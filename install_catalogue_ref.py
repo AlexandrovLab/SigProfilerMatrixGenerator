@@ -120,7 +120,8 @@ def main ():
 	chrom_tsb_dir = ref_dir + "chromosomes/tsb/"
 	matrix_dir = ref_dir + "matrix/"
 	vcf_dir = ref_dir + "vcf_files/"
-	new_dirs = [ref_dir, chrom_string_dir, chrom_fasta_dir, chrom_tsb_dir, matrix_dir, vcf_dir]
+	exome_dir = ref_dir + "chromosomes/exome/"
+	new_dirs = [ref_dir, chrom_string_dir, chrom_fasta_dir, chrom_tsb_dir, matrix_dir, vcf_dir, exome_dir]
 
 	current_dir = os.getcwd()
 	for dirs in new_dirs:
