@@ -121,25 +121,28 @@ def main ():
 	matrix_dir = ref_dir + "matrix/"
 	vcf_dir = ref_dir + "vcf_files/"
 	exome_dir = ref_dir + "chromosomes/exome/"
-	new_dirs = [ref_dir, chrom_string_dir, chrom_fasta_dir, chrom_tsb_dir, matrix_dir, vcf_dir, exome_dir]
+	bed_dir = ref_dir + "vcf_files/BED/"
+	new_dirs = [ref_dir, chrom_string_dir, chrom_fasta_dir, chrom_tsb_dir, matrix_dir, vcf_dir, exome_dir, bed_dir]
 
 	current_dir = os.getcwd()
 	for dirs in new_dirs:
 		if not os.path.exists(dirs):
 			os.makedirs(dirs)
 
-	if os.path.exists("transcripts/"):
-		initial_transcripts = os.listdir("transcripts/")
-		for file in initial_transcripts:
-			name = file.split("_")
-			if not os.path.exists("references/chromosomes/transcripts/"+name[0]+"/"):
-				os.makedirs("references/chromosomes/transcripts/"+name[0]+"/")
-			if name != ".DS":
-				os.system("mv transcripts/"+file +" references/chromosomes/transcripts/" + name[0]+"/")
-		os.system("rmdir transcripts")
+	#if os.path.exists("transcripts/"):
+	initial_transcripts = os.listdir("transcripts_original/")
+	for file in initial_transcripts:
+		name = file.split("_")
+		if not os.path.exists("references/chromosomes/transcripts/"+name[0]+"/"):
+			os.makedirs("references/chromosomes/transcripts/"+name[0]+"/")
+		if name != ".DS":
+			os.system("cp transcripts_original/"+file +" references/chromosomes/transcripts/" + name[0]+"/")
+		#os.system("rmdir transcripts")
 
 	install_chromosomes(genomes)
 	install_chromosomes_tsb (genomes)
+	if os.exist.path("BRCA_eample/"):
+		os.system("mv -r BRCA_example/ references/vcf_files/")
 	print ("Please place your vcf files for each sample into the 'references/vcf_files/[test]/' directory. Once you have done that, you can proceed with the catalogue generation.")
 	print("Installation complete.")
 

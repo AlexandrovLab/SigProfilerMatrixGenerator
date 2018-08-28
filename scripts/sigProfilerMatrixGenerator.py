@@ -80,11 +80,11 @@ def catalogue_generator_single (vcf_path, vcf_files, chrom_path, chromosome_TSB_
     
     # Creates all possible mut_types
     size = 3
-    if context == ('1536' or '3072'):
+    if context == '1536' or context == '3072':
         size = 5
     mut_types_initial = perm(size, "ACGT")
     mut_types = []
-    if context == ('192' or '3072'):
+    if context == '192' or context == '3072':
         for tsbs in tsb:
             for mut in mut_types_initial:
                 current_base = mut[int(size/2)]
@@ -101,15 +101,6 @@ def catalogue_generator_single (vcf_path, vcf_files, chrom_path, chromosome_TSB_
                         mut_types.append(mut[0:int(size/2)] + "[" + mut[int(size/2)]+">"+ base+"]"+mut[int(size/2)+1:])
 
 
-    # Sorts the vcf file before generating the matrix
-    sort_command_initial = "sort -t $'\t' -k 6,6n -k 6,6 -k 2,2 -k 7,7n "
-    sort_command_initial_2 = " -o "
-    sort_file = vcf_files[0]
-    os.system(sort_command_initial + vcf_path + sort_file + sort_command_initial_2 + vcf_path + sort_file)
-
-    print("Sorting complete...\nDetermining mutation type for each variant, one chromosome at a time.")
-
-    # Instantiates all necessary variables/data structures
     types = []
     samples = []
     mutation_dict = {}
@@ -293,15 +284,6 @@ def catalogue_generator_DINUC_single (vcf_path, vcf_files, chrom_path, chromosom
                       'TA>AC','TA>AG','TA>AT','TA>CC','TA>CG','TA>GC']
 
 
-    # Sorts the vcf file before generating the matrix
-    sort_command_initial = "sort -t $'\t' -k 6,6n -k 6,6 -k 2,2 -k 7,7n "
-    sort_command_initial_2 = " -o "
-    sort_file = vcf_files[0]
-    os.system(sort_command_initial + vcf_path + sort_file + sort_command_initial_2 + vcf_path + sort_file)
-
-    print("Sorting complete...\nDetermining mutation type for each variant, one chromosome at a time.")
-
-
     types = []
     samples = []
     mutation_dict = {}
@@ -448,22 +430,22 @@ def catalogue_generator_INDEL_single (vcf_path, vcf_files, chrom_path, test, out
                    '2:Del:M:1', '3:Del:M:1', '3:Del:M:2', '4:Del:M:1', '4:Del:M:2', '4:Del:M:3',
                    '5:Del:M:1', '5:Del:M:2', '5:Del:M:3', '5:Del:M:4', '5:Del:M:5', '2:Ins:M:1', 
                    '3:Ins:M:1', '3:Ins:M:2', '4:Ins:M:1', '4:Ins:M:2', '4:Ins:M:3', '5:Ins:M:1', 
-                   '5:Ins:M:2', '5:Ins:M:3', '5:Ins:M:4', '5:Ins:M:5']
+                   '5:Ins:M:2', '5:Ins:M:3', '5:Ins:M:4', '5:Ins:M:5', 'complex', 'non_matching']
 
 
     # Sorts the vcf file before generating the mutational matrix
-    sort_command_initial = "sort -t $'\t' -k 6,6n -k 6,6 -k 7,7n "
-    sort_command_initial_2 = " -o "
-    sort_file = vcf_files[0]
-    os.system(sort_command_initial + vcf_path + sort_file + sort_command_initial_2 + vcf_path + sort_file)
+    # sort_command_initial = "sort -t $'\t' -k 6,6n -k 6,6 -k 7,7n "
+    # sort_command_initial_2 = " -o "
+    # sort_file = vcf_files[0]
+    # os.system(sort_command_initial + vcf_path + sort_file + sort_command_initial_2 + vcf_path + sort_file)
 
-    print("Sorting complete...\nDetermining mutation type for each variant, one chromosome at a time.")
 
     # Instantiates the remaining varibales/data structures
     i = 0
     chrom_string = None
     count = 0
     non_matching = 0
+    complex_muts = 0
 
     if exome:
         exome_temp_file = "exome_temp.txt"
@@ -502,14 +484,17 @@ def catalogue_generator_INDEL_single (vcf_path, vcf_files, chrom_path, test, out
 
             # Ensures that the variant matches the reference chromosome
             if ref[0] == chrom_string[start-1]:
-
                 # Saves the mutation type for the given variant
                 if len(ref) - len(mut) == len(ref)-1:
                     mut_type = 'Del'
                 elif len(mut) - len(ref) == len(mut)-1:
                     mut_type = 'Ins'
                 else:
-                    print(lines)
+                    if 'complex' not in indel_dict[sample].keys():
+                        indel_dict[sample]['complex'] = 0
+                    else:
+                        indel_dict[sample]['complex'] += 1
+                    continue
                 
                 # Opens the next chromosome when a new chromosome is reached in the file
                 if chrom != initial_chrom:
@@ -723,8 +708,12 @@ def catalogue_generator_INDEL_single (vcf_path, vcf_files, chrom_path, test, out
 
                 if exome:
                     exome_file.write(sample + '\t' + chrom + '\t' + str(start) + '\t' + mut_key + "\n")
-            
-                print("yes")
+            else:
+                if 'non_matching' not in indel_dict[sample].keys():
+                    indel_dict[sample]['non_matching'] = 1
+                else:
+                    indel_dict[sample]['non_matching'] += 1
+
     # Prints the total number of complex mutations
     print(non_matching)
 
@@ -917,7 +906,10 @@ def matrix_generator (context, output_matrix, test, samples, bias_sort, mutation
         #     types = sorted(types, key=lambda val: (bias_sort[val[0]], val[2:]))
 
         if context == '192' or context == '3072':
-            types = sorted(mut_types, key=lambda val: (bias_sort[val[0]], val[2:]))
+            try:
+                types = sorted(mut_types, key=lambda val: (bias_sort[val[0]], val[2:]))
+            except:
+                print(mut_types)
         else:
             types = mut_types
 
@@ -1044,25 +1036,28 @@ def main():
                   'NC_000083.6':'17', 'NC_000084.6':'18', 'NC_000085.6':'19', 'NC_000086.7':'X', 
                   'NC_000087.7':'Y'}
 
+    contexts = ['96', '1536', '192', '3072', 'DINUC']
+    #contexts = ['3072', 'DINUC']
+
     exome = False
+    indel = False
 
     parser = argparse.ArgumentParser(description="Provide the necessary arguments to create the desired catalogue.")
     parser.add_argument("--test", "-t",help="Provide a unique name for your samples. (ex: BRCA)")
     parser.add_argument("--genome", "-g",help="Provide a reference genome. (ex: GRCh37, GRCh38, mm10)")
-    parser.add_argument("--context", "-c",help="Whole genome context by default")
+    #parser.add_argument("--context", "-c",help="Whole genome context by default")
     parser.add_argument("-e", "--exome", help="Optional parameter instructs script to create the catalogues using only the exome regions. Whole genome context by default", action='store_true')
+    parser.add_argument("-i", "--indel", help="Optional parameter instructs script to create the catalogue for INDELs", action='store_true')
     args=parser.parse_args()
     test = args.test
     genome = args.genome
-    context = args.context
+    #context = args.context
     
     if args.exome:
         exome = True
 
-    if context == 'DINUC' or context == 'INDEL':
-        catalogue_context = context
-    else:
-        catalogue_context = 'SUBS'
+    if args.indel:
+        indel = True
 
     # Organizes all of the reference directories for later reference:
     current_dir = os.getcwd()
@@ -1095,24 +1090,36 @@ def main():
         os.makedirs(output_path)
 
     if file_extension == 'genome':
-        print("yes")
         os.system("bash convert_txt_files_to_simple_files.sh " + test)
     else:
         os.system("bash convert_" + file_extension + "_files_to_simple_files.sh " + test)
     vcf_files = os.listdir(ref_dir + '/references/vcf_files/single/')
     vcf_path = ref_dir + '/references/vcf_files/single/'
 
+    # Include some kind of a flag for the INDEL option 
+    sort_command_initial = "sort -t $'\t' -k 6,6n -k 6,6 -k 2,2 -k 7,7n "
+    sort_command_initial_2 = " -o "
+    sort_file = vcf_files[0]
+    os.system(sort_command_initial + vcf_path + sort_file + sort_command_initial_2 + vcf_path + sort_file)
+
+    print("Sorting complete...\nDetermining mutation type for each variant, one chromosome at a time.")
+
+    if indel:
+        contexts = ['INDEL']
+
     print("Starting catalogue generation...")
-    # Single file:
-    if context != 'DINUC' and context != 'INDEL':
-        catalogue_generator_single (vcf_path, vcf_files, chrom_path, chromosome_TSB_path, test, output_matrix, context, exome, genome, ncbi_chrom)
+    for context in contexts:
+        # Single file:
+        if context != 'DINUC' and context != 'INDEL':
+            catalogue_generator_single (vcf_path, vcf_files, chrom_path, chromosome_TSB_path, test, output_matrix, context, exome, genome, ncbi_chrom)
 
-    elif context == 'DINUC':
-        catalogue_generator_DINUC_single (vcf_path, vcf_files, chrom_path, chromosome_TSB_path, test, output_matrix, exome, genome, ncbi_chrom)
+        elif context == 'DINUC':
+            catalogue_generator_DINUC_single (vcf_path, vcf_files, chrom_path, chromosome_TSB_path, test, output_matrix, exome, genome, ncbi_chrom)
 
-    elif context == 'INDEL':
-        catalogue_generator_INDEL_single (vcf_path, vcf_files, chrom_path, test, output_matrix, exome, genome, ncbi_chrom)
+        elif context == 'INDEL':
+            catalogue_generator_INDEL_single (vcf_path, vcf_files, chrom_path, test, output_matrix, exome, genome, ncbi_chrom)
 
+        print("Catalogue for " + context + " context is complete.")
     os.system("rm -r " + vcf_path)
 
 
