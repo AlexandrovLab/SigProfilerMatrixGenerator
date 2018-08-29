@@ -386,7 +386,7 @@ def catalogue_generator_DINUC_single (vcf_path, vcf_files, chrom_path, chromosom
         
     
 
-def catalogue_generator_INDEL_single (vcf_path, vcf_files, chrom_path, test, output_matrix, exome, genome, ncbi_chrom):
+def catalogue_generator_INDEL_single (vcf_path, vcf_files, chrom_path, test, output_matrix, exome, genome, ncbi_chrom, limited_indel):
     '''
     Generates the mutational matrix for the INDEL context.
 
@@ -432,13 +432,8 @@ def catalogue_generator_INDEL_single (vcf_path, vcf_files, chrom_path, test, out
                    '3:Ins:M:1', '3:Ins:M:2', '4:Ins:M:1', '4:Ins:M:2', '4:Ins:M:3', '5:Ins:M:1', 
                    '5:Ins:M:2', '5:Ins:M:3', '5:Ins:M:4', '5:Ins:M:5', 'complex', 'non_matching']
 
-
-    # Sorts the vcf file before generating the mutational matrix
-    # sort_command_initial = "sort -t $'\t' -k 6,6n -k 6,6 -k 7,7n "
-    # sort_command_initial_2 = " -o "
-    # sort_file = vcf_files[0]
-    # os.system(sort_command_initial + vcf_path + sort_file + sort_command_initial_2 + vcf_path + sort_file)
-
+    if limited_indel:
+        indel_types = indel_types[:-13]
 
     # Instantiates the remaining varibales/data structures
     i = 0
@@ -700,7 +695,12 @@ def catalogue_generator_INDEL_single (vcf_path, vcf_files, chrom_path, test, out
                     non_matching += 1
 
                 # Creates the final INDEl key and saves it into the data structure
-                indel_key = str(indel_key_1) +':'+indel_key_2+':'+indel_key_3+':'+str(indel_key_4)  
+                if limited_indel and indel_key_2 == 'Ins' and indel_key_3 == 'M':
+                        indel_key = str(indel_key_1) + ':' + indel_key_2 + ':' + 'R' + ':' + '0'
+
+                else:        
+                    indel_key = str(indel_key_1) +':'+indel_key_2+':'+indel_key_3+':'+str(indel_key_4)
+
                 if indel_key not in indel_dict[sample].keys():
                     indel_dict[sample][indel_key] = 1
                 else:
@@ -1037,17 +1037,17 @@ def main():
                   'NC_000087.7':'Y'}
 
     contexts = ['96', '1536', '192', '3072', 'DINUC']
-    #contexts = ['3072', 'DINUC']
 
     exome = False
     indel = False
+    limited_indel = False
 
     parser = argparse.ArgumentParser(description="Provide the necessary arguments to create the desired catalogue.")
     parser.add_argument("--test", "-t",help="Provide a unique name for your samples. (ex: BRCA)")
     parser.add_argument("--genome", "-g",help="Provide a reference genome. (ex: GRCh37, GRCh38, mm10)")
-    #parser.add_argument("--context", "-c",help="Whole genome context by default")
     parser.add_argument("-e", "--exome", help="Optional parameter instructs script to create the catalogues using only the exome regions. Whole genome context by default", action='store_true')
-    parser.add_argument("-i", "--indel", help="Optional parameter instructs script to create the catalogue for INDELs", action='store_true')
+    parser.add_argument("-i", "--indel", help="Optional parameter instructs script to create the catalogue for limited INDELs", action='store_true')
+    parser.add_argument("-ie", "--extended_indel", help="Optional parameter instructs script to create the catalogue for extended INDELs", action='store_true')
     args=parser.parse_args()
     test = args.test
     genome = args.genome
@@ -1056,8 +1056,15 @@ def main():
     if args.exome:
         exome = True
 
+    if args.extended_indel:
+        indel = True
+
     if args.indel:
         indel = True
+        limited_indel = True
+
+
+        
 
     # Organizes all of the reference directories for later reference:
     current_dir = os.getcwd()
@@ -1117,7 +1124,7 @@ def main():
             catalogue_generator_DINUC_single (vcf_path, vcf_files, chrom_path, chromosome_TSB_path, test, output_matrix, exome, genome, ncbi_chrom)
 
         elif context == 'INDEL':
-            catalogue_generator_INDEL_single (vcf_path, vcf_files, chrom_path, test, output_matrix, exome, genome, ncbi_chrom)
+            catalogue_generator_INDEL_single (vcf_path, vcf_files, chrom_path, test, output_matrix, exome, genome, ncbi_chrom, limited_indel)
 
         print("Catalogue for " + context + " context is complete.")
     os.system("rm -r " + vcf_path)

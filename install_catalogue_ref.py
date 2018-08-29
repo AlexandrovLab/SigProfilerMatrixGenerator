@@ -141,8 +141,8 @@ def main ():
 
 	install_chromosomes(genomes)
 	install_chromosomes_tsb (genomes)
-	if os.exist.path("BRCA_eample/"):
-		os.system("mv -r BRCA_example/ references/vcf_files/")
+	if os.path.exists("BRCA_example/"):
+		os.system("mv BRCA_example/ references/vcf_files/")
 	print ("Please place your vcf files for each sample into the 'references/vcf_files/[test]/' directory. Once you have done that, you can proceed with the catalogue generation.")
 	print("Installation complete.")
 
