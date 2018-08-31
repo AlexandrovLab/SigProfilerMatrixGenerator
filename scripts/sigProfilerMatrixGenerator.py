@@ -32,6 +32,7 @@ import sys
 import re
 import argparse
 import itertools
+import pandas as pd
 
 
 ################# Functions and references ###############################################
@@ -44,7 +45,7 @@ def perm(n, seq):
         permus.append("".join(p))
     return(permus)
 
-def catalogue_generator_single (vcf_path, vcf_files, chrom_path, chromosome_TSB_path, test, output_matrix, context, exome, genome, ncbi_chrom):
+def catalogue_generator_single (vcf_path, vcf_files, chrom_path, chromosome_TSB_path, project, output_matrix, context, exome, genome, ncbi_chrom, functionFlag):
     '''
     Generates the mutational matrix for 96, 1536, 192, and 3072 context using a single vcf file with all samples of interest.
 
@@ -55,7 +56,7 @@ def catalogue_generator_single (vcf_path, vcf_files, chrom_path, chromosome_TSB_
                                 file name: '1.txt', '2.txt', etc.
         chromosome_TSB_path  -> path to transcriptional strand information reference for each chromosome. Only necessary if
                                 the desired context is 192 or 3072. Use "saveTSB_192.py" script to generate these files.
-                       test  -> unique name given to the set of samples (ex. 'BRCA') 
+                    project  -> unique name given to the set of samples (ex. 'BRCA') 
               output_matrix  -> path where the final mutational matrix is stored
                     context  -> desired context (ex. 96, 1536, 192, 3072)
                  ncbi_chrom  -> dictionary that allows for the converstion of ncbi chromosome names to standard format
@@ -65,7 +66,7 @@ def catalogue_generator_single (vcf_path, vcf_files, chrom_path, chromosome_TSB_
         None
 
     Outputs:
-        Outputs a mutational matrix for the desired context within /references/matrix/[test]/
+        Outputs a mutational matrix for the desired context within /references/matrix/[project]/
 
     '''
 
@@ -238,10 +239,13 @@ def catalogue_generator_single (vcf_path, vcf_files, chrom_path, chromosome_TSB_
         os.system("rm " + exome_temp_file)
 
     # Calls the function to generate the final matrix
-    matrix_generator (context, output_matrix, test, samples, bias_sort, mutation_dict, types, exome, mut_types)
+    if functionFlag:
+        return(pd.DataFrame.from_dict(mutation_dict))
+    else:
+        matrix_generator (context, output_matrix, project, samples, bias_sort, mutation_dict, types, exome, mut_types)
 
 
-def catalogue_generator_DINUC_single (vcf_path, vcf_files, chrom_path, chromosome_TSB_path, test, output_matrix, exome, genome, ncbi_chrom):
+def catalogue_generator_DINUC_single (vcf_path, vcf_files, chrom_path, chromosome_TSB_path, project, output_matrix, exome, genome, ncbi_chrom, functionFlag):
     '''
     Generates the mutational matrix for the dinucleotide context.
 
@@ -252,7 +256,7 @@ def catalogue_generator_DINUC_single (vcf_path, vcf_files, chrom_path, chromosom
                                 file name: '1.txt', '2.txt', etc.
         chromosome_TSB_path  -> path to transcriptional strand information reference for each chromosome. Only necessary if
                                 the desired context is 192 or 3072. Use "saveTSB_192.py" script to generate these files.
-                       test  -> unique name given to the set of samples (ex. 'BRCA') 
+                    project  -> unique name given to the set of samples (ex. 'BRCA') 
               output_matrix  -> path where the final mutational matrix is stored
                  ncbi_chrom  -> dictionary that allows for the converstion of ncbi chromosome names to standard format
                                 for the mm10 assembly.
@@ -382,11 +386,14 @@ def catalogue_generator_DINUC_single (vcf_path, vcf_files, chrom_path, chromosom
         os.system("rm " + exome_temp_file)
 
     # Calls the function to generate the final mutational matrix
-    matrix_generator_DINUC (output_matrix, samples, mutation_types, dinucs, test, exome)
+    if functionFlag:
+        return(pd.DataFrame.from_dict(dinucs))
+    else:
+        matrix_generator_DINUC (output_matrix, samples, mutation_types, dinucs, project, exome)
         
     
 
-def catalogue_generator_INDEL_single (vcf_path, vcf_files, chrom_path, test, output_matrix, exome, genome, ncbi_chrom, limited_indel):
+def catalogue_generator_INDEL_single (vcf_path, vcf_files, chrom_path, project, output_matrix, exome, genome, ncbi_chrom, limited_indel, functionFlag):
     '''
     Generates the mutational matrix for the INDEL context.
 
@@ -395,7 +402,7 @@ def catalogue_generator_INDEL_single (vcf_path, vcf_files, chrom_path, test, out
                   vcf_files  -> vcf file of interest
                  chrom_path  -> path to chromosome reference files. The chromosomes are saved as strings witht the following
                                 file name: '1.txt', '2.txt', etc.
-                       test  -> unique name given to the set of samples (ex. 'BRCA') 
+                    project  -> unique name given to the set of samples (ex. 'BRCA') 
               output_matrix  -> path where the final mutational matrix is stored
                  ncbi_chrom  -> dictionary that allows for the converstion of ncbi chromosome names to standard format
                                 for the mm10 assembly.
@@ -726,7 +733,10 @@ def catalogue_generator_INDEL_single (vcf_path, vcf_files, chrom_path, test, out
 
 
     # Calls the function to generate the final mutational matrix
-    matrix_generator_INDEL(output_matrix, samples, indel_types, indel_dict, test, exome)
+    if functionFlag:
+        return(pd.DataFrame.from_dict(indel_dict))
+    else:
+        matrix_generator_INDEL(output_matrix, samples, indel_types, indel_dict, project, exome, limited_indel)
 
 def exome_check (genome, exome_temp_file):
     '''
@@ -737,8 +747,8 @@ def exome_check (genome, exome_temp_file):
         exome_temp_file  -> The temporary file that contains all of the variants used for filtering
 
     Returns:
-        mutation_dict  -> updated mutation dictionary for each sample for each mutation type post filtering
-              samples  -> updated list of samples that still contain mutations post filtering
+          mutation_dict  -> updated mutation dictionary for each sample for each mutation type post filtering
+                samples  -> updated list of samples that still contain mutations post filtering
 
     ''' 
 
@@ -864,14 +874,14 @@ def exome_check (genome, exome_temp_file):
 
 
 
-def matrix_generator (context, output_matrix, test, samples, bias_sort, mutation_dict, types, exome, mut_types):
+def matrix_generator (context, output_matrix, project, samples, bias_sort, mutation_dict, types, exome, mut_types):
     '''
     Writes the final mutational matrix given a dictionary of samples, mutation types, and counts
 
     Parameters:
                     context  -> desired context (ex. 96, 1536, 192, 3072)
               output_matrix  -> path where the final mutational matrix is stored
-                       test  -> unique name given to the set of samples (ex. 'BRCA') 
+                    project  -> unique name given to the set of samples (ex. 'BRCA') 
                      samples -> a list of all sample names
                    bias_sort -> dictionary that provides the sorting order for the TSB matrices
              muatation_dict  -> dictionary with the counts for each mutation type for each sample
@@ -889,9 +899,9 @@ def matrix_generator (context, output_matrix, test, samples, bias_sort, mutation
     '''
 
     if exome:
-        output_file_matrix = output_matrix + test + ".exome.mut" + context 
+        output_file_matrix = output_matrix + project + ".exome.mut" + context 
     else:
-        output_file_matrix = output_matrix + test + ".genome.mut" + context
+        output_file_matrix = output_matrix + project + ".genome.mut" + context
 
     with open (output_file_matrix, 'w') as out:
 
@@ -900,10 +910,6 @@ def matrix_generator (context, output_matrix, test, samples, bias_sort, mutation
         for sample in samples:
             print (sample + '\t', end='', flush=True, file=out)
         print(file=out)
-    
-        # Sorts the mutation types for the TSB contexts
-        # if context == '192' or context == '3072':
-        #     types = sorted(types, key=lambda val: (bias_sort[val[0]], val[2:]))
 
         if context == '192' or context == '3072':
             try:
@@ -925,9 +931,6 @@ def matrix_generator (context, output_matrix, test, samples, bias_sort, mutation
 
     # sorts the 96 and 1536 matrices by mutation type
     if context == '96' or context == '1536':
-        #out_file = output_matrix + test + ".genome.mut" + context
-        #command1 = "head -1 " + out_file + " > " + output_matrix + "a.tmp;"
-        #command2 = "tail -n+2 " + out_file + " | sort -n >> " + output_matrix + "a.tmp;"
         command1 = "head -1 " + output_file_matrix + " > " + output_matrix + "a.tmp;"
         command2 = "tail -n+2 " + output_file_matrix + " | sort -n >> " + output_matrix + "a.tmp;"
 
@@ -937,7 +940,7 @@ def matrix_generator (context, output_matrix, test, samples, bias_sort, mutation
         os.system("cat " + output_matrix + "a.tmp > " + output_file_matrix)
         os.system("rm " + output_matrix + "a.tmp")
 
-def matrix_generator_INDEL (output_matrix, samples, indel_types, indel_dict, test, exome):
+def matrix_generator_INDEL (output_matrix, samples, indel_types, indel_dict, project, exome, limited_indel):
     '''
     Writes the final mutational matrix for INDELS given a dictionary of samples, INDEL types, and counts
 
@@ -946,7 +949,7 @@ def matrix_generator_INDEL (output_matrix, samples, indel_types, indel_dict, tes
                     samples  -> a list of all sample names
                 indel_types  -> list of the INDEL types 
                  indel_dict  -> dictionary with the counts for each INDEL type for each sample
-                       test  -> unique name given to the set of samples (ex. 'BRCA') 
+                    project  -> unique name given to the set of samples (ex. 'BRCA') 
                       exome  -> Boolean for whether the catalogue should be generated across the whole
                                 genome or just the exome
 
@@ -958,9 +961,15 @@ def matrix_generator_INDEL (output_matrix, samples, indel_types, indel_dict, tes
 
     '''
     if exome:
-        output_file_matrix = output_matrix + test + ".exome.mutINDEL" 
+        if limited_indel:
+            output_file_matrix = output_matrix + project + ".exome.mutLimitedINDEL"
+        else: 
+            output_file_matrix = output_matrix + project + ".exome.mutINDEL" 
     else:
-        output_file_matrix = output_matrix + test + ".genome.mutINDEL"
+        if limited_indel:
+            output_file_matrix = output_matrix + project + ".genome.mutLimitedINDEL"
+        else:
+            output_file_matrix = output_matrix + project + ".genome.mutINDEL"
 
     with open (output_file_matrix, 'w') as out:
         # Prints all of the sample names into the first line of the file
@@ -981,7 +990,7 @@ def matrix_generator_INDEL (output_matrix, samples, indel_types, indel_dict, tes
             print(file=out)
 
 
-def matrix_generator_DINUC (output_matrix, samples, mutation_types, dinucs, test, exome):
+def matrix_generator_DINUC (output_matrix, samples, mutation_types, dinucs, project, exome):
     '''
     Writes the final mutational matrix for INDELS given a dictionary of samples, INDEL types, and counts
 
@@ -990,7 +999,7 @@ def matrix_generator_DINUC (output_matrix, samples, mutation_types, dinucs, test
                     samples  -> a list of all sample names
              mutation_types  -> list of the DINUC types 
                      dinucs  -> dictionary with the counts for each DINUC type for each sample
-                       test  -> unique name given to the set of samples (ex. 'BRCA') 
+                    project  -> unique name given to the set of samples (ex. 'BRCA') 
                       exome  -> Boolean for whether the catalogue should be generated across the whole
                                 genome or just the exome
 
@@ -1002,9 +1011,9 @@ def matrix_generator_DINUC (output_matrix, samples, mutation_types, dinucs, test
 
     '''
     if exome:
-        output_file_matrix = output_matrix + test + ".exome.mutDINUC" 
+        output_file_matrix = output_matrix + project + ".exome.mutDINUC" 
     else:
-        output_file_matrix = output_matrix + test + ".genome.mutDINUC"
+        output_file_matrix = output_matrix + project + ".genome.mutDINUC"
 
     with open (output_file_matrix, 'w') as out:
         # Prints all of the sample names into the first line of the file
@@ -1041,15 +1050,16 @@ def main():
     exome = False
     indel = False
     limited_indel = False
+    functionFlag = False
 
     parser = argparse.ArgumentParser(description="Provide the necessary arguments to create the desired catalogue.")
-    parser.add_argument("--test", "-t",help="Provide a unique name for your samples. (ex: BRCA)")
+    parser.add_argument("--project", "-p",help="Provide a unique name for your samples. (ex: BRCA)")
     parser.add_argument("--genome", "-g",help="Provide a reference genome. (ex: GRCh37, GRCh38, mm10)")
     parser.add_argument("-e", "--exome", help="Optional parameter instructs script to create the catalogues using only the exome regions. Whole genome context by default", action='store_true')
     parser.add_argument("-i", "--indel", help="Optional parameter instructs script to create the catalogue for limited INDELs", action='store_true')
     parser.add_argument("-ie", "--extended_indel", help="Optional parameter instructs script to create the catalogue for extended INDELs", action='store_true')
     args=parser.parse_args()
-    test = args.test
+    project = args.project
     genome = args.genome
     #context = args.context
     
@@ -1076,7 +1086,7 @@ def main():
 
     # Organizes all of the input and output directories:
     output_matrix = ref_dir + "/references/matrix/"
-    vcf_path = ref_dir + '/references/vcf_files/' + test + "/"
+    vcf_path = ref_dir + '/references/vcf_files/' + project + "/"
 
     # Gathers all of the vcf files:
     vcf_files2 = os.listdir(vcf_path)
@@ -1096,10 +1106,11 @@ def main():
     if not os.path.exists(output_path):
         os.makedirs(output_path)
 
+
     if file_extension == 'genome':
-        os.system("bash convert_txt_files_to_simple_files.sh " + test)
+        os.system("bash convert_txt_files_to_simple_files.sh " + project)
     else:
-        os.system("bash convert_" + file_extension + "_files_to_simple_files.sh " + test)
+        os.system("bash convert_" + file_extension + "_files_to_simple_files.sh " + project)
     vcf_files = os.listdir(ref_dir + '/references/vcf_files/single/')
     vcf_path = ref_dir + '/references/vcf_files/single/'
 
@@ -1118,13 +1129,13 @@ def main():
     for context in contexts:
         # Single file:
         if context != 'DINUC' and context != 'INDEL':
-            catalogue_generator_single (vcf_path, vcf_files, chrom_path, chromosome_TSB_path, test, output_matrix, context, exome, genome, ncbi_chrom)
+            catalogue_generator_single (vcf_path, vcf_files, chrom_path, chromosome_TSB_path, project, output_matrix, context, exome, genome, ncbi_chrom, functionFlag)
 
         elif context == 'DINUC':
-            catalogue_generator_DINUC_single (vcf_path, vcf_files, chrom_path, chromosome_TSB_path, test, output_matrix, exome, genome, ncbi_chrom)
+            catalogue_generator_DINUC_single (vcf_path, vcf_files, chrom_path, chromosome_TSB_path, project, output_matrix, exome, genome, ncbi_chrom, functionFlag)
 
         elif context == 'INDEL':
-            catalogue_generator_INDEL_single (vcf_path, vcf_files, chrom_path, test, output_matrix, exome, genome, ncbi_chrom, limited_indel)
+            catalogue_generator_INDEL_single (vcf_path, vcf_files, chrom_path, project, output_matrix, exome, genome, ncbi_chrom, limited_indel, functionFlag)
 
         print("Catalogue for " + context + " context is complete.")
     os.system("rm -r " + vcf_path)

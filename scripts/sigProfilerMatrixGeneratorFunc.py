@@ -31,7 +31,6 @@ def sigProfilerMatrixGeneratorFunc (project, genome, exome=False, indel=False, i
 
 	# Instantiates all of the required variables
 	functionFlag = True
-	test = project
 	matrices = {'96':None, '1536':None, '192':None, '3072':None, 'DINUC':None}
 
 	ncbi_chrom = {'NC_000067.6':'1', 'NC_000068.7':'2', 'NC_000069.6':'3', 'NC_000070.6':'4', 
@@ -51,7 +50,7 @@ def sigProfilerMatrixGeneratorFunc (project, genome, exome=False, indel=False, i
 
 	# Organizes all of the input and output directories:
 	output_matrix = ref_dir + "/references/matrix/"
-	vcf_path = ref_dir + '/references/vcf_files/' + test + "/"
+	vcf_path = ref_dir + '/references/vcf_files/' + project + "/"
 
 	# Gathers all of the vcf files:
 	vcf_files2 = os.listdir(vcf_path)
@@ -72,9 +71,9 @@ def sigProfilerMatrixGeneratorFunc (project, genome, exome=False, indel=False, i
 		os.makedirs(output_path)
 
 	if file_extension == 'genome':
-		os.system("bash convert_txt_files_to_simple_files.sh " + test)
+		os.system("bash convert_txt_files_to_simple_files.sh " + project)
 	else:
-		os.system("bash convert_" + file_extension + "_files_to_simple_files.sh " + test)
+		os.system("bash convert_" + file_extension + "_files_to_simple_files.sh " + project)
 	vcf_files = os.listdir(ref_dir + '/references/vcf_files/single/')
 	vcf_path = ref_dir + '/references/vcf_files/single/'
 
@@ -96,15 +95,15 @@ def sigProfilerMatrixGeneratorFunc (project, genome, exome=False, indel=False, i
 	# Creates the matrix for each context
 	for context in contexts:
 		if context != 'DINUC' and context != 'INDEL':
-			matrix = matGen.catalogue_generator_single (vcf_path, vcf_files, chrom_path, chromosome_TSB_path, test, output_matrix, context, exome, genome, ncbi_chrom, functionFlag)
+			matrix = matGen.catalogue_generator_single (vcf_path, vcf_files, chrom_path, chromosome_TSB_path, project, output_matrix, context, exome, genome, ncbi_chrom, functionFlag)
 			matrices[context] = matrix
 
 		elif context == 'DINUC':
-			matrix = matGen.catalogue_generator_DINUC_single (vcf_path, vcf_files, chrom_path, chromosome_TSB_path, test, output_matrix, exome, genome, ncbi_chrom, functionFlag)
+			matrix = matGen.catalogue_generator_DINUC_single (vcf_path, vcf_files, chrom_path, chromosome_TSB_path, project, output_matrix, exome, genome, ncbi_chrom, functionFlag)
 			matrices[context] = matrix
 
 		elif context == 'INDEL':
-			matrix = matGen.catalogue_generator_INDEL_single (vcf_path, vcf_files, chrom_path, test, output_matrix, exome, genome, ncbi_chrom, indel_extended,functionFlag)
+			matrix = matGen.catalogue_generator_INDEL_single (vcf_path, vcf_files, chrom_path, project, output_matrix, exome, genome, ncbi_chrom, indel_extended,functionFlag)
 			matrices[context] = matrix
 
 	# Deletes the temporary files and returns the final matrix
