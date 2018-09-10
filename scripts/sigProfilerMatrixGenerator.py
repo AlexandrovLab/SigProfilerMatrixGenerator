@@ -34,7 +34,7 @@ import argparse
 import itertools
 import pandas as pd
 from itertools import chain
-
+import time
 
 ################# Functions and references ###############################################
 def perm(n, seq):
@@ -231,7 +231,7 @@ def catalogue_generator_single (vcf_path, vcf_files, chrom_path, chromosome_TSB_
                             ref = revcompl(ref)
                             mut = revcompl(mut) 
                             sequence = revcompl(sequence)
-                            bias = revbias(str(bias_catalogue))
+                            bias = revbias(str(bias))
 
                         mut_key = sequence[0:int(len(sequence)/2)] + '[' + ref + '>' + mut + ']' + sequence[int(len(sequence)/2+1):]
 
@@ -257,6 +257,7 @@ def catalogue_generator_single (vcf_path, vcf_files, chrom_path, chromosome_TSB_
 
                         if exome:
                             exome_file.write(sample + '\t' + chrom + '\t' + str(start) + '\t' + mut_key + "\n")
+    print ("Chromosome " + chrom_start + " done")
 
     if exome:
         exome_file.close()
@@ -383,10 +384,11 @@ def catalogue_generator_DINUC_single (vcf_path, vcf_files, chrom_path, chromosom
 
                     # Breaks the loop once a new chromosome is reached
                     if chrom != chrom_start:
+                        print ("Chromosome " + chrom_start + " done")
                         chrom_start = chrom
                         with open(chrom_path + chrom_start + ".txt") as f:
                             chrom_string = f.readline().strip()
-                        print ("Chromosome " + chrom_start + " done")
+                        
 
                     # Grabs the slice of interest
                     else:
@@ -411,6 +413,8 @@ def catalogue_generator_DINUC_single (vcf_path, vcf_files, chrom_path, chromosom
                     previous_start = start
                     previous_ref = ref
                     previous_mut = mut
+
+    print ("Chromosome " + chrom_start + " done")
 
     if exome:
         exome_file.close()
@@ -977,9 +981,9 @@ def matrix_generator (context, output_matrix, project, samples, bias_sort, mutat
     with open (output_file_matrix, 'w') as out:
 
         # Prints all of the sample names into the first line of the file
-        print ('MutationType\t', end='', flush=True, file=out)  
+        print ('MutationType\t', end='', flush=False, file=out)  
         for sample in samples:
-            print (sample + '\t', end='', flush=True, file=out)
+            print (sample + '\t', end='', flush=False, file=out)
         print(file=out)
 
         if context == '192' or context == '3072':
@@ -992,14 +996,21 @@ def matrix_generator (context, output_matrix, project, samples, bias_sort, mutat
 
         # Prints the mutation count for each mutation type across every sample
         for mut_type in types:
-            print (mut_type + '\t', end='', flush =True, file=out)
+            print (mut_type + '\t', end='', flush =False, file=out)
             for sample in samples:
                 if context == '96':
                     subType = mut_type[2:5]
                     if sample not in mut_count_six[subType].keys():
-                        mut_count_six[subType][sample] = mutation_dict[sample][mut_type]
+                        if mut_type in mutation_dict[sample].keys():
+                            mut_count_six[subType][sample] = mutation_dict[sample][mut_type]
+                        else:
+                            mut_count_six[subType][sample] = 0
                     else:
-                        mut_count_six[subType][sample] += mutation_dict[sample][mut_type]
+                        if mut_type in mutation_dict[sample].keys():
+                            mut_count_six[subType][sample] += mutation_dict[sample][mut_type]
+                        else:
+                            mut_count_six[subType][sample] = 0
+
                 elif context == '192':
                     subType = mut_type[0:2] + mut_type[4:7]
                     if sample not in mut_count_twelve[subType].keys():
@@ -1034,12 +1045,12 @@ def matrix_generator (context, output_matrix, project, samples, bias_sort, mutat
     # Generates the matrix for the 6 SNV mutation types
     if context == '96':
         with open(output_file_matrix_six, 'w') as out:
-            print ('MutationType\t', end='', flush=True, file=out)  
+            print ('MutationType\t', end='', flush=False, file=out)  
             for sample in samples:
-                print (sample + '\t', end='', flush=True, file=out)
+                print (sample + '\t', end='', flush=False, file=out)
             print(file=out)
             for types in mut_types_six:
-                print (types + '\t', end='', flush =True, file=out)
+                print (types + '\t', end='', flush =False, file=out)
                 for sample in samples:
                     print(str(mut_count_six[types][sample]) + "\t",end='',file=out)
                 print(file=out)
@@ -1048,12 +1059,12 @@ def matrix_generator (context, output_matrix, project, samples, bias_sort, mutat
     # Generates the matrix for the 12 SNV mutation types
     elif context == '192':
         with open(output_file_matrix_twelve, 'w') as out:
-            print ('MutationType\t', end='', flush=True, file=out)  
+            print ('MutationType\t', end='', flush=False, file=out)  
             for sample in samples:
-                print (sample + '\t', end='', flush=True, file=out)
+                print (sample + '\t', end='', flush=False, file=out)
             print(file=out)
             for types in mut_types_twelve:
-                print (types + '\t', end='', flush =True, file=out)
+                print (types + '\t', end='', flush =False, file=out)
                 for sample in samples:
                     print(str(mut_count_twelve[types][sample]) + "\t",end='',file=out)
                 print(file=out)
@@ -1098,15 +1109,15 @@ def matrix_generator_INDEL (output_matrix, samples, indel_types, indel_dict, pro
 
     with open (output_file_matrix, 'w') as out:
         # Prints all of the sample names into the first line of the file
-        print ('MutationType\t', end='', flush=True, file=out)  
+        print ('MutationType\t', end='', flush=False, file=out)  
         samples.sort()
         for sample in samples:
-            print (sample + '\t', end='', flush=True, file=out)
+            print (sample + '\t', end='', flush=False, file=out)
         print(file=out)
         
         # Prints the mutation count for each INDEL type across every sample
         for indel in indel_types:
-            print (indel + '\t', end='', flush =True, file=out)
+            print (indel + '\t', end='', flush =False, file=out)
             for sample in samples:
                 if indel in indel_dict[sample].keys():
                     print (str(indel_dict[sample][indel]) + '\t', end='', file=out)
@@ -1148,14 +1159,14 @@ def matrix_generator_DINUC (output_matrix, samples, mutation_types, dinucs, proj
 
     with open (output_file_matrix, 'w') as out:
         # Prints all of the sample names into the first line of the file
-        print ('MutationType\t', end='', flush=True, file=out)  
+        print ('MutationType\t', end='', flush=False, file=out)  
         for sample in samples:
-            print (sample + '\t', end='', flush=True, file=out)
+            print (sample + '\t', end='', flush=False, file=out)
         print(file=out)
         
         # Prints the mutation count for each INDEL type across every sample
         for dinuc in mutation_types:
-            print (dinuc + '\t', end='', flush =True, file=out)
+            print (dinuc + '\t', end='', flush =False, file=out)
             for sample in samples:
                 try:
                     if dinuc in dinucs[sample].keys():
@@ -1169,6 +1180,8 @@ def matrix_generator_DINUC (output_matrix, samples, mutation_types, dinucs, proj
 
 
 def main():
+    start = time.time()
+
     ncbi_chrom = {'NC_000067.6':'1', 'NC_000068.7':'2', 'NC_000069.6':'3', 'NC_000070.6':'4', 
                   'NC_000071.6':'5', 'NC_000072.6':'6', 'NC_000073.6':'7', 'NC_000074.6':'8',
                   'NC_000075.6':'9', 'NC_000076.6':'10', 'NC_000077.6':'11', 'NC_000078.6':'12',
@@ -1284,7 +1297,8 @@ def main():
 
         print("Catalogue for " + context + " context is complete.")
     os.system("rm -r " + vcf_path)
-
+    end = time.time()
+    print("Job took ",str(end-start), " seconds.")
 
 
 if __name__ == '__main__':
