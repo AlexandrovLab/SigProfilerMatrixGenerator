@@ -231,7 +231,8 @@ def catalogue_generator_single (vcf_path, vcf_files, chrom_path, chromosome_TSB_
                             ref = revcompl(ref)
                             mut = revcompl(mut) 
                             sequence = revcompl(sequence)
-                            bias = revbias(str(bias))
+                            if context == '192' or context == '3072':
+                                bias = revbias(str(bias))
 
                         mut_key = sequence[0:int(len(sequence)/2)] + '[' + ref + '>' + mut + ']' + sequence[int(len(sequence)/2+1):]
 
