@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-import sigProfilerMatrixGenerator as matGen
+import sigProfilerMatrixGenerator_withBED as matGen
 import os
 import re
 
@@ -35,7 +35,7 @@ def sigProfilerMatrixGeneratorFunc (project, genome, exome=False, indel=False, i
 	bed = False
 	bed_ranges = None
 	
-	matrices = {'96':None, '1536':None, '192':None, '3072':None, 'DINUC':None}
+	matrices = {'96':None, '1536':None, '192':None, '3072':None, 'DINUC':None, '6':None, '12':None}
 
 	ncbi_chrom = {'NC_000067.6':'1', 'NC_000068.7':'2', 'NC_000069.6':'3', 'NC_000070.6':'4', 
 				  'NC_000071.6':'5', 'NC_000072.6':'6', 'NC_000073.6':'7', 'NC_000074.6':'8',
@@ -96,10 +96,10 @@ def sigProfilerMatrixGeneratorFunc (project, genome, exome=False, indel=False, i
 
 	print("Starting catalogue generation...")
 
-    if bed_file != None:
-    	bed = True
-        bed_file_path = ref_dir + "/references/vcf_files/BED/" + project + "/" + bed_file
-        bed_ranges = matGen.BED_filtering(bed_file_path)
+	if bed_file != None:
+		bed = True
+		bed_file_path = ref_dir + "/references/vcf_files/BED/" + project + "/" + bed_file
+		bed_ranges = matGen.BED_filtering(bed_file_path)
 
 	# Creates the matrix for each context
 	for context in contexts:
