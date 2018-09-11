@@ -31,69 +31,79 @@ import os
 import sys
 import re
 import subprocess
+import argparse
 
-
-def install_chromosomes (genomes):
-	#chrom_number = 24
-	for genome in genomes:
-		species = None
-		chrom_number = None
-		if genome == 'GRCh37' or genome == 'GRCh38': 
-			species = "homo_sapiens"
-			chrom_number = 24
-		elif genome == 'mm10':
-			species = "mus_musculus"
-			chrom_number = 21
-		else:
-			print(genome + " is not supported. The following genomes are supported:\nGRCh37, GRCh38, mm10")
-		
-		chromosome_string_path = "references/chromosomes/chrom_string/" + genome + "/"
-		chromosome_fasta_path = "references/chromosomes/fasta/" + genome + "/"
-
-		wget_flag = True
-		if os.path.exists(chromosome_string_path) == False or len(os.listdir(chromosome_string_path)) <= chrom_number:
-			if os.path.exists(chromosome_fasta_path) == False or len(os.listdir(chromosome_fasta_path)) <= chrom_number:
-				print("Chromosomes are not currently saved as individual text files for " + genome + ". Downloading the files now...")
-				try:
-					p = subprocess.Popen("wget", stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-				except:
-					proceed = input("You may not have wget or homebrew installed. Download those dependencies now?[Y/N]").upper()
-					if proceed == 'Y':
-						try:
-							os.system("brew install wget")
-						except:
-							os.system('/usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"')
-							os.system("brew install wget")
-					else:
-						print("Installation has stopped. Please download the chromosome files before proceeding with the installation.")
-						wget_flag = False
-						sys.exit()
-				if wget_flag:
-					try:
-						if genome == 'GRCh37':
-							print('yes')
-							os.system("wget -r -l1 -c -nc --no-parent -A '*.dna.chromosome.*' -nd -P " + chromosome_fasta_path + " ftp://ftp.ensembl.org/pub/grch37/update/fasta/homo_sapiens/dna/")
-						else:
-							os.system("wget -r -l1 -c -nc --no-parent -A '*.dna.chromosome.*' -nd -P " + chromosome_fasta_path + " ftp://ftp.ensembl.org/pub/release-93/fasta/"+species+"/dna/")
-						os.system("gunzip references/chromosomes/fasta/" + genome + "/*.gz")
-					except:
-						print("The ensembl ftp site is not currently responding.")
-						sys.exit()
-
-			print("Chromosome fasta files for " + genome + " have been installed. Creating the chromosome string files now...")
+def install_chromosomes (genomes, custom):
+	if custom:
+		for genome in genomes:
+			os.system("gunzip references/chromosomes/fasta/" + genome + "/*.gz")
+			chromosome_fasta_path = "references/chromosomes/fasta/" + genome + "/"
 			os.system("python3 scripts/save_chrom_strings.py -g " + genome)
 			print("Chromosome string files for " + genome + " have been created. Continuing with installation.")
-			os.system("rm -r " + chromosome_fasta_path)
+			#os.system("rm -r " + chromosome_fasta_path)
+	else:
 
-		else:
-			print("Chromosome reference files exist for " + genome + ". Continuing with installation.")
+		for genome in genomes:
+			species = None
+			chrom_number = None
+			if genome == 'GRCh37' or genome == 'GRCh38': 
+				species = "homo_sapiens"
+				chrom_number = 24
+			elif genome == 'mm10':
+				species = "mus_musculus"
+				chrom_number = 21
+			else:
+				print(genome + " is not supported. The following genomes are supported:\nGRCh37, GRCh38, mm10")
+			
+			chromosome_string_path = "references/chromosomes/chrom_string/" + genome + "/"
+			chromosome_fasta_path = "references/chromosomes/fasta/" + genome + "/"
+
+			wget_flag = True
+			if os.path.exists(chromosome_string_path) == False or len(os.listdir(chromosome_string_path)) <= chrom_number:
+				if os.path.exists(chromosome_fasta_path) == False or len(os.listdir(chromosome_fasta_path)) <= chrom_number:
+					print("Chromosomes are not currently saved as individual text files for " + genome + ". Downloading the files now...")
+					try:
+						p = subprocess.Popen("wget", stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+					except:
+						proceed = input("You may not have wget or homebrew installed. Download those dependencies now?[Y/N]").upper()
+						if proceed == 'Y':
+							try:
+								os.system("brew install wget")
+							except:
+								os.system('/usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"')
+								os.system("brew install wget")
+						else:
+							print("Installation has stopped. Please download the chromosome files before proceeding with the installation.")
+							wget_flag = False
+							sys.exit()
+					if wget_flag:
+						try:
+							if genome == 'GRCh37':
+								print('yes')
+								os.system("wget -r -l1 -c -nc --no-parent -A '*.dna.chromosome.*' -nd -P " + chromosome_fasta_path + " ftp://ftp.ensembl.org/pub/grch37/update/fasta/homo_sapiens/dna/")
+							else:
+								os.system("wget -r -l1 -c -nc --no-parent -A '*.dna.chromosome.*' -nd -P " + chromosome_fasta_path + " ftp://ftp.ensembl.org/pub/release-93/fasta/"+species+"/dna/")
+							os.system("gunzip references/chromosomes/fasta/" + genome + "/*.gz")
+						except:
+							print("The ensembl ftp site is not currently responding.")
+							sys.exit()
+
+				print("Chromosome fasta files for " + genome + " have been installed. Creating the chromosome string files now...")
+				os.system("python3 scripts/save_chrom_strings.py -g " + genome)
+				print("Chromosome string files for " + genome + " have been created. Continuing with installation.")
+				os.system("rm -r " + chromosome_fasta_path)
+
+			else:
+				print("Chromosome reference files exist for " + genome + ". Continuing with installation.")
 
 
-def install_chromosomes_tsb (genomes):
-	chrom_number = 24
+def install_chromosomes_tsb (genomes, custom):
 	for genome in genomes:
-		if genome == 'mm10':
-			chrom_number = 21
+		chrom_string_path = "references/chromosomes/chrom_string/" + genome + "/"
+		chrom_number = len(chrom_string_path)
+
+#		if genome == 'mm10':
+#			chrom_number = 21
 		chromosome_TSB_path = "references/chromosomes/tsb/" + genome + "/"
 		transcript_files = "references/chromosomes/transcripts/" + genome + "/"
 
@@ -112,11 +122,22 @@ def install_chromosomes_tsb (genomes):
 
 
 def main ():
+
 	genomes = ['mm10','GRCh37', 'GRCh38' ]
+	custom = False
+	parser = argparse.ArgumentParser(description="Provide the necessary arguments to install the reference files.")
+	parser.add_argument("-g", "--genome", nargs='?', help="Optional parameter instructs script to install the custom genome.")
+	args = parser.parse_args()
+
+	if args.genome:
+		genomes = [args.genome]
+
+	if len(genomes) == 1:
+		custom = True
+
 	ref_dir = "references/"
 	chrom_string_dir = ref_dir + "chromosomes/chrom_string/"
 	chrom_fasta_dir = ref_dir + "chromosomes/fasta/"
-	#chrom_transcripts_dir = ref_dir + "chromosomes/transcripts/"
 	chrom_tsb_dir = ref_dir + "chromosomes/tsb/"
 	matrix_dir = ref_dir + "matrix/"
 	vcf_dir = ref_dir + "vcf_files/"
@@ -129,7 +150,6 @@ def main ():
 		if not os.path.exists(dirs):
 			os.makedirs(dirs)
 
-	#if os.path.exists("transcripts/"):
 	initial_transcripts = os.listdir("transcripts_original/")
 	for file in initial_transcripts:
 		name = file.split("_")
@@ -137,13 +157,14 @@ def main ():
 			os.makedirs("references/chromosomes/transcripts/"+name[0]+"/")
 		if name != ".DS":
 			os.system("cp transcripts_original/"+file +" references/chromosomes/transcripts/" + name[0]+"/")
-		#os.system("rmdir transcripts")
 
-	install_chromosomes(genomes)
-	install_chromosomes_tsb (genomes)
+	install_chromosomes(genomes, custom)
+	install_chromosomes_tsb (genomes, custom)
 	if os.path.exists("BRCA_example/"):
 		os.system("mv BRCA_example/ references/vcf_files/")
-	print ("Please place your vcf files for each sample into the 'references/vcf_files/[test]/' directory. Once you have done that, you can proceed with the catalogue generation.")
+	if os.path.exists("example_test"):
+		os.system("mv example_test/ references/vcf_files/")
+	print ("Please place your vcf files for each sample into the 'references/vcf_files/[test]/[mutation_type]/' directory. Once you have done that, you can proceed with the catalogue generation.")
 	print("Installation complete.")
 
 

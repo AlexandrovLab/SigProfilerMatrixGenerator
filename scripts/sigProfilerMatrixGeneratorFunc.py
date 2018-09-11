@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
-import sigProfilerMatrixGenerator_withBED as matGen
+import sigProfilerMatrixGenerator as matGen
 import os
 import re
+import sys
+import logging
 
 def sigProfilerMatrixGeneratorFunc (project, genome, exome=False, indel=False, indel_extended=False, bed_file=None):
 	'''
@@ -34,8 +36,13 @@ def sigProfilerMatrixGeneratorFunc (project, genome, exome=False, indel=False, i
 	functionFlag = True
 	bed = False
 	bed_ranges = None
-	
+	indel = indel
+	exome = exome
 	matrices = {'96':None, '1536':None, '192':None, '3072':None, 'DINUC':None, '6':None, '12':None}
+
+	# Adjusts the variables if the context is for INDELs
+	if indel:
+		matrices = {'INDEL':None}
 
 	ncbi_chrom = {'NC_000067.6':'1', 'NC_000068.7':'2', 'NC_000069.6':'3', 'NC_000070.6':'4', 
 				  'NC_000071.6':'5', 'NC_000072.6':'6', 'NC_000073.6':'7', 'NC_000074.6':'8',
@@ -45,6 +52,17 @@ def sigProfilerMatrixGeneratorFunc (project, genome, exome=False, indel=False, i
 				  'NC_000087.7':'Y'}
 
 	contexts = ['96', '1536', '192', '3072', 'DINUC']
+
+
+	error_file = 'sigProfilerMatrixGenerator_' + project + "_" + genome + ".e"
+	log_file = 'sigProfilerMatrixGenerator_' + project + "_" + genome + ".o"
+	if os.path.exists(error_file):
+		os.system("rm " + error_file)
+	if os.path.exists(log_file):
+		 os.system("rm " + log_file)
+	sys.stderr = open(error_file, 'w')
+	logging.basicConfig(filename=log_file, level=logging.INFO)
+
 
 	# Organizes all of the reference directories for later reference:
 	current_dir = os.getcwd()
@@ -57,67 +75,88 @@ def sigProfilerMatrixGeneratorFunc (project, genome, exome=False, indel=False, i
 	vcf_path = ref_dir + '/references/vcf_files/' + project + "/"
 
 	# Gathers all of the vcf files:
-	vcf_files2 = os.listdir(vcf_path)
-	vcf_files = []
+	vcf_files_snv_temp = os.listdir(vcf_path + "SNV/")
+	if indel:
+		vcf_files_indel_temp = os.listdir(vcf_path + "INDEL/")
 
-	for file in vcf_files2:
+	vcf_files2 = [[],[]]
+
+	for file in vcf_files_snv_temp:
 		# Skips hidden files
 		if file[0:3] == '.DS':
 			pass
 		else:
-			vcf_files.append(file)
+			vcf_files2[0].append(file)
 
-	file_name = vcf_files[0].split(".")
-	file_extension = file_name[-1]
-
-	output_path = ref_dir + "/references/vcf_files/single/"
-	if not os.path.exists(output_path):
-		os.makedirs(output_path)
-
-	if file_extension == 'genome':
-		os.system("bash convert_txt_files_to_simple_files.sh " + project)
-	else:
-		os.system("bash convert_" + file_extension + "_files_to_simple_files.sh " + project)
-	vcf_files = os.listdir(ref_dir + '/references/vcf_files/single/')
-	vcf_path = ref_dir + '/references/vcf_files/single/'
-
-	# Include some kind of a flag for the INDEL option 
-	sort_command_initial = "sort -t $'\t' -k 6,6n -k 6,6 -k 2,2 -k 7,7n "
-	sort_command_initial_2 = " -o "
-	sort_file = vcf_files[0]
-	os.system(sort_command_initial + vcf_path + sort_file + sort_command_initial_2 + vcf_path + sort_file)
-
-	print("Sorting complete...\nDetermining mutation type for each variant, one chromosome at a time.")
-
-	# Adjusts the variables if the context is for INDELs
 	if indel:
-		contexts = ['INDEL']
-		matrices = {'INDEL':None}
+		for file in vcf_files_indel_temp:
+			# Skips hidden files
+			if file[0:3] == '.DS':
+				pass
+			else:
+				vcf_files2[1].append(file)
 
-	print("Starting catalogue generation...")
 
-	if bed_file != None:
-		bed = True
-		bed_file_path = ref_dir + "/references/vcf_files/BED/" + project + "/" + bed_file
-		bed_ranges = matGen.BED_filtering(bed_file_path)
+	for i in range(0, len(vcf_files2), 1):
+		if i ==1 and indel:
+			contexts = ['INDEL']
+		elif i == 1 and not indel:
+			break
+		vcf_path = ref_dir + '/references/vcf_files/' + project + "/"
+		file_name = vcf_files2[i][0].split(".")
+		file_extension = file_name[-1]
 
-	# Creates the matrix for each context
-	for context in contexts:
-		if context != 'DINUC' and context != 'INDEL':
-			matrix = matGen.catalogue_generator_single (vcf_path, vcf_files, chrom_path, chromosome_TSB_path, project, output_matrix, context, exome, genome, ncbi_chrom, functionFlag, bed, bed_ranges)
-			matrices[context] = matrix
 
-		elif context == 'DINUC':
-			matrix = matGen.catalogue_generator_DINUC_single (vcf_path, vcf_files, chrom_path, chromosome_TSB_path, project, output_matrix, exome, genome, ncbi_chrom, functionFlag, bed, bed_ranges)
-			matrices[context] = matrix
+		output_path = ref_dir + "/references/vcf_files/single/"
+		if not os.path.exists(output_path):
+			os.makedirs(output_path)
 
-		elif context == 'INDEL':
-			matrix = matGen.catalogue_generator_INDEL_single (vcf_path, vcf_files, chrom_path, project, output_matrix, exome, genome, ncbi_chrom, indel_extended,functionFlag, bed, bed_ranges)
-			matrices[context] = matrix
+		if file_extension == 'genome':
+			if i ==1:
+				os.system("bash convert_txt_files_to_simple_files.sh " + project + " " + vcf_path + "INDEL/")
+			else:
+				os.system("bash convert_txt_files_to_simple_files.sh " + project + " " + vcf_path + "SNV/")
+		else:
+			if i == 1:
+				os.system("bash convert_" + file_extension + "_files_to_simple_files.sh " + project + " " + vcf_path + "INDEL/")
+			else:
+				os.system("bash convert_" + file_extension + "_files_to_simple_files.sh " + project + " " + vcf_path +"SNV/")
 
-	# Deletes the temporary files and returns the final matrix
-	print("Catalogue for " + context + " context is complete.")
-	os.system("rm -r " + vcf_path)
+		vcf_files = os.listdir(ref_dir + '/references/vcf_files/single/')
+		vcf_path = ref_dir + '/references/vcf_files/single/'
+
+		# Include some kind of a flag for the INDEL option 
+		sort_command_initial = "sort -t $'\t' -k 6,6n -k 6,6 -k 2,2 -k 7,7n "
+		sort_command_initial_2 = " -o "
+		sort_file = vcf_files[0]
+		os.system(sort_command_initial + vcf_path + sort_file + sort_command_initial_2 + vcf_path + sort_file)
+
+		print("Sorting complete...\nDetermining mutation type for each variant, one chromosome at a time. Starting catalogue generation...")
+
+		if bed_file != None:
+			bed = True
+			bed_file_path = ref_dir + "/references/vcf_files/BED/" + project + "/" + bed_file
+			bed_ranges = matGen.BED_filtering(bed_file_path)
+
+		# Creates the matrix for each context
+		for context in contexts:
+			if context != 'DINUC' and context != 'INDEL':
+				matrix = matGen.catalogue_generator_single (vcf_path, vcf_files, chrom_path, chromosome_TSB_path, project, output_matrix, context, exome, genome, ncbi_chrom, functionFlag, bed, bed_ranges)
+				matrices[context] = matrix
+
+			elif context == 'DINUC':
+				matrix = matGen.catalogue_generator_DINUC_single (vcf_path, vcf_files, chrom_path, chromosome_TSB_path, project, output_matrix, exome, genome, ncbi_chrom, functionFlag, bed, bed_ranges)
+				matrices[context] = matrix
+
+			elif context == 'INDEL':
+				matrix = matGen.catalogue_generator_INDEL_single (vcf_path, vcf_files, chrom_path, project, output_matrix, exome, genome, ncbi_chrom, indel_extended,functionFlag, bed, bed_ranges)
+				matrices[context] = matrix
+
+			# Deletes the temporary files and returns the final matrix
+			logging.info("Catalogue for " + context + " context is complete.")
+			print("Catalogue for " + context + " context is complete.")
+		os.system("rm -r " + vcf_path)
+
 	return(matrices)
 
 	
