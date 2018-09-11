@@ -35,6 +35,7 @@ import itertools
 import pandas as pd
 from itertools import chain
 import time
+import logging
 
 ################# Functions and references ###############################################
 def perm(n, seq):
@@ -174,6 +175,7 @@ def catalogue_generator_single (vcf_path, vcf_files, chrom_path, chromosome_TSB_
                                 with open (chromosome_TSB_path + chrom_start + "_192.txt", 'rb') as f:
                                     chrom_bias = f.read()
                         except:
+
                             print(chrom_start + " is not supported. You will need to download that chromosome and create the required files. Continuing with the matrix generation...")
                             continue
                         flag = False
@@ -185,7 +187,8 @@ def catalogue_generator_single (vcf_path, vcf_files, chrom_path, chromosome_TSB_
 
                     # Opens the next chromosome data once a new chromosome is reached
                     if chrom != chrom_start:
-                        print ("Chromosome " + chrom_start + " done")
+                        logging.info("Chromosome " + chrom_start + " done")
+                        #print ("Chromosome " + chrom_start + " done")
                         chrom_start = chrom
                         try:
                             with open(chrom_path + chrom_start + ".txt") as f:
@@ -258,7 +261,8 @@ def catalogue_generator_single (vcf_path, vcf_files, chrom_path, chromosome_TSB_
 
                         if exome:
                             exome_file.write(sample + '\t' + chrom + '\t' + str(start) + '\t' + mut_key + "\n")
-    print ("Chromosome " + chrom_start + " done")
+    #print ("Chromosome " + chrom_start + " done")
+    logging.info("Chromosome " + chrom_start + " done")
 
     if exome:
         exome_file.close()
@@ -385,7 +389,8 @@ def catalogue_generator_DINUC_single (vcf_path, vcf_files, chrom_path, chromosom
 
                     # Breaks the loop once a new chromosome is reached
                     if chrom != chrom_start:
-                        print ("Chromosome " + chrom_start + " done")
+                        #print ("Chromosome " + chrom_start + " done")
+                        logging.info("Chromosome " + chrom_start + " done")
                         chrom_start = chrom
                         with open(chrom_path + chrom_start + ".txt") as f:
                             chrom_string = f.readline().strip()
@@ -415,7 +420,8 @@ def catalogue_generator_DINUC_single (vcf_path, vcf_files, chrom_path, chromosom
                     previous_ref = ref
                     previous_mut = mut
 
-    print ("Chromosome " + chrom_start + " done")
+    logging.info("Chromosome " + chrom_start + " done")
+    #print ("Chromosome " + chrom_start + " done")
 
     if exome:
         exome_file.close()
@@ -538,8 +544,11 @@ def catalogue_generator_INDEL_single (vcf_path, vcf_files, chrom_path, project, 
                 elif len(mut) - len(ref) == len(mut)-1:
                     mut_type = 'Ins'
                 else:
+                    if sample not in indel_dict.keys():
+                        indel_dict[sample] = {}
+
                     if 'complex' not in indel_dict[sample].keys():
-                        indel_dict[sample]['complex'] = 0
+                        indel_dict[sample]['complex'] = 1
                     else:
                         indel_dict[sample]['complex'] += 1
                     continue
@@ -551,7 +560,8 @@ def catalogue_generator_INDEL_single (vcf_path, vcf_files, chrom_path, project, 
                         with open (chrom_path + initial_chrom + '.txt') as f:
                             chrom_string = f.readline().strip()
                         i += 1
-                        print(initial_chrom)
+                        logging.info("Chromosome "+ chrom + " complete")
+                        #print(initial_chrom)
                     except:
                         print(chrom_start + " is not supported. You will need to download that chromosome and create the required files. Continuing with the matrix generation...")
                         continue
@@ -768,6 +778,7 @@ def catalogue_generator_INDEL_single (vcf_path, vcf_files, chrom_path, project, 
                     indel_dict[sample]['non_matching'] += 1
 
     # Prints the total number of complex mutations
+    logging.info("Non-matching mutations: " + str(non_matching))
     print(non_matching)
 
     if exome:
@@ -913,7 +924,7 @@ def exome_check (genome, exome_temp_file):
             previous_chrom_start = start_ref
             previous_chrom_end = end_ref
 
-    
+    logging.info("Exome filtering is complete. Proceeding with the final catalogue generation...")
     print("Exome filtering is complete. Proceeding with the final catalogue generation...")
     return(mutation_dict, samples)
 
@@ -1204,14 +1215,13 @@ def main():
     parser.add_argument("--project", "-p",help="Provide a unique name for your samples. (ex: BRCA)")
     parser.add_argument("--genome", "-g",help="Provide a reference genome. (ex: GRCh37, GRCh38, mm10)")
     parser.add_argument("-e", "--exome", help="Optional parameter instructs script to create the catalogues using only the exome regions. Whole genome context by default", action='store_true')
-    parser.add_argument("-i", "--indel", help="Optional parameter instructs script to create the catalogue for limited INDELs", action='store_true')
-    parser.add_argument("-ie", "--extended_indel", help="Optional parameter instructs script to create the catalogue for extended INDELs", action='store_true')
+    parser.add_argument( "-i", "--indel", help="Optional parameter instructs script to create the catalogue for limited INDELs", action='store_true')
+    parser.add_argument( "-ie", "--extended_indel", help="Optional parameter instructs script to create the catalogue for extended INDELs", action='store_true')
     parser.add_argument("-b", "--bed", nargs='?', help="Optional parameter instructs script to simulate on a given set of ranges (ex: exome). Whole genome context by default")
     args=parser.parse_args()
     project = args.project
     genome = args.genome
-    #context = args.context
-    
+
     if args.exome:
         exome = True
 
@@ -1225,9 +1235,16 @@ def main():
     if args.bed:
         bed = True
         bed_file = args.bed
-
-
-        
+    
+    error_file = 'sigProfilerMatrixGenerator_' + project + "_" + genome + ".e"
+    log_file = 'sigProfilerMatrixGenerator_' + project + "_" + genome + ".o"
+    if os.path.exists(error_file):
+        os.system("rm " + error_file)
+    if os.path.exists(log_file):
+         os.system("rm " + log_file)
+    sys.stderr = open(error_file, 'w')
+    #logging.basicConfig(filename=error_file, level=logging.DEBUG, format='%(asctime)s %(levelname)s %(name)s %(message)s')
+    logging.basicConfig(filename=log_file, level=logging.INFO)
 
     # Organizes all of the reference directories for later reference:
     current_dir = os.getcwd()
@@ -1243,62 +1260,87 @@ def main():
     bed_path = ref_dir + '/references/vcf_files/BED/' + project + "/"
 
     # Gathers all of the vcf files:
-    vcf_files2 = os.listdir(vcf_path)
-    vcf_files = []
+    vcf_files_snv_temp = os.listdir(vcf_path + "SNV/")
+    if indel:
+        vcf_files_indel_temp = os.listdir(vcf_path + "INDEL/")
 
-    for file in vcf_files2:
+    vcf_files2 = [[],[]]
+
+    for file in vcf_files_snv_temp:
         # Skips hidden files
         if file[0:3] == '.DS':
             pass
         else:
-            vcf_files.append(file)
-
-    file_name = vcf_files[0].split(".")
-    file_extension = file_name[-1]
-
-    output_path = ref_dir + "/references/vcf_files/single/"
-    if not os.path.exists(output_path):
-        os.makedirs(output_path)
-
-
-    if file_extension == 'genome':
-        os.system("bash convert_txt_files_to_simple_files.sh " + project)
-    else:
-        os.system("bash convert_" + file_extension + "_files_to_simple_files.sh " + project)
-    vcf_files = os.listdir(ref_dir + '/references/vcf_files/single/')
-    vcf_path = ref_dir + '/references/vcf_files/single/'
-
-    # Include some kind of a flag for the INDEL option 
-    sort_command_initial = "sort -t $'\t' -k 6,6n -k 6,6 -k 2,2 -k 7,7n "
-    sort_command_initial_2 = " -o "
-    sort_file = vcf_files[0]
-    os.system(sort_command_initial + vcf_path + sort_file + sort_command_initial_2 + vcf_path + sort_file)
-
-    print("Sorting complete...\nDetermining mutation type for each variant, one chromosome at a time.")
+            vcf_files2[0].append(file)
 
     if indel:
-        contexts = ['INDEL']
+        for file in vcf_files_indel_temp:
+            # Skips hidden files
+            if file[0:3] == '.DS':
+                pass
+            else:
+                vcf_files2[1].append(file)   
 
-    print("Starting catalogue generation...")
+    for i in range(0, len(vcf_files2), 1):
+        if i == 1 and indel:
+            contexts = ['INDEL']
+        elif i ==1 and not indel:
+            break
+        vcf_path = ref_dir + '/references/vcf_files/' + project + "/"
+        file_name = vcf_files2[i][0].split(".")
+        file_extension = file_name[-1]
 
-    if bed:
-        bed_file_path = ref_dir + "/references/vcf_files/BED/" + project + "/" + bed_file
-        bed_ranges = BED_filtering(bed_file_path)
 
-    for context in contexts:
-        # Single file:
-        if context != 'DINUC' and context != 'INDEL':
-            catalogue_generator_single (vcf_path, vcf_files, chrom_path, chromosome_TSB_path, project, output_matrix, context, exome, genome, ncbi_chrom, functionFlag, bed, bed_ranges)
 
-        elif context == 'DINUC':
-            catalogue_generator_DINUC_single (vcf_path, vcf_files, chrom_path, chromosome_TSB_path, project, output_matrix, exome, genome, ncbi_chrom, functionFlag, bed, bed_ranges)
 
-        elif context == 'INDEL':
-            catalogue_generator_INDEL_single (vcf_path, vcf_files, chrom_path, project, output_matrix, exome, genome, ncbi_chrom, limited_indel, functionFlag, bed, bed_ranges)
+        output_path = ref_dir + "/references/vcf_files/single/"
+        if not os.path.exists(output_path):
+            os.makedirs(output_path)
 
-        print("Catalogue for " + context + " context is complete.")
-    os.system("rm -r " + vcf_path)
+
+        if file_extension == 'genome':
+            if i == 1:
+                os.system("bash convert_txt_files_to_simple_files.sh " + project + " " + vcf_path + "INDEL/")
+            else:
+                os.system("bash convert_txt_files_to_simple_files.sh " + project + " " + vcf_path + "SNV/")
+        else:
+            if i == 1:
+                os.system("bash convert_" + file_extension + "_files_to_simple_files.sh " + project + " " + vcf_path + "INDEL/")
+            else:
+                os.system("bash convert_" + file_extension + "_files_to_simple_files.sh " + project + " " + vcf_path +"SNV/")
+
+        vcf_files = os.listdir(ref_dir + '/references/vcf_files/single/')
+        vcf_path = ref_dir + '/references/vcf_files/single/'
+
+        # Include some kind of a flag for the INDEL option 
+        sort_command_initial = "sort -t $'\t' -k 6,6n -k 6,6 -k 2,2 -k 7,7n "
+        sort_command_initial_2 = " -o "
+        sort_file = vcf_files[0]
+        os.system(sort_command_initial + vcf_path + sort_file + sort_command_initial_2 + vcf_path + sort_file)
+
+        print("Sorting complete...\nDetermining mutation type for each variant, one chromosome at a time. Starting catalogue generation...")
+
+        if bed:
+            bed_file_path = ref_dir + "/references/vcf_files/BED/" + project + "/" + bed_file
+            bed_ranges = BED_filtering(bed_file_path)
+
+        for context in contexts:
+            # Single file:
+            if context != 'DINUC' and context != 'INDEL':
+                catalogue_generator_single (vcf_path, vcf_files, chrom_path, chromosome_TSB_path, project, output_matrix, context, exome, genome, ncbi_chrom, functionFlag, bed, bed_ranges)
+
+            elif context == 'DINUC':
+                catalogue_generator_DINUC_single (vcf_path, vcf_files, chrom_path, chromosome_TSB_path, project, output_matrix, exome, genome, ncbi_chrom, functionFlag, bed, bed_ranges)
+
+            elif context == 'INDEL':
+                catalogue_generator_INDEL_single (vcf_path, vcf_files, chrom_path, project, output_matrix, exome, genome, ncbi_chrom, limited_indel, functionFlag, bed, bed_ranges)
+
+            logging.info("Catalogue for " + context + " context is complete.")
+            print("Catalogue for " + context + " context is complete.")
+        os.system("rm -r " + vcf_path)
+
     end = time.time()
+    logging.info("Job took " + str(end-start) + " seconds.")
     print("Job took ",str(end-start), " seconds.")
 
 

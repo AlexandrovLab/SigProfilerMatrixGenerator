@@ -3,10 +3,11 @@
 cd ..
 
 test_name=$1;
+vcf_path=$2;
 output_path="references/vcf_files/single/";
 outputFile="references/vcf_files/single/"$test_name"_indels.genome";
-vcf_path="references/vcf_files/$test_name/";
-mkdir $output_path
+#vcf_path="references/vcf_files/$test_name/$mut_name/";
+#mkdir $output_path
 
 rm -f $outputFile;
 
