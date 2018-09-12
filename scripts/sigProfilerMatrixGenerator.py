@@ -36,6 +36,7 @@ import pandas as pd
 from itertools import chain
 import time
 import logging
+from line_profiler import LineProfiler
 
 ################# Functions and references ###############################################
 def perm(n, seq):
@@ -102,27 +103,16 @@ def catalogue_generator_single (vcf_path, vcf_files, chrom_path, chromosome_TSB_
     tsb = ['T','U','N','B']
     bases = ['A','C','G','T']
     
-    # Creates all possible mut_types
-    size = 3
-    if context == '1536' or context == '3072':
-        size = 5
+    size = 5
     mut_types_initial = perm(size, "ACGT")
     mut_types = []
-    if context == '192' or context == '3072':
-        for tsbs in tsb:
-            for mut in mut_types_initial:
-                current_base = mut[int(size/2)]
-                if current_base == 'C' or current_base == 'T':
-                    for base in bases:
-                        if base != current_base:
-                            mut_types.append(tsbs+":"+mut[0:int(size/2)] + "[" + current_base+">"+ base+"]"+mut[int(size/2)+1:])
-    else:
+    for tsbs in tsb:
         for mut in mut_types_initial:
             current_base = mut[int(size/2)]
             if current_base == 'C' or current_base == 'T':
                 for base in bases:
                     if base != current_base:
-                        mut_types.append(mut[0:int(size/2)] + "[" + mut[int(size/2)]+">"+ base+"]"+mut[int(size/2)+1:])
+                        mut_types.append(tsbs+":"+mut[0:int(size/2)] + "[" + current_base+">"+ base+"]"+mut[int(size/2)+1:])
 
 
     types = []
@@ -169,11 +159,9 @@ def catalogue_generator_single (vcf_path, vcf_files, chrom_path, chromosome_TSB_
 
                         # Opens each chromosome string path and bias string path
                         try:
-                            with open(chrom_path + chrom_start + ".txt") as f:
-                                chrom_string = f.readline().strip()
-                            if context == '192' or context == '3072':
-                                with open (chromosome_TSB_path + chrom_start + "_192.txt", 'rb') as f:
-                                    chrom_bias = f.read()
+                            with open(chrom_path + chrom_start + ".txt") as f, open (chromosome_TSB_path + chrom_start + "_192.txt", 'rb') as f2:
+                                chrom_string = f.read()
+                                chrom_bias = f2.read()
                         except:
 
                             print(chrom_start + " is not supported. You will need to download that chromosome and create the required files. Continuing with the matrix generation...")
@@ -191,31 +179,19 @@ def catalogue_generator_single (vcf_path, vcf_files, chrom_path, chromosome_TSB_
                         #print ("Chromosome " + chrom_start + " done")
                         chrom_start = chrom
                         try:
-                            with open(chrom_path + chrom_start + ".txt") as f:
-                                chrom_string = f.readline().strip()
-
-                            if context == '192' or context == '3072':
-                                with open(chromosome_TSB_path + chrom_start + "_192.txt", 'rb') as f:
-                                    chrom_bias = f.read()
+                            with open(chrom_path + chrom_start + ".txt") as f, open(chromosome_TSB_path + chrom_start + "_192.txt", 'rb') as f2:
+                                chrom_string = f.read()
+                                chrom_bias = f2.read()
                             i += 1
                         except:
                             print(chrom_start + " is not supported. You will need to download that chromosome and create the required files. Continuing with the matrix generation...")
                             continue
 
-                        
-
                     # Pulls out the relevant sequence depending on the context
-                    if context == '96' or context == '192':
-                        sequence = chrom_string[start-2:start+1]
-
-                    else:
-                        sequence = chrom_string[start-3:start+2]
-
-                    if context == '192' or context == '3072':
-                        bias = chrom_bias[start]
+                    sequence = chrom_string[start-3:start+2]
+                    bias = chrom_bias[start]
                     char = sequence[int(len(sequence)/2)]
 
- 
                     # Prints the sequence and position if the pulled sequence doesn't match
                     # the variant from the file
                     if char != ref and revcompl(char) != ref:
@@ -234,23 +210,21 @@ def catalogue_generator_single (vcf_path, vcf_files, chrom_path, chromosome_TSB_
                             ref = revcompl(ref)
                             mut = revcompl(mut) 
                             sequence = revcompl(sequence)
-                            if context == '192' or context == '3072':
-                                bias = revbias(str(bias))
+                            bias = revbias(str(bias))
 
                         mut_key = sequence[0:int(len(sequence)/2)] + '[' + ref + '>' + mut + ']' + sequence[int(len(sequence)/2+1):]
 
 
 
-                        if context == '192' or context == '3072':
-                            if bias == 0:
-                                bias = 'N'
-                            elif bias == 1:
-                                bias = 'T'
-                            elif bias == 2:
-                                bias = 'U'
-                            else:
-                                bias = 'B'
-                            mut_key = bias + ':' + mut_key
+                        if bias == 0:
+                            bias = 'N'
+                        elif bias == 1:
+                            bias = 'T'
+                        elif bias == 2:
+                            bias = 'U'
+                        else:
+                            bias = 'B'
+                        mut_key = bias + ':' + mut_key
 
                         if mut_key not in types:
                             types.append(mut_key)
@@ -261,7 +235,7 @@ def catalogue_generator_single (vcf_path, vcf_files, chrom_path, chromosome_TSB_
 
                         if exome:
                             exome_file.write(sample + '\t' + chrom + '\t' + str(start) + '\t' + mut_key + "\n")
-    #print ("Chromosome " + chrom_start + " done")
+
     logging.info("Chromosome " + chrom_start + " done")
 
     if exome:
@@ -378,22 +352,11 @@ def catalogue_generator_DINUC_single (vcf_path, vcf_files, chrom_path, chromosom
                         sample_start = sample
                         chrom_start = chrom
 
-                        # Open each chromosome string path and bias string path
-                        try:
-                            with open(chrom_path + chrom_start + ".txt") as f:
-                                chrom_string = f.readline().strip()
-                            flag = False
-                        except:
-                            print(chrom_start + " is not supported. You will need to download that chromosome and create the required files. Continuing with the matrix generation...")
-                            continue
 
                     # Breaks the loop once a new chromosome is reached
                     if chrom != chrom_start:
-                        #print ("Chromosome " + chrom_start + " done")
                         logging.info("Chromosome " + chrom_start + " done")
                         chrom_start = chrom
-                        with open(chrom_path + chrom_start + ".txt") as f:
-                            chrom_string = f.readline().strip()
                         
 
                     # Grabs the slice of interest
@@ -958,37 +921,20 @@ def matrix_generator (context, output_matrix, project, samples, bias_sort, mutat
 
     '''
 
-    mut_types_six = ['C>A','C>G','C>T','T>A','T>C','T>G']
-    mut_types_twelve = ['T:C>A','T:C>G','T:C>T','T:T>A','T:T>C','T:T>G',
-                        'U:C>A','U:C>G','U:C>T','U:T>A','U:T>C','U:T>G',
-                        'B:C>A','B:C>G','B:C>T','B:T>A','B:T>C','B:T>G',
-                        'N:C>A','N:C>G','N:C>T','N:T>A','N:T>C','N:T>G']
-
-    mut_count_six = {'C>A':{},'C>G':{},'C>T':{},'T>A':{},'T>C':{},'T>G':{}}
-    mut_count_twelve = {'T:C>A':{},'T:C>G':{},'T:C>T':{},'T:T>A':{},'T:T>C':{},'T:T>G':{},
-                        'U:C>A':{},'U:C>G':{},'U:C>T':{},'U:T>A':{},'U:T>C':{},'U:T>G':{},
-                        'B:C>A':{},'B:C>G':{},'B:C>T':{},'B:T>A':{},'B:T>C':{},'B:T>G':{},
-                        'N:C>A':{},'N:C>G':{},'N:C>T':{},'N:T>A':{},'N:T>C':{},'N:T>G':{}}
+    contexts = ['96', '192', '1536', '6', '12']
+    mut_types_all = {'96':[], '192':[], '1536':[], '6':[], '12':[]}
+    mut_count_all = {'96':{}, '192':{}, '1536':{}, '6':{}, '12':{}}
 
     if bed:    
         file_prefix = project + "_BED" 
     else:
         file_prefix = project
 
+
     if exome:
         output_file_matrix = output_matrix + file_prefix + ".exome.mut" + context 
-        if context == '96':
-            output_file_matrix_six = output_matrix + file_prefix + ".exome.mut6"
-        elif context == '192':
-            output_file_matrix_twelve = output_matrix + file_prefix + ".exome.mut12"
     else:
         output_file_matrix = output_matrix + file_prefix + ".genome.mut" + context
-        if context == '96':
-            output_file_matrix_six = output_matrix + file_prefix + ".genome.mut6"
-        elif context == '192':
-            output_file_matrix_twelve = output_matrix + file_prefix + ".genome.mut12"
-
-
 
     with open (output_file_matrix, 'w') as out:
 
@@ -998,43 +944,46 @@ def matrix_generator (context, output_matrix, project, samples, bias_sort, mutat
             print (sample + '\t', end='', flush=False, file=out)
         print(file=out)
 
-        if context == '192' or context == '3072':
-            try:
-                types = sorted(mut_types, key=lambda val: (bias_sort[val[0]], val[2:]))
-            except:
-                print(mut_types)
-        else:
-            types = mut_types
+        try:
+            types = sorted(mut_types, key=lambda val: (bias_sort[val[0]], val[2:]))
+        except:
+            print(mut_types)
 
         # Prints the mutation count for each mutation type across every sample
         for mut_type in types:
             print (mut_type + '\t', end='', flush =False, file=out)
-            for sample in samples:
-                if context == '96':
-                    subType = mut_type[2:5]
-                    if sample not in mut_count_six[subType].keys():
-                        if mut_type in mutation_dict[sample].keys():
-                            mut_count_six[subType][sample] = mutation_dict[sample][mut_type]
-                        else:
-                            mut_count_six[subType][sample] = 0
-                    else:
-                        if mut_type in mutation_dict[sample].keys():
-                            mut_count_six[subType][sample] += mutation_dict[sample][mut_type]
-                        else:
-                            mut_count_six[subType][sample] = 0
+            mut_types_all['96'].append(mut_type[3:-1])
+            mut_types_all['192'].append(mut_type[0:2] + mut_type[3:-1])
+            mut_types_all['1536'].append(mut_type[2:])
+            mut_types_all['6'].append(mut_type[5:8])
+            mut_types_all['12'].append(mut_type[0:2] + mut_type[5:8])
 
-                elif context == '192':
-                    subType = mut_type[0:2] + mut_type[4:7]
-                    if sample not in mut_count_twelve[subType].keys():
-                        if mut_type in mutation_dict[sample]:
-                            mut_count_twelve[subType][sample] = mutation_dict[sample][mut_type]
-                        else:
-                            mut_count_twelve[subType][sample] = 0
-                    else:
-                        if mut_type in mutation_dict[sample]:
-                            mut_count_twelve[subType][sample] += mutation_dict[sample][mut_type]
-                        else:
-                            mut_count_twelve[subType][sample] += 0
+
+            for sample in samples:
+                if sample not in mut_count_all['96'].keys():
+                    mut_count_all['96'][sample] = {}
+                    mut_count_all['192'][sample] = {}
+                    mut_count_all['1536'][sample] = {}
+                    mut_count_all['6'][sample] = {}
+                    mut_count_all['12'][sample] = {}
+                if mut_type[3:-1] not in mut_count_all['96'][sample].keys():
+                    mut_count_all['96'][sample][mut_type[3:-1]] = 0
+                if (mut_type[0:2]+mut_type[3:-1]) not in mut_count_all['192'][sample].keys():
+                    mut_count_all['192'][sample][mut_type[0:2] + mut_type[3:-1]] = 0
+                if mut_type[2:] not in mut_count_all['1536'][sample].keys():
+                    mut_count_all['1536'][sample][mut_type[2:]] = 0
+                if mut_type[5:8] not in mut_count_all['6'][sample].keys():
+                    mut_count_all['6'][sample][mut_type[5:8]] = 0
+                if (mut_type[0:2] + mut_type[5:8]) not in mut_count_all['12'][sample].keys():
+                    mut_count_all['12'][sample][mut_type[0:2] + mut_type[5:8]] = 0
+
+                if mut_type in mutation_dict[sample].keys():
+                    mut_count_all['96'][sample][mut_type[3:-1]] += mutation_dict[sample][mut_type]
+                    mut_count_all['192'][sample][mut_type[0:2] + mut_type[3:-1]] += mutation_dict[sample][mut_type]
+                    mut_count_all['1536'][sample][mut_type[2:]] += mutation_dict[sample][mut_type]
+                    mut_count_all['6'][sample][mut_type[5:8]] += mutation_dict[sample][mut_type]
+                    mut_count_all['12'][sample][mut_type[0:2] + mut_type[5:8]] += mutation_dict[sample][mut_type]                                  
+
 
                 if mut_type in mutation_dict[sample].keys():
                     print (str(mutation_dict[sample][mut_type]) + '\t', end='', file=out)
@@ -1043,44 +992,57 @@ def matrix_generator (context, output_matrix, project, samples, bias_sort, mutat
             print(file=out)
 
 
-    # sorts the 96 and 1536 matrices by mutation type
-    if context == '96' or context == '1536':
-        command1 = "head -1 " + output_file_matrix + " > " + output_matrix + "a.tmp;"
-        command2 = "tail -n+2 " + output_file_matrix + " | sort -n >> " + output_matrix + "a.tmp;"
 
-        
-        os.system(command1)
-        os.system(command2)
-        os.system("cat " + output_matrix + "a.tmp > " + output_file_matrix)
-        os.system("rm " + output_matrix + "a.tmp")
+    for cont in contexts:
+        types = mut_types_all[cont]
+        types = list(set(types))
+        mutation_dict = mut_count_all[cont]
+        if exome:
+            output_file_matrix = output_matrix + file_prefix + ".exome.mut" + cont 
+        else:
+            output_file_matrix = output_matrix + file_prefix + ".genome.mut" + cont
+
+
+        with open (output_file_matrix, 'w') as out:
+
+            # Prints all of the sample names into the first line of the file
+            print ('MutationType\t', end='', flush=False, file=out)  
+            for sample in samples:
+                print (sample + '\t', end='', flush=False, file=out)
+            print(file=out)
+
+            if cont == '192' or cont == '3072':
+                try:
+                    types = sorted(types, key=lambda val: (bias_sort[val[0]], val[2:]))
+                except:
+                    print(mut_types)
+
+            # Prints the mutation count for each mutation type across every sample
+            for mut_type in types:
+                print (mut_type + '\t', end='', flush =False, file=out)
+                for sample in samples:
+                    if mut_type in mutation_dict[sample].keys():
+                        print (str(mutation_dict[sample][mut_type]) + '\t', end='', file=out)
+                    else:
+                        print ('0\t', end='', file=out)
+                print(file=out)
+
+
+
+
+
+
+        # sorts the 96 and 1536 matrices by mutation type
+        if cont == '96' or cont == '1536':
+            command1 = "head -1 " + output_file_matrix + " > " + output_matrix + "a.tmp;"
+            command2 = "tail -n+2 " + output_file_matrix + " | sort -n >> " + output_matrix + "a.tmp;"
+
+            
+            os.system(command1)
+            os.system(command2)
+            os.system("cat " + output_matrix + "a.tmp > " + output_file_matrix)
+            os.system("rm " + output_matrix + "a.tmp")
     
-    # Generates the matrix for the 6 SNV mutation types
-    if context == '96':
-        with open(output_file_matrix_six, 'w') as out:
-            print ('MutationType\t', end='', flush=False, file=out)  
-            for sample in samples:
-                print (sample + '\t', end='', flush=False, file=out)
-            print(file=out)
-            for types in mut_types_six:
-                print (types + '\t', end='', flush =False, file=out)
-                for sample in samples:
-                    print(str(mut_count_six[types][sample]) + "\t",end='',file=out)
-                print(file=out)
-        print("Catalogue for 6 context is complete.")
-
-    # Generates the matrix for the 12 SNV mutation types
-    elif context == '192':
-        with open(output_file_matrix_twelve, 'w') as out:
-            print ('MutationType\t', end='', flush=False, file=out)  
-            for sample in samples:
-                print (sample + '\t', end='', flush=False, file=out)
-            print(file=out)
-            for types in mut_types_twelve:
-                print (types + '\t', end='', flush =False, file=out)
-                for sample in samples:
-                    print(str(mut_count_twelve[types][sample]) + "\t",end='',file=out)
-                print(file=out)
-        print("Catalogue for 12 context is complete.")
 
 def matrix_generator_INDEL (output_matrix, samples, indel_types, indel_dict, project, exome, limited_indel, bed):
     '''
@@ -1201,7 +1163,7 @@ def main():
                   'NC_000083.6':'17', 'NC_000084.6':'18', 'NC_000085.6':'19', 'NC_000086.7':'X', 
                   'NC_000087.7':'Y'}
 
-    contexts = ['96', '1536', '192', '3072', 'DINUC']
+    contexts = ['3072', 'DINUC']#, '1536', '192', '3072', 'DINUC']
 
     exome = False
     indel = False
@@ -1294,10 +1256,13 @@ def main():
 
 
         output_path = ref_dir + "/references/vcf_files/single/"
-        if not os.path.exists(output_path):
-            os.makedirs(output_path)
+        if os.path.exists(output_path):
+            os.system("rm -r " + output_path)
+
+        os.makedirs(output_path)
 
 
+        
         if file_extension == 'genome':
             if i == 1:
                 os.system("bash convert_txt_files_to_simple_files.sh " + project + " " + vcf_path + "INDEL/")
@@ -1309,14 +1274,21 @@ def main():
             else:
                 os.system("bash convert_" + file_extension + "_files_to_simple_files.sh " + project + " " + vcf_path +"SNV/")
 
+
         vcf_files = os.listdir(ref_dir + '/references/vcf_files/single/')
         vcf_path = ref_dir + '/references/vcf_files/single/'
 
         # Include some kind of a flag for the INDEL option 
-        sort_command_initial = "sort -t $'\t' -k 6,6n -k 6,6 -k 2,2 -k 7,7n "
-        sort_command_initial_2 = " -o "
         sort_file = vcf_files[0]
-        os.system(sort_command_initial + vcf_path + sort_file + sort_command_initial_2 + vcf_path + sort_file)
+        with open(vcf_path + sort_file) as f:
+            lines = [line.strip().split() for line in f]
+
+        output = open(vcf_path + sort_file, 'w')
+
+        for line in sorted(lines, key = lambda x: (['X','Y','1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22'].index(x[5]), x[1], x[6])):
+            print('\t'.join(line), file=output)
+
+        output.close()
 
         print("Sorting complete...\nDetermining mutation type for each variant, one chromosome at a time. Starting catalogue generation...")
 
@@ -1326,7 +1298,11 @@ def main():
 
         for context in contexts:
             # Single file:
+            #lp = LineProfiler()
+            #lp_wrapper = lp(catalogue_generator_single)
             if context != 'DINUC' and context != 'INDEL':
+                #lp_wrapper(vcf_path, vcf_files, chrom_path, chromosome_TSB_path, project, output_matrix, context, exome, genome, ncbi_chrom, functionFlag, bed, bed_ranges)
+                #lp.print_stats()
                 catalogue_generator_single (vcf_path, vcf_files, chrom_path, chromosome_TSB_path, project, output_matrix, context, exome, genome, ncbi_chrom, functionFlag, bed, bed_ranges)
 
             elif context == 'DINUC':
