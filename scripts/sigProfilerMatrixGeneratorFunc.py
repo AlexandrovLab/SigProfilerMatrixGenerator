@@ -4,8 +4,10 @@ import os
 import re
 import sys
 import logging
+import pandas as pd
+import datetime
 
-def sigProfilerMatrixGeneratorFunc (project, genome, exome=False, indel=False, indel_extended=False, bed_file=None):
+def sigProfilerMatrixGeneratorFunc (project, genome, exome=False, indel=False, indel_extended=False, bed_file=None, chrom_based=False):
 	'''
 	Allows for the import of the sigProfilerMatrixGenerator.py function. Returns a dictionary
 	with each context serving as the first level of keys. 
@@ -51,17 +53,7 @@ def sigProfilerMatrixGeneratorFunc (project, genome, exome=False, indel=False, i
 				  'NC_000083.6':'17', 'NC_000084.6':'18', 'NC_000085.6':'19', 'NC_000086.7':'X', 
 				  'NC_000087.7':'Y'}
 
-	contexts = ['96', '1536', '192', '3072', 'DINUC']
-
-
-	error_file = 'sigProfilerMatrixGenerator_' + project + "_" + genome + ".e"
-	log_file = 'sigProfilerMatrixGenerator_' + project + "_" + genome + ".o"
-	if os.path.exists(error_file):
-		os.system("rm " + error_file)
-	if os.path.exists(log_file):
-		 os.system("rm " + log_file)
-	sys.stderr = open(error_file, 'w')
-	logging.basicConfig(filename=log_file, level=logging.INFO)
+	contexts = ['3072', 'DINUC']
 
 
 	# Organizes all of the reference directories for later reference:
@@ -69,6 +61,19 @@ def sigProfilerMatrixGeneratorFunc (project, genome, exome=False, indel=False, i
 	ref_dir = re.sub('\/scripts$', '', current_dir)
 	chrom_path = ref_dir + '/references/chromosomes/chrom_string/' + genome + "/"
 	chromosome_TSB_path =  ref_dir + '/references/chromosomes/tsb/' + genome + "/"
+
+	time_stamp = datetime.date.today()
+	output_log_path = ref_dir + "/logs/"
+	if not os.path.exists(output_log_path):
+		os.system("mkdir " + output_log_path)
+	error_file = output_log_path + 'SigProfilerMatrixGenerator_' + project + "_" + genome + str(time_stamp) + ".err"
+	log_file = output_log_path + 'SigProfilerMatrixGenerator_' + project + "_" + genome + str(time_stamp) + ".out"
+	if os.path.exists(error_file):
+		os.system("rm " + error_file)
+	if os.path.exists(log_file):
+		 os.system("rm " + log_file)
+	sys.stderr = open(error_file, 'w')
+	logging.basicConfig(filename=log_file, level=logging.INFO)
 
 	# Organizes all of the input and output directories:
 	output_matrix = ref_dir + "/references/matrix/"
@@ -141,15 +146,15 @@ def sigProfilerMatrixGeneratorFunc (project, genome, exome=False, indel=False, i
 		# Creates the matrix for each context
 		for context in contexts:
 			if context != 'DINUC' and context != 'INDEL':
-				matrix = matGen.catalogue_generator_single (vcf_path, vcf_files, chrom_path, chromosome_TSB_path, project, output_matrix, context, exome, genome, ncbi_chrom, functionFlag, bed, bed_ranges)
-				matrices[context] = matrix
+				matrix = matGen.catalogue_generator_single (vcf_path, vcf_files, chrom_path, chromosome_TSB_path, project, output_matrix, context, exome, genome, ncbi_chrom, functionFlag, bed, bed_ranges, chrom_based)
+				matrices = matrix
 
 			elif context == 'DINUC':
-				matrix = matGen.catalogue_generator_DINUC_single (vcf_path, vcf_files, chrom_path, chromosome_TSB_path, project, output_matrix, exome, genome, ncbi_chrom, functionFlag, bed, bed_ranges)
+				matrix = matGen.catalogue_generator_DINUC_single (vcf_path, vcf_files, chrom_path, chromosome_TSB_path, project, output_matrix, exome, genome, ncbi_chrom, functionFlag, bed, bed_ranges, chrom_based)
 				matrices[context] = matrix
 
 			elif context == 'INDEL':
-				matrix = matGen.catalogue_generator_INDEL_single (vcf_path, vcf_files, chrom_path, project, output_matrix, exome, genome, ncbi_chrom, indel_extended,functionFlag, bed, bed_ranges)
+				matrix = matGen.catalogue_generator_INDEL_single (vcf_path, vcf_files, chrom_path, project, output_matrix, exome, genome, ncbi_chrom, indel_extended,functionFlag, bed, bed_ranges, chrom_based)
 				matrices[context] = matrix
 
 			# Deletes the temporary files and returns the final matrix
@@ -157,6 +162,9 @@ def sigProfilerMatrixGeneratorFunc (project, genome, exome=False, indel=False, i
 			print("Catalogue for " + context + " context is complete.")
 		os.system("rm -r " + vcf_path)
 
-	return(matrices)
+	final_matrices = {}
+	for conts in matrices.keys():
+		final_matrices[conts] = pd.DataFrame.from_dict(matrices[conts])
+	return(final_matrices)
 
 	
