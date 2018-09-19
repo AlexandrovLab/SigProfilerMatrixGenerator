@@ -1371,12 +1371,7 @@ def main():
             bed_ranges = BED_filtering(bed_file_path)
 
         for context in contexts:
-            # Single file:
-            #lp = LineProfiler()
-            #lp_wrapper = lp(catalogue_generator_single)
             if context != 'DINUC' and context != 'INDEL':
-                #lp_wrapper(vcf_path, vcf_files, chrom_path, chromosome_TSB_path, project, output_matrix, context, exome, genome, ncbi_chrom, functionFlag, bed, bed_ranges)
-                #lp.print_stats()
                 catalogue_generator_single (vcf_path, vcf_files, chrom_path, chromosome_TSB_path, project, output_matrix, context, exome, genome, ncbi_chrom, functionFlag, bed, bed_ranges, chrom_based)
 
             elif context == 'DINUC':
