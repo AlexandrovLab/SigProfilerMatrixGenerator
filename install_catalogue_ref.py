@@ -49,7 +49,7 @@ def install_chromosomes (genomes, custom):
 			if genome == 'GRCh37' or genome == 'GRCh38': 
 				species = "homo_sapiens"
 				chrom_number = 24
-			elif genome == 'mm10':
+			elif genome == 'mm10' or genome == 'mm9':
 				species = "mus_musculus"
 				chrom_number = 21
 			else:
@@ -79,8 +79,9 @@ def install_chromosomes (genomes, custom):
 					if wget_flag:
 						try:
 							if genome == 'GRCh37':
-								print('yes')
 								os.system("wget -r -l1 -c -nc --no-parent -A '*.dna.chromosome.*' -nd -P " + chromosome_fasta_path + " ftp://ftp.ensembl.org/pub/grch37/update/fasta/homo_sapiens/dna/")
+							elif genome == 'mm9':
+								os.system("wget -r -l1 -c -nc --no-parent -A '*.dna.chromosome.*' -nd -P " + chromosome_fasta_path + " ftp://ftp.ensembl.org/pub/release-67/fasta/mus_musculus/dna/")
 							else:
 								os.system("wget -r -l1 -c -nc --no-parent -A '*.dna.chromosome.*' -nd -P " + chromosome_fasta_path + " ftp://ftp.ensembl.org/pub/release-93/fasta/"+species+"/dna/")
 							os.system("gunzip references/chromosomes/fasta/" + genome + "/*.gz")
@@ -123,7 +124,7 @@ def install_chromosomes_tsb (genomes, custom):
 
 def main ():
 
-	genomes = ['mm10','GRCh37', 'GRCh38' ]
+	genomes = ['mm9', 'mm10','GRCh37', 'GRCh38' ]
 	custom = False
 	parser = argparse.ArgumentParser(description="Provide the necessary arguments to install the reference files.")
 	parser.add_argument("-g", "--genome", nargs='?', help="Optional parameter instructs script to install the custom genome.")
@@ -132,8 +133,6 @@ def main ():
 	if args.genome:
 		genomes = [args.genome]
 
-	if len(genomes) == 1:
-		custom = True
 
 	ref_dir = "references/"
 	chrom_string_dir = ref_dir + "chromosomes/chrom_string/"
@@ -141,9 +140,8 @@ def main ():
 	chrom_tsb_dir = ref_dir + "chromosomes/tsb/"
 	matrix_dir = ref_dir + "matrix/"
 	vcf_dir = ref_dir + "vcf_files/"
-	exome_dir = ref_dir + "chromosomes/exome/"
 	bed_dir = ref_dir + "vcf_files/BED/"
-	new_dirs = [ref_dir, chrom_string_dir, chrom_fasta_dir, chrom_tsb_dir, matrix_dir, vcf_dir, exome_dir, bed_dir]
+	new_dirs = [ref_dir, chrom_string_dir, chrom_fasta_dir, chrom_tsb_dir, matrix_dir, vcf_dir, bed_dir]
 
 	current_dir = os.getcwd()
 	for dirs in new_dirs:
@@ -158,13 +156,16 @@ def main ():
 		if name != ".DS":
 			os.system("cp transcripts_original/"+file +" references/chromosomes/transcripts/" + name[0]+"/")
 
+	if os.path.exists("exome/"):
+		os.system("mv exome/ references/chromosomes/")
+
 	install_chromosomes(genomes, custom)
 	install_chromosomes_tsb (genomes, custom)
 	if os.path.exists("BRCA_example/"):
 		os.system("mv BRCA_example/ references/vcf_files/")
 	if os.path.exists("example_test"):
 		os.system("mv example_test/ references/vcf_files/")
-	print ("Please place your vcf files for each sample into the 'references/vcf_files/[test]/[mutation_type]/' directory. Once you have done that, you can proceed with the catalogue generation.")
+	print ("Please place your vcf files for each sample into the 'references/vcf_files/[test]/[mutation_type]/' directory. Once you have done that, you can proceed with the matrix generation.")
 	print("Installation complete.")
 
 
