@@ -38,6 +38,8 @@ import time
 import logging
 from line_profiler import LineProfiler
 import datetime
+from scipy import stats
+import statsmodels.stats.multitest as sm
 
 ################# Functions and references ###############################################
 def perm(n, seq):
@@ -265,6 +267,7 @@ def catalogue_generator_single (vcf_path, vcf_files, chrom_path, chromosome_TSB_
     if functionFlag:
         chrom_start = None
         matrices = matrix_generator (context, output_matrix, project, samples, bias_sort, mutation_dict, types, exome, mut_types, bed, chrom_start, functionFlag)
+
         return(matrices)
     else:
         if not chrom_based:
@@ -966,6 +969,8 @@ def matrix_generator (context, output_matrix, project, samples, bias_sort, mutat
     mut_count_all = {'96':{}, '192':{}, '1536':{}, '6':{}, '12':{}}
 
 
+    significant_tsb = open(output_matrix + "significantResults_strandBiasTest.txt", 'w')
+
     file_prefix = project + ".SBS" + context
     if exome:
         output_file_matrix = output_matrix + file_prefix + ".exome"
@@ -1035,21 +1040,51 @@ def matrix_generator (context, output_matrix, project, samples, bias_sort, mutat
                     print ('0\t', end='', file=out)
             print(file=out)
 
+        with open (output_matrix + "strandBiasTest_3072.txt", 'w') as out2:
+            print("Sample\tMutationType\tEnrichment[Trans/UnTrans]\tp.value\tFDR_q.value",file=out2)
+            current_tsb = pd.DataFrame.from_dict(mutation_dict)
+            for sample in samples:
+                pvals = []
+                enrichment = []
+                for mut_type in types:
+                    if mut_type[0] == 'T':
+                        if mut_type not in mutation_dict[sample]:
+                            num1 = 0
+                        else:
+                            num1 = current_tsb.loc[mut_type][sample]
+
+                        if 'U:'+mut_type[2:] not in mutation_dict[sample]:
+                            num2 = 0
+                        else:
+                            num2 = current_tsb.loc['U:'+mut_type[2:]][sample]
+
+                        pvals.append(stats.binom_test([num1, num2]))
+
+                        if 'U:'+mut_type[2:] not in mutation_dict[sample] or current_tsb.loc['U:'+mut_type[2:]][sample] == 0:
+                            enrichment.append(0)
+                        else:
+                            enrichment.append(round(num1/num2, 4))
+                qvals = sm.fdrcorrection(pvals)[1]
+                p_index = 0
+                for mut_type in types:
+                    if mut_type[0] == 'T':
+                        print(sample + "\t" + mut_type[2:] + "\t" + str(enrichment[p_index]) + "\t" + str(pvals[p_index]) + "\t" + str(qvals[p_index]), file=out2)
+                        if qvals[p_index] < 0.01:
+                             print(sample + "\t" + mut_type[2:] + "\t" + str(enrichment[p_index]) + "\t" + str(pvals[p_index]) + "\t" + str(qvals[p_index]), file=significant_tsb)
+                    p_index += 1
+  
         if functionFlag:
             os.system("rm " + output_file_matrix) 
             mut_count_all['3072'] = mutation_dict
             return(mut_count_all)
 
-
+    strandBias_test = ['12','192', '3072']
+    strandBias_test = set(strandBias_test)
 
     for cont in contexts:
         types = mut_types_all[cont]
         types = list(set(types))
         mutation_dict = mut_count_all[cont]
-        # if exome:
-        #     output_file_matrix = output_matrix + file_prefix + ".exome.mut" + cont 
-        # else:
-        #     output_file_matrix = output_matrix + file_prefix + ".genome.mut" + cont
         file_prefix = project + ".SBS" + cont
         if exome:
             output_file_matrix = output_matrix + file_prefix + ".exome"
@@ -1071,7 +1106,7 @@ def matrix_generator (context, output_matrix, project, samples, bias_sort, mutat
                 print (sample + '\t', end='', flush=False, file=out)
             print(file=out)
 
-            if cont == '192' or cont == '3072':
+            if cont == '192' or cont == '3072' or cont == '12':
                 try:
                     types = sorted(types, key=lambda val: (bias_sort[val[0]], val[2:]))
                 except:
@@ -1079,6 +1114,8 @@ def matrix_generator (context, output_matrix, project, samples, bias_sort, mutat
 
             # Prints the mutation count for each mutation type across every sample
             for mut_type in types:
+
+
                 print (mut_type + '\t', end='', flush =False, file=out)
                 for sample in samples:
                     if mut_type in mutation_dict[sample].keys():
@@ -1087,9 +1124,30 @@ def matrix_generator (context, output_matrix, project, samples, bias_sort, mutat
                         print ('0\t', end='', file=out)
                 print(file=out)
 
-
-
-
+            if cont in strandBias_test:
+                with open (output_matrix + "strandBiasTest_" + cont + ".txt", 'w') as out2:
+                    print("Sample\tMutationType\tEnrichment[Trans/UnTrans]\tp.value\tFDR_q.value",file=out2)
+                    current_tsb = pd.DataFrame.from_dict(mut_count_all[cont])
+                    for sample in samples:
+                        pvals = []
+                        enrichment = []
+                        for mut_type in types:
+                            if mut_type[0] == 'T':
+                                if cont in strandBias_test:
+                                    pvals.append(stats.binom_test([current_tsb.loc[mut_type][sample], current_tsb.loc['U:'+mut_type[2:]][sample]]))
+                                    if current_tsb.loc['U:'+mut_type[2:]][sample] == 0:
+                                        enrichment.append(0)
+                                    else:
+                                        enrichment.append(round(current_tsb.loc[mut_type][sample]/current_tsb.loc['U:'+mut_type[2:]][sample], 4))
+                        qvals = sm.fdrcorrection(pvals)[1]
+                        p_index = 0
+                        for mut_type in types:
+                            if mut_type[0] == 'T':
+                                print(sample + "\t" + mut_type[2:] + "\t" + str(enrichment[p_index]) + "\t" + str(pvals[p_index]) + "\t" + str(qvals[p_index]), file=out2)
+                                if qvals[p_index] < 0.01:
+                                     print(sample + "\t" + mut_type[2:] + "\t" + str(enrichment[p_index]) + "\t" + str(pvals[p_index]) + "\t" + str(qvals[p_index]), file=significant_tsb)
+                            p_index += 1
+                        
 
 
         # sorts the 96 and 1536 matrices by mutation type
@@ -1102,7 +1160,8 @@ def matrix_generator (context, output_matrix, project, samples, bias_sort, mutat
             os.system(command2)
             os.system("cat " + output_matrix + "a.tmp > " + output_file_matrix)
             os.system("rm " + output_matrix + "a.tmp")
-    
+
+    significant_tsb.close()
 
 def matrix_generator_INDEL (output_matrix, samples, indel_types, indel_dict, project, exome, limited_indel, bed, initial_chrom=None):
     '''
