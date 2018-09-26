@@ -118,8 +118,10 @@ def install_chromosomes_tsb (genomes, custom):
 
 		print("The transcriptional reference data for " + genome + " has been saved.")
 
-
-
+def install_chromosomes_tsb_BED (genomes, custom):
+	for genome in genomes:
+		os.system("python3 scripts/save_chrom_tsb_separate.py -g " + genome)
+		print("The TSB BED files for " + genome + " have been saved.")
 
 
 def main ():
@@ -132,7 +134,7 @@ def main ():
 
 	if args.genome:
 		genomes = [args.genome]
-
+		custom = True
 
 	ref_dir = "references/"
 	chrom_string_dir = ref_dir + "chromosomes/chrom_string/"
@@ -161,10 +163,13 @@ def main ():
 
 	install_chromosomes(genomes, custom)
 	install_chromosomes_tsb (genomes, custom)
+	install_chromosomes_tsb_BED (genomes, custom)
 	if os.path.exists("BRCA_example/"):
 		os.system("mv BRCA_example/ references/vcf_files/")
 	if os.path.exists("example_test"):
 		os.system("mv example_test/ references/vcf_files/")
+	if os.path.exists("context_distributions/"):
+		os.system("mv context_distributions/ references/chromosomes/")
 	print ("Please place your vcf files for each sample into the 'references/vcf_files/[test]/[mutation_type]/' directory. Once you have done that, you can proceed with the matrix generation.")
 	print("Installation complete.")
 
