@@ -8,7 +8,7 @@ import pandas as pd
 import datetime
 import convert_input_to_simple_files as convertIn
 
-def sigProfilerMatrixGeneratorFunc (project, genome, exome=False, indel=False, indel_extended=False, bed_file=None, chrom_based=False):
+def sigProfilerMatrixGeneratorFunc (project, genome, exome=False, indel=False, indel_extended=False, bed_file=None, chrom_based=False, plot=False):
 	'''
 	Allows for the import of the sigProfilerMatrixGenerator.py function. Returns a dictionary
 	with each context serving as the first level of keys. 
@@ -41,6 +41,10 @@ def sigProfilerMatrixGeneratorFunc (project, genome, exome=False, indel=False, i
 	bed_ranges = None
 	indel = indel
 	exome = exome
+	plot = plot
+	if plot:
+		indel = True
+
 	matrices = {'96':None, '1536':None, '192':None, '3072':None, 'DINUC':None, '6':None, '12':None}
 
 	# Adjusts the variables if the context is for INDELs
@@ -178,15 +182,15 @@ def sigProfilerMatrixGeneratorFunc (project, genome, exome=False, indel=False, i
 		# Creates the matrix for each context
 		for context in contexts:
 			if context != 'DINUC' and context != 'INDEL':
-				matrix = matGen.catalogue_generator_single (vcf_path, vcf_files, chrom_path, chromosome_TSB_path, project, output_matrix, context, exome, genome, ncbi_chrom, functionFlag, bed, bed_ranges, chrom_based)
+				matrix = matGen.catalogue_generator_single (vcf_path, vcf_files, chrom_path, chromosome_TSB_path, project, output_matrix, context, exome, genome, ncbi_chrom, functionFlag, bed, bed_ranges, chrom_based, plot)
 				matrices = matrix
 
 			elif context == 'DINUC':
-				matrix = matGen.catalogue_generator_DINUC_single (vcf_path, vcf_files, chrom_path, chromosome_TSB_path, project, output_matrix, exome, genome, ncbi_chrom, functionFlag, bed, bed_ranges, chrom_based)
+				matrix = matGen.catalogue_generator_DINUC_single (vcf_path, vcf_files, chrom_path, chromosome_TSB_path, project, output_matrix, exome, genome, ncbi_chrom, functionFlag, bed, bed_ranges, chrom_based, plot)
 				matrices[context] = matrix
 
 			elif context == 'INDEL':
-				matrix = matGen.catalogue_generator_INDEL_single (vcf_path, vcf_files, chrom_path, project, output_matrix, exome, genome, ncbi_chrom, indel_extended,functionFlag, bed, bed_ranges, chrom_based)
+				matrix = matGen.catalogue_generator_INDEL_single (vcf_path, vcf_files, chrom_path, project, output_matrix, exome, genome, ncbi_chrom, indel_extended,functionFlag, bed, bed_ranges, chrom_based, plot)
 				matrices[context] = matrix
 
 			# Deletes the temporary files and returns the final matrix
