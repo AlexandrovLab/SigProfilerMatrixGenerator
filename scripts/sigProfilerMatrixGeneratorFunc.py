@@ -6,6 +6,7 @@ import sys
 import logging
 import pandas as pd
 import datetime
+import convert_input_to_simple_files as convertIn
 
 def sigProfilerMatrixGeneratorFunc (project, genome, exome=False, indel=False, indel_extended=False, bed_file=None, chrom_based=False):
 	'''
@@ -118,23 +119,54 @@ def sigProfilerMatrixGeneratorFunc (project, genome, exome=False, indel=False, i
 
 		if file_extension == 'genome':
 			if i ==1:
-				os.system("bash convert_txt_files_to_simple_files.sh " + project + " " + vcf_path + "INDEL/")
+				convertIn.convertTxt(project, vcf_path + "INDEL/", genome, 'INDEL')
+				#os.system("bash convert_txt_files_to_simple_files.sh " + project + " " + vcf_path + "INDEL/")
 			else:
-				os.system("bash convert_txt_files_to_simple_files.sh " + project + " " + vcf_path + "SNV/")
+				convertIn.convertTxt(project, vcf_path + "SNV/", genome, 'SNV')
+				#os.system("bash convert_txt_files_to_simple_files.sh " + project + " " + vcf_path + "SNV/")
 		else:
 			if i == 1:
-				os.system("bash convert_" + file_extension + "_files_to_simple_files.sh " + project + " " + vcf_path + "INDEL/")
+                if file_extension == 'txt':
+                    convertIn.convertTxt(project, vcf_path + "INDEL/",  genome, 'INDEL')
+                elif file_extension == 'vcf':
+                    convertIn.convertVCF(project, vcf_path + "INDEL/", genome, 'INDEL')
+                elif file_extension == 'maf':
+                    convertIn.convertMAF(project, vcf_path + "INDEL/", genome, 'INDEL')
+                else:
+                    print("File format not supported")
+
+				#os.system("bash convert_" + file_extension + "_files_to_simple_files.sh " + project + " " + vcf_path + "INDEL/")
 			else:
-				os.system("bash convert_" + file_extension + "_files_to_simple_files.sh " + project + " " + vcf_path +"SNV/")
+                if file_extension == 'txt':
+                    convertIn.convertTxt(project, vcf_path + "SNV/", genome, 'SNV')
+                elif file_extension == 'vcf':
+                    convertIn.convertVCF(project, vcf_path + "SNV/", genome, 'SNV')
+                elif file_extension == 'maf':
+                    convertIn.convertMAF(project, vcf_path + "SNV/", genome, 'SNV')
+                else:
+                    print("File format not supported")
+
+				#os.system("bash convert_" + file_extension + "_files_to_simple_files.sh " + project + " " + vcf_path +"SNV/")
 
 		vcf_files = os.listdir(ref_dir + '/references/vcf_files/single/')
 		vcf_path = ref_dir + '/references/vcf_files/single/'
 
+        sort_file = vcf_files[0]
+        with open(vcf_path + sort_file) as f:
+            lines = [line.strip().split() for line in f]
+
+        output = open(vcf_path + sort_file, 'w')
+
+        for line in sorted(lines, key = lambda x: (['X','Y','1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22'].index(x[5]), x[1], x[6])):
+            print('\t'.join(line), file=output)
+
+        output.close()
+
 		# Include some kind of a flag for the INDEL option 
-		sort_command_initial = "sort -t $'\t' -k 6,6n -k 6,6 -k 2,2 -k 7,7n "
-		sort_command_initial_2 = " -o "
-		sort_file = vcf_files[0]
-		os.system(sort_command_initial + vcf_path + sort_file + sort_command_initial_2 + vcf_path + sort_file)
+		# sort_command_initial = "sort -t $'\t' -k 6,6n -k 6,6 -k 2,2 -k 7,7n "
+		# sort_command_initial_2 = " -o "
+		# sort_file = vcf_files[0]
+		# os.system(sort_command_initial + vcf_path + sort_file + sort_command_initial_2 + vcf_path + sort_file)
 
 		print("Sorting complete...\nDetermining mutation type for each variant, one chromosome at a time. Starting catalogue generation...")
 

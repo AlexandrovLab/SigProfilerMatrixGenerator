@@ -32,6 +32,10 @@ import sys
 import re
 import subprocess
 import argparse
+import time
+from scipy import spatial
+import pandas as pd
+import shutil
 
 def install_chromosomes (genomes, custom):
 	if custom:
@@ -123,6 +127,50 @@ def install_chromosomes_tsb_BED (genomes, custom):
 		os.system("python3 scripts/save_chrom_tsb_separate.py -g " + genome)
 		print("The TSB BED files for " + genome + " have been saved.")
 
+def benchmark (ref_dir):
+	if os.path.exists("scripts/Benchmark/BRCA_bench/"):
+		shutil.move("scripts/Benchmark/BRCA_bench/", "references/vcf_files/")
+	start_time = time.time()
+	os.system("python3 scripts/sigProfilerMatrixGenerator_withBED_SNV_INDEL_together_faster_fdr.py -g GRCh37 -p BRCA_bench")
+	end_time = time.time()
+
+	original_matrix_96 = "scripts/Benchmark/BRCA_bench_orig_96.txt"
+	original_matrix_3072 = "scripts/Benchmark/BRCA_bench_orig_3072.txt"
+	new_matrix_96 = ref_dir + "matrix/BRCA_bench/BRCA_bench.SBS96.all"
+	new_matrix_3072 = ref_dir + "matrix/BRCA_bench/BRCA_bench.SBS3072.all"
+
+	genome = "GRCh37"
+
+	############# Cosine Test ###################################################
+	data_orig = pd.read_csv(original_matrix_96, sep='\t', header=0)
+	data_new = pd.read_csv(new_matrix_96, sep='\t', header=0)
+	count = 0
+	range_count = min(len(data_orig.loc[0]), len(data_new.loc[0]))
+	for i in range (1, range_count, 1):
+	    orig_list = list(data_orig[data_orig.columns[i]])
+	    new_list = list(data_new[data_new.columns[i]])
+	    cosine_result = (1-spatial.distance.cosine(orig_list,new_list))
+	    if cosine_result != 1:
+	        count += 1
+	if count != 0:
+	    print("There seems to be some errors in the newly generated matrix. The installation may not have been successful.")
+
+
+	data_orig = pd.read_csv(original_matrix_3072, sep='\t', header=0)
+	data_new = pd.read_csv(new_matrix_3072, sep='\t', header=0)
+	count = 0
+	range_count = min(len(data_orig.loc[0]), len(data_new.loc[0]))
+	for i in range (1, range_count, 1):
+	    orig_list = data_orig[data_orig.columns[i]]
+	    new_list = data_new[data_new.columns[i]]
+	    cosine_result = (1-spatial.distance.cosine(orig_list,new_list))
+	    if cosine_result >= 0.85:
+	        count += 1
+	if count != 0:
+	    print("There seems to be some errors in the newly generated matrix. The installation may not have been successful.")
+
+	end_time = time.time()
+	print("Installation was succesful.\nSigProfilerMatrixGenerator took " + str(end_time-start_time) + " seconds to complete.")
 
 def main ():
 
@@ -170,6 +218,9 @@ def main ():
 		os.system("mv example_test/ references/vcf_files/")
 	if os.path.exists("context_distributions/"):
 		os.system("mv context_distributions/ references/chromosomes/")
+
+	print("All reference files have been created.\nVerifying and benchmarking installation now...")
+	benchmark(ref_dir)
 	print ("Please place your vcf files for each sample into the 'references/vcf_files/[test]/[mutation_type]/' directory. Once you have done that, you can proceed with the matrix generation.")
 	print("Installation complete.")
 

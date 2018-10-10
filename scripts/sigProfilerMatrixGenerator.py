@@ -36,10 +36,10 @@ import pandas as pd
 from itertools import chain
 import time
 import logging
-from line_profiler import LineProfiler
 import datetime
 from scipy import stats
 import statsmodels.stats.multitest as sm
+import convert_input_to_simple_files as convertIn
 
 ################# Functions and references ###############################################
 def perm(n, seq):
@@ -258,10 +258,19 @@ def catalogue_generator_single (vcf_path, vcf_files, chrom_path, chromosome_TSB_
 
     if exome:
         exome_file.close()
-        os.system("sort -t $'\t' -k 2,2n -k 2,2 -k 3,3n " + exome_temp_file + " -o " + exome_temp_file)
-        print("Beginning exome filtering. This may take a few moments...")
-        mutation_dict, samples = exome_check (genome, exome_temp_file)
-        os.system("rm " + exome_temp_file)
+
+        sort_file = exome_temp_file
+        with open(sort_file) as f:
+            lines = [line.strip().split() for line in f]
+        output = open(vcf_path + sort_file, 'w')
+        for line in sorted(lines, key = lambda x: (['X','Y','1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22'].index(x[1]), int(x[2]))):
+            print('\t'.join(line), file=output)
+        output.close()
+
+        # os.system("sort -t $'\t' -k 2,2n -k 2,2 -k 3,3n " + exome_temp_file + " -o " + exome_temp_file)
+        # print("Beginning exome filtering. This may take a few moments...")
+        # mutation_dict, samples = exome_check (genome, exome_temp_file)
+        # os.system("rm " + exome_temp_file)
 
     # Calls the function to generate the final matrix
     if functionFlag:
@@ -416,10 +425,19 @@ def catalogue_generator_DINUC_single (vcf_path, vcf_files, chrom_path, chromosom
 
     if exome:
         exome_file.close()
-        os.system("sort -t $'\t' -k 2,2n -k 2,2 -k 3,3n " + exome_temp_file + " -o " + exome_temp_file)
-        print("Beginning exome filtering. This may take a few moments...")
-        mutation_dict, samples = exome_check (genome, exome_temp_file)
-        os.system("rm " + exome_temp_file)
+
+        sort_file = exome_temp_file
+        with open(sort_file) as f:
+            lines = [line.strip().split() for line in f]
+        output = open(vcf_path + sort_file, 'w')
+        for line in sorted(lines, key = lambda x: (['X','Y','1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22'].index(x[1]), int(x[2]))):
+            print('\t'.join(line), file=output)
+        output.close()
+
+        # os.system("sort -t $'\t' -k 2,2n -k 2,2 -k 3,3n " + exome_temp_file + " -o " + exome_temp_file)
+        # print("Beginning exome filtering. This may take a few moments...")
+        # mutation_dict, samples = exome_check (genome, exome_temp_file)
+        # os.system("rm " + exome_temp_file)
 
     # Calls the function to generate the final mutational matrix
     if functionFlag:
@@ -788,10 +806,18 @@ def catalogue_generator_INDEL_single (vcf_path, vcf_files, chrom_path, project, 
 
     if exome:
         exome_file.close()
-        os.system("sort -t $'\t' -k 2,2n -k 2,2 -k 3,3n " + exome_temp_file + " -o " + exome_temp_file)
-        print("Beginning exome filtering. This may take a few moments...")
-        mutation_dict, samples = exome_check (genome, exome_temp_file)
-        os.system("rm " + exome_temp_file)
+        sort_file = exome_temp_file
+        with open(sort_file) as f:
+            lines = [line.strip().split() for line in f]
+        output = open(vcf_path + sort_file, 'w')
+        for line in sorted(lines, key = lambda x: (['X','Y','1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22'].index(x[1]), int(x[2]))):
+            print('\t'.join(line), file=output)
+        output.close()
+
+        # os.system("sort -t $'\t' -k 2,2n -k 2,2 -k 3,3n " + exome_temp_file + " -o " + exome_temp_file)
+        # print("Beginning exome filtering. This may take a few moments...")
+        # mutation_dict, samples = exome_check (genome, exome_temp_file)
+        # os.system("rm " + exome_temp_file)
 
 
     # Calls the function to generate the final mutational matrix
@@ -1040,38 +1066,38 @@ def matrix_generator (context, output_matrix, project, samples, bias_sort, mutat
                     print ('0\t', end='', file=out)
             print(file=out)
 
-        with open (output_matrix + "strandBiasTest_3072.txt", 'w') as out2:
-            print("Sample\tMutationType\tEnrichment[Trans/UnTrans]\tp.value\tFDR_q.value",file=out2)
-            current_tsb = pd.DataFrame.from_dict(mutation_dict)
-            for sample in samples:
-                pvals = []
-                enrichment = []
-                for mut_type in types:
-                    if mut_type[0] == 'T':
-                        if mut_type not in mutation_dict[sample]:
-                            num1 = 0
-                        else:
-                            num1 = current_tsb.loc[mut_type][sample]
+        # with open (output_matrix + "strandBiasTest_3072.txt", 'w') as out2:
+        #     print("Sample\tMutationType\tEnrichment[Trans/UnTrans]\tp.value\tFDR_q.value",file=out2)
+        #     current_tsb = pd.DataFrame.from_dict(mutation_dict)
+        #     for sample in samples:
+        #         pvals = []
+        #         enrichment = []
+        #         for mut_type in types:
+        #             if mut_type[0] == 'T':
+        #                 if mut_type not in mutation_dict[sample]:
+        #                     num1 = 0
+        #                 else:
+        #                     num1 = current_tsb.loc[mut_type][sample]
 
-                        if 'U:'+mut_type[2:] not in mutation_dict[sample]:
-                            num2 = 0
-                        else:
-                            num2 = current_tsb.loc['U:'+mut_type[2:]][sample]
+        #                 if 'U:'+mut_type[2:] not in mutation_dict[sample]:
+        #                     num2 = 0
+        #                 else:
+        #                     num2 = current_tsb.loc['U:'+mut_type[2:]][sample]
 
-                        pvals.append(stats.binom_test([num1, num2]))
+        #                 pvals.append(stats.binom_test([num1, num2]))
 
-                        if 'U:'+mut_type[2:] not in mutation_dict[sample] or current_tsb.loc['U:'+mut_type[2:]][sample] == 0:
-                            enrichment.append(0)
-                        else:
-                            enrichment.append(round(num1/num2, 4))
-                qvals = sm.fdrcorrection(pvals)[1]
-                p_index = 0
-                for mut_type in types:
-                    if mut_type[0] == 'T':
-                        print(sample + "\t" + mut_type[2:] + "\t" + str(enrichment[p_index]) + "\t" + str(pvals[p_index]) + "\t" + str(qvals[p_index]), file=out2)
-                        if qvals[p_index] < 0.01:
-                             print(sample + "\t" + mut_type[2:] + "\t" + str(enrichment[p_index]) + "\t" + str(pvals[p_index]) + "\t" + str(qvals[p_index]), file=significant_tsb)
-                    p_index += 1
+        #                 if 'U:'+mut_type[2:] not in mutation_dict[sample] or current_tsb.loc['U:'+mut_type[2:]][sample] == 0:
+        #                     enrichment.append(0)
+        #                 else:
+        #                     enrichment.append(round(num1/num2, 4))
+        #         qvals = sm.fdrcorrection(pvals)[1]
+        #         p_index = 0
+        #         for mut_type in types:
+        #             if mut_type[0] == 'T':
+        #                 print(sample + "\t" + mut_type[2:] + "\t" + str(enrichment[p_index]) + "\t" + str(pvals[p_index]) + "\t" + str(qvals[p_index]), file=out2)
+        #                 if qvals[p_index] < 0.01:
+        #                      print(sample + "\t" + mut_type[2:] + "\t" + str(enrichment[p_index]) + "\t" + str(pvals[p_index]) + "\t" + str(qvals[p_index]), file=significant_tsb)
+        #             p_index += 1
   
         if functionFlag:
             os.system("rm " + output_file_matrix) 
@@ -1124,29 +1150,29 @@ def matrix_generator (context, output_matrix, project, samples, bias_sort, mutat
                         print ('0\t', end='', file=out)
                 print(file=out)
 
-            if cont in strandBias_test:
-                with open (output_matrix + "strandBiasTest_" + cont + ".txt", 'w') as out2:
-                    print("Sample\tMutationType\tEnrichment[Trans/UnTrans]\tp.value\tFDR_q.value",file=out2)
-                    current_tsb = pd.DataFrame.from_dict(mut_count_all[cont])
-                    for sample in samples:
-                        pvals = []
-                        enrichment = []
-                        for mut_type in types:
-                            if mut_type[0] == 'T':
-                                if cont in strandBias_test:
-                                    pvals.append(stats.binom_test([current_tsb.loc[mut_type][sample], current_tsb.loc['U:'+mut_type[2:]][sample]]))
-                                    if current_tsb.loc['U:'+mut_type[2:]][sample] == 0:
-                                        enrichment.append(0)
-                                    else:
-                                        enrichment.append(round(current_tsb.loc[mut_type][sample]/current_tsb.loc['U:'+mut_type[2:]][sample], 4))
-                        qvals = sm.fdrcorrection(pvals)[1]
-                        p_index = 0
-                        for mut_type in types:
-                            if mut_type[0] == 'T':
-                                print(sample + "\t" + mut_type[2:] + "\t" + str(enrichment[p_index]) + "\t" + str(pvals[p_index]) + "\t" + str(qvals[p_index]), file=out2)
-                                if qvals[p_index] < 0.01:
-                                     print(sample + "\t" + mut_type[2:] + "\t" + str(enrichment[p_index]) + "\t" + str(pvals[p_index]) + "\t" + str(qvals[p_index]), file=significant_tsb)
-                            p_index += 1
+            # if cont in strandBias_test:
+            #     with open (output_matrix + "strandBiasTest_" + cont + ".txt", 'w') as out2:
+            #         print("Sample\tMutationType\tEnrichment[Trans/UnTrans]\tp.value\tFDR_q.value",file=out2)
+            #         current_tsb = pd.DataFrame.from_dict(mut_count_all[cont])
+            #         for sample in samples:
+            #             pvals = []
+            #             enrichment = []
+            #             for mut_type in types:
+            #                 if mut_type[0] == 'T':
+            #                     if cont in strandBias_test:
+            #                         pvals.append(stats.binom_test([current_tsb.loc[mut_type][sample], current_tsb.loc['U:'+mut_type[2:]][sample]]))
+            #                         if current_tsb.loc['U:'+mut_type[2:]][sample] == 0:
+            #                             enrichment.append(0)
+            #                         else:
+            #                             enrichment.append(round(current_tsb.loc[mut_type][sample]/current_tsb.loc['U:'+mut_type[2:]][sample], 4))
+            #             qvals = sm.fdrcorrection(pvals)[1]
+            #             p_index = 0
+            #             for mut_type in types:
+            #                 if mut_type[0] == 'T':
+            #                     print(sample + "\t" + mut_type[2:] + "\t" + str(enrichment[p_index]) + "\t" + str(pvals[p_index]) + "\t" + str(qvals[p_index]), file=out2)
+            #                     if qvals[p_index] < 0.01:
+            #                          print(sample + "\t" + mut_type[2:] + "\t" + str(enrichment[p_index]) + "\t" + str(pvals[p_index]) + "\t" + str(qvals[p_index]), file=significant_tsb)
+            #                 p_index += 1
                         
 
 
@@ -1184,7 +1210,7 @@ def matrix_generator_INDEL (output_matrix, samples, indel_types, indel_dict, pro
         Write the final mutational matrix for INDELS
 
     '''
-
+    print("ues")
     file_prefix = project + ".DBS94"
     if exome:
         output_file_matrix = output_matrix + file_prefix + ".exome"
@@ -1336,7 +1362,7 @@ def main():
     time_stamp = datetime.date.today()
     output_logs = ref_dir + "/logs/"
     if not os.path.exists(output_logs):
-        os.system("mkdir " + output_logs)
+        os.mkdir(output_logs)
     error_file = output_logs + 'SigProfilerMatrixGenerator_' + project + "_" + genome + "_" + str(time_stamp) + ".err"
     log_file = output_logs + 'SigProfilerMatrixGenerator_' + project + "_" + genome + "_" + str(time_stamp) + ".out"
     if os.path.exists(error_file):
@@ -1398,16 +1424,35 @@ def main():
         
         if file_extension == 'genome':
             if i == 1:
-                os.system("bash convert_txt_files_to_simple_files.sh " + project + " " + vcf_path + "INDEL/")
+                convertIn.convertTxt(project, vcf_path + "INDEL/", genome, 'INDEL')
+                #os.system("bash convert_txt_files_to_simple_files.sh " + project + " " + vcf_path + "INDEL/")
             else:
-                os.system("bash convert_txt_files_to_simple_files.sh " + project + " " + vcf_path + "SNV/")
+                convertIn.convertTxt(project, vcf_path + "SNV/", genome, 'SNV')
+                #os.system("bash convert_txt_files_to_simple_files.sh " + project + " " + vcf_path + "SNV/")
         else:
             if i == 1:
-                os.system("bash convert_" + file_extension + "_files_to_simple_files.sh " + project + " " + vcf_path + "INDEL/")
+                if file_extension == 'txt':
+                    convertIn.convertTxt(project, vcf_path + "INDEL/",  genome, 'INDEL')
+                elif file_extension == 'vcf':
+                    convertIn.convertVCF(project, vcf_path + "INDEL/", genome, 'INDEL')
+                elif file_extension == 'maf':
+                    convertIn.convertMAF(project, vcf_path + "INDEL/", genome, 'INDEL')
+                else:
+                    print("File format not supported")
+            #    os.system("bash convert_" + file_extension + "_files_to_simple_files.sh " + project + " " + vcf_path + "INDEL/")
             else:
-                os.system("bash convert_" + file_extension + "_files_to_simple_files.sh " + project + " " + vcf_path +"SNV/")
+                if file_extension == 'txt':
+                    convertIn.convertTxt(project, vcf_path + "SNV/", genome, 'SNV')
+                elif file_extension == 'vcf':
+                    convertIn.convertVCF(project, vcf_path + "SNV/", genome, 'SNV')
+                elif file_extension == 'maf':
+                    convertIn.convertMAF(project, vcf_path + "SNV/", genome, 'SNV')
+                else:
+                    print("File format not supported")
+                #os.system("bash convert_" + file_extension + "_files_to_simple_files.sh " + project + " " + vcf_path +"SNV/")
 
 
+                
         vcf_files = os.listdir(ref_dir + '/references/vcf_files/single/')
         vcf_path = ref_dir + '/references/vcf_files/single/'
 
