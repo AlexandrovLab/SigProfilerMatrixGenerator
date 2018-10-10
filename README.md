@@ -163,6 +163,8 @@ conda install -c anaconda statsmodels
      
 -ch or --chromosome	-> optional: Creates a single matrix for each chromosome.
 
+-pl or --plot -> optional: Creates the sample plots for the 96, 192, DINUC, and INDEL contexts.
+
 **FOLDER STRUCTURE**
 
 The base framework consists of a *scripts* folder, a *transcripts_original* folder, an *exome/* folder, a *BRCA_example*  folder, an *example_test* folder, the install_catalogue_ref.py script, and this README file. The scripts folder contains all of the python scripts necessary to generate the reference files for the matrix generation as well as the sigProfilerMatrixGenerator.py script. The transcripts_original folder contains all protein-coding transcripts for each reference genome that is currently supported. These are necessary for generating the transcriptional strand bias matrices. The exome folder contains the exome BED files for the supported genomes. The BRCA_example folder contains an example simple text file format (see EXAMPLE). The example_test folder contains 10 example vcf files. 

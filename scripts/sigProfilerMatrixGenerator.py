@@ -40,6 +40,7 @@ import datetime
 from scipy import stats
 import statsmodels.stats.multitest as sm
 import convert_input_to_simple_files as convertIn
+import sigProfilerPlotting as sigPlt
 
 ################# Functions and references ###############################################
 def perm(n, seq):
@@ -70,7 +71,7 @@ def BED_filtering (bed_file_path):
 
     return(ranges_final)
 
-def catalogue_generator_single (vcf_path, vcf_files, chrom_path, chromosome_TSB_path, project, output_matrix, context, exome, genome, ncbi_chrom, functionFlag, bed, bed_ranges, chrom_based):
+def catalogue_generator_single (vcf_path, vcf_files, chrom_path, chromosome_TSB_path, project, output_matrix, context, exome, genome, ncbi_chrom, functionFlag, bed, bed_ranges, chrom_based, plot):
     '''
     Generates the mutational matrix for 96, 1536, 192, and 3072 context using a single vcf file with all samples of interest.
 
@@ -275,15 +276,17 @@ def catalogue_generator_single (vcf_path, vcf_files, chrom_path, chromosome_TSB_
     # Calls the function to generate the final matrix
     if functionFlag:
         chrom_start = None
-        matrices = matrix_generator (context, output_matrix, project, samples, bias_sort, mutation_dict, types, exome, mut_types, bed, chrom_start, functionFlag)
+        chrom_start=None
+        matrices = matrix_generator (context, output_matrix, project, samples, bias_sort, mutation_dict, types, exome, mut_types, bed, chrom_start, functionFlag, plot)
 
         return(matrices)
     else:
         if not chrom_based:
-            matrix_generator (context, output_matrix, project, samples, bias_sort, mutation_dict, types, exome, mut_types, bed)
+            chrom_start=None
+            matrix_generator (context, output_matrix, project, samples, bias_sort, mutation_dict, types, exome, mut_types, bed, chrom_start, functionFlag, plot)
 
 
-def catalogue_generator_DINUC_single (vcf_path, vcf_files, chrom_path, chromosome_TSB_path, project, output_matrix, exome, genome, ncbi_chrom, functionFlag, bed, bed_ranges, chrom_based):
+def catalogue_generator_DINUC_single (vcf_path, vcf_files, chrom_path, chromosome_TSB_path, project, output_matrix, exome, genome, ncbi_chrom, functionFlag, bed, bed_ranges, chrom_based, plot):
     '''
     Generates the mutational matrix for the dinucleotide context.
 
@@ -388,7 +391,7 @@ def catalogue_generator_DINUC_single (vcf_path, vcf_files, chrom_path, chromosom
                     if chrom != chrom_start:
                         logging.info("Chromosome " + chrom_start + " done")
                         if chrom_based:
-                            matrix_generator_DINUC (output_matrix, samples, mutation_types, dinucs, project, exome, bed, chrom_start)
+                            matrix_generator_DINUC (output_matrix, samples, mutation_types, dinucs, project, exome, bed, chrom_start, plot)
                             dinucs = {}
                         chrom_start = chrom
                         
@@ -419,7 +422,7 @@ def catalogue_generator_DINUC_single (vcf_path, vcf_files, chrom_path, chromosom
 
     logging.info("Chromosome " + chrom_start + " done")
     if chrom_based:
-        matrix_generator_DINUC (output_matrix, samples, mutation_types, dinucs, project, exome, bed, chrom_start)
+        matrix_generator_DINUC (output_matrix, samples, mutation_types, dinucs, project, exome, bed, chrom_start, plot)
         dinucs = {}
     #print ("Chromosome " + chrom_start + " done")
 
@@ -444,13 +447,14 @@ def catalogue_generator_DINUC_single (vcf_path, vcf_files, chrom_path, chromosom
         return(pd.DataFrame.from_dict(dinucs))
     else:
         if not chrom_based:
-            matrix_generator_DINUC (output_matrix, samples, mutation_types, dinucs, project, exome, bed)
+            chrom_start=None
+            matrix_generator_DINUC (output_matrix, samples, mutation_types, dinucs, project, exome, bed, chrom_start, plot)
         
 
         
     
 
-def catalogue_generator_INDEL_single (vcf_path, vcf_files, chrom_path, project, output_matrix, exome, genome, ncbi_chrom, limited_indel, functionFlag, bed, bed_ranges, chrom_based):
+def catalogue_generator_INDEL_single (vcf_path, vcf_files, chrom_path, project, output_matrix, exome, genome, ncbi_chrom, limited_indel, functionFlag, bed, bed_ranges, chrom_based, plot):
     '''
     Generates the mutational matrix for the INDEL context.
 
@@ -802,7 +806,7 @@ def catalogue_generator_INDEL_single (vcf_path, vcf_files, chrom_path, project, 
     logging.info("Non-matching mutations: " + str(non_matching))
     print(non_matching)
     if chrom_based:
-        matrix_generator_INDEL(output_matrix, samples, indel_types, indel_dict, project, exome, limited_indel, bed, initial_chrom)
+        matrix_generator_INDEL(output_matrix, samples, indel_types, indel_dict, project, exome, limited_indel, bed, initial_chrom, plot)
 
     if exome:
         exome_file.close()
@@ -825,7 +829,8 @@ def catalogue_generator_INDEL_single (vcf_path, vcf_files, chrom_path, project, 
         return(pd.DataFrame.from_dict(indel_dict))
     else:
         if not chrom_based:
-            matrix_generator_INDEL(output_matrix, samples, indel_types, indel_dict, project, exome, limited_indel, bed)
+            initial_chrom=None
+            matrix_generator_INDEL(output_matrix, samples, indel_types, indel_dict, project, exome, limited_indel, bed, initial_chrom, plot)
 
 def exome_check (genome, exome_temp_file):
     '''
@@ -963,7 +968,7 @@ def exome_check (genome, exome_temp_file):
 
 
 
-def matrix_generator (context, output_matrix, project, samples, bias_sort, mutation_dict, types, exome, mut_types, bed, chrom_start=None, functionFlag=False):
+def matrix_generator (context, output_matrix, project, samples, bias_sort, mutation_dict, types, exome, mut_types, bed, chrom_start=None, functionFlag=False, plot=False):
     '''
     Writes the final mutational matrix given a dictionary of samples, mutation types, and counts
 
@@ -989,6 +994,8 @@ def matrix_generator (context, output_matrix, project, samples, bias_sort, mutat
         Write the final mutational matrix for 96, 192, 1536, 3072 contexts
 
     '''
+    current_dir = os.getcwd()
+    ref_dir = re.sub('\/scripts$', '', current_dir)
 
     contexts = ['96', '192', '1536', '6', '12']
     mut_types_all = {'96':[], '192':[], '1536':[], '6':[], '12':[]}
@@ -1187,9 +1194,19 @@ def matrix_generator (context, output_matrix, project, samples, bias_sort, mutat
             os.system("cat " + output_matrix + "a.tmp > " + output_file_matrix)
             os.system("rm " + output_matrix + "a.tmp")
 
+        if plot:
+            output_path = ref_dir + "/plots/" + project + "/"
+            if not os.path.exists(output_path):
+                os.mkdirs(output_path)
+            if cont == '96':
+                sigPlt.plot96(output_file_matrix, output_path, False, project, False)
+            elif cont == '192':
+                sigPlt.plot192(output_file_matrix, output_path, False, project, False)
+
+
     significant_tsb.close()
 
-def matrix_generator_INDEL (output_matrix, samples, indel_types, indel_dict, project, exome, limited_indel, bed, initial_chrom=None):
+def matrix_generator_INDEL (output_matrix, samples, indel_types, indel_dict, project, exome, limited_indel, bed, initial_chrom=None, plot=False):
     '''
     Writes the final mutational matrix for INDELS given a dictionary of samples, INDEL types, and counts
 
@@ -1210,7 +1227,9 @@ def matrix_generator_INDEL (output_matrix, samples, indel_types, indel_dict, pro
         Write the final mutational matrix for INDELS
 
     '''
-    print("ues")
+    current_dir = os.getcwd()
+    ref_dir = re.sub('\/scripts$', '', current_dir)
+
     file_prefix = project + ".DBS94"
     if exome:
         output_file_matrix = output_matrix + file_prefix + ".exome"
@@ -1243,8 +1262,11 @@ def matrix_generator_INDEL (output_matrix, samples, indel_types, indel_dict, pro
                     print ('0\t', end='', file=out)
             print(file=out)
 
+    if plot:
+        output_path = ref_dir + "/plots/" + project + "/"
+        sigPlt.plotINDEL(output_file_matrix, output_path, False, project, False)
 
-def matrix_generator_DINUC (output_matrix, samples, mutation_types, dinucs, project, exome, bed, chrom_start=None):
+def matrix_generator_DINUC (output_matrix, samples, mutation_types, dinucs, project, exome, bed, chrom_start=None, plot=False):
     '''
     Writes the final mutational matrix for INDELS given a dictionary of samples, INDEL types, and counts
 
@@ -1265,6 +1287,8 @@ def matrix_generator_DINUC (output_matrix, samples, mutation_types, dinucs, proj
         Write the final mutational matrix for DINUCs
 
     '''
+    current_dir = os.getcwd()
+    ref_dir = re.sub('\/scripts$', '', current_dir)
 
     file_prefix = project + ".DBS78"
     if exome:
@@ -1299,6 +1323,9 @@ def matrix_generator_DINUC (output_matrix, samples, mutation_types, dinucs, proj
             print(file=out)
     
 
+    if plot:
+        output_path = ref_dir + "/plots/" + project + "/"
+        sigPlt.plotDINUC(output_file_matrix, output_path, False, project, False)
 
 def main():
     start = time.time()
@@ -1320,6 +1347,7 @@ def main():
     bed_file = None
     bed_ranges = None
     chrom_based = False
+    plot = False
     matrix_suffix = ''
 
     parser = argparse.ArgumentParser(description="Provide the necessary arguments to create the desired catalogue.")
@@ -1330,6 +1358,7 @@ def main():
     parser.add_argument( "-ie", "--extended_indel", help="Optional parameter instructs script to create the catalogue for extended INDELs", action='store_true')
     parser.add_argument("-b", "--bed", nargs='?', help="Optional parameter instructs script to simulate on a given set of ranges (ex: exome). Whole genome context by default")
     parser.add_argument("-ch", "--chromosome", help="Optional parameter instructs script to generate the matrices per chromoosome", action='store_true')
+    parser.add_argument("-pl", "--plot", help="Optional parameter instructs script to generate the plots for 96, 192, INDEL, and DINUC contexts", action='store_true')
 
     args=parser.parse_args()
     project = args.project
@@ -1352,6 +1381,10 @@ def main():
     if args.chromosome:
         chrom_based = True
 
+    if args.plot:
+        limited_indel = True
+        indel = True
+        plot = True
 
     # Organizes all of the reference directories for later reference:
     current_dir = os.getcwd()
@@ -1410,8 +1443,6 @@ def main():
         vcf_path = ref_dir + '/references/vcf_files/' + project + "/"
         file_name = vcf_files2[i][0].split(".")
         file_extension = file_name[-1]
-
-
 
 
         output_path = ref_dir + "/references/vcf_files/single/"
@@ -1476,13 +1507,14 @@ def main():
 
         for context in contexts:
             if context != 'DINUC' and context != 'INDEL':
-                catalogue_generator_single (vcf_path, vcf_files, chrom_path, chromosome_TSB_path, project, output_matrix, context, exome, genome, ncbi_chrom, functionFlag, bed, bed_ranges, chrom_based)
+                catalogue_generator_single (vcf_path, vcf_files, chrom_path, chromosome_TSB_path, project, output_matrix, context, exome, genome, ncbi_chrom, functionFlag, bed, bed_ranges, chrom_based, plot)
 
             elif context == 'DINUC':
-                catalogue_generator_DINUC_single (vcf_path, vcf_files, chrom_path, chromosome_TSB_path, project, output_matrix, exome, genome, ncbi_chrom, functionFlag, bed, bed_ranges, chrom_based)
+                catalogue_generator_DINUC_single (vcf_path, vcf_files, chrom_path, chromosome_TSB_path, project, output_matrix, exome, genome, ncbi_chrom, functionFlag, bed, bed_ranges, chrom_based, plot)
 
             elif context == 'INDEL':
-                catalogue_generator_INDEL_single (vcf_path, vcf_files, chrom_path, project, output_matrix, exome, genome, ncbi_chrom, limited_indel, functionFlag, bed, bed_ranges, chrom_based)
+                print("yes start1")
+                catalogue_generator_INDEL_single (vcf_path, vcf_files, chrom_path, project, output_matrix, exome, genome, ncbi_chrom, limited_indel, functionFlag, bed, bed_ranges, chrom_based, plot)
 
             logging.info("Catalogue for " + context + " context is complete.")
             print("Catalogue for " + context + " context is complete.")
@@ -1491,6 +1523,7 @@ def main():
     end = time.time()
     logging.info("Job took " + str(end-start) + " seconds.")
     print("Job took ",str(end-start), " seconds.")
+
 
 
 if __name__ == '__main__':
