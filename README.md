@@ -33,6 +33,115 @@ This section will guide you through the minimum steps required to create mutatio
 7.	The final matrices and the strand bias test results will be placed within the *references/matrix/[project]/* folder. By default, the script will generate the matrices for 6, 12, 96, 192, 1536, 3072, and DINUC context. The strand bias test results are generated for the 12, 192, and 3072 context.
 8. Final log files will be placed within the *logs/* folder.
 
+**INSTALLING WITH CONDA**
+
+-This alternate method was adapted from Andreas Gruber:
+
+# Installation using Conda
+
+"Conda" is a cross-platform, open source package manager that can be used to install different versions of software packages and libraries.
+
+
+## Installing Conda
+
+Install the appropriate version of miniconda:
+
+Linux:
+
+```
+wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh
+```
+
+Mac:
+
+```
+wget https://repo.continuum.io/miniconda/Miniconda3-latest-MacOSX-x86_64.sh
+```
+
+Windows:
+
+```
+wget https://repo.continuum.io/miniconda/Miniconda3-latest-Windows-x86_64.exe
+```
+
+**2. Install 'miniconda (3)'**
+```
+bash Miniconda3-latest-Linux-x86_64.sh
+```
+
+**3. Start a new terminal or simply source your .bashrc**
+```
+source ~/.bashrc
+```
+
+**4. Test wheather you have conda installed now**
+```
+which conda
+```
+
+**5. (Optional) Remove the miniconda installation file in order to save space (Use the appropriate file name: MacOSX shown below)**
+```
+rm Miniconda3-latest-MacOSX-x86_64.sh
+```
+
+## Creating a virtual environment for running SigProfiler
+
+**1. Create a new virtual environment**
+
+For the following example, Python version 3.6.2 was used within the "SigProfiler" environment (python=3.6.2).
+
+```
+conda create --name SigProfiler python=3.6.2
+```
+
+**2. Activate the "SigProfiler" virtual environment**
+
+Next we need to activate the new virtual environment:
+
+```
+source activate SigProfiler
+```
+
+When you are finished using the environment, you can deactivate it to return to your local machine's environment:
+```
+source deactivate SigProfiler
+```
+
+**3. Install software within the virtual environment**
+
+Install all the software needed in order to run SigProfilerMatrixGenerator.
+
+
+Installing "wget" from channel anaconda.
+```
+conda install -c anaconda wget
+```
+
+Installing "line_profiler" from channel anaconda.
+```
+conda install -c anaconda line_profiler
+```
+
+Installing "pandas" from channel anaconda.
+```
+conda install -c anaconda pandas
+```
+
+Installing "scipy" from channel anaconda.
+```
+conda install -c anaconda scipy
+```
+
+Installing "statsmodels" from channel anaconda.
+```
+conda install -c anaconda statsmodels
+```
+
+
+
+
+
+
 **COMMANDS**
 
 -g or --genome 	-> required: Followed by the reference genome (ex: GRCh37, GRCh38,
