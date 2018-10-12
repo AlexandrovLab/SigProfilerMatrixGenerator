@@ -191,7 +191,8 @@ def main ():
 	matrix_dir = ref_dir + "matrix/"
 	vcf_dir = ref_dir + "vcf_files/"
 	bed_dir = ref_dir + "vcf_files/BED/"
-	new_dirs = [ref_dir, chrom_string_dir, chrom_fasta_dir, chrom_tsb_dir, matrix_dir, vcf_dir, bed_dir]
+	log_dir = ref_dir + "logs/"
+	new_dirs = [ref_dir, chrom_string_dir, chrom_fasta_dir, chrom_tsb_dir, matrix_dir, vcf_dir, bed_dir, log_dir]
 
 	current_dir = os.getcwd()
 	for dirs in new_dirs:
