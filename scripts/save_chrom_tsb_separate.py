@@ -2,10 +2,11 @@
 import pickle
 import os
 import argparse
+import re
 
-def save_chrom_tsb_separate (genome):
-	chromosome_path = '/Users/ebergstr/Desktop/Perl_tests/testCode/simulation_code_python/mutation_simulation/references/chromosomes/tsb/' + genome + '/'
-	chromosome_BED_path = '/Users/ebergstr/Desktop/Perl_tests/testCode/simulation_code_python/mutation_simulation/references/chromosomes/tsb_BED/' + genome + '/'
+def save_chrom_tsb_separate (genome, ref_dir):
+	chromosome_path = ref_dir + '/references/chromosomes/tsb/' + genome + '/'
+	chromosome_BED_path = ref_dir + '/references/chromosomes/tsb_BED/' + genome + '/'
 	chromosomes = ['X', 'Y', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', 
 				   '13', '14', '15', '16', '17', '18', '19', '20', '21', '22']
 
@@ -36,8 +37,12 @@ def main ():
 	parser = argparse.ArgumentParser(description="Provide the necessary arguments to install the reference files.")
 	parser.add_argument("-g", "--genome", nargs='?', help="Optional parameter instructs script to install the custom genome.")
 	args = parser.parse_args()
-
 	genome = args.genome
+
+	current_dir = os.getcwd()
+    ref_dir = re.sub('\/scripts$', '', current_dir)
+
+    save_chrom_tsb_separate(genome, ref_dir)
 
 
 if __name__ == '__main__':
