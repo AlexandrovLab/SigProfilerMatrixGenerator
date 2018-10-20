@@ -83,7 +83,11 @@ def convertTxt (project, vcf_path, genome, mutType=None):
 
 	files = os.listdir(vcf_path)
 	for file in files:
+		if file == '.DS_Store':
+			continue
+		print(vcf_path, file)
 		with open (vcf_path + file) as f:
+			#print(f.readline())
 			for lines in f:
 				line = lines.strip().split()
 				sample = line[1]

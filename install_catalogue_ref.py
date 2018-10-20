@@ -107,8 +107,6 @@ def install_chromosomes_tsb (genomes, custom):
 		chrom_string_path = "references/chromosomes/chrom_string/" + genome + "/"
 		chrom_number = len(chrom_string_path)
 
-#		if genome == 'mm10':
-#			chrom_number = 21
 		chromosome_TSB_path = "references/chromosomes/tsb/" + genome + "/"
 		transcript_files = "references/chromosomes/transcripts/" + genome + "/"
 
@@ -122,16 +120,17 @@ def install_chromosomes_tsb (genomes, custom):
 
 		print("The transcriptional reference data for " + genome + " has been saved.")
 
-def install_chromosomes_tsb_BED (genomes, custom):
+def install_chromosomes_tsb_BED (genomes, custom, ref_dir):
 	for genome in genomes:
-		os.system("python3 scripts/save_chrom_tsb_separate.py -g " + genome)
-		print("The TSB BED files for " + genome + " have been saved.")
+		if not os.path.exists(ref_dir + "chromosomes/tsb_BED/" + genome + "/") or len(os.listdir(ref_dir + "chromosomes/tsb_BED/" + genome + "/")) < 19:
+			os.system("python3 scripts/save_chrom_tsb_separate.py -g " + genome)
+			print("The TSB BED files for " + genome + " have been saved.")
 
 def benchmark (ref_dir):
 	if os.path.exists("scripts/Benchmark/BRCA_bench/"):
 		shutil.move("scripts/Benchmark/BRCA_bench/", "references/vcf_files/")
 	start_time = time.time()
-	os.system("python3 scripts/sigProfilerMatrixGenerator_withBED_SNV_INDEL_together_faster_fdr.py -g GRCh37 -p BRCA_bench")
+	os.system("python3 scripts/sigProfilerMatrixGenerator.py -g GRCh37 -p BRCA_bench -snv")
 	end_time = time.time()
 
 	original_matrix_96 = "scripts/Benchmark/BRCA_bench_orig_96.txt"
@@ -164,7 +163,7 @@ def benchmark (ref_dir):
 	    orig_list = data_orig[data_orig.columns[i]]
 	    new_list = data_new[data_new.columns[i]]
 	    cosine_result = (1-spatial.distance.cosine(orig_list,new_list))
-	    if cosine_result >= 0.85:
+	    if cosine_result <= 0.85:
 	        count += 1
 	if count != 0:
 	    print("There seems to be some errors in the newly generated matrix. The installation may not have been successful.")
@@ -174,7 +173,8 @@ def benchmark (ref_dir):
 
 def main ():
 
-	genomes = ['mm9', 'mm10','GRCh37', 'GRCh38' ]
+	#genomes = ['mm9', 'mm10','GRCh37', 'GRCh38' ]
+	genomes = ['GRCh37']
 	custom = False
 	parser = argparse.ArgumentParser(description="Provide the necessary arguments to install the reference files.")
 	parser.add_argument("-g", "--genome", nargs='?', help="Optional parameter instructs script to install the custom genome.")
@@ -191,7 +191,7 @@ def main ():
 	matrix_dir = ref_dir + "matrix/"
 	vcf_dir = ref_dir + "vcf_files/"
 	bed_dir = ref_dir + "vcf_files/BED/"
-	log_dir = ref_dir + "logs/"
+	log_dir = "logs/"
 	new_dirs = [ref_dir, chrom_string_dir, chrom_fasta_dir, chrom_tsb_dir, matrix_dir, vcf_dir, bed_dir, log_dir]
 
 	current_dir = os.getcwd()
@@ -212,7 +212,7 @@ def main ():
 
 	install_chromosomes(genomes, custom)
 	install_chromosomes_tsb (genomes, custom)
-	install_chromosomes_tsb_BED (genomes, custom)
+	install_chromosomes_tsb_BED (genomes, custom, ref_dir)
 	if os.path.exists("BRCA_example/"):
 		os.system("mv BRCA_example/ references/vcf_files/")
 	if os.path.exists("example_test"):
@@ -223,6 +223,7 @@ def main ():
 	print("All reference files have been created.\nVerifying and benchmarking installation now...")
 	benchmark(ref_dir)
 	print ("Please place your vcf files for each sample into the 'references/vcf_files/[test]/[mutation_type]/' directory. Once you have done that, you can proceed with the matrix generation.")
+	os.system("rm -r " + chrom_string_dir)
 	print("Installation complete.")
 
 

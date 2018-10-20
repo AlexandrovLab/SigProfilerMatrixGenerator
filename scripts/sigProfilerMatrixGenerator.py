@@ -71,7 +71,7 @@ def BED_filtering (bed_file_path):
 
     return(ranges_final)
 
-def catalogue_generator_single (vcf_path, vcf_files, chrom_path, chromosome_TSB_path, project, output_matrix, context, exome, genome, ncbi_chrom, functionFlag, bed, bed_ranges, chrom_based, plot):
+def catalogue_generator_single (vcf_path, vcf_files, chrom_path, project, output_matrix, context, exome, genome, ncbi_chrom, functionFlag, bed, bed_ranges, chrom_based, plot, tsb_ref):
     '''
     Generates the mutational matrix for 96, 1536, 192, and 3072 context using a single vcf file with all samples of interest.
 
@@ -80,8 +80,6 @@ def catalogue_generator_single (vcf_path, vcf_files, chrom_path, chromosome_TSB_
                   vcf_files  -> actual vcf file
                  chrom_path  -> path to chromosome reference files. The chromosomes are saved as strings witht the following
                                 file name: '1.txt', '2.txt', etc.
-        chromosome_TSB_path  -> path to transcriptional strand information reference for each chromosome. Only necessary if
-                                the desired context is 192 or 3072. Use "saveTSB_192.py" script to generate these files.
                     project  -> unique name given to the set of samples (ex. 'BRCA') 
               output_matrix  -> path where the final mutational matrix is stored
                     context  -> desired context (ex. 96, 1536, 192, 3072)
@@ -163,9 +161,9 @@ def catalogue_generator_single (vcf_path, vcf_files, chrom_path, chromosome_TSB_
 
                         # Opens each chromosome string path and bias string path
                         try:
-                            with open(chrom_path + chrom_start + ".txt") as f, open (chromosome_TSB_path + chrom_start + "_192.txt", 'rb') as f2:
+                            with open(chrom_path + chrom_start + ".txt", "rb") as f:
                                 chrom_string = f.read()
-                                chrom_bias = f2.read()
+                                #chrom_bias = f2.read()
                         except:
 
                             print(chrom_start + " is not supported. You will need to download that chromosome and create the required files. Continuing with the matrix generation...")
@@ -187,20 +185,24 @@ def catalogue_generator_single (vcf_path, vcf_files, chrom_path, chromosome_TSB_
                             matrix_generator (context, output_matrix, project, samples, bias_sort, mutation_dict, types, exome, mut_types, bed, chrom_start)
                             mutation_dict = {}
                             mutation_dict[sample] = {}
-                        #print ("Chromosome " + chrom_start + " done")
                         chrom_start = chrom
                         try:
-                            with open(chrom_path + chrom_start + ".txt") as f, open(chromosome_TSB_path + chrom_start + "_192.txt", 'rb') as f2:
+                            with open(chrom_path + chrom_start + ".txt", "rb") as f:
                                 chrom_string = f.read()
-                                chrom_bias = f2.read()
+                                #chrom_bias = f2.read()
                             i += 1
                         except:
                             print(chrom_start + " is not supported. You will need to download that chromosome and create the required files. Continuing with the matrix generation...")
                             continue
 
                     # Pulls out the relevant sequence depending on the context
-                    sequence = chrom_string[start-3:start+2]
-                    bias = chrom_bias[start]
+                    sequence = ''
+                    for i in range (start-3, start+2, 1):
+                        try:
+                            sequence += tsb_ref[chrom_string[i]][1]
+                        except:
+                            print(i, chrom)
+                    bias = tsb_ref[chrom_string[start]][0]
                     char = sequence[int(len(sequence)/2)]
 
                     # Prints the sequence and position if the pulled sequence doesn't match
@@ -227,14 +229,14 @@ def catalogue_generator_single (vcf_path, vcf_files, chrom_path, chromosome_TSB_
 
 
 
-                        if bias == 0:
-                            bias = 'N'
-                        elif bias == 1:
-                            bias = 'T'
-                        elif bias == 2:
-                            bias = 'U'
-                        else:
-                            bias = 'B'
+                        # if bias == 0:
+                        #     bias = 'N'
+                        # elif bias == 1:
+                        #     bias = 'T'
+                        # elif bias == 2:
+                        #     bias = 'U'
+                        # else:
+                        #     bias = 'B'
                         mut_key = bias + ':' + mut_key
 
                         if mut_key not in types:
@@ -286,7 +288,7 @@ def catalogue_generator_single (vcf_path, vcf_files, chrom_path, chromosome_TSB_
             matrix_generator (context, output_matrix, project, samples, bias_sort, mutation_dict, types, exome, mut_types, bed, chrom_start, functionFlag, plot)
 
 
-def catalogue_generator_DINUC_single (vcf_path, vcf_files, chrom_path, chromosome_TSB_path, project, output_matrix, exome, genome, ncbi_chrom, functionFlag, bed, bed_ranges, chrom_based, plot):
+def catalogue_generator_DINUC_single (vcf_path, vcf_files, chrom_path, project, output_matrix, exome, genome, ncbi_chrom, functionFlag, bed, bed_ranges, chrom_based, plot, tsb_ref):
     '''
     Generates the mutational matrix for the dinucleotide context.
 
@@ -295,8 +297,6 @@ def catalogue_generator_DINUC_single (vcf_path, vcf_files, chrom_path, chromosom
                   vcf_files  -> vcf file of interest
                  chrom_path  -> path to chromosome reference files. The chromosomes are saved as strings witht the following
                                 file name: '1.txt', '2.txt', etc.
-        chromosome_TSB_path  -> path to transcriptional strand information reference for each chromosome. Only necessary if
-                                the desired context is 192 or 3072. Use "saveTSB_192.py" script to generate these files.
                     project  -> unique name given to the set of samples (ex. 'BRCA') 
               output_matrix  -> path where the final mutational matrix is stored
                  ncbi_chrom  -> dictionary that allows for the converstion of ncbi chromosome names to standard format
@@ -454,7 +454,7 @@ def catalogue_generator_DINUC_single (vcf_path, vcf_files, chrom_path, chromosom
         
     
 
-def catalogue_generator_INDEL_single (vcf_path, vcf_files, chrom_path, project, output_matrix, exome, genome, ncbi_chrom, limited_indel, functionFlag, bed, bed_ranges, chrom_based, plot):
+def catalogue_generator_INDEL_single (vcf_path, vcf_files, chrom_path, project, output_matrix, exome, genome, ncbi_chrom, limited_indel, functionFlag, bed, bed_ranges, chrom_based, plot, tsb_ref):
     '''
     Generates the mutational matrix for the INDEL context.
 
@@ -545,8 +545,9 @@ def catalogue_generator_INDEL_single (vcf_path, vcf_files, chrom_path, project, 
             if first_flag:
                 initial_chrom = chrom
                 try:
-                    with open (chrom_path + initial_chrom + '.txt') as f:
-                        chrom_string = f.readline().strip()
+                    with open (chrom_path + initial_chrom + '.txt', "rb") as f:
+                        chrom_string = f.read().strip()
+                        print(len(chrom_string))
                     first_flag = False
                 except:
                     print(initial_chrom + " is not supported. You will need to download that chromosome and create the required files. Continuing with the matrix generation...")
@@ -565,15 +566,19 @@ def catalogue_generator_INDEL_single (vcf_path, vcf_files, chrom_path, project, 
                     indel_dict = {}
                 initial_chrom = chrom
                 try:
-                    with open (chrom_path + initial_chrom + '.txt') as f:
-                        chrom_string = f.readline().strip()
+                    with open (chrom_path + initial_chrom + '.txt', "rb") as f:
+                        chrom_string = f.read().strip()
                     i += 1
                     logging.info("Chromosome "+ chrom + " complete")
                     #print(initial_chrom)
                 except:
                     print(chrom_start + " is not supported. You will need to download that chromosome and create the required files. Continuing with the matrix generation...")
                     continue
-            if ref[0] == chrom_string[start-1]:
+            try:
+                base = tsb_ref[chrom_string[start-1]][1]
+            except:
+                print(chrom, start)
+            if ref[0] == base:
                 # Saves the mutation type for the given variant
                 if len(ref) - len(mut) == len(ref)-1:
                     mut_type = 'Del'
@@ -603,12 +608,25 @@ def catalogue_generator_INDEL_single (vcf_path, vcf_files, chrom_path, project, 
                     sequence = type_sequence
                     pos = start + type_length 
                     pos_rev = start 
-                    while pos_rev - type_length > 0 and chrom_string[pos_rev-type_length:pos_rev] == type_sequence:
-                        sequence = chrom_string[pos_rev-type_length:pos_rev] + sequence
+                    actual_seq = ''
+                    for i in range (pos_rev-type_length, pos_rev, 1):
+                        actual_seq += tsb_ref[chrom_string[i]][1]                    
+                    while pos_rev - type_length > 0 and actual_seq == type_sequence:
+                        sequence = actual_seq + sequence
                         pos_rev -= type_length
-                    while pos + type_length < len(chrom_string) and chrom_string[pos:pos + type_length] == type_sequence:
-                        sequence += chrom_string[pos:pos+type_length]
+                        actual_seq = ''
+                        for i in range (pos_rev-type_length, pos_rev, 1):
+                            actual_seq += tsb_ref[chrom_string[i]][1]
+                    
+                    new_seq = ''
+                    for i in range(pos, pos+type_length, 1):
+                        new_seq += tsb_ref[chrom_string[i]][1]
+                    while pos + type_length < len(chrom_string) and new_seq == type_sequence:
+                        sequence += new_seq
                         pos += type_length
+                        new_seq = ''
+                        for i in range(pos, pos+type_length, 1):
+                            new_seq += tsb_ref[chrom_string[i]][1]
                     
                     # Pulls out possible microhomology deletions
                     if type_length > 1 and len(sequence) == type_length:
@@ -619,7 +637,10 @@ def catalogue_generator_INDEL_single (vcf_path, vcf_files, chrom_path, project, 
                         for_hom = False
                         pos = start + type_length
                         for i in range (len(forward_homology), 0, -1):
-                            if chrom_string[pos:pos+i] == forward_homology[:i]:
+                            seq = ''
+                            for l in range (pos, pos + i, 1):
+                                seq += tsb_ref[chrom_string[l]][1]
+                            if seq == forward_homology[:i]:
                                 sequence += forward_homology[:i]
                                 mut_type += '_Micro_for'
                                 for_hom = True
@@ -628,7 +649,11 @@ def catalogue_generator_INDEL_single (vcf_path, vcf_files, chrom_path, project, 
                         if for_hom != True:
                             pos = start
                             for i in range (len(reverse_homology), 0, -1):
-                                if chrom_string[pos-i:pos] == reverse_homology[-i:]:
+                                seq = ''
+                                for l in range (pos-i, pos, 1):
+                                    seq += tsb_ref[chrom_string[l]][1]
+
+                                if seq == reverse_homology[-i:]:
                                     sequence = reverse_homology[-i:] + sequence
                                     mut_type += '_Micro_rev'
                                     break
@@ -641,13 +666,25 @@ def catalogue_generator_INDEL_single (vcf_path, vcf_files, chrom_path, project, 
 
                     pos = start
                     pos_rev = start
-                    while pos_rev - type_length > 0 and chrom_string[pos_rev-type_length:pos_rev] == type_sequence:
-                        sequence = chrom_string[pos_rev-type_length:pos_rev] + sequence
+                    seq = ''
+                    for i in range(pos_rev-type_length, pos_rev, 1):
+                        seq += tsb_ref[chrom_string[i]][1]
+                    while pos_rev - type_length > 0 and seq == type_sequence:
+                        sequence = seq + sequence
                         pos_rev -= type_length
-                    while pos + type_length < len(chrom_string) and chrom_string[pos:pos + type_length] == type_sequence:
-                        sequence += chrom_string[pos:pos+type_length]
+                        seq = ''
+                        for i in range(pos_rev-type_length, pos_rev, 1):
+                            seq += tsb_ref[chrom_string[i]][1]
+
+                    seq = ''
+                    for i in range(pos, pos + type_length, 1):
+                        seq += tsb_ref[chrom_string[i]][1]
+                    while pos + type_length < len(chrom_string) and seq == type_sequence:
+                        sequence += seq
                         pos += type_length
-                    
+                        seq = ''
+                        for i in range(pos, pos + type_length, 1):
+                            seq += tsb_ref[chrom_string[i]][1]                   
                     # Pulls possible microhomology for insertions
                     if type_length > 1 and len(sequence) == type_length:
                         forward_homology = mut[1:-1]
@@ -656,7 +693,10 @@ def catalogue_generator_INDEL_single (vcf_path, vcf_files, chrom_path, project, 
                         for_hom = False
                         pos = start
                         for i in range (len(forward_homology), 0, -1):
-                            if chrom_string[pos:pos+i] == forward_homology[:i]:
+                            seq = ''
+                            for i in range (pos, pos + i, 1):
+                                seq += tsb_ref[chrom_string[i]][1]
+                            if seq == forward_homology[:i]:
                                 sequence += forward_homology[:i]
                                 mut_type += '_Micro_for'
                                 for_hom = True
@@ -665,7 +705,10 @@ def catalogue_generator_INDEL_single (vcf_path, vcf_files, chrom_path, project, 
                         if for_hom != True:
                             pos = start
                             for i in range (len(reverse_homology), 0, -1):
-                                if chrom_string[pos-i:pos] == reverse_homology[-i:]:
+                                seq = ''
+                                for i in range (pos-i, pos, 1):
+                                    seq += tsb_ref[chrom_string[i]][1]
+                                if seq == reverse_homology[-i:]:
                                     sequence = reverse_homology[-i:] + sequence
                                     mut_type += '_Micro_rev'
                                     break
@@ -804,7 +847,6 @@ def catalogue_generator_INDEL_single (vcf_path, vcf_files, chrom_path, project, 
 
     # Prints the total number of complex mutations
     logging.info("Non-matching mutations: " + str(non_matching))
-    print(non_matching)
     if chrom_based:
         matrix_generator_INDEL(output_matrix, samples, indel_types, indel_dict, project, exome, limited_indel, bed, initial_chrom, plot)
 
@@ -1337,6 +1379,12 @@ def main():
                   'NC_000083.6':'17', 'NC_000084.6':'18', 'NC_000085.6':'19', 'NC_000086.7':'X', 
                   'NC_000087.7':'Y'}
 
+    tsb_ref = {0:['N','A'], 1:['N','C'], 2:['N','G'], 3:['N','T'],
+               4:['T','A'], 5:['T','C'], 6:['T','G'], 7:['T','T'],
+               8:['U','A'], 9:['U','C'], 10:['U','G'], 11:['U','T'],
+               12:['B','A'], 13:['B','C'], 14:['B','G'], 15:['B','T'],
+               16:['N','N'], 17:['T','N'], 18:['U','N'], 19:['B','N']}
+
     contexts = ['3072', 'DINUC']#, '1536', '192', '3072', 'DINUC']
 
     exome = False
@@ -1349,11 +1397,13 @@ def main():
     chrom_based = False
     plot = False
     matrix_suffix = ''
+    SNVs = False
 
     parser = argparse.ArgumentParser(description="Provide the necessary arguments to create the desired catalogue.")
     parser.add_argument("--project", "-p",help="Provide a unique name for your samples. (ex: BRCA)")
     parser.add_argument("--genome", "-g",help="Provide a reference genome. (ex: GRCh37, GRCh38, mm10)")
     parser.add_argument("-e", "--exome", help="Optional parameter instructs script to create the catalogues using only the exome regions. Whole genome context by default", action='store_true')
+    parser.add_argument( "-snv", "--SNV", help="Optional parameter instructs script to create the catalogue for SNVs", action='store_true')
     parser.add_argument( "-i", "--indel", help="Optional parameter instructs script to create the catalogue for limited INDELs", action='store_true')
     parser.add_argument( "-ie", "--extended_indel", help="Optional parameter instructs script to create the catalogue for extended INDELs", action='store_true')
     parser.add_argument("-b", "--bed", nargs='?', help="Optional parameter instructs script to simulate on a given set of ranges (ex: exome). Whole genome context by default")
@@ -1386,11 +1436,17 @@ def main():
         indel = True
         plot = True
 
+    if args.SNV:
+        SNVs = True
+
+
     # Organizes all of the reference directories for later reference:
     current_dir = os.getcwd()
     ref_dir = re.sub('\/scripts$', '', current_dir)
-    chrom_path = ref_dir + '/references/chromosomes/chrom_string/' + genome + "/"
-    chromosome_TSB_path =  ref_dir + '/references/chromosomes/tsb/' + genome + "/"
+    #chrom_path = ref_dir + '/references/chromosomes/chrom_string/' + genome + "/"
+    #chrom_path = "/Users/ebergstr/Desktop/test_bi/references/chromosomes/tsb/GRCh37/"
+    chrom_path =ref_dir + '/references/chromosomes/tsb/' + genome + "/"
+    #chromosome_TSB_path =  ref_dir + '/references/chromosomes/tsb/' + genome + "/"
     
     time_stamp = datetime.date.today()
     output_logs = ref_dir + "/logs/"
@@ -1414,18 +1470,20 @@ def main():
         os.system("mkdir " + output_matrix)
 
     # Gathers all of the vcf files:
-    vcf_files_snv_temp = os.listdir(vcf_path + "SNV/")
+    if SNVs:
+        vcf_files_snv_temp = os.listdir(vcf_path + "SNV/")
     if indel:
         vcf_files_indel_temp = os.listdir(vcf_path + "INDEL/")
 
     vcf_files2 = [[],[]]
 
-    for file in vcf_files_snv_temp:
-        # Skips hidden files
-        if file[0:3] == '.DS':
-            pass
-        else:
-            vcf_files2[0].append(file)
+    if SNVs:
+        for file in vcf_files_snv_temp:
+            # Skips hidden files
+            if file[0:3] == '.DS':
+                pass
+            else:
+                vcf_files2[0].append(file)
 
     if indel:
         for file in vcf_files_indel_temp:
@@ -1440,6 +1498,8 @@ def main():
             contexts = ['INDEL']
         elif i ==1 and not indel:
             break
+        elif i == 0 and not SNVs:
+            continue
         vcf_path = ref_dir + '/references/vcf_files/' + project + "/"
         file_name = vcf_files2[i][0].split(".")
         file_extension = file_name[-1]
@@ -1507,14 +1567,13 @@ def main():
 
         for context in contexts:
             if context != 'DINUC' and context != 'INDEL':
-                catalogue_generator_single (vcf_path, vcf_files, chrom_path, chromosome_TSB_path, project, output_matrix, context, exome, genome, ncbi_chrom, functionFlag, bed, bed_ranges, chrom_based, plot)
+                catalogue_generator_single (vcf_path, vcf_files, chrom_path, project, output_matrix, context, exome, genome, ncbi_chrom, functionFlag, bed, bed_ranges, chrom_based, plot, tsb_ref)
 
             elif context == 'DINUC':
-                catalogue_generator_DINUC_single (vcf_path, vcf_files, chrom_path, chromosome_TSB_path, project, output_matrix, exome, genome, ncbi_chrom, functionFlag, bed, bed_ranges, chrom_based, plot)
+                catalogue_generator_DINUC_single (vcf_path, vcf_files, chrom_path, project, output_matrix, exome, genome, ncbi_chrom, functionFlag, bed, bed_ranges, chrom_based, plot, tsb_ref)
 
             elif context == 'INDEL':
-                print("yes start1")
-                catalogue_generator_INDEL_single (vcf_path, vcf_files, chrom_path, project, output_matrix, exome, genome, ncbi_chrom, limited_indel, functionFlag, bed, bed_ranges, chrom_based, plot)
+                catalogue_generator_INDEL_single (vcf_path, vcf_files, chrom_path, project, output_matrix, exome, genome, ncbi_chrom, limited_indel, functionFlag, bed, bed_ranges, chrom_based, plot, tsb_ref)
 
             logging.info("Catalogue for " + context + " context is complete.")
             print("Catalogue for " + context + " context is complete.")
