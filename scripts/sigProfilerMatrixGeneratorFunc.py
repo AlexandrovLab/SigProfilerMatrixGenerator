@@ -8,7 +8,7 @@ import pandas as pd
 import datetime
 import convert_input_to_simple_files as convertIn
 
-def sigProfilerMatrixGeneratorFunc (project, genome, exome=False, indel=False, indel_extended=False, bed_file=None, chrom_based=False, plot=False):
+def sigProfilerMatrixGeneratorFunc (project, genome, exome=False, SNVs=False,indel=False, indel_extended=False, bed_file=None, chrom_based=False, plot=False):
 	'''
 	Allows for the import of the sigProfilerMatrixGenerator.py function. Returns a dictionary
 	with each context serving as the first level of keys. 
@@ -57,6 +57,13 @@ def sigProfilerMatrixGeneratorFunc (project, genome, exome=False, indel=False, i
 				  'NC_000079.6':'13', 'NC_000080.6':'14', 'NC_000081.6':'15', 'NC_000082.6':'16', 
 				  'NC_000083.6':'17', 'NC_000084.6':'18', 'NC_000085.6':'19', 'NC_000086.7':'X', 
 				  'NC_000087.7':'Y'}
+				  
+    tsb_ref = {0:['N','A'], 1:['N','C'], 2:['N','G'], 3:['N','T'],
+               4:['T','A'], 5:['T','C'], 6:['T','G'], 7:['T','T'],
+               8:['U','A'], 9:['U','C'], 10:['U','G'], 11:['U','T'],
+               12:['B','A'], 13:['B','C'], 14:['B','G'], 15:['B','T'],
+               16:['N','N'], 17:['T','N'], 18:['U','N'], 19:['B','N']}
+
 
 	contexts = ['3072', 'DINUC']
 
@@ -85,18 +92,20 @@ def sigProfilerMatrixGeneratorFunc (project, genome, exome=False, indel=False, i
 	vcf_path = ref_dir + '/references/vcf_files/' + project + "/"
 
 	# Gathers all of the vcf files:
-	vcf_files_snv_temp = os.listdir(vcf_path + "SNV/")
+	if SNVs:
+		vcf_files_snv_temp = os.listdir(vcf_path + "SNV/")
 	if indel:
 		vcf_files_indel_temp = os.listdir(vcf_path + "INDEL/")
 
 	vcf_files2 = [[],[]]
 
-	for file in vcf_files_snv_temp:
-		# Skips hidden files
-		if file[0:3] == '.DS':
-			pass
-		else:
-			vcf_files2[0].append(file)
+	if SNVs:
+		for file in vcf_files_snv_temp:
+			# Skips hidden files
+			if file[0:3] == '.DS':
+				pass
+			else:
+				vcf_files2[0].append(file)
 
 	if indel:
 		for file in vcf_files_indel_temp:
@@ -112,6 +121,8 @@ def sigProfilerMatrixGeneratorFunc (project, genome, exome=False, indel=False, i
 			contexts = ['INDEL']
 		elif i == 1 and not indel:
 			break
+		elif i == 0 and not SNVs:
+			continue
 		vcf_path = ref_dir + '/references/vcf_files/' + project + "/"
 		file_name = vcf_files2[i][0].split(".")
 		file_extension = file_name[-1]
@@ -182,15 +193,15 @@ def sigProfilerMatrixGeneratorFunc (project, genome, exome=False, indel=False, i
 		# Creates the matrix for each context
 		for context in contexts:
 			if context != 'DINUC' and context != 'INDEL':
-				matrix = matGen.catalogue_generator_single (vcf_path, vcf_files, chrom_path, chromosome_TSB_path, project, output_matrix, context, exome, genome, ncbi_chrom, functionFlag, bed, bed_ranges, chrom_based, plot)
+				matrix = matGen.catalogue_generator_single (vcf_path, vcf_files, chrom_path, chromosome_TSB_path, project, output_matrix, context, exome, genome, ncbi_chrom, functionFlag, bed, bed_ranges, chrom_based, plot, tsb_ref)
 				matrices = matrix
 
 			elif context == 'DINUC':
-				matrix = matGen.catalogue_generator_DINUC_single (vcf_path, vcf_files, chrom_path, chromosome_TSB_path, project, output_matrix, exome, genome, ncbi_chrom, functionFlag, bed, bed_ranges, chrom_based, plot)
+				matrix = matGen.catalogue_generator_DINUC_single (vcf_path, vcf_files, chrom_path, chromosome_TSB_path, project, output_matrix, exome, genome, ncbi_chrom, functionFlag, bed, bed_ranges, chrom_based, plot, tsb_ref)
 				matrices[context] = matrix
 
 			elif context == 'INDEL':
-				matrix = matGen.catalogue_generator_INDEL_single (vcf_path, vcf_files, chrom_path, project, output_matrix, exome, genome, ncbi_chrom, indel_extended,functionFlag, bed, bed_ranges, chrom_based, plot)
+				matrix = matGen.catalogue_generator_INDEL_single (vcf_path, vcf_files, chrom_path, project, output_matrix, exome, genome, ncbi_chrom, indel_extended,functionFlag, bed, bed_ranges, chrom_based, plot, tsb_ref)
 				matrices[context] = matrix
 
 			# Deletes the temporary files and returns the final matrix

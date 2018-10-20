@@ -30,7 +30,7 @@ This section will guide you through the minimum steps required to create mutatio
 
 *NOTE: only include –e if you would like to generate matrices using only mutations found within the exome, and only include –i or -ie if you would like to create the matrix for INDELS. (See available commands below).
 
-7.	The final matrices and the strand bias test results will be placed within the *references/matrix/[project]/* folder. By default, the script will generate the matrices for 6, 12, 96, 192, 1536, 3072, and DINUC context. The strand bias test results are generated for the 12, 192, and 3072 context.
+7.	The final matrices and the strand bias test results will be placed within the *references/matrix/[project]/* folder. If the optional parameter "-snv" is chosen, the script will generate the matrices for 6, 12, 96, 192, 1536, 3072, and DINUC context. The strand bias test results are generated for the 12, 192, and 3072 context.
 8. Final log files will be placed within the *logs/* folder.
 
 **INSTALLING WITH CONDA**
@@ -150,6 +150,8 @@ conda install -c anaconda statsmodels
 -p or --project		-> required: Followed by the project name (ex: BRCA).
 
 -e or --exome		-> optional: Creates the matrix based solely on the exome.
+
+-snv or --SNV   -> optional: Creates the matrix for the SNV mutation types (6, 12, 96, 192, 1536, 3072)
 
 -i or --indel		-> optional: Creates the matrix for the limited list of INDELs (classifies
     insertions at micro-homologies as insertions at repeats of 0).

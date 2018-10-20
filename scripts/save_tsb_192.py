@@ -61,16 +61,16 @@ def save_tsb (chromosome_string_path, transcript_path, output_path):
     # Retrieves the transcript file 
     transcript_files = os.listdir(transcript_path)
 
-    if len(transcript_files) < 2:
+    if len(transcript_files) < 3:
         # Instantiates required flag variables
         initial_flag = True
         initial_chrom = None
         for file in transcript_files:
             file_name = file.split("_")
-            chrom = file_name[0]
+            name = file_name[0]
 
             # Skips hidden files
-            if chrom == '.DS':
+            if name == '.DS':
                 pass
             else:
 
@@ -111,16 +111,17 @@ def save_tsb (chromosome_string_path, transcript_path, output_path):
     for files in transcript_files:
         file_name = files.split("_")
         chrom = file_name[0]
+        
         if chrom == '.DS':
             pass
         else:
             try:
-                if os.path.exists(output_path + chrom + "_192.txt"):
+                if os.path.exists(output_path + chrom + ".txt"):
                     continue
 
                 else:
                     # Create a binary file for the output.
-                    outFile = open (output_path + chrom + "_192.txt", "wb")
+                    outFile = open (output_path + chrom + ".txt", "wb")
 
 
                     # Instantiates all of the required parameters.
@@ -136,23 +137,61 @@ def save_tsb (chromosome_string_path, transcript_path, output_path):
 
                     # Save the length for the current chromosome.
                     with open (chromosome_string_path + chrom + ".txt") as f:
-                        chrom_length = len(f.readline())
+                        chrom_string = f.readline().strip()
+                        chrom_length = len(chrom_string)
+                        print(chrom_length)
 
                     # Establishes a unique binary number for each transcript type.
-                    Non_transcribed = '00000000'
-                    Transcribed = '00000001'
-                    Untranscribed = '00000010'
-                    BiDirectional = '00000011'
+                    Non_transcribed_A = '00000000' # 0
+                    Non_transcribed_C = '00000001' # 1
+                    Non_transcribed_G = '00000010' # 2
+                    Non_transcribed_T = '00000011' # 3
+                    Transcribed_A = '00000100'     # 4
+                    Transcribed_C = '00000101'     # 5
+                    Transcribed_G = '00000110'     # 6
+                    Transcribed_T = '00000111'     # 7
+                    Untranscribed_A = '00001000'   # 8
+                    Untranscribed_C = '00001001'   # 9
+                    Untranscribed_G = '00001010'   # 10
+                    Untranscribed_T = '00001011'   # 11
+                    BiDirectional_A = '00001100'   # 12
+                    BiDirectional_C = '00001101'   # 13
+                    BiDirectional_G = '00001110'   # 14
+                    BiDirectional_T = '00001111'   # 15
+                    Non_transcribed_N = '00010000' # 16
+                    Transcribed_N = '00010001'     # 17
+                    Untranscribed_N = '00010010'   # 18 
+                    BiDirectional_N = '00010011'   # 19
 
                     # Organizes the binary/integer formats for the data structures.
-                    nN = int(Non_transcribed, 2)
-                    nT = int(Transcribed, 2)
-                    nU = int(Untranscribed, 2)
-                    nB = int(BiDirectional, 2)
-                    N = bytes([nN])
-                    T = bytes([nT])
-                    U = bytes([nU])
-                    B = bytes([nB])
+                    nN_A = int(Non_transcribed_A, 2)
+                    nN_C = int(Non_transcribed_C, 2)
+                    nN_G = int(Non_transcribed_G, 2)
+                    nN_T = int(Non_transcribed_T, 2)
+                    nT_A = int(Transcribed_A, 2)
+                    nT_C = int(Transcribed_C, 2)
+                    nT_G = int(Transcribed_G, 2)
+                    nT_T = int(Transcribed_T, 2)
+                    nU_A = int(Untranscribed_A, 2)
+                    nU_C = int(Untranscribed_C, 2)
+                    nU_G = int(Untranscribed_G, 2)
+                    nU_T = int(Untranscribed_T, 2)
+                    nB_A = int(BiDirectional_A, 2)
+                    nB_C = int(BiDirectional_C, 2)
+                    nB_G = int(BiDirectional_G, 2)
+                    nB_T = int(BiDirectional_T, 2)
+                    
+                    nN_N = int(Non_transcribed_N, 2)
+                    nT_N = int(Transcribed_N, 2)
+                    nU_N = int(Untranscribed_N, 2)
+                    nB_N = int(BiDirectional_N, 2)
+
+                    byte_ref = {'N_A':bytes([nN_A]), 'N_C':bytes([nN_C]), 'N_G':bytes([nN_G]), 'N_T':bytes([nN_T]),
+                                'T_A':bytes([nT_A]), 'T_C':bytes([nT_C]), 'T_G':bytes([nT_G]), 'T_T':bytes([nT_T]),
+                                'U_A':bytes([nU_A]), 'U_C':bytes([nU_C]), 'U_G':bytes([nU_G]), 'U_T':bytes([nU_T]),
+                                'B_A':bytes([nB_A]), 'B_C':bytes([nB_C]), 'B_G':bytes([nB_G]), 'B_T':bytes([nB_T]),
+                                'N_N':bytes([nN_N]), 'T_N':bytes([nT_N]), 'U_N':bytes([nU_N]), 'B_N':bytes([nB_N])}
+
                     stringTest = ''
 
 
@@ -176,7 +215,8 @@ def save_tsb (chromosome_string_path, transcript_path, output_path):
                                 # Saves Non-transcribed data up until
                                 # the first transcript.
                                 for i in range(0, location, 1):
-                                    outFile.write(N)
+                                    nuc = chrom_string[i]
+                                    outFile.write(byte_ref['N_' + nuc])
                                     l += 1
                                 pointer = 1
 
@@ -192,7 +232,8 @@ def save_tsb (chromosome_string_path, transcript_path, output_path):
                                 # next transcript.
                                 if I_T_start > location:
                                     for i in range(location, I_T_start, 1):
-                                        outFile.write(N)
+                                        nuc = chrom_string[i]
+                                        outFile.write(byte_ref['N_' + nuc])
                                         l += 1
                                     location = I_T_start
                                 
@@ -225,17 +266,20 @@ def save_tsb (chromosome_string_path, transcript_path, output_path):
                                     if bi_start != 0 and bi_start > location:
                                         for i in range (location, bi_start, 1):
                                             if I_strand == '1':
-                                                outFile.write(T)
+                                                nuc = chrom_string[i]
+                                                outFile.write(byte_ref['T_' + nuc])
                                                 l += 1
                                             else:
-                                                outFile.write(U)
+                                                nuc = chrom_string[i]
+                                                outFile.write(byte_ref['U_' + nuc])
                                                 l += 1
                                         location = bi_start
 
                                         # Saves Bi-directional data for the length
                                         # of the opposing transcripts overlap
                                         for i in range (location, bi_end, 1):
-                                            outFile.write(B) 
+                                            nuc = chrom_string[i]
+                                            outFile.write(byte_ref['B_' + nuc])
                                             l += 1
                                         location = bi_end
                                     bi_start = 0
@@ -246,10 +290,12 @@ def save_tsb (chromosome_string_path, transcript_path, output_path):
                             if I_T_end > location:
                                 for i in range(location, I_T_end, 1):
                                     if I_strand == '1':
-                                        outFile.write(T)
+                                        nuc = chrom_string[i]
+                                        outFile.write(byte_ref['T_' + nuc])
                                         l += 1
                                     else:
-                                        outFile.write(U)
+                                        nuc = chrom_string[i]
+                                        outFile.write(byte_ref['U_' + nuc])
                                         l +=1
                                 location = I_T_end
                             line_count += 1
@@ -258,7 +304,8 @@ def save_tsb (chromosome_string_path, transcript_path, output_path):
                     # the final transcript is analyzed         
                     if location < chrom_length:
                         for i in range(location, chrom_length,1):
-                            outFile.write(N) 
+                            nuc = chrom_string[i]
+                            outFile.write(byte_ref['N_' + nuc]) 
                             l += 1        
                         
                     outFile.close()
@@ -279,7 +326,7 @@ def main ():
     script_dir = os.getcwd()
     ref_dir = re.sub('\/scripts$', '', script_dir)
 
-    chromosome_string_path = ref_dir + "/references/chromosomes/chrom_string/" + genome + "/"
+    chromosome_string_path = "/Users/ebergstr/Desktop/Perl_tests/testCode/simulation_code_python/mutation_simulation/references/chromosomes/chrom_string/" + genome + "/"
     transcript_path = ref_dir + "/references/chromosomes/transcripts/" + genome + "/"
     output_path = ref_dir + "/references/chromosomes/tsb/" + genome + "/"
     if os.path.exists(output_path) == False:
