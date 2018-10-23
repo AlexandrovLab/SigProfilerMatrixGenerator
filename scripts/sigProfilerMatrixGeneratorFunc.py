@@ -7,6 +7,7 @@ import logging
 import pandas as pd
 import datetime
 import convert_input_to_simple_files as convertIn
+import uuid
 
 def sigProfilerMatrixGeneratorFunc (project, genome, exome=False, SNVs=False,indel=False, indel_extended=False, bed_file=None, chrom_based=False, plot=False):
 	'''
@@ -58,11 +59,11 @@ def sigProfilerMatrixGeneratorFunc (project, genome, exome=False, SNVs=False,ind
 				  'NC_000083.6':'17', 'NC_000084.6':'18', 'NC_000085.6':'19', 'NC_000086.7':'X', 
 				  'NC_000087.7':'Y'}
 				  
-    tsb_ref = {0:['N','A'], 1:['N','C'], 2:['N','G'], 3:['N','T'],
-               4:['T','A'], 5:['T','C'], 6:['T','G'], 7:['T','T'],
-               8:['U','A'], 9:['U','C'], 10:['U','G'], 11:['U','T'],
-               12:['B','A'], 13:['B','C'], 14:['B','G'], 15:['B','T'],
-               16:['N','N'], 17:['T','N'], 18:['U','N'], 19:['B','N']}
+	tsb_ref = {0:['N','A'], 1:['N','C'], 2:['N','G'], 3:['N','T'],
+			   4:['T','A'], 5:['T','C'], 6:['T','G'], 7:['T','T'],
+			   8:['U','A'], 9:['U','C'], 10:['U','G'], 11:['U','T'],
+			   12:['B','A'], 13:['B','C'], 14:['B','G'], 15:['B','T'],
+			   16:['N','N'], 17:['T','N'], 18:['U','N'], 19:['B','N']}
 
 
 	contexts = ['3072', 'DINUC']
@@ -127,55 +128,60 @@ def sigProfilerMatrixGeneratorFunc (project, genome, exome=False, SNVs=False,ind
 		file_name = vcf_files2[i][0].split(".")
 		file_extension = file_name[-1]
 
-
-		output_path = ref_dir + "/references/vcf_files/single/"
+		unique_folder = project + str(uuid.uuid4())
+		#output_path = ref_dir + "/references/vcf_files/single/"
+		output_path = ref_dir + "/references/vcf_files/" + unique_folder + "/"
 		if not os.path.exists(output_path):
 			os.makedirs(output_path)
 
 		if file_extension == 'genome':
 			if i ==1:
-				convertIn.convertTxt(project, vcf_path + "INDEL/", genome, 'INDEL')
+				convertIn.convertTxt(project, vcf_path + "INDEL/", genome, output_path, 'INDEL')
 				#os.system("bash convert_txt_files_to_simple_files.sh " + project + " " + vcf_path + "INDEL/")
 			else:
-				convertIn.convertTxt(project, vcf_path + "SNV/", genome, 'SNV')
+				convertIn.convertTxt(project, vcf_path + "SNV/", genome, output_path, 'SNV')
 				#os.system("bash convert_txt_files_to_simple_files.sh " + project + " " + vcf_path + "SNV/")
 		else:
 			if i == 1:
-                if file_extension == 'txt':
-                    convertIn.convertTxt(project, vcf_path + "INDEL/",  genome, 'INDEL')
-                elif file_extension == 'vcf':
-                    convertIn.convertVCF(project, vcf_path + "INDEL/", genome, 'INDEL')
-                elif file_extension == 'maf':
-                    convertIn.convertMAF(project, vcf_path + "INDEL/", genome, 'INDEL')
-                else:
-                    print("File format not supported")
+				if file_extension == 'txt':
+					convertIn.convertTxt(project, vcf_path + "INDEL/",  output_path, genome, 'INDEL')
+				elif file_extension == 'vcf':
+					convertIn.convertVCF(project, vcf_path + "INDEL/", output_path, genome, 'INDEL')
+				elif file_extension == 'maf':
+					convertIn.convertMAF(project, vcf_path + "INDEL/", output_path, genome, 'INDEL')
+				elif file_extension == '.tsv':
+					convertIn.convertICGC(project, vcf_path + "INDEL/", output_path, genome, 'INDEL')
+				else:
+					print("File format not supported")
 
 				#os.system("bash convert_" + file_extension + "_files_to_simple_files.sh " + project + " " + vcf_path + "INDEL/")
 			else:
-                if file_extension == 'txt':
-                    convertIn.convertTxt(project, vcf_path + "SNV/", genome, 'SNV')
-                elif file_extension == 'vcf':
-                    convertIn.convertVCF(project, vcf_path + "SNV/", genome, 'SNV')
-                elif file_extension == 'maf':
-                    convertIn.convertMAF(project, vcf_path + "SNV/", genome, 'SNV')
-                else:
-                    print("File format not supported")
+				if file_extension == 'txt':
+					convertIn.convertTxt(project, vcf_path + "SNV/", output_path, genome, 'SNV')
+				elif file_extension == 'vcf':
+					convertIn.convertVCF(project, vcf_path + "SNV/", output_path, genome, 'SNV')
+				elif file_extension == 'maf':
+					convertIn.convertMAF(project, vcf_path + "SNV/", output_path, genome, 'SNV')
+				elif file_extension == '.tsv':
+					convertIn.convertICGC(project, vcf_path + "SNV/", output_path, genome, 'SNV')
+				else:
+					print("File format not supported")
 
 				#os.system("bash convert_" + file_extension + "_files_to_simple_files.sh " + project + " " + vcf_path +"SNV/")
 
-		vcf_files = os.listdir(ref_dir + '/references/vcf_files/single/')
-		vcf_path = ref_dir + '/references/vcf_files/single/'
+		vcf_files = os.listdir(ref_dir + '/references/vcf_files/' + output_path + '/')
+		vcf_path = ref_dir + '/references/vcf_files/' + output_path + '/'
 
-        sort_file = vcf_files[0]
-        with open(vcf_path + sort_file) as f:
-            lines = [line.strip().split() for line in f]
+		sort_file = vcf_files[0]
+		with open(vcf_path + sort_file) as f:
+			lines = [line.strip().split() for line in f]
 
-        output = open(vcf_path + sort_file, 'w')
+		output = open(vcf_path + sort_file, 'w')
 
-        for line in sorted(lines, key = lambda x: (['X','Y','1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22'].index(x[5]), x[1], x[6])):
-            print('\t'.join(line), file=output)
+		for line in sorted(lines, key = lambda x: (['X','Y','1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22'].index(x[5]), x[1], x[6])):
+			print('\t'.join(line), file=output)
 
-        output.close()
+		output.close()
 
 		# Include some kind of a flag for the INDEL option 
 		# sort_command_initial = "sort -t $'\t' -k 6,6n -k 6,6 -k 2,2 -k 7,7n "
