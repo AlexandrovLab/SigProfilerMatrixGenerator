@@ -33,15 +33,11 @@ import re
 
 
 
-def convertVCF (project, vcf_path, genome, mutType=None):
+def convertVCF (project, vcf_path, genome, output_path, mutType=None):
 	if mutType == None:
 		mutType = 'SNP'
 
-	current_dir = os.getcwd()
-	ref_dir = re.sub('\/scripts$', '', current_dir)
-
-	output_path = ref_dir + "/references/vcf_files/single/"
-	outputFile = ref_dir + "/references/vcf_files/single/" + project + "_indels.genome"
+	outputFile = output_path + project + "_indels.genome"
 	os.system("rm -f " + outputFile)
 
 	if not os.path.exists(output_path):
@@ -51,29 +47,32 @@ def convertVCF (project, vcf_path, genome, mutType=None):
 
 	files = os.listdir(vcf_path)
 	for file in files:
+		file_name = file.split(".")
+		sample = file_name[0]
+		if file == '.DS_Store':
+			continue
 		with open (vcf_path + file) as f:
 			for lines in f:
-				line = lines.strip().split()
-				chrom = line[0]
-				start = line[1]
-				sample = line[2]
-				ref = line[3]
-				mut = line[4]
+				if lines[0] == "#":
+					continue
+				else:
+					line = lines.strip().split()
+					chrom = line[0]
+					start = line[1]
+					#sample = line[2]
+					ref = line[3]
+					mut = line[4]
 
-				print("\t".join([project, sample, ".", genome, mutType, chrom, start, start, ref, mut, "SOMATIC"]), file=out)
+					print("\t".join([project, sample, ".", genome, mutType, chrom, start, start, ref, mut, "SOMATIC"]), file=out)
 
 	out.close()
 
 
-def convertTxt (project, vcf_path, genome, mutType=None):
+def convertTxt (project, vcf_path, genome, output_path, mutType=None):
 	if mutType == None:
 		mutType = 'SNP'
 
-	current_dir = os.getcwd()
-	ref_dir = re.sub('\/scripts$', '', current_dir)
-
-	output_path = ref_dir + "/references/vcf_files/single/"
-	outputFile = ref_dir + "/references/vcf_files/single/" + project + "_indels.genome"
+	outputFile = output_path + project + "_indels.genome"
 	os.system("rm -f " + outputFile)
 
 	if not os.path.exists(output_path):
@@ -85,14 +84,11 @@ def convertTxt (project, vcf_path, genome, mutType=None):
 	for file in files:
 		if file == '.DS_Store':
 			continue
-		print(vcf_path, file)
 		with open (vcf_path + file) as f:
-			#print(f.readline())
 			for lines in f:
 				line = lines.strip().split()
 				sample = line[1]
 				genome = line[3]
-				#mutType = line[4]
 				chrom = line[5]
 				start = line[6]
 				end = line[7]
@@ -102,15 +98,11 @@ def convertTxt (project, vcf_path, genome, mutType=None):
 
 	out.close()
 
-def convertMAF (project, vcf_path, genome, mutType=None):
+def convertMAF (project, vcf_path, genome, output_path, mutType=None):
 	if mutType == None:
 		mutType = 'SNP'
 
-	current_dir = os.getcwd()
-	ref_dir = re.sub('\/scripts$', '', current_dir)
-
-	output_path = ref_dir + "/references/vcf_files/single/"
-	outputFile = ref_dir + "/references/vcf_files/single/" + project + "_indels.genome"
+	outputFile = output_path + project + "_indels.genome"
 	os.system("rm -f " + outputFile)
 
 	if not os.path.exists(output_path):
@@ -120,6 +112,8 @@ def convertMAF (project, vcf_path, genome, mutType=None):
 
 	files = os.listdir(vcf_path)
 	for file in files:
+		if file == '.DS_Store':
+			continue
 		name = file.split(".")
 		sample = name[0]
 		with open (vcf_path + file) as f:
@@ -132,6 +126,37 @@ def convertMAF (project, vcf_path, genome, mutType=None):
 				ref = line[10]
 				mut = line[47]
 				print("\t".join([project, sample, ".", genome, mutType, chrom, start, end, ref, mut, "SOMATIC"]), file=out)
+
+	out.close()
+
+def convertICGC (project, vcf_path, genome, output_path, mutType=None):
+	if mutType == None:
+		mutType = 'SNP'
+
+	outputFile = output_path + project + "_indels.genome"
+	os.system("rm -f " + outputFile)
+
+	if not os.path.exists(output_path):
+		os.mkdir(output_path)
+
+	out = open(outputFile, "w") 
+
+	files = os.listdir(vcf_path)
+	for file in files:
+		if file == '.DS_Store':
+			continue
+		with open (vcf_path + file) as f:
+			for lines in f:
+				line = lines.strip().split()
+				sample = line[1]
+				icgc_sample_id = line[4]
+				chrom = line[8]
+				start = line[9]
+				end = line[10]
+				genome = line[12]
+				ref = line[15]
+				mut = line[16]
+				print("\t".join([project, sample, ".", genome, mutType, chrom, start, end, ref, mut, "SOMATIC",icgc_sample_id]), file=out)
 
 	out.close()
 
