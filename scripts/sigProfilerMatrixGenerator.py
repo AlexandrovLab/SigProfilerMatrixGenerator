@@ -224,7 +224,11 @@ def catalogue_generator_single (vcf_path, vcf_files, chrom_path, project, output
 							ref = revcompl(ref)
 							mut = revcompl(mut) 
 							sequence = revcompl(sequence)
-							bias = revbias(str(bias))
+							if bias == 'U':
+								bias = 'T'
+							elif bias == 'T':
+								bias = 'U' 
+							#bias = revbias(str(bias))
 
 						mut_key = sequence[0:int(len(sequence)/2)] + '[' + ref + '>' + mut + ']' + sequence[int(len(sequence)/2+1):]
 
@@ -1484,7 +1488,6 @@ def main():
 				pass
 			else:
 				vcf_files2[0].append(file)
-
 	if indel:
 		for file in vcf_files_indel_temp:
 			# Skips hidden files
@@ -1545,8 +1548,8 @@ def main():
 
 
 				
-		vcf_files = os.listdir(ref_dir + '/references/vcf_files/' + output_path + '/')
-		vcf_path = ref_dir + '/references/vcf_files/' + output_path + '/'
+		vcf_files = os.listdir(output_path)
+		vcf_path = output_path
 
 		# Include some kind of a flag for the INDEL option 
 		sort_file = vcf_files[0]
@@ -1578,7 +1581,7 @@ def main():
 
 			logging.info("Catalogue for " + context + " context is complete.")
 			print("Catalogue for " + context + " context is complete.")
-		os.system("rm -r " + vcf_path)
+		#os.system("rm -r " + vcf_path)
 
 	end = time.time()
 	logging.info("Job took " + str(end-start) + " seconds.")
