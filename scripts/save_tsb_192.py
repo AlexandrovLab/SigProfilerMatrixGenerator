@@ -326,7 +326,7 @@ def main ():
     script_dir = os.getcwd()
     ref_dir = re.sub('\/scripts$', '', script_dir)
 
-    chromosome_string_path = "/Users/ebergstr/Desktop/Perl_tests/testCode/simulation_code_python/mutation_simulation/references/chromosomes/chrom_string/" + genome + "/"
+    chromosome_string_path = ref_dir + "/references/chromosomes/chrom_string/" + genome + "/"
     transcript_path = ref_dir + "/references/chromosomes/transcripts/" + genome + "/"
     output_path = ref_dir + "/references/chromosomes/tsb/" + genome + "/"
     if os.path.exists(output_path) == False:
