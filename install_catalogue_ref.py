@@ -173,8 +173,8 @@ def benchmark (ref_dir):
 
 def main ():
 
-	#genomes = ['mm9', 'mm10','GRCh37', 'GRCh38' ]
-	genomes = ['GRCh37']
+	genomes = ['mm9', 'mm10','GRCh37', 'GRCh38' ]
+	#genomes = ['GRCh37']
 	custom = False
 	parser = argparse.ArgumentParser(description="Provide the necessary arguments to install the reference files.")
 	parser.add_argument("-g", "--genome", nargs='?', help="Optional parameter instructs script to install the custom genome.")
