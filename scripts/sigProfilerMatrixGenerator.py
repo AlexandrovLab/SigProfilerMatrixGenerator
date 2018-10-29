@@ -1243,7 +1243,7 @@ def matrix_generator (context, output_matrix, project, samples, bias_sort, mutat
 		if plot:
 			output_path = ref_dir + "/plots/" + project + "/"
 			if not os.path.exists(output_path):
-				os.mkdirs(output_path)
+				os.makedirs(output_path)
 			if cont == '96':
 				sigPlt.plot96(output_file_matrix, output_path, False, project, False)
 			elif cont == '192':

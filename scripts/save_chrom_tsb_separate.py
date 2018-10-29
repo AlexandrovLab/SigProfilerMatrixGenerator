@@ -19,7 +19,7 @@ def save_chrom_tsb_separate (genome, ref_dir):
 
 
 	if genome == 'mm10' or genome == 'mm9':
-		chromosomes = chromosomes[:19]
+		chromosomes = chromosomes[:21]
 
 	if not os.path.exists(chromosome_BED_path):
 		os.makedirs(chromosome_BED_path)
