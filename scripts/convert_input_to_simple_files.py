@@ -56,7 +56,7 @@ def convertVCF (project, vcf_path, genome, output_path, mutType=None):
 				if lines[0] == "#":
 					continue
 				else:
-					line = lines.strip().split()
+					line = lines.strip().split('\t')
 					chrom = line[0]
 					start = line[1]
 					#sample = line[2]
@@ -86,7 +86,7 @@ def convertTxt (project, vcf_path, genome, output_path, mutType=None):
 			continue
 		with open (vcf_path + file) as f:
 			for lines in f:
-				line = lines.strip().split()
+				line = lines.strip().split('\t')
 				sample = line[1]
 				genome = line[3]
 				chrom = line[5]
@@ -118,7 +118,7 @@ def convertMAF (project, vcf_path, genome, output_path, mutType=None):
 		sample = name[0]
 		with open (vcf_path + file) as f:
 			for lines in f:
-				line = lines.strip().split()
+				line = lines.strip().split('\t')
 				genome = line[3]
 				chrom = line[4]
 				start = line[5]
@@ -147,16 +147,21 @@ def convertICGC (project, vcf_path, genome, output_path, mutType=None):
 			continue
 		with open (vcf_path + file) as f:
 			for lines in f:
-				line = lines.strip().split()
+				line = lines.strip().split('\t')
 				sample = line[1]
 				icgc_sample_id = line[4]
 				chrom = line[8]
-				start = line[9]
+				start = int(line[9])
 				end = line[10]
 				genome = line[12]
 				ref = line[15]
 				mut = line[16]
-				print("\t".join([project, sample, ".", genome, mutType, chrom, start, end, ref, mut, "SOMATIC",icgc_sample_id]), file=out)
+				if ref == '-':
+					mut = '-' + mut
+				elif mut == '-':
+					start -= 1
+					ref = '-' + ref
+				print("\t".join([project, sample, ".", genome, mutType, chrom, str(start), end, ref, mut, "SOMATIC",icgc_sample_id]), file=out)
 
 	out.close()
 

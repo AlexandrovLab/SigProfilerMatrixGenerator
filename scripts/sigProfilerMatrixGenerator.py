@@ -42,18 +42,38 @@ import statsmodels.stats.multitest as sm
 import convert_input_to_simple_files as convertIn
 import sigProfilerPlotting as sigPlt
 import uuid
+from collections import defaultdict
+from collections import OrderedDict
+
 
 ################# Functions and references ###############################################
 def perm(n, seq):
 	'''
-	Generates a list of all available permutations of n-mers
+	Generates a list of all available permutations of n-mers.
+
+	Parameters:
+		       n  -> length of the desired permutation string
+		     seq  -> list of all possible string values
+
+	Returns:
+	      permus  -> list of all available permutations
 	'''
 	permus = []
 	for p in itertools.product(seq, repeat=n):
 		permus.append("".join(p))
 	return(permus)
 
+
 def BED_filtering (bed_file_path):
+	'''
+	Creates ranges from a bed file for generating the matrix.
+
+	Parameters:
+	     bed_file_path  -> path to the desired bed file
+
+	Returns:
+	      ranges_final  -> dictionary of all ranges for each chromosome.
+	'''
 	ranges = {}
 	ranges_final = {}
 	with open(bed_file_path) as f:
@@ -72,22 +92,81 @@ def BED_filtering (bed_file_path):
 
 	return(ranges_final)
 
-def catalogue_generator_single (vcf_path, vcf_files, chrom_path, project, output_matrix, context, exome, genome, ncbi_chrom, functionFlag, bed, bed_ranges, chrom_based, plot, tsb_ref):
+def gene_range (files_path):
+	'''
+	Creates a dictionary of gene ranges and gene names across the 
+	given reference genome. 
+
+	Parameters:
+	     files_path  -> path to the transcript files
+
+	Returns:
+		gene_ranges  -> dictionary that contains the gene ranges on a chromosome basis.
+		gene_counts  -> dictionary that contains the number of mutations found for a given gene.
+						This value broken into a list of two integers ([transcribed, untranscribed])
+		 gene_names  -> dictionary that contains all of the gene names on a chromosome basis
+	'''
+	gene_ranges = {}
+	gene_counts = {}
+	gene_names = {}
+	for file in os.listdir(files_path):
+		name = file.split("_")
+		chrom = name[0]
+		gene_ranges[chrom] = []
+		gene_names[chrom] = []
+		if file == '.DS_Store':
+			continue
+		else:
+			with open(files_path + file) as f:
+				next(f)
+				for lines in f:
+					line = lines.strip().split("\t")
+					gene, start, end, strand, chrom = line[6], line[4], line[5], line[3], line[2]
+					start, end = int(start), int(end)
+					if gene not in gene_names[chrom]:
+						gene_counts[gene] = OrderedDict()
+						gene_ranges[chrom].append((start, end, strand))
+						gene_names[chrom].append(gene)
+						gene_counts[gene] = {'T:C>A':0, 'T:C>G':0,'T:C>T':0,'T:T>A':0,'T:T>C':0,'T:T>G':0,
+											 'U:C>A':0, 'U:C>G':0,'U:C>T':0,'U:T>A':0,'U:T>C':0,'U:T>G':0,
+											 'samples':[]}
+					else:
+						lst = list(gene_ranges[chrom][-1])
+						if start < lst[0]:
+							lst[0] = start
+						if end > lst[1]:
+							lst[1] = end
+						gene_ranges[chrom][-1] = tuple(lst) 
+
+	return(gene_ranges, gene_counts, gene_names)
+
+
+
+
+def catalogue_generator_single (vcf_path, vcf_files, chrom_path, project, output_matrix, context, exome, genome, ncbi_chrom, functionFlag, bed, bed_ranges, chrom_based, plot, tsb_ref, transcript_path, gs):
 	'''
 	Generates the mutational matrix for 96, 1536, 192, and 3072 context using a single vcf file with all samples of interest.
 
 	Parameters:
-				   vcf_path  -> path to vcf file of interest
-				  vcf_files  -> actual vcf file
-				 chrom_path  -> path to chromosome reference files. The chromosomes are saved as strings witht the following
+				    vcf_path  -> path to vcf file of interest
+				   vcf_files  -> actual vcf file
+				  chrom_path  -> path to chromosome reference files. The chromosomes are saved as strings witht the following
 								file name: '1.txt', '2.txt', etc.
-					project  -> unique name given to the set of samples (ex. 'BRCA') 
-			  output_matrix  -> path where the final mutational matrix is stored
-					context  -> desired context (ex. 96, 1536, 192, 3072)
-				 ncbi_chrom  -> dictionary that allows for the converstion of ncbi chromosome names to standard format
+					 project  -> unique name given to the set of samples (ex. 'BRCA') 
+			   output_matrix  -> path where the final mutational matrix is stored
+					 context  -> desired context (ex. 96, 1536, 192, 3072)
+					   exome  -> flag that generates the matrix in only the exome 
+					  genome  -> the desired reference genome 
+				  ncbi_chrom  -> dictionary that allows for the converstion of ncbi chromosome names to standard format
 								for the mm10 assembly.
-						bed  -> parameter used to filter the mutations on a user-provided BED file
-				 bed_ranges  -> dictionary that contains all of the ranges for each chromosome dictated by the user's input BED file
+				functionFlag  -> flag that is used when calling this function from an alternate script
+						 bed  -> parameter used to filter the mutations on a user-provided BED file
+				  bed_ranges  -> dictionary that contains all of the ranges for each chromosome dictated by the user's input BED file
+				 chrom_based  -> flag that generates the matrices on a chromosome basis
+				        plot  -> flag that plots the matrices after they are generated
+				     tsb_ref  -> dictionary that allows for switching between binary and biologically relevant strings
+			 transcript_path  -> path to the transcript files
+				          gs  -> flag that generates a file for the strand bias on a gene basis.
 
 	Returns:
 		None
@@ -99,7 +178,7 @@ def catalogue_generator_single (vcf_path, vcf_files, chrom_path, project, output
 
 	# Small functions to provide reverse complements of TSB and sequence info:
 	revcompl = lambda x: ''.join([{'A':'T','C':'G','G':'C','T':'A','N':'N'}[B] for B in x][::-1])
-	revbias = lambda x: ''.join([{'0':'0', '3':'3', '1':'2','2':'1'}[B] for B in x][::-1])
+	revbias = lambda x: ''.join([{'0':'0', '3':'3', '1':'2','2':'1','U':'T','T':'U','B':'B','N':'N'}[B] for B in x][::-1])
 	
 	# Provides the sorting order for the TSB matrices
 	bias_sort = {'T':0,'U':1,'N':3,'B':2}
@@ -118,6 +197,7 @@ def catalogue_generator_single (vcf_path, vcf_files, chrom_path, project, output
 						mut_types.append(tsbs+":"+mut[0:int(size/2)] + "[" + current_base+">"+ base+"]"+mut[int(size/2)+1:])
 
 
+
 	types = []
 	samples = []
 	mutation_dict = {}
@@ -125,12 +205,17 @@ def catalogue_generator_single (vcf_path, vcf_files, chrom_path, project, output
 	i = 0
 	file = vcf_files[0]
 	sample_start = None
+	gene_counts = {}
+	range_index = 0
 
 	if exome:
 		exome_temp_file = "exome_temp.txt"
 		exome_file = open(exome_temp_file, 'w')
 
-	with open (vcf_path + file) as f:                
+	with open (vcf_path + file) as f:
+			if gs:
+				out = open(output_matrix + "gene_strand_bias_counts.txt", "w")
+				gene_ranges, gene_counts, gene_names = gene_range(transcript_path)
 			# Skips any header lines
 			for lines in f:
 				if lines[0] == '#':
@@ -164,7 +249,7 @@ def catalogue_generator_single (vcf_path, vcf_files, chrom_path, project, output
 						try:
 							with open(chrom_path + chrom_start + ".txt", "rb") as f:
 								chrom_string = f.read()
-								#chrom_bias = f2.read()
+
 						except:
 
 							print(chrom_start + " is not supported. You will need to download that chromosome and create the required files. Continuing with the matrix generation...")
@@ -181,6 +266,7 @@ def catalogue_generator_single (vcf_path, vcf_files, chrom_path, project, output
 
 					# Opens the next chromosome data once a new chromosome is reached
 					if chrom != chrom_start:
+						range_index = 0
 						logging.info("Chromosome " + chrom_start + " done")
 						if chrom_based:
 							matrix_generator (context, output_matrix, project, samples, bias_sort, mutation_dict, types, exome, mut_types, bed, chrom_start)
@@ -190,7 +276,6 @@ def catalogue_generator_single (vcf_path, vcf_files, chrom_path, project, output
 						try:
 							with open(chrom_path + chrom_start + ".txt", "rb") as f:
 								chrom_string = f.read()
-								#chrom_bias = f2.read()
 							i += 1
 						except:
 							print(chrom_start + " is not supported. You will need to download that chromosome and create the required files. Continuing with the matrix generation...")
@@ -215,33 +300,50 @@ def catalogue_generator_single (vcf_path, vcf_files, chrom_path, project, output
 					# Saves the sequence/mutation type if it matched the reference  
 					else:
 						if char == ref:
+							strand = '1'
 							if ref == 'A' or ref == 'G':
+								strand = '-1'
+
+								bias = revbias(bias)
 								ref = revcompl(ref)
 								mut = revcompl(mut)
 								sequence = revcompl(sequence)
 
 						else:
-							ref = revcompl(ref)
-							mut = revcompl(mut) 
-							sequence = revcompl(sequence)
-							if bias == 'U':
-								bias = 'T'
-							elif bias == 'T':
-								bias = 'U' 
-							#bias = revbias(str(bias))
+							strand = '-1'
+							if ref == 'A' or ref == 'G':
+								strand = '1'
+								ref = revcompl(ref)
+								mut = revcompl(mut) 
+								sequence = revcompl(sequence)
+							else:
+								bias = revbias(bias)
+
+						if gs:	
+							continue_flag = False
+							for ranges in gene_ranges[chrom_start][range_index:]:
+								dict_key = ref + ">" + mut
+								# if start > ranges[1] and not continue_flag:
+								# 	range_index += 1
+								if start < ranges[0]:
+									break
+								if ranges[0] <= start <= ranges[1]:
+									continue_flag = True
+									gene_index = gene_ranges[chrom_start].index(ranges)
+									gene = gene_names[chrom_start][gene_index]
+									if strand == ranges[2]:
+										dict_key = 'T:' + dict_key
+										gene_counts[gene][dict_key] += 1
+										if sample not in gene_counts[gene]['samples']:
+											gene_counts[gene]['samples'].append(sample)
+									elif int(strand) + int(ranges[2]) == 0:
+										dict_key = 'U:' + dict_key
+										gene_counts[gene][dict_key] += 1
+										if sample not in gene_counts[gene]['samples']:
+											gene_counts[gene]['samples'].append(sample)
+								
 
 						mut_key = sequence[0:int(len(sequence)/2)] + '[' + ref + '>' + mut + ']' + sequence[int(len(sequence)/2+1):]
-
-
-
-						# if bias == 0:
-						#     bias = 'N'
-						# elif bias == 1:
-						#     bias = 'T'
-						# elif bias == 2:
-						#     bias = 'U'
-						# else:
-						#     bias = 'B'
 						mut_key = bias + ':' + mut_key
 
 						if mut_key not in types:
@@ -253,13 +355,57 @@ def catalogue_generator_single (vcf_path, vcf_files, chrom_path, project, output
 							else:
 								mutation_dict[sample][mut_key] += 1
 						except:
-							#print(chrom)\
 							pass
 
 						if exome:
 							exome_file.write(sample + '\t' + chrom + '\t' + str(start) + '\t' + mut_key + "\n")
 
+
+
+			if gs:
+				pvals = []
+				qvals = []
+				for gene in gene_counts:
+					sum_tran = 0
+					sum_untran = 0
+					for mut, counts in gene_counts[gene].items():
+						if mut[0] == 'T':
+							sum_tran += counts
+						elif mut[0] == 'U':
+							sum_untran += counts
+					pvals.append(stats.binom_test([sum_tran, sum_untran]))
+				qvals = sm.fdrcorrection(pvals)[1]
+				gene_ind = 0
+				for gene in gene_counts:
+					gene_counts[gene]['samples'] = len(gene_counts[gene]['samples'])
+					print(gene, end='',file=out, flush=False)
+					sum_tran = 0
+					sum_untran = 0
+					for mut, counts in gene_counts[gene].items():
+						if mut[0] == 'T':
+							sum_tran += counts
+						elif mut[0] == 'U':
+							sum_untran += counts
+						print("\t" + str(counts), end='', file=out, flush=False)
+
+					print("\t" + str(sum_tran) + "\t" + str(sum_untran) + "\t" + str(qvals[gene_ind]), flush=False, file=out)
+					gene_ind += 1
+				out.close()
+				with open(output_matrix + "gene_strand_bias_counts.txt") as f2:
+					lines = [line.strip().split() for line in f2]
+
+
+				output = open(output_matrix + "gene_strand_bias_counts.txt", 'w')
+				print('GENE\tT:C>A\tT:C>G\tT:C>T\tT:T>A\tT:T>C\tT:T>G\tU:C>A\tU:C>G\tU:C>T\tU:T>A\tU:T>C\tU:T>G\tSampleCount\tTranscribed_total\tUntranscribedTotal\tq_value', file=output)
+
+				for line in sorted(lines, key = lambda x: (float(x[-1])), reverse=False):
+					print('\t'.join(line), file=output)
+
+				output.close()
+
 	logging.info("Chromosome " + chrom_start + " done")
+
+
 	if chrom_based:
 		matrix_generator (context, output_matrix, project, samples, bias_sort, mutation_dict, types, exome, mut_types, bed, chrom_start)
 		mutation_dict = {}
@@ -275,10 +421,8 @@ def catalogue_generator_single (vcf_path, vcf_files, chrom_path, project, output
 			print('\t'.join(line), file=output)
 		output.close()
 
-		# os.system("sort -t $'\t' -k 2,2n -k 2,2 -k 3,3n " + exome_temp_file + " -o " + exome_temp_file)
-		# print("Beginning exome filtering. This may take a few moments...")
-		# mutation_dict, samples = exome_check (genome, exome_temp_file)
-		# os.system("rm " + exome_temp_file)
+		mutation_dict, samples = exome_check(genome, exome_temp_file)
+
 
 	# Calls the function to generate the final matrix
 	if functionFlag:
@@ -304,10 +448,16 @@ def catalogue_generator_DINUC_single (vcf_path, vcf_files, chrom_path, project, 
 								file name: '1.txt', '2.txt', etc.
 					project  -> unique name given to the set of samples (ex. 'BRCA') 
 			  output_matrix  -> path where the final mutational matrix is stored
+			  exome  -> flag that generates the matrix in only the exome 
+			  genome  -> the desired reference genome 
 				 ncbi_chrom  -> dictionary that allows for the converstion of ncbi chromosome names to standard format
 								for the mm10 assembly.
+					functionFlag  -> flag that is used when calling this function from an alternate script
 						bed  -> parameter used to filter the mutations on a user-provided BED file
 				 bed_ranges  -> dictionary that contains all of the ranges for each chromosome dictated by the user's input BED file
+				 chrom_based  -> flag that generates the matrices on a chromosome basis
+				 plot  -> flag that plots the matrices after they are generated
+				 tsb_ref  -> dictionary that allows for switching between binary and biologically relevant strings
 
 
 	Returns:
@@ -319,12 +469,18 @@ def catalogue_generator_DINUC_single (vcf_path, vcf_files, chrom_path, project, 
 	'''
 
 	# Small functions to provide reverse complements of TSB and sequence info:
-	revcompl = lambda x: ''.join([{'A':'T','C':'G','G':'C','T':'A','N':'N'}[B] for B in x][::-1])
-	revbias = lambda x: ''.join([{'0':'0', '3':'3', '1':'2','2':'1'}[B] for B in x][::-1])
-	
+	revcompl = lambda x: ''.join([{'A':'T','C':'G','G':'C','T':'A','N':'N','[':'[',']':']','>':'>'}[B] for B in x][::-1])
+	revbias = lambda x: ''.join([{'0':'0', '3':'3', '1':'2','2':'1','U':'T','T':'U','B':'B','N':'N'}[B] for B in x][::-1])
+	bases = ['A','C','G','T']
+	bias_sort = {'T':0,'U':1,'N':3,'B':2}
+	tsb = ['T','U','N','B']
+
 
 	# Instantiates the necessary variables/data structures
 	dinucs = {}
+	dinucs_context = {}
+	dinucs_context_tsb = {}
+	dinucs_tsb = {}
 	samples = []
 	mutation_types = ['AA>CC','AA>CG','AA>CT','AA>GC','AA>GG','AA>GT','AA>TC','AA>TG','AA>TT',
 					  'AC>CA','AC>CG','AC>CT','AC>GA','AC>GG','AC>GT','AC>TA','AC>TG','AC>TT',
@@ -336,6 +492,19 @@ def catalogue_generator_DINUC_single (vcf_path, vcf_files, chrom_path, project, 
 					  'GA>TC','GA>TG','GA>TT','GC>AA','GC>AG','GC>AT','GC>CA','GC>CG','GC>TA',
 					  'TA>AC','TA>AG','TA>AT','TA>CC','TA>CG','TA>GC']
 
+
+	mutation_types_context = []
+	mutation_types_tsb_context = []
+	mutation_types_tsb = []
+	for base in bases:
+		for mut in mutation_types:
+			for base2 in bases:
+				mutation_types_context.append(base + "[" + mut + "]" + base2)
+				for base3 in tsb:
+					mutation_types_tsb_context.append(''.join([base3,":",base,"[",mut,"]",base2]))
+					mut_tsb = base3 + ":" + mut
+					if mut_tsb not in mutation_types_tsb:
+						mutation_types_tsb.append(base3 + ":" + mut)
 
 	types = []
 	samples = []
@@ -390,7 +559,9 @@ def catalogue_generator_DINUC_single (vcf_path, vcf_files, chrom_path, project, 
 					if flag:
 						sample_start = sample
 						chrom_start = chrom
-
+						with open (chrom_path + chrom + ".txt", "rb") as f:
+							chrom_string = f.read()
+						flag = False
 
 					# Breaks the loop once a new chromosome is reached
 					if chrom != chrom_start:
@@ -399,6 +570,8 @@ def catalogue_generator_DINUC_single (vcf_path, vcf_files, chrom_path, project, 
 							matrix_generator_DINUC (output_matrix, samples, mutation_types, dinucs, project, exome, bed, chrom_start, plot)
 							dinucs = {}
 						chrom_start = chrom
+						with open (chrom_path + chrom + ".txt", "rb") as f:
+							chrom_string = f.read()
 						
 
 					# Grabs the slice of interest
@@ -406,15 +579,49 @@ def catalogue_generator_DINUC_single (vcf_path, vcf_files, chrom_path, project, 
 						if start == previous_start + 1:
 							dinuc = previous_ref + ref + ">" + previous_mut + mut
 
+							dinuc_seq = "".join([tsb_ref[chrom_string[start-3]][1],"[",dinuc,"]",tsb_ref[chrom_string[start]][1]])
+							bias = tsb_ref[chrom_string[start-1]][0]
+							dinuc_seq_tsb = bias + ":" + dinuc_seq
+							dinuc_tsb = bias + ":" + dinuc
+
 							if sample not in dinucs.keys():
 								dinucs[sample] = {}
+								dinucs_context[sample] = {}
+								dinucs_context_tsb[sample] = {}
+								dinucs_tsb[sample] = {}
+
 								for dinucl in mutation_types:
 									dinucs[sample][dinucl]=0
+								for dinucl in mutation_types_context:
+									dinucs_context[sample][dinucl]=0
+								for dinucl in  mutation_types_tsb_context:
+									dinucs_context_tsb[sample][dinucl]=0
+								for dinucl in mutation_types_tsb:
+									dinucs_tsb[sample][dinucl]=0
+
 							if dinuc in mutation_types:
 								dinucs[sample][dinuc] += 1 
 							else:
 								dinuc = revcompl(previous_ref + ref) + '>' + revcompl(previous_mut + mut)
 								dinucs[sample][dinuc] += 1
+
+							if dinuc_seq in mutation_types_context:
+								dinucs_context[sample][dinuc_seq] += 1
+							else:
+								dinuc_seq = "".join([revcompl(dinuc_seq[0]),"[",revcompl(previous_ref + ref),'>',revcompl(previous_mut + mut),"]",revcompl(dinuc_seq[8])])
+								dinucs_context[sample][dinuc_seq] += 1
+
+							if dinuc_seq_tsb in mutation_types_tsb_context:
+								dinucs_context_tsb[sample][dinuc_seq_tsb] += 1
+							else:
+								dinuc_seq_tsb = "".join([revbias(dinuc_seq_tsb[0]),":",revcompl(dinuc_seq_tsb[-1]),"[",revcompl(dinuc_seq_tsb[4:6]),">",revcompl(dinuc_seq_tsb[7:9]),"]",revcompl(dinuc_seq_tsb[2])])
+								dinucs_context_tsb[sample][dinuc_seq_tsb] += 1
+
+							if dinuc_tsb in mutation_types_tsb:
+								dinucs_tsb[sample][dinuc_tsb] += 1
+							else:
+								dinuc_tsb = "".join([revbias(dinuc_tsb[0]),":",revcompl(dinuc_tsb[2:4]),">",revcompl(dinuc_tsb[5:])])
+								dinucs_tsb[sample][dinuc_tsb] += 1
 
 							if exome:
 								exome_file.write(sample + '\t' + chrom + '\t' + str(start) + '\t' + dinuc + "\n")
@@ -425,11 +632,12 @@ def catalogue_generator_DINUC_single (vcf_path, vcf_files, chrom_path, project, 
 					previous_ref = ref
 					previous_mut = mut
 
+	all_dinucs = {'78':dinucs, '312':dinucs_tsb, '1248':dinucs_context, '4992':dinucs_context_tsb}
+	all_mut_types = {'78':mutation_types, '312':mutation_types_tsb, '1248':mutation_types_context, '4992':mutation_types_tsb_context}
 	logging.info("Chromosome " + chrom_start + " done")
 	if chrom_based:
-		matrix_generator_DINUC (output_matrix, samples, mutation_types, dinucs, project, exome, bed, chrom_start, plot)
+		matrix_generator_DINUC (output_matrix, samples, bias_sort, all_dinucs, all_mut_types, mutation_types, mutation_types_context, mutation_types_tsb_context, dinucs, dinucs_context, dinucs_context_tsb, project, exome, bed, chrom_start, plot)
 		dinucs = {}
-	#print ("Chromosome " + chrom_start + " done")
 
 	if exome:
 		exome_file.close()
@@ -442,10 +650,7 @@ def catalogue_generator_DINUC_single (vcf_path, vcf_files, chrom_path, project, 
 			print('\t'.join(line), file=output)
 		output.close()
 
-		# os.system("sort -t $'\t' -k 2,2n -k 2,2 -k 3,3n " + exome_temp_file + " -o " + exome_temp_file)
-		# print("Beginning exome filtering. This may take a few moments...")
-		# mutation_dict, samples = exome_check (genome, exome_temp_file)
-		# os.system("rm " + exome_temp_file)
+		all_dinucs, samples = exome_check(genome, exome_temp_file)
 
 	# Calls the function to generate the final mutational matrix
 	if functionFlag:
@@ -453,7 +658,7 @@ def catalogue_generator_DINUC_single (vcf_path, vcf_files, chrom_path, project, 
 	else:
 		if not chrom_based:
 			chrom_start=None
-			matrix_generator_DINUC (output_matrix, samples, mutation_types, dinucs, project, exome, bed, chrom_start, plot)
+			matrix_generator_DINUC (output_matrix, samples, bias_sort, all_dinucs, all_mut_types, mutation_types, mutation_types_context, mutation_types_tsb_context, dinucs, dinucs_context, dinucs_context_tsb, project, exome, bed, chrom_start, plot)
 		
 
 		
@@ -487,7 +692,11 @@ def catalogue_generator_INDEL_single (vcf_path, vcf_files, chrom_path, project, 
 
 	# Instantiates the necessary variables/data structures
 	indel_dict = {}
+	indel_tsb_dict = {}
 	samples = []
+	indel_types_tsb = []
+	tsb_abrev = ['T','U','B','N']
+
 						# Single point mutations
 	indel_types = ['1:Del:C:0', '1:Del:C:1', '1:Del:C:2', '1:Del:C:3', '1:Del:C:4', '1:Del:C:5',
 				   '1:Del:T:0', '1:Del:T:1', '1:Del:T:2', '1:Del:T:3', '1:Del:T:4', '1:Del:T:5',
@@ -507,6 +716,11 @@ def catalogue_generator_INDEL_single (vcf_path, vcf_files, chrom_path, project, 
 				   '5:Del:M:1', '5:Del:M:2', '5:Del:M:3', '5:Del:M:4', '5:Del:M:5', '2:Ins:M:1', 
 				   '3:Ins:M:1', '3:Ins:M:2', '4:Ins:M:1', '4:Ins:M:2', '4:Ins:M:3', '5:Ins:M:1', 
 				   '5:Ins:M:2', '5:Ins:M:3', '5:Ins:M:4', '5:Ins:M:5', 'complex', 'non_matching']
+
+	for indels in indel_types[:24]:
+		for tsbs in tsb_abrev:
+			indel_types_tsb.append(tsbs + ":" + indels)
+	print(len(indel_types_tsb))
 
 	if limited_indel:
 		indel_types = indel_types[:-13]
@@ -557,17 +771,12 @@ def catalogue_generator_INDEL_single (vcf_path, vcf_files, chrom_path, project, 
 					print(initial_chrom + " is not supported. You will need to download that chromosome and create the required files. Continuing with the matrix generation...")
 					continue
 
-			# Ensures that the variant matches the reference chromosome
-			#try:
-			#    if chrom_string[start-1]:
-			#        pass
-			#except:
-			#    print(sample, chrom, start, len(chrom_string))
 			# Opens the next chromosome when a new chromosome is reached in the file
 			if chrom != initial_chrom:
 				if chrom_based:
-					matrix_generator_INDEL(output_matrix, samples, indel_types, indel_dict, project, exome, limited_indel, bed, initial_chrom)
+					matrix_generator_INDEL(output_matrix, samples, indel_types, indel_types_tsb, indel_dict, indel_tsb_dict, project, exome, limited_indel, bed, initial_chrom)
 					indel_dict = {}
+					indel_tsb_dict = {}
 				initial_chrom = chrom
 				try:
 					with open (chrom_path + initial_chrom + '.txt', "rb") as f:
@@ -582,7 +791,8 @@ def catalogue_generator_INDEL_single (vcf_path, vcf_files, chrom_path, project, 
 				base = tsb_ref[chrom_string[start-1]][1]
 			except:
 				print(chrom, start)
-			if ref[0] == base:
+			if ref[0] == base or ref[0] == '-':
+				bias = tsb_ref[chrom_string[start-1]][0]
 				# Saves the mutation type for the given variant
 				if len(ref) - len(mut) == len(ref)-1:
 					mut_type = 'Del'
@@ -591,6 +801,7 @@ def catalogue_generator_INDEL_single (vcf_path, vcf_files, chrom_path, project, 
 				else:
 					if sample not in indel_dict.keys():
 						indel_dict[sample] = {}
+						indel_tsb_dict[sample] = {}
 
 					if 'complex' not in indel_dict[sample].keys():
 						indel_dict[sample]['complex'] = 1
@@ -599,15 +810,12 @@ def catalogue_generator_INDEL_single (vcf_path, vcf_files, chrom_path, project, 
 					continue
 				
 
- 
-
-
 				type_sequence = ''
 				
 				# Pulls out the mutation subtype for deletions
 				if mut_type == 'Del': 
 					type_sequence = ref[1:]   
-					
+
 					type_length = len(type_sequence)
 					sequence = type_sequence
 					pos = start + type_length 
@@ -720,6 +928,7 @@ def catalogue_generator_INDEL_single (vcf_path, vcf_files, chrom_path, project, 
 				# Saves the sample name for later reference
 				if sample not in indel_dict.keys():
 					indel_dict[sample] = {}
+					indel_tsb_dict[sample] = {}
 				if sample not in samples:
 					samples.append(sample)
 
@@ -836,13 +1045,20 @@ def catalogue_generator_INDEL_single (vcf_path, vcf_files, chrom_path, project, 
 				else:        
 					indel_key = str(indel_key_1) +':'+indel_key_2+':'+indel_key_3+':'+str(indel_key_4)
 
+				indel_key_tsb = bias + ":" + indel_key
+
 				if indel_key not in indel_dict[sample].keys():
 					indel_dict[sample][indel_key] = 1
 				else:
 					indel_dict[sample][indel_key] += 1
 
+				if indel_key_tsb not in indel_tsb_dict[sample].keys():
+					indel_tsb_dict[sample][indel_key_tsb] = 1
+				else:
+					indel_tsb_dict[sample][indel_key_tsb] += 1
+
 				if exome:
-					exome_file.write(sample + '\t' + chrom + '\t' + str(start) + '\t' + mut_key + "\n")
+					exome_file.write(sample + '\t' + chrom + '\t' + str(start) + '\t' + indel_key + "\n")
 			else:
 				if 'non_matching' not in indel_dict[sample].keys():
 					indel_dict[sample]['non_matching'] = 1
@@ -852,7 +1068,7 @@ def catalogue_generator_INDEL_single (vcf_path, vcf_files, chrom_path, project, 
 	# Prints the total number of complex mutations
 	logging.info("Non-matching mutations: " + str(non_matching))
 	if chrom_based:
-		matrix_generator_INDEL(output_matrix, samples, indel_types, indel_dict, project, exome, limited_indel, bed, initial_chrom, plot)
+		matrix_generator_INDEL(output_matrix, samples, indel_types, indel_types_tsb, indel_dict, indel_tsb_dict, project, exome, limited_indel, bed, initial_chrom, plot)
 
 	if exome:
 		exome_file.close()
@@ -864,11 +1080,7 @@ def catalogue_generator_INDEL_single (vcf_path, vcf_files, chrom_path, project, 
 			print('\t'.join(line), file=output)
 		output.close()
 
-		# os.system("sort -t $'\t' -k 2,2n -k 2,2 -k 3,3n " + exome_temp_file + " -o " + exome_temp_file)
-		# print("Beginning exome filtering. This may take a few moments...")
-		# mutation_dict, samples = exome_check (genome, exome_temp_file)
-		# os.system("rm " + exome_temp_file)
-
+		indel_dict, samples = exome_check(genome, exome_temp_file)
 
 	# Calls the function to generate the final mutational matrix
 	if functionFlag:
@@ -876,7 +1088,7 @@ def catalogue_generator_INDEL_single (vcf_path, vcf_files, chrom_path, project, 
 	else:
 		if not chrom_based:
 			initial_chrom=None
-			matrix_generator_INDEL(output_matrix, samples, indel_types, indel_dict, project, exome, limited_indel, bed, initial_chrom, plot)
+			matrix_generator_INDEL(output_matrix, samples, indel_types, indel_types_tsb, indel_dict, indel_tsb_dict, project, exome, limited_indel, bed, initial_chrom, plot)
 
 def exome_check (genome, exome_temp_file):
 	'''
@@ -903,7 +1115,7 @@ def exome_check (genome, exome_temp_file):
 
 	initial = True
 	udpate_chrom = False
-	exome_file = ref_dir + "/references/chromosomes/exome/" + genome + "_exome.interval_list"
+	exome_file = ref_dir + "/references/chromosomes/exome/" + genome + "/" + genome + "_exome.interval_list"
 
 
 	with open(exome_temp_file) as f, open(exome_file) as exome:
@@ -1119,38 +1331,38 @@ def matrix_generator (context, output_matrix, project, samples, bias_sort, mutat
 					print ('0\t', end='', file=out)
 			print(file=out)
 
-		# with open (output_matrix + "strandBiasTest_3072.txt", 'w') as out2:
-		#     print("Sample\tMutationType\tEnrichment[Trans/UnTrans]\tp.value\tFDR_q.value",file=out2)
-		#     current_tsb = pd.DataFrame.from_dict(mutation_dict)
-		#     for sample in samples:
-		#         pvals = []
-		#         enrichment = []
-		#         for mut_type in types:
-		#             if mut_type[0] == 'T':
-		#                 if mut_type not in mutation_dict[sample]:
-		#                     num1 = 0
-		#                 else:
-		#                     num1 = current_tsb.loc[mut_type][sample]
+		with open (output_matrix + "strandBiasTest_3072.txt", 'w') as out2:
+		    print("Sample\tMutationType\tEnrichment[Trans/UnTrans]\tp.value\tFDR_q.value",file=out2)
+		    current_tsb = pd.DataFrame.from_dict(mutation_dict)
+		    for sample in samples:
+		        pvals = []
+		        enrichment = []
+		        for mut_type in types:
+		            if mut_type[0] == 'T':
+		                if mut_type not in mutation_dict[sample]:
+		                    num1 = 0
+		                else:
+		                    num1 = current_tsb.loc[mut_type][sample]
 
-		#                 if 'U:'+mut_type[2:] not in mutation_dict[sample]:
-		#                     num2 = 0
-		#                 else:
-		#                     num2 = current_tsb.loc['U:'+mut_type[2:]][sample]
+		                if 'U:'+mut_type[2:] not in mutation_dict[sample]:
+		                    num2 = 0
+		                else:
+		                    num2 = current_tsb.loc['U:'+mut_type[2:]][sample]
 
-		#                 pvals.append(stats.binom_test([num1, num2]))
+		                pvals.append(stats.binom_test([num1, num2]))
 
-		#                 if 'U:'+mut_type[2:] not in mutation_dict[sample] or current_tsb.loc['U:'+mut_type[2:]][sample] == 0:
-		#                     enrichment.append(0)
-		#                 else:
-		#                     enrichment.append(round(num1/num2, 4))
-		#         qvals = sm.fdrcorrection(pvals)[1]
-		#         p_index = 0
-		#         for mut_type in types:
-		#             if mut_type[0] == 'T':
-		#                 print(sample + "\t" + mut_type[2:] + "\t" + str(enrichment[p_index]) + "\t" + str(pvals[p_index]) + "\t" + str(qvals[p_index]), file=out2)
-		#                 if qvals[p_index] < 0.01:
-		#                      print(sample + "\t" + mut_type[2:] + "\t" + str(enrichment[p_index]) + "\t" + str(pvals[p_index]) + "\t" + str(qvals[p_index]), file=significant_tsb)
-		#             p_index += 1
+		                if 'U:'+mut_type[2:] not in mutation_dict[sample] or current_tsb.loc['U:'+mut_type[2:]][sample] == 0:
+		                    enrichment.append(0)
+		                else:
+		                    enrichment.append(round(num1/num2, 4))
+		        qvals = sm.fdrcorrection(pvals)[1]
+		        p_index = 0
+		        for mut_type in types:
+		            if mut_type[0] == 'T':
+		                print(sample + "\t" + mut_type[2:] + "\t" + str(enrichment[p_index]) + "\t" + str(pvals[p_index]) + "\t" + str(qvals[p_index]), file=out2)
+		                if qvals[p_index] < 0.01:
+		                     print(sample + "\t" + mut_type[2:] + "\t" + str(enrichment[p_index]) + "\t" + str(pvals[p_index]) + "\t" + str(qvals[p_index]), file=significant_tsb)
+		            p_index += 1
   
 		if functionFlag:
 			os.system("rm " + output_file_matrix) 
@@ -1203,29 +1415,29 @@ def matrix_generator (context, output_matrix, project, samples, bias_sort, mutat
 						print ('0\t', end='', file=out)
 				print(file=out)
 
-			# if cont in strandBias_test:
-			#     with open (output_matrix + "strandBiasTest_" + cont + ".txt", 'w') as out2:
-			#         print("Sample\tMutationType\tEnrichment[Trans/UnTrans]\tp.value\tFDR_q.value",file=out2)
-			#         current_tsb = pd.DataFrame.from_dict(mut_count_all[cont])
-			#         for sample in samples:
-			#             pvals = []
-			#             enrichment = []
-			#             for mut_type in types:
-			#                 if mut_type[0] == 'T':
-			#                     if cont in strandBias_test:
-			#                         pvals.append(stats.binom_test([current_tsb.loc[mut_type][sample], current_tsb.loc['U:'+mut_type[2:]][sample]]))
-			#                         if current_tsb.loc['U:'+mut_type[2:]][sample] == 0:
-			#                             enrichment.append(0)
-			#                         else:
-			#                             enrichment.append(round(current_tsb.loc[mut_type][sample]/current_tsb.loc['U:'+mut_type[2:]][sample], 4))
-			#             qvals = sm.fdrcorrection(pvals)[1]
-			#             p_index = 0
-			#             for mut_type in types:
-			#                 if mut_type[0] == 'T':
-			#                     print(sample + "\t" + mut_type[2:] + "\t" + str(enrichment[p_index]) + "\t" + str(pvals[p_index]) + "\t" + str(qvals[p_index]), file=out2)
-			#                     if qvals[p_index] < 0.01:
-			#                          print(sample + "\t" + mut_type[2:] + "\t" + str(enrichment[p_index]) + "\t" + str(pvals[p_index]) + "\t" + str(qvals[p_index]), file=significant_tsb)
-			#                 p_index += 1
+			if cont in strandBias_test:
+			    with open (output_matrix + "strandBiasTest_" + cont + ".txt", 'w') as out2:
+			        print("Sample\tMutationType\tEnrichment[Trans/UnTrans]\tp.value\tFDR_q.value",file=out2)
+			        current_tsb = pd.DataFrame.from_dict(mut_count_all[cont])
+			        for sample in samples:
+			            pvals = []
+			            enrichment = []
+			            for mut_type in types:
+			                if mut_type[0] == 'T':
+			                    if cont in strandBias_test:
+			                        pvals.append(stats.binom_test([current_tsb.loc[mut_type][sample], current_tsb.loc['U:'+mut_type[2:]][sample]]))
+			                        if current_tsb.loc['U:'+mut_type[2:]][sample] == 0:
+			                            enrichment.append(0)
+			                        else:
+			                            enrichment.append(round(current_tsb.loc[mut_type][sample]/current_tsb.loc['U:'+mut_type[2:]][sample], 4))
+			            qvals = sm.fdrcorrection(pvals)[1]
+			            p_index = 0
+			            for mut_type in types:
+			                if mut_type[0] == 'T':
+			                    print(sample + "\t" + mut_type[2:] + "\t" + str(enrichment[p_index]) + "\t" + str(pvals[p_index]) + "\t" + str(qvals[p_index]), file=out2)
+			                    if qvals[p_index] < 0.01:
+			                         print(sample + "\t" + mut_type[2:] + "\t" + str(enrichment[p_index]) + "\t" + str(pvals[p_index]) + "\t" + str(qvals[p_index]), file=significant_tsb)
+			                p_index += 1
 						
 
 
@@ -1252,7 +1464,7 @@ def matrix_generator (context, output_matrix, project, samples, bias_sort, mutat
 
 	significant_tsb.close()
 
-def matrix_generator_INDEL (output_matrix, samples, indel_types, indel_dict, project, exome, limited_indel, bed, initial_chrom=None, plot=False):
+def matrix_generator_INDEL (output_matrix, samples, indel_types, indel_types_tsb, indel_dict, indel_tsb_dict, project, exome, limited_indel, bed, initial_chrom=None, plot=False):
 	'''
 	Writes the final mutational matrix for INDELS given a dictionary of samples, INDEL types, and counts
 
@@ -1260,7 +1472,9 @@ def matrix_generator_INDEL (output_matrix, samples, indel_types, indel_dict, pro
 			  output_matrix  -> path where the final mutational matrix is stored
 					samples  -> a list of all sample names
 				indel_types  -> list of the INDEL types 
+			indel_types_tsb  -> list of the INDEL types for the TSB matrix
 				 indel_dict  -> dictionary with the counts for each INDEL type for each sample
+			 indel_tsb_dict  -> dictionary with the TSB counts for each INDEL type (only 1bp INDELs)
 					project  -> unique name given to the set of samples (ex. 'BRCA') 
 					  exome  -> Boolean for whether the catalogue should be generated across the whole
 								genome or just the exome
@@ -1276,17 +1490,24 @@ def matrix_generator_INDEL (output_matrix, samples, indel_types, indel_dict, pro
 	current_dir = os.getcwd()
 	ref_dir = re.sub('\/scripts$', '', current_dir)
 
+	bias_sort = {'T':0,'U':1,'N':3,'B':2}
+
 	file_prefix = project + ".DBS94"
+	file_prefix_tsb = project + ".DBS96"
 	if exome:
 		output_file_matrix = output_matrix + file_prefix + ".exome"
+		output_file_matrix_tsb = output_matrix + file_prefix_tsb + ".exome"
 	else:
 		if bed:
 			output_file_matrix = output_matrix + file_prefix + ".region"
+			output_file_matrix_tsb = output_matrix + file_prefix_tsb + ".region"
 		else:
 			output_file_matrix = output_matrix + file_prefix + ".all"
+			output_file_matrix_tsb = output_matrix + file_prefix_tsb + ".all"
 
 	if initial_chrom != None:
 		output_file_matrix += ".chr" + initial_chrom
+		output_file_matrix_tsb += ".chr" + initial_chrom
 
 	with open (output_file_matrix, 'w') as out:
 		# Prints all of the sample names into the first line of the file
@@ -1308,11 +1529,34 @@ def matrix_generator_INDEL (output_matrix, samples, indel_types, indel_dict, pro
 					print ('0\t', end='', file=out)
 			print(file=out)
 
+
+	with open (output_file_matrix_tsb, 'w') as out:
+		# Prints all of the sample names into the first line of the file
+		print ('MutationType\t', end='', flush=False, file=out)  
+		samples.sort()
+		for sample in samples:
+			print (sample + '\t', end='', flush=False, file=out)
+		print(file=out)
+
+		types = sorted(indel_types_tsb, key=lambda val: (bias_sort[val[0]], val[2:]))
+		# Prints the mutation count for each INDEL type across every sample
+		for indel in types:
+			print (indel + '\t', end='', flush =False, file=out)
+			for sample in samples:
+				if sample not in indel_tsb_dict.keys():
+					indel_tsb_dict[sample] = {}
+				if indel in indel_tsb_dict[sample].keys():
+					print (str(indel_tsb_dict[sample][indel]) + '\t', end='', file=out)
+				else:
+					print ('0\t', end='', file=out)
+			print(file=out)
+
+
 	if plot:
 		output_path = ref_dir + "/plots/" + project + "/"
 		sigPlt.plotINDEL(output_file_matrix, output_path, False, project, False)
 
-def matrix_generator_DINUC (output_matrix, samples, mutation_types, dinucs, project, exome, bed, chrom_start=None, plot=False):
+def matrix_generator_DINUC (output_matrix, samples, bias_sort, all_dinucs, all_mut_types, mutation_types, mutation_types_context, mutation_types_tsb_context, dinucs, dinucs_context, dinucs_context_tsb, project, exome, bed, chrom_start=None, plot=False):
 	'''
 	Writes the final mutational matrix for INDELS given a dictionary of samples, INDEL types, and counts
 
@@ -1333,45 +1577,82 @@ def matrix_generator_DINUC (output_matrix, samples, mutation_types, dinucs, proj
 		Write the final mutational matrix for DINUCs
 
 	'''
+
+	revcompl = lambda x: ''.join([{'A':'T','C':'G','G':'C','T':'A','N':'N'}[B] for B in x][::-1])
+	revbias = lambda x: ''.join([{'0':'0', '3':'3', '1':'2','2':'1','U':'T','T':'U','B':'B','N':'N'}[B] for B in x][::-1])
+	if not any(dinucs):
+		return()
 	current_dir = os.getcwd()
 	ref_dir = re.sub('\/scripts$', '', current_dir)
-
-	file_prefix = project + ".DBS78"
-	if exome:
-		output_file_matrix = output_matrix + file_prefix + ".exome"
-	else:
-		if bed:
-			output_file_matrix = output_matrix + file_prefix + ".region"
+	for cont in all_dinucs.keys():
+		mutation_types = all_mut_types[cont]
+		dinucs = all_dinucs[cont]
+		file_prefix = project + ".DBS" + cont
+		if exome:
+			output_file_matrix = output_matrix + file_prefix + ".exome"
 		else:
-			output_file_matrix = output_matrix + file_prefix + ".all"
+			if bed:
+				output_file_matrix = output_matrix + file_prefix + ".region"
+			else:
+				output_file_matrix = output_matrix + file_prefix + ".all"
+		if chrom_start != None:
+			output_file_matrix += ".chr" + chrom_start
 
-	if chrom_start != None:
-		output_file_matrix += ".chr" + chrom_start
-
-	with open (output_file_matrix, 'w') as out:
-		# Prints all of the sample names into the first line of the file
-		print ('MutationType\t', end='', flush=False, file=out)  
-		for sample in samples:
-			print (sample + '\t', end='', flush=False, file=out)
-		print(file=out)
-		
-		# Prints the mutation count for each INDEL type across every sample
-		for dinuc in mutation_types:
-			print (dinuc + '\t', end='', flush =False, file=out)
+		with open (output_file_matrix, 'w') as out:
+			# Prints all of the sample names into the first line of the file
+			print ('MutationType\t', end='', flush=False, file=out)  
 			for sample in samples:
-				try:
-					if dinuc in dinucs[sample].keys():
-						print (str(dinucs[sample][dinuc]) + '\t', end='', file=out)
-					else:
-						print ('0\t', end='', file=out)
-				except:
-					print('0\t', end='', file=out)
+				print (sample + '\t', end='', flush=False, file=out)
 			print(file=out)
+		
+			if cont == '312' or cont == '4992':
+				try:
+					mutation_types = sorted(mutation_types, key=lambda val: (bias_sort[val[0]], val[2:]))
+				except:
+					print(mutation_types)
+			# Prints the mutation count for each INDEL type across every sample
+			for dinuc in mutation_types:
+				if cont == '312' and dinuc[0] == 'T':
+					count = 0
+					if dinuc[2] == revcompl(dinuc[3]) and dinuc[5] == revcompl(dinuc[6]):
+						count += dinucs[sample][dinuc]
+						rev_dinuc = revbias(dinuc[0]) + dinuc[1:]
+						count += dinucs[sample][rev_dinuc]
+						if count >= 2:
+							dinucs[sample][dinuc] = int(count/2)
+							if count%2 != 0:							
+								dinucs[sample][rev_dinuc] = int(count/2) + 1
+							else:
+								dinucs[sample][rev_dinuc] = int(count/2)
+				
+				if cont == '4992' and dinuc[0] == 'T':
+					count = 0
+					if dinuc[2] == revcompl(dinuc[10]) and dinuc[4] == revcompl(dinuc[5]) and dinuc[7] == revcompl(dinuc[8]):
+						count += dinucs[sample][dinuc]
+						rev_dinuc = revbias(dinuc[0]) + dinuc[1:]
+						count += dinucs[sample][rev_dinuc]
+						if count >= 2:
+							dinucs[sample][dinuc] = int(count/2)
+							if count%2 != 0:							
+								dinucs[sample][rev_dinuc] = int(count/2) + 1
+							else:
+								dinucs[sample][rev_dinuc] = int(count/2)
+
+				print (dinuc + '\t', end='', flush =False, file=out)
+				for sample in samples:
+					try:
+						if dinuc in dinucs[sample]:
+							print(str(dinucs[sample][dinuc]) + "\t",end='',file=out)
+						else:
+							print('0\t',end='',file=out)
+					except:
+						print('0\t',end='',file=out)
+				print(file=out)
 	
 
-	if plot:
-		output_path = ref_dir + "/plots/" + project + "/"
-		sigPlt.plotDINUC(output_file_matrix, output_path, False, project, False)
+		if plot:
+			output_path = ref_dir + "/plots/" + project + "/"
+			sigPlt.plotDINUC(output_file_matrix, output_path, False, project, False)
 
 def main():
 	start = time.time()
@@ -1389,7 +1670,7 @@ def main():
 			   12:['B','A'], 13:['B','C'], 14:['B','G'], 15:['B','T'],
 			   16:['N','N'], 17:['T','N'], 18:['U','N'], 19:['B','N']}
 
-	contexts = ['3072', 'DINUC']#, '1536', '192', '3072', 'DINUC']
+	contexts = ['3072', 'DINUC']
 
 	exome = False
 	indel = False
@@ -1402,6 +1683,7 @@ def main():
 	plot = False
 	matrix_suffix = ''
 	SNVs = False
+	gs = False
 
 	parser = argparse.ArgumentParser(description="Provide the necessary arguments to create the desired catalogue.")
 	parser.add_argument("--project", "-p",help="Provide a unique name for your samples. (ex: BRCA)")
@@ -1413,6 +1695,7 @@ def main():
 	parser.add_argument("-b", "--bed", nargs='?', help="Optional parameter instructs script to simulate on a given set of ranges (ex: exome). Whole genome context by default")
 	parser.add_argument("-ch", "--chromosome", help="Optional parameter instructs script to generate the matrices per chromoosome", action='store_true')
 	parser.add_argument("-pl", "--plot", help="Optional parameter instructs script to generate the plots for 96, 192, INDEL, and DINUC contexts", action='store_true')
+	parser.add_argument("-gs", "--geneStrandBias", help="Optional parameter instructs script to generate the strand bias per gene", action='store_true')
 
 	args=parser.parse_args()
 	project = args.project
@@ -1443,14 +1726,15 @@ def main():
 	if args.SNV:
 		SNVs = True
 
+	if args.geneStrandBias:
+		gs = True
+
 
 	# Organizes all of the reference directories for later reference:
 	current_dir = os.getcwd()
 	ref_dir = re.sub('\/scripts$', '', current_dir)
-	#chrom_path = ref_dir + '/references/chromosomes/chrom_string/' + genome + "/"
-	#chrom_path = "/Users/ebergstr/Desktop/test_bi/references/chromosomes/tsb/GRCh37/"
 	chrom_path =ref_dir + '/references/chromosomes/tsb/' + genome + "/"
-	#chromosome_TSB_path =  ref_dir + '/references/chromosomes/tsb/' + genome + "/"
+	transcript_path = ref_dir + '/references/chromosomes/transcripts/' + genome + "/"
 	
 	time_stamp = datetime.date.today()
 	output_logs = ref_dir + "/logs/"
@@ -1508,7 +1792,6 @@ def main():
 		file_extension = file_name[-1]
 
 		unique_folder = project + str(uuid.uuid4())
-		#output_path = ref_dir + "/references/vcf_files/single/"
 		output_path = ref_dir + "/references/vcf_files/" + unique_folder + "/"
 		if os.path.exists(output_path):
 			os.system("rm -r " + output_path)
@@ -1520,10 +1803,8 @@ def main():
 		if file_extension == 'genome':
 			if i == 1:
 				convertIn.convertTxt(project, vcf_path + "INDEL/", genome, output_path, 'INDEL')
-				#os.system("bash convert_txt_files_to_simple_files.sh " + project + " " + vcf_path + "INDEL/")
 			else:
 				convertIn.convertTxt(project, vcf_path + "SNV/", genome, output_path, 'SNV')
-				#os.system("bash convert_txt_files_to_simple_files.sh " + project + " " + vcf_path + "SNV/")
 		else:
 			if i == 1:
 				if file_extension == 'txt':
@@ -1532,9 +1813,10 @@ def main():
 					convertIn.convertVCF(project, vcf_path + "INDEL/", genome, output_path, 'INDEL')
 				elif file_extension == 'maf':
 					convertIn.convertMAF(project, vcf_path + "INDEL/", genome, output_path, 'INDEL')
+				elif file_extension == 'tsv':
+					convertIn.convertICGC(project, vcf_path + "INDEL/", genome, output_path, 'INDEL')
 				else:
 					print("File format not supported")
-			#    os.system("bash convert_" + file_extension + "_files_to_simple_files.sh " + project + " " + vcf_path + "INDEL/")
 			else:
 				if file_extension == 'txt':
 					convertIn.convertTxt(project, vcf_path + "SNV/", genome, output_path, 'SNV')
@@ -1542,9 +1824,10 @@ def main():
 					convertIn.convertVCF(project, vcf_path + "SNV/", genome, output_path, 'SNV')
 				elif file_extension == 'maf':
 					convertIn.convertMAF(project, vcf_path + "SNV/", genome, output_path, 'SNV')
+				elif file_extension == 'tsv':
+					convertIn.convertICGC(project, vcf_path + "SNV/", genome, output_path, 'SNV')
 				else:
 					print("File format not supported")
-				#os.system("bash convert_" + file_extension + "_files_to_simple_files.sh " + project + " " + vcf_path +"SNV/")
 
 
 				
@@ -1554,11 +1837,11 @@ def main():
 		# Include some kind of a flag for the INDEL option 
 		sort_file = vcf_files[0]
 		with open(vcf_path + sort_file) as f:
-			lines = [line.strip().split() for line in f]
-
+			lines = [tuple(t) for t in [line.strip().split() for line in f]]
+			lines = set(lines)
 		output = open(vcf_path + sort_file, 'w')
 
-		for line in sorted(lines, key = lambda x: (['X','Y','1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22'].index(x[5]), x[1], x[6])):
+		for line in sorted(lines, key = lambda x: (['X','Y','1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22'].index(x[5]), x[1], int(x[6]))):
 			print('\t'.join(line), file=output)
 
 		output.close()
@@ -1571,7 +1854,7 @@ def main():
 
 		for context in contexts:
 			if context != 'DINUC' and context != 'INDEL':
-				catalogue_generator_single (vcf_path, vcf_files, chrom_path, project, output_matrix, context, exome, genome, ncbi_chrom, functionFlag, bed, bed_ranges, chrom_based, plot, tsb_ref)
+				catalogue_generator_single (vcf_path, vcf_files, chrom_path, project, output_matrix, context, exome, genome, ncbi_chrom, functionFlag, bed, bed_ranges, chrom_based, plot, tsb_ref, transcript_path, gs)
 
 			elif context == 'DINUC':
 				catalogue_generator_DINUC_single (vcf_path, vcf_files, chrom_path, project, output_matrix, exome, genome, ncbi_chrom, functionFlag, bed, bed_ranges, chrom_based, plot, tsb_ref)
@@ -1581,7 +1864,7 @@ def main():
 
 			logging.info("Catalogue for " + context + " context is complete.")
 			print("Catalogue for " + context + " context is complete.")
-		#os.system("rm -r " + vcf_path)
+		os.system("rm -r " + vcf_path)
 
 	end = time.time()
 	logging.info("Job took " + str(end-start) + " seconds.")
