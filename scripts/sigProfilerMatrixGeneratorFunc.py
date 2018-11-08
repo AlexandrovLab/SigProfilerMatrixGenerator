@@ -9,7 +9,7 @@ import datetime
 import convert_input_to_simple_files as convertIn
 import uuid
 
-def sigProfilerMatrixGeneratorFunc (project, genome, exome=False, SNVs=False,indel=False, indel_extended=False, bed_file=None, chrom_based=False, plot=False):
+def sigProfilerMatrixGeneratorFunc (project, genome, exome=False, SNVs=False,indel=False, indel_extended=False, bed_file=None, chrom_based=False, plot=False, gs=False):
 	'''
 	Allows for the import of the sigProfilerMatrixGenerator.py function. Returns a dictionary
 	with each context serving as the first level of keys. 
@@ -41,6 +41,8 @@ def sigProfilerMatrixGeneratorFunc (project, genome, exome=False, SNVs=False,ind
 	bed = False
 	bed_ranges = None
 	indel = indel
+	if indel:
+		limited_indel = True
 	exome = exome
 	plot = plot
 	if plot:
@@ -72,8 +74,8 @@ def sigProfilerMatrixGeneratorFunc (project, genome, exome=False, SNVs=False,ind
 	# Organizes all of the reference directories for later reference:
 	current_dir = os.getcwd()
 	ref_dir = re.sub('\/scripts$', '', current_dir)
-	chrom_path = ref_dir + '/references/chromosomes/chrom_string/' + genome + "/"
-	chromosome_TSB_path =  ref_dir + '/references/chromosomes/tsb/' + genome + "/"
+	chrom_path =ref_dir + '/references/chromosomes/tsb/' + genome + "/"
+	transcript_path = ref_dir + '/references/chromosomes/transcripts/' + genome + "/"
 
 	time_stamp = datetime.date.today()
 	output_log_path = ref_dir + "/logs/"
@@ -144,33 +146,33 @@ def sigProfilerMatrixGeneratorFunc (project, genome, exome=False, SNVs=False,ind
 		else:
 			if i == 1:
 				if file_extension == 'txt':
-					convertIn.convertTxt(project, vcf_path + "INDEL/",  output_path, genome, 'INDEL')
+					convertIn.convertTxt(project, vcf_path + "INDEL/",  genome,  output_path,'INDEL')
 				elif file_extension == 'vcf':
-					convertIn.convertVCF(project, vcf_path + "INDEL/", output_path, genome, 'INDEL')
+					convertIn.convertVCF(project, vcf_path + "INDEL/",  genome, output_path,'INDEL')
 				elif file_extension == 'maf':
-					convertIn.convertMAF(project, vcf_path + "INDEL/", output_path, genome, 'INDEL')
+					convertIn.convertMAF(project, vcf_path + "INDEL/",  genome, output_path, 'INDEL')
 				elif file_extension == '.tsv':
-					convertIn.convertICGC(project, vcf_path + "INDEL/", output_path, genome, 'INDEL')
+					convertIn.convertICGC(project, vcf_path + "INDEL/",  genome, output_path,'INDEL')
 				else:
 					print("File format not supported")
 
 				#os.system("bash convert_" + file_extension + "_files_to_simple_files.sh " + project + " " + vcf_path + "INDEL/")
 			else:
 				if file_extension == 'txt':
-					convertIn.convertTxt(project, vcf_path + "SNV/", output_path, genome, 'SNV')
+					convertIn.convertTxt(project, vcf_path + "SNV/",  genome, output_path,'SNV')
 				elif file_extension == 'vcf':
-					convertIn.convertVCF(project, vcf_path + "SNV/", output_path, genome, 'SNV')
+					convertIn.convertVCF(project, vcf_path + "SNV/",  genome, output_path,'SNV')
 				elif file_extension == 'maf':
-					convertIn.convertMAF(project, vcf_path + "SNV/", output_path, genome, 'SNV')
+					convertIn.convertMAF(project, vcf_path + "SNV/",  genome, output_path, 'SNV')
 				elif file_extension == '.tsv':
-					convertIn.convertICGC(project, vcf_path + "SNV/", output_path, genome, 'SNV')
+					convertIn.convertICGC(project, vcf_path + "SNV/",  genome, output_path, 'SNV')
 				else:
 					print("File format not supported")
 
 				#os.system("bash convert_" + file_extension + "_files_to_simple_files.sh " + project + " " + vcf_path +"SNV/")
 
-		vcf_files = os.listdir(ref_dir + '/references/vcf_files/' + output_path + '/')
-		vcf_path = ref_dir + '/references/vcf_files/' + output_path + '/'
+		vcf_files = os.listdir(output_path)
+		vcf_path = output_path
 
 		sort_file = vcf_files[0]
 		with open(vcf_path + sort_file) as f:
@@ -183,12 +185,6 @@ def sigProfilerMatrixGeneratorFunc (project, genome, exome=False, SNVs=False,ind
 
 		output.close()
 
-		# Include some kind of a flag for the INDEL option 
-		# sort_command_initial = "sort -t $'\t' -k 6,6n -k 6,6 -k 2,2 -k 7,7n "
-		# sort_command_initial_2 = " -o "
-		# sort_file = vcf_files[0]
-		# os.system(sort_command_initial + vcf_path + sort_file + sort_command_initial_2 + vcf_path + sort_file)
-
 		print("Sorting complete...\nDetermining mutation type for each variant, one chromosome at a time. Starting catalogue generation...")
 
 		if bed_file != None:
@@ -199,15 +195,15 @@ def sigProfilerMatrixGeneratorFunc (project, genome, exome=False, SNVs=False,ind
 		# Creates the matrix for each context
 		for context in contexts:
 			if context != 'DINUC' and context != 'INDEL':
-				matrix = matGen.catalogue_generator_single (vcf_path, vcf_files, chrom_path, chromosome_TSB_path, project, output_matrix, context, exome, genome, ncbi_chrom, functionFlag, bed, bed_ranges, chrom_based, plot, tsb_ref)
+				matrix = matGen.catalogue_generator_single (vcf_path, vcf_files, chrom_path, project, output_matrix, context, exome, genome, ncbi_chrom, functionFlag, bed, bed_ranges, chrom_based, plot, tsb_ref, transcript_path, gs)
 				matrices = matrix
 
 			elif context == 'DINUC':
-				matrix = matGen.catalogue_generator_DINUC_single (vcf_path, vcf_files, chrom_path, chromosome_TSB_path, project, output_matrix, exome, genome, ncbi_chrom, functionFlag, bed, bed_ranges, chrom_based, plot, tsb_ref)
+				matrix = matGen.catalogue_generator_DINUC_single (vcf_path, vcf_files, chrom_path, project, output_matrix, exome, genome, ncbi_chrom, functionFlag, bed, bed_ranges, chrom_based, plot, tsb_ref)
 				matrices[context] = matrix
 
 			elif context == 'INDEL':
-				matrix = matGen.catalogue_generator_INDEL_single (vcf_path, vcf_files, chrom_path, project, output_matrix, exome, genome, ncbi_chrom, indel_extended,functionFlag, bed, bed_ranges, chrom_based, plot, tsb_ref)
+				matrix = matGen.catalogue_generator_INDEL_single (vcf_path, vcf_files, chrom_path, project, output_matrix, exome, genome, ncbi_chrom, limited_indel, functionFlag, bed, bed_ranges, chrom_based, plot, tsb_ref)
 				matrices[context] = matrix
 
 			# Deletes the temporary files and returns the final matrix
@@ -218,6 +214,8 @@ def sigProfilerMatrixGeneratorFunc (project, genome, exome=False, SNVs=False,ind
 	final_matrices = {}
 	for conts in matrices.keys():
 		final_matrices[conts] = pd.DataFrame.from_dict(matrices[conts])
+		for column in final_matrices[conts].columns:
+			final_matrices[conts][column] = matrices[conts][column].fillna(0)
 	return(final_matrices)
 
 	
