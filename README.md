@@ -12,6 +12,7 @@ The framework is written in PYTHON, however, it also requires the following soft
   * PYTHON          version 3.4 or newer
   * PANDAS [MODULE]        any version
   * WGET                   version 1.9
+  * SigProfilerPlotting    newest version (https://github.com/AlexandrovLab/SigProfilerPlotting)
 
 By default the installation process will save the FASTA files for all chromosomes for the default genome 
 assemblies (GRCh37, GRCH38, mm10, mm9). As a result, XX Gb of storage must be available for the downloads.
@@ -25,8 +26,9 @@ This section will guide you through the minimum steps required to create mutatio
  4.	Separate your INDEL mutations from your SNV mutations if they are present in the same files, and create a folder for each mutation type (ex: *references/vcf_files/[project]/SNV/* or *references/vcf_files/[project]/INDEL/*). 
 5.	Place your vcf files within these new folders (either *references/vcf_files/[project]/SNV* or *references/vcf_files/[project]/INDEL/*).
 6. From within the scripts folder, run the sigProfilerMatrixGenerator.py script in python3, specifying the reference genome, project name, indel (optional), and exome (optional) if desired:
-
-                         `python3 sigProfilerMatrixGenerator.py –g GRCh37 –p BRCA –e -i`
+```
+                         python3 sigProfilerMatrixGenerator.py –g GRCh37 –p BRCA –e -i
+```
 
 *NOTE: only include –e if you would like to generate matrices using only mutations found within the exome, and only include –i or -ie if you would like to create the matrix for INDELS. (See available commands below).
 
@@ -167,6 +169,8 @@ conda install -c anaconda statsmodels
 
 -pl or --plot -> optional: Creates the sample plots for the 96, 192, DINUC, and INDEL contexts.
 
+-gs or --gs -> optional: Performs a gene strand bias test across all protein-coding genes
+
 **FOLDER STRUCTURE**
 
 The base framework consists of a *scripts* folder, a *transcripts_original* folder, an *exome/* folder, a *BRCA_example*  folder, an *example_test* folder, the install_catalogue_ref.py script, and this README file. The scripts folder contains all of the python scripts necessary to generate the reference files for the matrix generation as well as the sigProfilerMatrixGenerator.py script. The transcripts_original folder contains all protein-coding transcripts for each reference genome that is currently supported. These are necessary for generating the transcriptional strand bias matrices. The exome folder contains the exome BED files for the supported genomes. The BRCA_example folder contains an example simple text file format (see EXAMPLE). The example_test folder contains 10 example vcf files. 
@@ -201,16 +205,22 @@ If the user desires to use a genome other than those currently supported (GRCh37
 5.	Download the exome ranges for the given genome and place in the references/chromosomes/exome folder.
 6.	Once you have performed the initial install for the baseline genomes, rerun the installation script and specify the name of the new genome:
 
-                             ``python3 install_catalogue_ref.py –g mm37``
+```
+                             python3 install_catalogue_ref.py –g mm37
+```
 
 **EXAMPLE**
 
 Within the *references/vcf_files/BRCA_example/* folder, there is a simple text file (BRCA_example_subs_simple.txt) with four breast cancer sample and their associated mutational catalogues saved within a single file. To see an example of the output, run the following command from within the scripts folder:
 
-                     ``python3 sigProfilerMatrixGenerator.py –g GRCh37 –p BRCA_example``
+```
+                     python3 sigProfilerMatrixGenerator.py –g GRCh37 –p BRCA_example
+```
 
 The final matrices will be saved within the *references/matrix/* folder. To generate the INDEL matrix, place the INDEL vcf file within the *references/vcf_files/[project]/INDEL/* folder and run the command:
-                    ``python3 sigProfilerMatrixGenerator.py –g [genome] –p [project] –i``
+```
+                    python3 sigProfilerMatrixGenerator.py –g [genome] –p [project] –i
+```
 
 **LOG FILES**
 

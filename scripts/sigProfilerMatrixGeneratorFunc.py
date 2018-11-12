@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+
 import sigProfilerMatrixGenerator as matGen
 import os
 import re
@@ -203,7 +204,7 @@ def sigProfilerMatrixGeneratorFunc (project, genome, exome=False, SNVs=False,ind
 				matrices[context] = matrix
 
 			elif context == 'INDEL':
-				matrix = matGen.catalogue_generator_INDEL_single (vcf_path, vcf_files, chrom_path, project, output_matrix, exome, genome, ncbi_chrom, limited_indel, functionFlag, bed, bed_ranges, chrom_based, plot, tsb_ref)
+				matrix = matGen.catalogue_generator_INDEL_single (vcf_path, vcf_files, chrom_path, project, output_matrix, exome, genome, ncbi_chrom, limited_indel, functionFlag, bed, bed_ranges, chrom_based, plot, tsb_ref, transcript_path, gs)
 				matrices[context] = matrix
 
 			# Deletes the temporary files and returns the final matrix
