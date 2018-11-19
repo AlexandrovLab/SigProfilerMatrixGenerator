@@ -52,11 +52,11 @@ def perm(n, seq):
 	Generates a list of all available permutations of n-mers.
 
 	Parameters:
-		       n  -> length of the desired permutation string
-		     seq  -> list of all possible string values
+			   n  -> length of the desired permutation string
+			 seq  -> list of all possible string values
 
 	Returns:
-	      permus  -> list of all available permutations
+		  permus  -> list of all available permutations
 	'''
 	permus = []
 	for p in itertools.product(seq, repeat=n):
@@ -69,10 +69,10 @@ def BED_filtering (bed_file_path):
 	Creates ranges from a bed file for generating the matrix.
 
 	Parameters:
-	     bed_file_path  -> path to the desired bed file
+		 bed_file_path  -> path to the desired bed file
 
 	Returns:
-	      ranges_final  -> dictionary of all ranges for each chromosome.
+		  ranges_final  -> dictionary of all ranges for each chromosome.
 	'''
 	ranges = {}
 	ranges_final = {}
@@ -98,17 +98,17 @@ def gene_range (files_path, indel=False):
 	given reference genome. 
 
 	Parameters:
-	                    	files_path  -> path to the transcript files
-	                    	     indel  -> flag that will construct the data structures for indels
+							files_path  -> path to the transcript files
+								 indel  -> flag that will construct the data structures for indels
 
 	Returns:
-		               	   gene_ranges  -> dictionary that contains the gene ranges on a chromosome basis.
-		               	   gene_counts  -> dictionary that contains the number of mutations found for a given gene.
-						                   This value broken into a list of two integers ([transcribed, untranscribed])
-		                	gene_names  -> dictionary that contains all of the gene names on a chromosome basis
-	        sample_mut_counts_per_gene  -> dictionary that contains all of the genes. It will store the number
-	    							   	   of mutations associated with each gene per sample.
-	    sample_mut_counts_per_mut_type  -> dictionary that contains the total mutation count for each gene per mutation type
+						   gene_ranges  -> dictionary that contains the gene ranges on a chromosome basis.
+						   gene_counts  -> dictionary that contains the number of mutations found for a given gene.
+										   This value broken into a list of two integers ([transcribed, untranscribed])
+							gene_names  -> dictionary that contains all of the gene names on a chromosome basis
+			sample_mut_counts_per_gene  -> dictionary that contains all of the genes. It will store the number
+										   of mutations associated with each gene per sample.
+		sample_mut_counts_per_mut_type  -> dictionary that contains the total mutation count for each gene per mutation type
 	'''
 	gene_ranges = {}
 	gene_counts = {}
@@ -160,7 +160,7 @@ def catalogue_generator_single (vcf_path, vcf_files, chrom_path, project, output
 	Generates the mutational matrix for 96, 1536, 192, and 3072 context using a single vcf file with all samples of interest.
 
 	Parameters:
-				    vcf_path  -> path to vcf file of interest
+					vcf_path  -> path to vcf file of interest
 				   vcf_files  -> actual vcf file
 				  chrom_path  -> path to chromosome reference files. The chromosomes are saved as strings witht the following
 								file name: '1.txt', '2.txt', etc.
@@ -175,10 +175,10 @@ def catalogue_generator_single (vcf_path, vcf_files, chrom_path, project, output
 						 bed  -> parameter used to filter the mutations on a user-provided BED file
 				  bed_ranges  -> dictionary that contains all of the ranges for each chromosome dictated by the user's input BED file
 				 chrom_based  -> flag that generates the matrices on a chromosome basis
-				        plot  -> flag that plots the matrices after they are generated
-				     tsb_ref  -> dictionary that allows for switching between binary and biologically relevant strings
+						plot  -> flag that plots the matrices after they are generated
+					 tsb_ref  -> dictionary that allows for switching between binary and biologically relevant strings
 			 transcript_path  -> path to the transcript files
-				          gs  -> flag that generates a file for the strand bias on a gene basis.
+						  gs  -> flag that generates a file for the strand bias on a gene basis.
 
 	Returns:
 		None
@@ -219,7 +219,7 @@ def catalogue_generator_single (vcf_path, vcf_files, chrom_path, project, output
 	sample_start = None
 	gene_counts = {}
 	range_index = 0
-
+	sample_count = {}
 	if exome:
 		exome_temp_file = "exome_temp.txt"
 		exome_file = open(exome_temp_file, 'w')
@@ -275,6 +275,7 @@ def catalogue_generator_single (vcf_path, vcf_files, chrom_path, project, output
 					if sample not in samples:
 						samples.append(sample)
 						mutation_dict[sample] = {}
+						sample_count[sample] = [0,0]
 
 					if sample not in mutation_dict.keys():
 						mutation_dict[sample] = {}
@@ -304,6 +305,10 @@ def catalogue_generator_single (vcf_path, vcf_files, chrom_path, project, output
 						except:
 							print(i, chrom)
 					bias = tsb_ref[chrom_string[start]][0]
+					# if bias == 'T':
+					# 	bias = 'U'
+					# elif bias == 'U':
+					# 	bias = 'T'
 					char = sequence[int(len(sequence)/2)]
 
 					# Prints the sequence and position if the pulled sequence doesn't match
@@ -316,13 +321,16 @@ def catalogue_generator_single (vcf_path, vcf_files, chrom_path, project, output
 					else:
 						if char == ref:
 							strand = '1'
+							bias_before = bias
+							ref_before = ref
 							if ref == 'A' or ref == 'G':
 								strand = '-1'
-
 								bias = revbias(bias)
 								ref = revcompl(ref)
 								mut = revcompl(mut)
 								sequence = revcompl(sequence)
+
+
 
 						else:
 							strand = '-1'
@@ -332,6 +340,7 @@ def catalogue_generator_single (vcf_path, vcf_files, chrom_path, project, output
 								mut = revcompl(mut) 
 								sequence = revcompl(sequence)
 							else:
+								#pass
 								bias = revbias(bias)
 
 						# Performs the gene strand bias test if desired
@@ -343,7 +352,8 @@ def catalogue_generator_single (vcf_path, vcf_files, chrom_path, project, output
 								if ranges[0] <= start <= ranges[1]:
 									gene_index = gene_ranges[chrom_start].index(ranges)
 									gene = gene_names[chrom_start][gene_index]
-									if strand == ranges[2]:
+									#if strand == ranges[2]:
+									if int(strand) + int(ranges[2]) == 0:
 										dict_key = 'T:' + dict_key
 										gene_counts[gene][dict_key] += 1
 										if sample not in gene_counts[gene]['samples']:
@@ -356,7 +366,8 @@ def catalogue_generator_single (vcf_path, vcf_files, chrom_path, project, output
 										else:
 											sample_mut_counts_per_gene[gene][sample] += 1
 											sample_mut_counts_per_mut_type[gene][sample][dict_key] += 1
-									elif int(strand) + int(ranges[2]) == 0:
+									#elif int(strand) + int(ranges[2]) == 0:
+									elif strand == ranges[2]:
 										dict_key = 'U:' + dict_key
 										gene_counts[gene][dict_key] += 1
 										if sample not in gene_counts[gene]['samples']:
@@ -401,7 +412,7 @@ def catalogue_generator_single (vcf_path, vcf_files, chrom_path, project, output
 					total_count = sum(sample_mut_counts_per_gene[gene].values())
 					for sample in sample_mut_counts_per_gene[gene]:
 						mut_count = sample_mut_counts_per_gene[gene][sample]
-						if mut_count > 10 and mut_count/total_count > 0.5:
+						if mut_count > 3 and mut_count/total_count > 0.5:
 							if gene not in hotspots:
 								hotspots[gene] = {}
 								for mut, count in sample_mut_counts_per_mut_type[gene][sample].items():
@@ -485,7 +496,6 @@ def catalogue_generator_single (vcf_path, vcf_files, chrom_path, project, output
 				for line in sorted(lines, key = lambda x: (float(x[-1])), reverse=False):
 					print('\t'.join(line), file=output)
 				output.close()
-
 
 	logging.info("Chromosome " + chrom_start + " done")
 
@@ -1507,8 +1517,8 @@ def matrix_generator (context, output_matrix, project, samples, bias_sort, mutat
 	ref_dir = re.sub('\/scripts$', '', current_dir)
 
 	contexts = ['96', '192', '1536', '6', '12']
-	mut_types_all = {'96':[], '192':[], '1536':[], '6':[], '12':[]}
-	mut_count_all = {'96':{}, '192':{}, '1536':{}, '6':{}, '12':{}}
+	mut_types_all = {'96':[], '192':[], '1536':[], '6':[], '12':[], '6_pvalue':[], '7_pvalue':[]}
+	mut_count_all = {'96':{}, '192':{}, '1536':{}, '6':{}, '12':{}, '6_pvalue':{}, '7_pvalue':{}, '6_pvalue_temp':{}, '7_pvalue_temp':{}}
 
 
 	significant_tsb = open(output_matrix + "significantResults_strandBiasTest.txt", 'w')
@@ -1542,42 +1552,70 @@ def matrix_generator (context, output_matrix, project, samples, bias_sort, mutat
 		# Prints the mutation count for each mutation type across every sample
 		for mut_type in types:
 			print (mut_type + '\t', end='', flush =False, file=out)
-			mut_types_all['96'].append(mut_type[3:-1])
-			mut_types_all['192'].append(mut_type[0:2] + mut_type[3:-1])
-			mut_types_all['1536'].append(mut_type[2:])
-			mut_types_all['6'].append(mut_type[5:8])
-			mut_types_all['12'].append(mut_type[0:2] + mut_type[5:8])
+			if mut_type[3:-1] not in mut_types_all['96']:
+				mut_types_all['96'].append(mut_type[3:-1])
+			if mut_type[0:2] + mut_type[3:-1] not in mut_types_all['192']:
+				mut_types_all['192'].append(mut_type[0:2] + mut_type[3:-1])
+			if mut_type[2:] not in mut_types_all['1536']:
+				mut_types_all['1536'].append(mut_type[2:])
+			if mut_type[5:8] not in mut_types_all['6']:
+				mut_types_all['6'].append(mut_type[5:8])
+			if mut_type[0:2] + mut_type[5:8] not in mut_types_all['12']:
+				mut_types_all['12'].append(mut_type[0:2] + mut_type[5:8])
+			if mut_type[5:8] not in mut_types_all['6_pvalue']:
+				mut_types_all['6_pvalue'].append(mut_type[5:8])
+			if mut_type[5:8] not in mut_types_all['7_pvalue']:
+				mut_types_all['7_pvalue'].append(mut_type[5:8])
+
 
 
 			for sample in samples:
-				if sample not in mutation_dict.keys():
+				if sample not in mutation_dict:
 					mutation_dict[sample] = {}
-				if sample not in mut_count_all['96'].keys():
+				if sample not in mut_count_all['96']:
 					mut_count_all['96'][sample] = {}
 					mut_count_all['192'][sample] = {}
 					mut_count_all['1536'][sample] = {}
 					mut_count_all['6'][sample] = {}
 					mut_count_all['12'][sample] = {}
-				if mut_type[3:-1] not in mut_count_all['96'][sample].keys():
-					mut_count_all['96'][sample][mut_type[3:-1]] = 0
-				if (mut_type[0:2]+mut_type[3:-1]) not in mut_count_all['192'][sample].keys():
-					mut_count_all['192'][sample][mut_type[0:2] + mut_type[3:-1]] = 0
-				if mut_type[2:] not in mut_count_all['1536'][sample].keys():
-					mut_count_all['1536'][sample][mut_type[2:]] = 0
-				if mut_type[5:8] not in mut_count_all['6'][sample].keys():
-					mut_count_all['6'][sample][mut_type[5:8]] = 0
-				if (mut_type[0:2] + mut_type[5:8]) not in mut_count_all['12'][sample].keys():
-					mut_count_all['12'][sample][mut_type[0:2] + mut_type[5:8]] = 0
+					mut_count_all['6_pvalue_temp'][sample] = {}
+					mut_count_all['7_pvalue_temp'][sample] = {}
+					mut_count_all['6_pvalue'][sample] = {}
+					mut_count_all['7_pvalue'][sample] = {}
 
-				if mut_type in mutation_dict[sample].keys():
+				if mut_type[3:-1] not in mut_count_all['96'][sample]:
+					mut_count_all['96'][sample][mut_type[3:-1]] = 0
+				if (mut_type[0:2]+mut_type[3:-1]) not in mut_count_all['192'][sample]:
+					mut_count_all['192'][sample][mut_type[0:2] + mut_type[3:-1]] = 0
+				if mut_type[2:] not in mut_count_all['1536'][sample]:
+					mut_count_all['1536'][sample][mut_type[2:]] = 0
+				if mut_type[5:8] not in mut_count_all['6'][sample]:
+					mut_count_all['6'][sample][mut_type[5:8]] = 0
+				if (mut_type[0:2] + mut_type[5:8]) not in mut_count_all['12'][sample]:
+					mut_count_all['12'][sample][mut_type[0:2] + mut_type[5:8]] = 0
+					mut_count_all['6_pvalue_temp'][sample][mut_type[0:2] + mut_type[5:8]] = 0
+					mut_count_all['7_pvalue_temp'][sample][mut_type[0:2] + mut_type[5:8]] = 0
+					if mut_type[3:9] == 'A[T>C]':
+						if mut_type[0:2] + 'T>CpN' not in mut_count_all['7_pvalue_temp'][sample]:
+							mut_count_all['7_pvalue_temp'][sample][mut_type[0:2] + 'T>CpN'] = 0
+					else:
+						if (mut_type[0:2] + mut_type[5:8]) not in mut_count_all['7_pvalue_temp'][sample]:
+							mut_count_all['7_pvalue_temp'][sample][mut_type[0:2] + mut_type[5:8]] = 0
+						
+
+				if mut_type in mutation_dict[sample]:
 					mut_count_all['96'][sample][mut_type[3:-1]] += mutation_dict[sample][mut_type]
 					mut_count_all['192'][sample][mut_type[0:2] + mut_type[3:-1]] += mutation_dict[sample][mut_type]
 					mut_count_all['1536'][sample][mut_type[2:]] += mutation_dict[sample][mut_type]
 					mut_count_all['6'][sample][mut_type[5:8]] += mutation_dict[sample][mut_type]
 					mut_count_all['12'][sample][mut_type[0:2] + mut_type[5:8]] += mutation_dict[sample][mut_type]                                  
+					mut_count_all['6_pvalue_temp'][sample][mut_type[0:2] + mut_type[5:8]] += mutation_dict[sample][mut_type]
+					if mut_type[3:9] == 'A[T>C]':
+						mut_count_all['7_pvalue_temp'][sample][mut_type[0:2] + 'T>CpN'] += mutation_dict[sample][mut_type]
+					else:
+						mut_count_all['7_pvalue_temp'][sample][mut_type[0:2] + mut_type[5:8]] += mutation_dict[sample][mut_type]
 
-
-				if mut_type in mutation_dict[sample].keys():
+				if mut_type in mutation_dict[sample]:
 					print (str(mutation_dict[sample][mut_type]) + '\t', end='', file=out)
 				else:
 					print ('0\t', end='', file=out)
@@ -1586,42 +1624,67 @@ def matrix_generator (context, output_matrix, project, samples, bias_sort, mutat
 		# Writes a strand bias file for all TSB mutaiton types and outputs any significant ones to a 
 		# separate file
 		with open (output_matrix + "strandBiasTest_3072.txt", 'w') as out2:
-		    print("Sample\tMutationType\tEnrichment[Trans/UnTrans]\tp.value\tFDR_q.value",file=out2)
-		    current_tsb = pd.DataFrame.from_dict(mutation_dict)
-		    for sample in samples:
-		        pvals = []
-		        enrichment = []
-		        for mut_type in types:
-		            if mut_type[0] == 'T':
-		                if mut_type not in mutation_dict[sample]:
-		                    num1 = 0
-		                else:
-		                    num1 = current_tsb.loc[mut_type][sample]
+			print("Sample\tMutationType\tEnrichment[Trans/UnTrans]\tp.value\tFDR_q.value",file=out2)
+			current_tsb = pd.DataFrame.from_dict(mutation_dict)
+			for sample in samples:
+				pvals = []
+				enrichment = []
+				for mut_type in types:
+					if mut_type[0] == 'T':
+						if mut_type not in mutation_dict[sample]:
+							num1 = 0
+						else:
+							num1 = current_tsb.loc[mut_type][sample]
 
-		                if 'U:'+mut_type[2:] not in mutation_dict[sample]:
-		                    num2 = 0
-		                else:
-		                    num2 = current_tsb.loc['U:'+mut_type[2:]][sample]
+						if 'U:'+mut_type[2:] not in mutation_dict[sample]:
+							num2 = 0
+						else:
+							num2 = current_tsb.loc['U:'+mut_type[2:]][sample]
 
-		                pvals.append(stats.binom_test([num1, num2]))
+						pvals.append(stats.binom_test([num1, num2]))
 
-		                if 'U:'+mut_type[2:] not in mutation_dict[sample] or current_tsb.loc['U:'+mut_type[2:]][sample] == 0:
-		                    enrichment.append(0)
-		                else:
-		                    enrichment.append(round(num1/num2, 4))
-		        qvals = sm.fdrcorrection(pvals)[1]
-		        p_index = 0
-		        for mut_type in types:
-		            if mut_type[0] == 'T':
-		                print(sample + "\t" + mut_type[2:] + "\t" + str(enrichment[p_index]) + "\t" + str(pvals[p_index]) + "\t" + str(qvals[p_index]), file=out2)
-		                if qvals[p_index] < 0.01:
-		                     print(sample + "\t" + mut_type[2:] + "\t" + str(enrichment[p_index]) + "\t" + str(pvals[p_index]) + "\t" + str(qvals[p_index]), file=significant_tsb)
-		            p_index += 1
+						if 'U:'+mut_type[2:] not in mutation_dict[sample] or current_tsb.loc['U:'+mut_type[2:]][sample] == 0:
+							enrichment.append(0)
+						else:
+							enrichment.append(round(num1/num2, 4))
+				qvals = sm.fdrcorrection(pvals)[1]
+				p_index = 0
+				for mut_type in types:
+					if mut_type[0] == 'T':
+						print(sample + "\t" + mut_type[2:] + "\t" + str(enrichment[p_index]) + "\t" + str(pvals[p_index]) + "\t" + str(qvals[p_index]), file=out2)
+						if qvals[p_index] < 0.01:
+							 print(sample + "\t" + mut_type[2:] + "\t" + str(enrichment[p_index]) + "\t" + str(pvals[p_index]) + "\t" + str(qvals[p_index]), file=significant_tsb)
+					p_index += 1
   
-  		# If this cod eis run as an imported function, delete the physcial matrix.
+		# If this code is run as an imported function, delete the physcial matrix.
 		if functionFlag:
 			os.system("rm " + output_file_matrix) 
 			mut_count_all['3072'] = mutation_dict
+			function_tsb_test = ['6_pvalue_temp', '7_pvalue_temp']
+			for cont in function_tsb_test:
+				cont_save = cont[:8]
+				if cont == '6_pvalue_temp':
+					types = mut_types_all['12']
+				else:
+					types = mut_types_all['12']
+					types.append('T:T>CpN')
+					types.append('U:T>CpN')
+					print(types)
+				types = list(set(types))
+				current_tsb = pd.DataFrame.from_dict(mut_count_all[cont])
+				for sample in samples:
+					pvals = []
+					for mut_type in types:
+						if mut_type[0] == 'T':
+							pval = stats.binom_test([current_tsb.loc[mut_type][sample], current_tsb.loc['U:'+mut_type[2:]][sample]])
+							if current_tsb.loc[mut_type][sample] >= current_tsb.loc['U:'+mut_type[2:]][sample]:
+								strand_test = 1
+							else:
+								strand_test = -1
+							mut_count_all[cont_save][sample][mut_type[2:]] = [pval, strand_test]
+
+					#qvals = sm.fdrcorrection(pvals)[1]
+			
 			return(mut_count_all)
 
 	strandBias_test = ['12','192', '3072']
@@ -1673,28 +1736,28 @@ def matrix_generator (context, output_matrix, project, samples, bias_sort, mutat
 				print(file=out)
 
 			if cont in strandBias_test:
-			    with open (output_matrix + "strandBiasTest_" + cont + ".txt", 'w') as out2:
-			        print("Sample\tMutationType\tEnrichment[Trans/UnTrans]\tp.value\tFDR_q.value",file=out2)
-			        current_tsb = pd.DataFrame.from_dict(mut_count_all[cont])
-			        for sample in samples:
-			            pvals = []
-			            enrichment = []
-			            for mut_type in types:
-			                if mut_type[0] == 'T':
-			                    if cont in strandBias_test:
-			                        pvals.append(stats.binom_test([current_tsb.loc[mut_type][sample], current_tsb.loc['U:'+mut_type[2:]][sample]]))
-			                        if current_tsb.loc['U:'+mut_type[2:]][sample] == 0:
-			                            enrichment.append(0)
-			                        else:
-			                            enrichment.append(round(current_tsb.loc[mut_type][sample]/current_tsb.loc['U:'+mut_type[2:]][sample], 4))
-			            qvals = sm.fdrcorrection(pvals)[1]
-			            p_index = 0
-			            for mut_type in types:
-			                if mut_type[0] == 'T':
-			                    print(sample + "\t" + mut_type[2:] + "\t" + str(enrichment[p_index]) + "\t" + str(pvals[p_index]) + "\t" + str(qvals[p_index]), file=out2)
-			                    if qvals[p_index] < 0.01:
-			                         print(sample + "\t" + mut_type[2:] + "\t" + str(enrichment[p_index]) + "\t" + str(pvals[p_index]) + "\t" + str(qvals[p_index]), file=significant_tsb)
-			                p_index += 1
+				with open (output_matrix + "strandBiasTest_" + cont + ".txt", 'w') as out2:
+					print("Sample\tMutationType\tEnrichment[Trans/UnTrans]\tp.value\tFDR_q.value",file=out2)
+					current_tsb = pd.DataFrame.from_dict(mut_count_all[cont])
+					for sample in samples:
+						pvals = []
+						enrichment = []
+						for mut_type in types:
+							if mut_type[0] == 'T':
+								if cont in strandBias_test:
+									pvals.append(stats.binom_test([current_tsb.loc[mut_type][sample], current_tsb.loc['U:'+mut_type[2:]][sample]]))
+									if current_tsb.loc['U:'+mut_type[2:]][sample] == 0:
+										enrichment.append(0)
+									else:
+										enrichment.append(round(current_tsb.loc[mut_type][sample]/current_tsb.loc['U:'+mut_type[2:]][sample], 4))
+						qvals = sm.fdrcorrection(pvals)[1]
+						p_index = 0
+						for mut_type in types:
+							if mut_type[0] == 'T':
+								print(sample + "\t" + mut_type[2:] + "\t" + str(enrichment[p_index]) + "\t" + str(pvals[p_index]) + "\t" + str(qvals[p_index]), file=out2)
+								if qvals[p_index] < 0.01:
+									 print(sample + "\t" + mut_type[2:] + "\t" + str(enrichment[p_index]) + "\t" + str(pvals[p_index]) + "\t" + str(qvals[p_index]), file=significant_tsb)
+							p_index += 1
 						
 
 
@@ -2108,8 +2171,9 @@ def main():
 			lines = set(lines)
 		output = open(vcf_path + sort_file, 'w')
 
-		for line in sorted(lines, key = lambda x: (['X','Y','1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22'].index(x[5]), x[1], int(x[6]))):
+		for line in sorted(lines, key = lambda x: (['X','Y','1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', 'MT'].index(x[5]), x[1], int(x[6]))):
 			print('\t'.join(line), file=output)
+			
 
 		output.close()
 
