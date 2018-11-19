@@ -76,6 +76,7 @@ def save_tsb (chromosome_string_path, transcript_path, output_path):
 
                 # Sorts the transcript file by chromosome and transcript range
                 os.system("sort -t $'\t' -k 3,3n -k 3,3 -k 5,5 -k 6,6 " + transcript_path+file + " -o " + transcript_path+file)
+                 
                 with open (transcript_path + file) as f:
                     next(f)
 
@@ -104,6 +105,16 @@ def save_tsb (chromosome_string_path, transcript_path, output_path):
 
     # Retrieves the chromosome based list of transcript files 
     transcript_files = os.listdir(transcript_path)
+    for files in transcript_files:
+        with open(transcript_path + files) as f:
+            lines = [line.strip().split() for line in f]
+
+        output = open(transcript_path + files, 'w')
+
+        for line in sorted(lines, key = lambda x: (int(x[4]))):
+            print('\t'.join(line), file=output)
+
+        output.close()
 
     print("Creating the transcriptional reference files now. This may take awhile...")
 
@@ -200,16 +211,18 @@ def save_tsb (chromosome_string_path, transcript_path, output_path):
                     pointer = 0
                     with open(transcript_path + files, 'r') as f:
                         all_lines2 = f.readlines()
-                        all_lines = all_lines2[1:]
+                        all_lines = all_lines2[:]
+            #            all_lines = all_lines2[1:]
+
                         for lines in all_lines:
                             
                             # Handles the first line separately. 
                             if pointer == 0:
                                 first_line = lines.split()
-                                location = int(first_line[4])
+                                location = int(first_line[4]) -1
                                 I_chrom = first_line[2][3:]
-                                I_T_start = int(first_line[4])
-                                I_T_end = int(first_line[5])
+                                I_T_start = int(first_line[4]) -1
+                                I_T_end = int(first_line[5]) - 1
                                 I_strand = first_line[3]
                                 
                                 # Saves Non-transcribed data up until
@@ -224,8 +237,8 @@ def save_tsb (chromosome_string_path, transcript_path, output_path):
                             else:
                                 first_line = lines.split()
                                 I_chrom = first_line[2][3:]
-                                I_T_start = int(first_line[4])
-                                I_T_end = int(first_line[5])
+                                I_T_start = int(first_line[4]) - 1
+                                I_T_end = int(first_line[5]) - 1
                                 I_strand = first_line[3]
 
                                 # Saves Non-transcribed data up until the 
@@ -242,8 +255,8 @@ def save_tsb (chromosome_string_path, transcript_path, output_path):
                             for line2 in all_lines[line_count:]:
                                 next_line = line2.split()
                                 c_chrom = next_line[2][3:]
-                                c_start = int(next_line[4])
-                                c_end= int(next_line[5])
+                                c_start = int(next_line[4]) - 1
+                                c_end= int(next_line[5]) - 1
                                 c_strand = next_line[3]
                                 
                                 # Breaks to the next line if the two transcripts 
@@ -265,7 +278,7 @@ def save_tsb (chromosome_string_path, transcript_path, output_path):
                                     # the bi-directional transcription.
                                     if bi_start != 0 and bi_start > location:
                                         for i in range (location, bi_start, 1):
-                                            if I_strand == '1':
+                                            if I_strand == '-1':
                                                 nuc = chrom_string[i]
                                                 outFile.write(byte_ref['T_' + nuc])
                                                 l += 1
@@ -289,7 +302,7 @@ def save_tsb (chromosome_string_path, transcript_path, output_path):
                             # transcript if data has not already been saved for these bases.
                             if I_T_end > location:
                                 for i in range(location, I_T_end, 1):
-                                    if I_strand == '1':
+                                    if I_strand == '-1':
                                         nuc = chrom_string[i]
                                         outFile.write(byte_ref['T_' + nuc])
                                         l += 1

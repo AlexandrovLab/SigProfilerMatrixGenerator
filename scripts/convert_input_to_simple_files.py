@@ -58,6 +58,8 @@ def convertVCF (project, vcf_path, genome, output_path, mutType=None):
 				else:
 					line = lines.strip().split('\t')
 					chrom = line[0]
+					if len(chrom) > 2:
+						chrom = chrom[3:]
 					start = line[1]
 					#sample = line[2]
 					ref = line[3]
@@ -90,6 +92,8 @@ def convertTxt (project, vcf_path, genome, output_path, mutType=None):
 				sample = line[1]
 				genome = line[3]
 				chrom = line[5]
+				if len(chrom) > 2:
+					chrom = chrom[3:]
 				start = line[6]
 				end = line[7]
 				ref = line[8]
@@ -121,6 +125,8 @@ def convertMAF (project, vcf_path, genome, output_path, mutType=None):
 				line = lines.strip().split('\t')
 				genome = line[3]
 				chrom = line[4]
+				if len(chrom) > 2:
+					chrom = chrom[3:]
 				start = line[5]
 				end = line[6]
 				ref = line[10]
@@ -151,6 +157,8 @@ def convertICGC (project, vcf_path, genome, output_path, mutType=None):
 				sample = line[1]
 				icgc_sample_id = line[4]
 				chrom = line[8]
+				if len(chrom) > 2:
+					chrom = chrom[3:]
 				start = int(line[9])
 				end = line[10]
 				genome = line[12]

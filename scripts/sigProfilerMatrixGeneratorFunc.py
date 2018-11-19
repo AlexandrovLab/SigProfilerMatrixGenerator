@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-
-import sigProfilerMatrixGenerator as matGen
+import sigProfilerMatrixGenerator_bi_2_dinuc_context as matGen
+#import sigProfilerMatrixGenerator as matGen
 import os
 import re
 import sys
@@ -216,7 +216,7 @@ def sigProfilerMatrixGeneratorFunc (project, genome, exome=False, SNVs=False,ind
 	for conts in matrices.keys():
 		final_matrices[conts] = pd.DataFrame.from_dict(matrices[conts])
 		for column in final_matrices[conts].columns:
-			final_matrices[conts][column] = matrices[conts][column].fillna(0)
+			final_matrices[conts][column] = final_matrices[conts][column].fillna(0)
 	return(final_matrices)
 
 	
