@@ -72,7 +72,7 @@ def save_chrom_strings (genome):
 			except:
 				continue
 			if file_name[-4] == 'dna':
-				with open(chrom_fasta_path + files) as chrom, open(chrom_string_path + chromosome + ".txt", 'wb') as out:
+				with open(chrom_fasta_path + files) as chrom, open(chrom_string_path + chromosome + ".txt", 'w') as out:
 					next(chrom)
 					chromosome_final = ''
 					for lines in chrom:
