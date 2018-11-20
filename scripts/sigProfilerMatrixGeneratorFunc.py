@@ -1,6 +1,53 @@
 #!/usr/bin/env python3
-import sigProfilerMatrixGenerator_bi_2_dinuc_context as matGen
-#import sigProfilerMatrixGenerator as matGen
+# This source code file is a part of SigProfilerMatrixGenerator
+
+# SigProfilerMatrixGenerator is a tool included as part of the SigProfiler
+
+# computational framework for comprehensive analysis of mutational
+
+# signatures from next-generation sequencing of cancer genomes.
+
+# SigProfilerMatrixGenerator provides a standard tool for displaying all 
+
+# types of mutational signatures as well as all types of mutational 
+
+# patterns in cancer genomes. The tool seamlessly integrates with 
+
+#other SigProfiler tools.
+
+# Copyright (C) 2018 Erik Bergstrom
+
+#
+
+# SigProfilerMatrixGenerator is free software: you can redistribute it and/or modify
+
+# it under the terms of the GNU General Public License as published by
+
+# the Free Software Foundation, either version 3 of the License, or
+
+# (at your option) any later version.
+
+#
+
+# SigProfilerMatrixGenerator is distributed in the hope that it will be useful,
+
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+
+# GNU General Public License for more details.
+
+#
+
+# You should have received a copy of the GNU General Public License
+
+# along with SigProfilerMatrixGenerator.  If not, see http://www.gnu.org/licenses/
+ 
+#Author: Erik Bergstrom
+
+#Contact: ebergstr@eng.ucsd.edu
+
+import sigProfilerMatrixGenerator as matGen
 import os
 import re
 import sys

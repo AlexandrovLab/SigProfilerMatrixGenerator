@@ -1,28 +1,49 @@
 #!/usr/bin/env python3
 
-#This file is part of Mutational Signatures Project.
+# This source code file is a part of SigProfilerMatrixGenerator
 
-#Mutational Signatures Project: need info on project
+# SigProfilerMatrixGenerator is a tool included as part of the SigProfiler
 
-#Copyright (C) 2018 Erik Bergstrom
+# computational framework for comprehensive analysis of mutational
+
+# signatures from next-generation sequencing of cancer genomes.
+
+# SigProfilerMatrixGenerator provides a standard tool for displaying all 
+
+# types of mutational signatures as well as all types of mutational 
+
+# patterns in cancer genomes. The tool seamlessly integrates with 
+
+#other SigProfiler tools.
+
+# Copyright (C) 2018 Erik Bergstrom
 
 #
 
-#Mutational Signatures is free software: need to include distribtution
+# SigProfilerMatrixGenerator is free software: you can redistribute it and/or modify
 
-#rights and so forth
+# it under the terms of the GNU General Public License as published by
+
+# the Free Software Foundation, either version 3 of the License, or
+
+# (at your option) any later version.
 
 #
 
-#Mutational Signatures is distributed in the hope that it will be useful,
+# SigProfilerMatrixGenerator is distributed in the hope that it will be useful,
 
-#but WITHOUT ANY WARRANTY; without even the implied warranty of
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
 
-#MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 
-#GNU General Public License for more details [change to whatever group we should include.
+# GNU General Public License for more details.
+
+#
+
+# You should have received a copy of the GNU General Public License
+
+# along with SigProfilerMatrixGenerator.  If not, see http://www.gnu.org/licenses/
  
-
 #Author: Erik Bergstrom
 
 #Contact: ebergstr@eng.ucsd.edu
@@ -305,10 +326,6 @@ def catalogue_generator_single (vcf_path, vcf_files, chrom_path, project, output
 						except:
 							print(i, chrom)
 					bias = tsb_ref[chrom_string[start]][0]
-					# if bias == 'T':
-					# 	bias = 'U'
-					# elif bias == 'U':
-					# 	bias = 'T'
 					char = sequence[int(len(sequence)/2)]
 
 					# Prints the sequence and position if the pulled sequence doesn't match
@@ -574,15 +591,26 @@ def catalogue_generator_DINUC_single (vcf_path, vcf_files, chrom_path, project, 
 	dinucs_context_tsb = {}
 	dinucs_tsb = {}
 	samples = []
-	mutation_types = ['AA>CC','AA>CG','AA>CT','AA>GC','AA>GG','AA>GT','AA>TC','AA>TG','AA>TT',
-					  'AC>CA','AC>CG','AC>CT','AC>GA','AC>GG','AC>GT','AC>TA','AC>TG','AC>TT',
-					  'AG>CA','AG>CC','AG>CT','AG>GA','AG>GC','AG>GT','AG>TA','AG>TC','AG>TT',
-					  'AT>CA','AT>CC','AT>CG','AT>GA','AT>GC','AT>TA','CA>AC','CA>AG','CA>AT',
-					  'CA>GC','CA>GG','CA>GT','CA>TC','CA>TG','CA>TT','CC>AA','CC>AG','CC>AT',
+	# mutation_types = ['AA>CC','AA>CG','AA>CT','AA>GC','AA>GG','AA>GT','AA>TC','AA>TG','AA>TT',
+	# 				  'AC>CA','AC>CG','AC>CT','AC>GA','AC>GG','AC>GT','AC>TA','AC>TG','AC>TT',
+	# 				  'AG>CA','AG>CC','AG>CT','AG>GA','AG>GC','AG>GT','AG>TA','AG>TC','AG>TT',
+	# 				  'AT>CA','AT>CC','AT>CG','AT>GA','AT>GC','AT>TA','CA>AC','CA>AG','CA>AT',
+	# 				  'CA>GC','CA>GG','CA>GT','CA>TC','CA>TG','CA>TT','CC>AA','CC>AG','CC>AT',
+	# 				  'CC>GA','CC>GG','CC>GT','CC>TA','CC>TG','CC>TT','CG>AA','CG>AC','CG>AT',
+	# 				  'CG>GA','CG>GC','CG>TA','GA>AC','GA>AG','GA>AT','GA>CC','GA>CG','GA>CT',
+	# 				  'GA>TC','GA>TG','GA>TT','GC>AA','GC>AG','GC>AT','GC>CA','GC>CG','GC>TA',
+	# 				  'TA>AC','TA>AG','TA>AT','TA>CC','TA>CG','TA>GC']
+
+	mutation_types = ['AC>CA','AC>CG','AC>CT','AC>GA','AC>GG','AC>GT','AC>TA','AC>TG','AC>TT',
+					  'AT>CA','AT>CC','AT>CG','AT>GA','AT>GC','AT>TA','CC>AA','CC>AG','CC>AT',
 					  'CC>GA','CC>GG','CC>GT','CC>TA','CC>TG','CC>TT','CG>AA','CG>AC','CG>AT',
-					  'CG>GA','CG>GC','CG>TA','GA>AC','GA>AG','GA>AT','GA>CC','GA>CG','GA>CT',
-					  'GA>TC','GA>TG','GA>TT','GC>AA','GC>AG','GC>AT','GC>CA','GC>CG','GC>TA',
-					  'TA>AC','TA>AG','TA>AT','TA>CC','TA>CG','TA>GC']
+					  'CG>GA','CG>GC','CG>TA','CT>AA','CT>AC','CT>AG','CT>GA','CT>GC','CT>GG',
+					  'CT>TA','CT>TC','CT>TG','GC>AA','GC>AG','GC>AT','GC>CA','GC>CG','GC>TA',
+					  'TA>AC','TA>AG','TA>AT','TA>CC','TA>CG','TA>GC','TC>AA','TC>AG','TC>AT',
+					  'TC>CA','TC>CG','TC>CT','TC>GA','TC>GG','TC>GT','TG>AA','TG>AC','TG>AT',
+					  'TG>CA','TG>CC','TG>CT','TG>GA','TG>GC','TG>GT','TT>AA','TT>AC','TT>AG',
+					  'TT>CA','TT>CC','TT>CG','TT>GA','TT>GC','TT>GG']
+
 
 
 	# Organizes all of the mutation types for DINUCs
