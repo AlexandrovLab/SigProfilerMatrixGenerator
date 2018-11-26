@@ -950,10 +950,11 @@ def catalogue_generator_INDEL_single (vcf_path, vcf_files, chrom_path, project, 
 						indel_dict[sample] = {}
 						indel_tsb_dict[sample] = {}
 
-					if 'complex' not in indel_dict[sample].keys():
-						indel_dict[sample]['complex'] = 1
-					else:
-						indel_dict[sample]['complex'] += 1
+					if not functionFlag:
+						if 'complex' not in indel_dict[sample].keys():
+							indel_dict[sample]['complex'] = 1
+						else:
+							indel_dict[sample]['complex'] += 1
 					continue
 				
 
@@ -1248,10 +1249,11 @@ def catalogue_generator_INDEL_single (vcf_path, vcf_files, chrom_path, project, 
 				if exome:
 					exome_file.write(sample + '\t' + chrom + '\t' + str(start) + '\t' + indel_key + "\n")
 			else:
-				if 'non_matching' not in indel_dict[sample].keys():
-					indel_dict[sample]['non_matching'] = 1
-				else:
-					indel_dict[sample]['non_matching'] += 1
+				if not functionFlag:
+					if 'non_matching' not in indel_dict[sample].keys():
+						indel_dict[sample]['non_matching'] = 1
+					else:
+						indel_dict[sample]['non_matching'] += 1
 
 
 		# Once all of the variants have been account for, complete the gene strand bias test
