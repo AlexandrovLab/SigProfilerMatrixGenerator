@@ -40,7 +40,9 @@ $ python3
 >>matrices = matGen.SigProfilerMatrixGeneratorFunc("test", "GRCh37", "/Users/ebergstr/Desktop/test",plot=True)
 ```
   The layout of the parameters are as follows:
+  
       SigProfilerMatrixGeneratorFunc(project, reference_genome, path_to_input_files, plot)
+      
   where project, reference_genome, and path_to_input_files must be strings (surrounded by quotation marks, ex: "test") and plot is a boolean argument (True or False)
 
 
