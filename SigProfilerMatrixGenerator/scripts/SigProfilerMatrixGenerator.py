@@ -15,7 +15,8 @@ import time
 import datetime
 from scipy import stats
 import statsmodels.stats.multitest as sm
-from SigProfilerMatrixGenerator.scripts import convert_input_to_simple_files as convertIn
+#from SigProfilerMatrixGenerator.scripts import convert_input_to_simple_files as convertIn
+import convert_input_to_simple_files as convertIn
 import sigProfilerPlotting as sigPlt
 import uuid
 from collections import defaultdict

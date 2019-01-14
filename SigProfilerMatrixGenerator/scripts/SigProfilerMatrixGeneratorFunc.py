@@ -97,7 +97,8 @@ def SigProfilerMatrixGeneratorFunc (project, genome, vcfFiles, exome=False, bed_
 		os.mkdir(vcf_path)
 		input_files = os.listdir(vcfFiles)
 		input_files.remove("input")
-		input_files.remove(".DS_Store")
+		if ".DS_Store" in input_files:
+			input_files.remove(".DS_Store")
 		for files in input_files:
 			shutil.copy(vcfFiles + files, vcf_path + files)
 	output_matrix = vcfFiles + "output/"
@@ -152,7 +153,7 @@ def SigProfilerMatrixGeneratorFunc (project, genome, vcfFiles, exome=False, bed_
 			snv, indel = convertIn.convertVCF(project, vcf_path,  genome, output_path)
 		elif file_extension == 'maf':
 			snv, indel = convertIn.convertMAF(project, vcf_path,  genome, output_path)
-		elif file_extension == '.tsv':
+		elif file_extension == 'tsv':
 			snv, indel = convertIn.convertICGC(project, vcf_path,  genome, output_path)
 		else:
 			print("File format not supported")

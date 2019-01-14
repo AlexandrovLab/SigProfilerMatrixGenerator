@@ -107,6 +107,8 @@ def install_chromosomes_tsb_BED (genomes, custom, ref_dir):
 
 def benchmark (ref_dir):
 	if os.path.exists("scripts/Benchmark/BRCA_bench/"):
+		if os.path.exists("references/vcf_files/BRCA_bench"):
+			shutil.rmtree("references/vcf_files/BRCA_bench")
 		shutil.move("scripts/Benchmark/BRCA_bench/", "references/vcf_files/")
 	current_dir = os.path.realpath(__file__)
 	ref_dir = re.sub('\/install.py$', '', current_dir)
@@ -114,13 +116,13 @@ def benchmark (ref_dir):
 	output_path = ref_dir + "/references/matrix/"
 
 	start_time = time.time()
-	os.system("python3 " + ref_dir + "/scripts/sigProfilerMatrixGenerator.py -g GRCh37 -p BRCA_bench -vf " + vcf_path + " -op " + output_path + " -snv")
+	os.system("python3 " + ref_dir + "/scripts/SigProfilerMatrixGenerator.py -g GRCh37 -p BRCA_bench -vf " + vcf_path + " -op " + output_path + " -snv")
 	end_time = time.time()
 
 	original_matrix_96 = ref_dir + "/scripts/Benchmark/BRCA_bench_orig_96.txt"
 	original_matrix_3072 = ref_dir + "/scripts/Benchmark/BRCA_bench_orig_3072.txt"
-	new_matrix_96 = ref_dir + "/references/matrix/BRCA_bench/SBS/BRCA_bench.SBS96.all"
-	new_matrix_3072 = ref_dir + "/references/matrix/BRCA_bench/SBS/BRCA_bench.SBS3072.all"
+	new_matrix_96 = ref_dir + "/references/matrix/BRCA_bench/BRCA_bench.SBS96.all"
+	new_matrix_3072 = ref_dir + "/references/matrix/BRCA_bench/BRCA_bench.SBS3072.all"
 
 	genome = "GRCh37"
 
