@@ -94,10 +94,15 @@ def SigProfilerMatrixGeneratorFunc (project, genome, vcfFiles, exome=False, bed_
 	vcf_path = vcfFiles + "input/"
 	vcf_path_original = vcf_path
 	if not os.path.exists(vcf_path) or len(os.listdir(vcf_path)) < 1:
-		os.mkdir(vcf_path)
+		os.makedirs(vcf_path, exist_ok=True)
 		input_files = os.listdir(vcfFiles)
 		input_files.remove("input")
-		input_files.remove(".DS_Store")
+		if ".DS_Store" in input_files:
+			input_files.remove(".DS_Store")
+		if "__init__.py" in input_files:
+			input_files.remove("__init__.py")
+		if "__pycache__" in input_files:
+			input_files.remove("__pycache__")
 		for files in input_files:
 			shutil.copy(vcfFiles + files, vcf_path + files)
 	output_matrix = vcfFiles + "output/"
