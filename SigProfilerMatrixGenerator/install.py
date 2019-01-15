@@ -107,8 +107,8 @@ def install_chromosomes_tsb_BED (genomes, custom, ref_dir):
 			print("The TSB BED files for " + genome + " have been saved.")
 
 def benchmark (ref_dir):
-	if os.path.exists("scripts/Benchmark/BRCA_bench/"):
-		shutil.move("scripts/Benchmark/BRCA_bench/", "references/vcf_files/")
+	# if os.path.exists("scripts/Benchmark/BRCA_bench/"):
+	# 	shutil.move("scripts/Benchmark/BRCA_bench/", "references/vcf_files/")
 	current_dir = os.path.realpath(__file__)
 	ref_dir = re.sub('\/install.py$', '', current_dir)
 	vcf_path = ref_dir + "/references/vcf_files/BRCA_bench/"
