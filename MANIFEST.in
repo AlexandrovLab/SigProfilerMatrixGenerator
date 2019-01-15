@@ -1,5 +1,5 @@
 include README.rst
-include SigProfilerMatrixGenerator/references/vcf_files/BRCA_bench/SNV/*
+include SigProfilerMatrixGenerator/references/vcf_files/BRCA_bench/*
 include SigProfilerMatrixGenerator/references/vcf_files/BRCA_example/SNV/*
 include SigProfilerMatrixGenerator/references/chromosomes/transcripts/GRCh37/*
 include SigProfilerMatrixGenerator/references/chromosomes/transcripts/GRCh38/*

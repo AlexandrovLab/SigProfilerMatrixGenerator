@@ -15,6 +15,7 @@ import pandas as pd
 import shutil
 import logging
 from SigProfilerMatrixGenerator.scripts import convert_input_to_simple_files as convertIn
+from SigProfilerMatrixGenerator.scripts import SigProfilerMatrixGeneratorFunc as matGen
 
 def install_chromosomes (genomes, ref_dir, custom):
 	if custom:
@@ -111,16 +112,19 @@ def benchmark (ref_dir):
 	current_dir = os.path.realpath(__file__)
 	ref_dir = re.sub('\/install.py$', '', current_dir)
 	vcf_path = ref_dir + "/references/vcf_files/BRCA_bench/"
-	output_path = ref_dir + "/references/matrix/"
+	#output_path = ref_dir + "/references/matrix/"
 
 	start_time = time.time()
-	os.system("python3 " + ref_dir + "/scripts/sigProfilerMatrixGenerator.py -g GRCh37 -p BRCA_bench -vf " + vcf_path + " -op " + output_path + " -snv")
+	#os.system("python3 " + ref_dir + "/scripts/SigProfilerMatrixGenerator.py -g GRCh37 -p BRCA_bench -vf " + vcf_path + " -op " + output_path + " -snv")
+	matGen.SigProfilerMatrixGeneratorFunc("BRCA_bench", "GRCh37", vcf_path)
 	end_time = time.time()
 
 	original_matrix_96 = ref_dir + "/scripts/Benchmark/BRCA_bench_orig_96.txt"
 	original_matrix_3072 = ref_dir + "/scripts/Benchmark/BRCA_bench_orig_3072.txt"
-	new_matrix_96 = ref_dir + "/references/matrix/BRCA_bench/SBS/BRCA_bench.SBS96.all"
-	new_matrix_3072 = ref_dir + "/references/matrix/BRCA_bench/SBS/BRCA_bench.SBS3072.all"
+	new_matrix_96 = vcf_path + "output/SBS/BRCA_bench.SBS96.all"
+#	new_matrix_96 = ref_dir + "/references/matrix/BRCA_bench/SBS/BRCA_bench.SBS96.all"
+#	new_matrix_3072 = ref_dir + "/references/matrix/BRCA_bench/SBS/BRCA_bench.SBS3072.all"
+	new_matrix_3072 = vcf_path + "output/SBS/BRCA_bench.SBS3072.all"
 
 	genome = "GRCh37"
 
@@ -261,9 +265,12 @@ def main ():
 	if os.path.exists("context_distributions/"):
 		os.system("mv context_distributions/ references/chromosomes/")
 
-	print("All reference files have been created.\nVerifying and benchmarking installation now...")
+	
 	if os.path.exists(chrom_tsb_dir + "GRCh37/"):
+		print("All reference files have been created.\nVerifying and benchmarking installation now...")
 		benchmark(ref_dir)
+	else:
+		print("All reference files have been created.")
 	print ("Please place your vcf files for each sample into the 'references/vcf_files/[test]/[mutation_type]/' directory. Once you have done that, you can proceed with the matrix generation.")
 	#os.system("rm -r " + chrom_string_dir)
 	print("Installation complete.")

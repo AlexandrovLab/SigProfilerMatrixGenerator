@@ -40,13 +40,23 @@ $ python3
 >>matrices = matGen.SigProfilerMatrixGeneratorFunc("test", "GRCh37", "/Users/ebergstr/Desktop/test",plot=True)
 ```
   The layout of the parameters are as follows:
+  
       SigProfilerMatrixGeneratorFunc(project, reference_genome, path_to_input_files, plot)
+      
   where project, reference_genome, and path_to_input_files must be strings (surrounded by quotation marks, ex: "test") and plot is a boolean argument (True or False)
 
 
 **INPUT FILE FORMAT**
 
 This tool currently supports maf, vcf, simple text file, and ICGC formats. The user must provide variant data adhering to one of these four formats. If the user’s files are in vcf format, each sample must be saved as a separate files. 
+
+
+**Output File Structure**
+
+The output structure is divided into three folders: input, output, and logs. The input folder contains copies of the user-provided input files. The outputfolder contains
+a DINUC, SBS, INDEL, and TSB folder (there will also be a plots folder if this parameter is chosen). The matrices will be saved into the appropriate folders. The logs 
+folder contains the error and log files for the submitted job.
+
 
 **SUPPORTED GENOMES**
 
