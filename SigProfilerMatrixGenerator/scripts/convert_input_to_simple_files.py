@@ -324,7 +324,7 @@ def convertICGC (project, vcf_path, genome, output_path):
 					chrom = line[8]
 					if len(chrom) > 2:
 						chrom = chrom[3:]
-					start = int(line[9])
+					start = line[9]
 					end = line[10]
 					genome = line[12]
 					ref = line[15]
