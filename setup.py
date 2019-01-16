@@ -7,7 +7,7 @@ def readme():
 
 
 setup(name='SigProfilerMatrixGenerator',
-		version='0.1.10',
+		version='0.1.11',
 		description='SigProfiler matrix generator tool',
 		url='',
 		author='Erik Bergstrom',
