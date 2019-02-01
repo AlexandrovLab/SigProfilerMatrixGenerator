@@ -7,7 +7,7 @@ def readme():
 
 
 setup(name='SigProfilerMatrixGenerator',
-		version='0.1.11',
+		version='0.1.21',
 		description='SigProfiler matrix generator tool',
 		url='',
 		author='Erik Bergstrom',
@@ -15,7 +15,11 @@ setup(name='SigProfilerMatrixGenerator',
 		license='UCSD',
 		packages=find_packages(),#['SigProfilerMatrixGenerator'],
 		install_requires =[
-			"matplotlib",
-			"sigProfilerPlotting"],
+			"matplotlib==2.2.2",
+			"sigProfilerPlotting==0.1.16",
+			"statsmodels==0.9.0",
+			"scipy==1.1.0",
+			"pandas==0.23.4",
+			"numpy==1.14.3"],
 		include_package_data=True,
 		zip_safe=False)

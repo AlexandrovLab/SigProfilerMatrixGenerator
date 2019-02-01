@@ -21,7 +21,7 @@ import uuid
 from collections import defaultdict
 from collections import OrderedDict
 import numpy as np
-np.set_printoptions(threshold=np.nan)
+#np.set_printoptions(threshold=np.nan)
 
 ################# Functions and references ###############################################
 def perm(n, seq):
@@ -40,6 +40,21 @@ def perm(n, seq):
 		permus.append("".join(p))
 	return(permus)
 
+def reference_paths (genome):
+	'''
+	Returns the path to the reference genomes installed with SigProfilerMatrixGenerator
+
+	Parameters:
+		genome  -> reference genome
+
+	Returns:
+		chrom_path  -> path to the reference genome's chromosome files
+	'''
+	current_dir = os.path.realpath(__file__)
+	ref_dir = re.sub('\/scripts/SigProfilerMatrixGenerator.py$', '', current_dir)
+	chrom_path =ref_dir + '/references/chromosomes/tsb/' + genome + "/"
+
+	return(chrom_path)
 
 def BED_filtering (bed_file_path):
 	'''

@@ -96,7 +96,10 @@ def SigProfilerMatrixGeneratorFunc (project, genome, vcfFiles, exome=False, bed_
 	if not os.path.exists(vcf_path) or len(os.listdir(vcf_path)) < 1:
 		os.makedirs(vcf_path, exist_ok=True)
 		input_files = os.listdir(vcfFiles)
-		input_files.remove("input")
+		if os.path.exists(vcfFiles + "input/"):
+			input_files.remove("input")
+		if os.path.exists(vcfFiles + "logs/"):
+			input_files.remove("logs")
 		if ".DS_Store" in input_files:
 			input_files.remove(".DS_Store")
 		if "__init__.py" in input_files:
