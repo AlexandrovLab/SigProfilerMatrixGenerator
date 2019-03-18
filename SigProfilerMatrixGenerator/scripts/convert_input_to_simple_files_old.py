@@ -10,7 +10,7 @@ import re
 
 
 
-def convertVCF (project, vcf_path, genome, output_path, ncbi_chrom, log_file):
+def convertVCF (project, vcf_path, genome, output_path):
 	'''
 	Converts input vcf files into a single simple text format.
 
@@ -38,8 +38,6 @@ def convertVCF (project, vcf_path, genome, output_path, ncbi_chrom, log_file):
 	snv = False
 	indel = False
 	first_incorrect_file = True
-	out = open(log_file, 'a')
-	prev_line = None
 	
 	# Iterates through each file 
 	for file in files:
@@ -58,15 +56,10 @@ def convertVCF (project, vcf_path, genome, output_path, ncbi_chrom, log_file):
 						chrom = line[0]
 						if len(chrom) > 2:
 							chrom = chrom[3:]
-						if chrom in ncbi_chrom:
-							chrom = ncbi_chrom[chrom]
-
 						start = line[1]
 						ref = line[3]
 						mut = line[4]
 						int(start)
-
-
 					except:
 						if first_incorrect_file:
 							print("The given input files do not appear to be in the correct vcf format. Skipping this file: ", file)
@@ -76,31 +69,6 @@ def convertVCF (project, vcf_path, genome, output_path, ncbi_chrom, log_file):
 					# Saves SNV mutations into an SNV simple text file
 					if len(ref) == 1 and len(mut) == 1 and ref != "-" and mut != "-":
 						snv = True
-
-						if ref not in 'ACGT-':
-							print("The ref base is not recognized. Skipping this mutation: " + chrom + " " + str(start) + " " + ref + " " + mut, file=out)
-							out.flush()
-							skipped_count += 1
-							continue
-						
-						if mut not in 'ACGT-':
-							print("The mutation base is not recognized. Skipping this mutation: " + chrom + " " + str(start) + " " + ref + " " + mut, file=out)
-							out.flush()
-							skipped_count += 1
-							continue
-						
-						if ref == mut:
-							print("The ref base appears to match the mutated base. Skipping this mutation: " + chrom + " " + str(start) + " " + ref + " " + mut, file=out)
-							out.flush()
-							skipped_count += 1
-							continue
-
-						if line == prev_line:
-							print("There appears to be a duplicate single base substitution. Skipping this mutation: " + chrom + " " + str(start) + " " + ref + " " + mut, file=out)
-							out.flush()
-							skipped_count += 1
-							continue
-
 						if first_SNV:
 							outputFile = output_path + "SNV/" + project + ".genome"
 							os.system("rm -f " + outputFile)
@@ -123,8 +91,6 @@ def convertVCF (project, vcf_path, genome, output_path, ncbi_chrom, log_file):
 							first_indel = False
 
 						print("\t".join([project, sample, ".", genome, "INDEL", chrom, start, start, ref, mut, "SOMATIC"]), file=out_indel)
-					prev_line = line
-
 
 		first_incorrect_file = True
 
@@ -133,11 +99,10 @@ def convertVCF (project, vcf_path, genome, output_path, ncbi_chrom, log_file):
 		out_snv.close()
 	if indel:
 		out_indel.close()
-	out.close()
 	return(snv, indel)
 
 
-def convertTxt (project, vcf_path, genome, output_path, ncbi_chrom, log_file):
+def convertTxt (project, vcf_path, genome, output_path):
 	'''
 	Converts input text files into a single simple text format.
 
@@ -159,14 +124,12 @@ def convertTxt (project, vcf_path, genome, output_path, ncbi_chrom, log_file):
 	'''
 
 	# Collect all input file names and instantiate flags
-	out = open(log_file, 'a')
 	files = os.listdir(vcf_path)
 	first_indel = True
 	first_SNV = True	
 	snv = False
 	indel = False
 	first_incorrect_file = True
-	prev_line = None
 
 	# Iterates through each file 
 	for file in files:
@@ -181,18 +144,12 @@ def convertTxt (project, vcf_path, genome, output_path, ncbi_chrom, log_file):
 					chrom = line[5]
 					if len(chrom) > 2:
 						chrom = chrom[3:]
-					if chrom in ncbi_chrom:
-						chrom = ncbi_chrom[chrom]
-
 					start = line[6]
 					end = line[7]
 					ref = line[8]
 					mut = line[9]
 					int(start)
 					int(end)
-
-
-
 				except:
 					if first_incorrect_file:
 						print("The given input files do not appear to be in the correct simple text format. Skipping this file: ", file)
@@ -202,30 +159,6 @@ def convertTxt (project, vcf_path, genome, output_path, ncbi_chrom, log_file):
 				# Saves SNV mutations into an SNV simple text file
 				if len(ref) == 1 and len(mut) == 1 and ref != "-" and mut != "-":
 					snv = True
-					if ref not in 'ACGT-':
-						print("The ref base is not recognized. Skipping this mutation: " + chrom + " " + str(start) + " " + ref + " " + mut, file=out)
-						out.flush()
-						skipped_count += 1
-						continue
-					
-					if mut not in 'ACGT-':
-						print("The mutation base is not recognized. Skipping this mutation: " + chrom + " " + str(start) + " " + ref + " " + mut, file=out)
-						out.flush()
-						skipped_count += 1
-						continue
-					
-					if ref == mut:
-						print("The ref base appears to match the mutated base. Skipping this mutation: " + chrom + " " + str(start) + " " + ref + " " + mut, file=out)
-						out.flush()
-						skipped_count += 1
-						continue
-
-					if line == prev_line:
-						print("There appears to be a duplicate single base substitution. Skipping this mutation: " + chrom + " " + str(start) + " " + ref + " " + mut, file=out)
-						out.flush()
-						skipped_count += 1
-						continue
-
 					if first_SNV:
 						outputFile = output_path + "SNV/" + project + ".genome"
 						os.system("rm -f " + outputFile)
@@ -248,8 +181,7 @@ def convertTxt (project, vcf_path, genome, output_path, ncbi_chrom, log_file):
 						first_indel = False
 
 					print("\t".join([project, sample, ".", genome, "INDEL", chrom, start, start, ref, mut, "SOMATIC"]), file=out_indel)
-				
-				prev_line = line
+
 		first_incorrect_file = True
 
 	# Closes the output files and returns the boolean flags
@@ -257,10 +189,9 @@ def convertTxt (project, vcf_path, genome, output_path, ncbi_chrom, log_file):
 		out_snv.close()
 	if indel:
 		out_indel.close()
-	out.close()
 	return(snv, indel)
 
-def convertMAF (project, vcf_path, genome, output_path, ncbi_chrom, log_file):
+def convertMAF (project, vcf_path, genome, output_path):
 	'''
 	Converts input MAF files into a single simple text format.
 
@@ -282,14 +213,12 @@ def convertMAF (project, vcf_path, genome, output_path, ncbi_chrom, log_file):
 	'''
 
 	# Collect all input file names and instantiate flags
-	out = open(log_file, 'a')
 	files = os.listdir(vcf_path)
 	first_indel = True
 	first_SNV = True	
 	snv = False
 	indel = False
 	first_incorrect_file = True
-	prev_line = None
 
 	# Iterates through each file 
 	for file in files:
@@ -305,17 +234,12 @@ def convertMAF (project, vcf_path, genome, output_path, ncbi_chrom, log_file):
 					chrom = line[4]
 					if len(chrom) > 2:
 						chrom = chrom[3:]
-					if chrom in ncbi_chrom:
-						chrom = ncbi_chrom[chrom]
-
 					start = line[5]
 					end = line[6]
 					ref = line[10]
 					mut = line[47]
 					int(start)
 					int(end)
-
-
 				except:
 					if first_incorrect_file:
 						print("The given input files do not appear to be in the correct MAF format. Skipping this file: ", file)
@@ -325,30 +249,6 @@ def convertMAF (project, vcf_path, genome, output_path, ncbi_chrom, log_file):
 				# Saves SNV mutations into an SNV simple text file
 				if len(ref) == 1 and len(mut) == 1 and ref != "-" and mut != "-":
 					snv = True
-					if ref not in 'ACGT-':
-						print("The ref base is not recognized. Skipping this mutation: " + chrom + " " + str(start) + " " + ref + " " + mut, file=out)
-						out.flush()
-						skipped_count += 1
-						continue
-					
-					if mut not in 'ACGT-':
-						print("The mutation base is not recognized. Skipping this mutation: " + chrom + " " + str(start) + " " + ref + " " + mut, file=out)
-						out.flush()
-						skipped_count += 1
-						continue
-					
-					if ref == mut:
-						print("The ref base appears to match the mutated base. Skipping this mutation: " + chrom + " " + str(start) + " " + ref + " " + mut, file=out)
-						out.flush()
-						skipped_count += 1
-						continue
-
-					if line == prev_line:
-						print("There appears to be a duplicate single base substitution. Skipping this mutation: " + chrom + " " + str(start) + " " + ref + " " + mut, file=out)
-						out.flush()
-						skipped_count += 1
-						continue
-
 					if first_SNV:
 						outputFile = output_path + "SNV/" + project + ".genome"
 						os.system("rm -f " + outputFile)
@@ -371,8 +271,7 @@ def convertMAF (project, vcf_path, genome, output_path, ncbi_chrom, log_file):
 						first_indel = False
 
 					print("\t".join([project, sample, ".", genome, "INDEL", chrom, start, start, ref, mut, "SOMATIC"]), file=out_indel)
-				
-				prev_line = line
+
 		first_incorrect_file = True
 
 	# Closes the output files and returns the boolean flags
@@ -380,11 +279,10 @@ def convertMAF (project, vcf_path, genome, output_path, ncbi_chrom, log_file):
 		out_snv.close()
 	if indel:
 		out_indel.close()
-	out.close()
 	return(snv, indel)
 
 
-def convertICGC (project, vcf_path, genome, output_path, ncbi_chrom, log_file):
+def convertICGC (project, vcf_path, genome, output_path):
 	'''
 	Converts input ICGC files into a single simple text format.
 
@@ -406,14 +304,12 @@ def convertICGC (project, vcf_path, genome, output_path, ncbi_chrom, log_file):
 	'''
 
 	# Collect all input file names and instantiate flags
-	out = open(log_file, 'a')
 	files = os.listdir(vcf_path)
 	first_indel = True
 	first_SNV = True	
 	snv = False
 	indel = False
 	first_incorrect_file = True
-	prev_line = None
 
 	# Iterates through each file 
 	for file in files:
@@ -428,9 +324,6 @@ def convertICGC (project, vcf_path, genome, output_path, ncbi_chrom, log_file):
 					chrom = line[8]
 					if len(chrom) > 2:
 						chrom = chrom[3:]
-					if chrom in ncbi_chrom:
-						chrom = ncbi_chrom[chrom]
-
 					start = line[9]
 					end = line[10]
 					genome = line[12]
@@ -443,9 +336,6 @@ def convertICGC (project, vcf_path, genome, output_path, ncbi_chrom, log_file):
 						ref = '-' + ref
 					int(start)
 					int(end)
-
-
-
 				except:
 					if first_incorrect_file:
 						print("The given input files do not appear to be in the correct ICGC format.")
@@ -455,30 +345,6 @@ def convertICGC (project, vcf_path, genome, output_path, ncbi_chrom, log_file):
 				# Saves SNV mutations into an SNV simple text file
 				if len(ref) == 1 and len(mut) == 1 and ref != "-" and mut != "-":
 					snv = True
-					if ref not in 'ACGT-':
-						print("The ref base is not recognized. Skipping this mutation: " + chrom + " " + str(start) + " " + ref + " " + mut, file=out)
-						out.flush()
-						skipped_count += 1
-						continue
-					
-					if mut not in 'ACGT-':
-						print("The mutation base is not recognized. Skipping this mutation: " + chrom + " " + str(start) + " " + ref + " " + mut, file=out)
-						out.flush()
-						skipped_count += 1
-						continue
-					
-					if ref == mut:
-						print("The ref base appears to match the mutated base. Skipping this mutation: " + chrom + " " + str(start) + " " + ref + " " + mut, file=out)
-						out.flush()
-						skipped_count += 1
-						continue
-
-					if line == prev_line:
-						print("There appears to be a duplicate single base substitution. Skipping this mutation: " + chrom + " " + str(start) + " " + ref + " " + mut, file=out)
-						out.flush()
-						skipped_count += 1
-						continue
-
 					if first_SNV:
 						outputFile = output_path + "SNV/" + project + ".genome"
 						os.system("rm -f " + outputFile)
@@ -501,7 +367,6 @@ def convertICGC (project, vcf_path, genome, output_path, ncbi_chrom, log_file):
 						first_indel = False
 
 					print("\t".join([project, sample, ".", genome, "INDEL", chrom, start, start, ref, mut, "SOMATIC"]), file=out_indel)
-				prev_line = line
 
 		first_incorrect_file = True
 
@@ -510,7 +375,6 @@ def convertICGC (project, vcf_path, genome, output_path, ncbi_chrom, log_file):
 		out_snv.close()
 	if indel:
 		out_indel.close()
-	out.close()
 	return(snv, indel)
 
 
