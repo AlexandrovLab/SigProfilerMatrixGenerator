@@ -157,13 +157,13 @@ def SigProfilerMatrixGeneratorFunc (project, genome, vcfFiles, exome=False, bed_
 			convertIn.convertTxt(project, vcf_path, genome, output_path)
 	else:
 		if file_extension == 'txt':
-			snv, indel = convertIn.convertTxt(project, vcf_path,  genome,  output_path, ncbi_chrom, log_file)
+			snv, indel = convertIn.convertTxt(project, vcf_path,  genome,  output_path)
 		elif file_extension == 'vcf':
-			snv, indel = convertIn.convertVCF(project, vcf_path,  genome, output_path, ncbi_chrom, log_file)
+			snv, indel = convertIn.convertVCF(project, vcf_path,  genome, output_path)
 		elif file_extension == 'maf':
-			snv, indel = convertIn.convertMAF(project, vcf_path,  genome, output_path, ncbi_chrom, log_file)
+			snv, indel = convertIn.convertMAF(project, vcf_path,  genome, output_path)
 		elif file_extension == 'tsv':
-			snv, indel = convertIn.convertICGC(project, vcf_path,  genome, output_path, ncbi_chrom, log_file)
+			snv, indel = convertIn.convertICGC(project, vcf_path,  genome, output_path)
 		else:
 			print("File format not supported")
 
