@@ -41,6 +41,7 @@ def convertVCF (project, vcf_path, genome, output_path, ncbi_chrom, log_file):
 	out = open(log_file, 'a')
 	prev_line = None
 	first_chrom = ''
+	skipped_count = 0
 	
 	# Iterates through each file 
 	for file in files:
@@ -173,7 +174,7 @@ def convertVCF (project, vcf_path, genome, output_path, ncbi_chrom, log_file):
 	if indel:
 		out_indel.close()
 	out.close()
-	return(snv, indel)
+	return(snv, indel, skipped_count)
 
 
 def convertTxt (project, vcf_path, genome, output_path, ncbi_chrom, log_file):
