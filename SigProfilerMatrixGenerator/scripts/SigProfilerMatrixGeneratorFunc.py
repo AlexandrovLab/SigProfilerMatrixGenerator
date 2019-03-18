@@ -152,25 +152,27 @@ def SigProfilerMatrixGeneratorFunc (project, genome, vcfFiles, exome=False, bed_
 		os.system("rm -r " + output_path)
 	os.makedirs(output_path)
 
+	skipped_muts = 0
 	# Converts the input files to standard text in the temporary folder
 	if file_extension == 'genome':
-			convertIn.convertTxt(project, vcf_path, genome, output_path)
+			snv, indel, skipped = convertIn.convertTxt(project, vcf_path, genome, output_path)
 	else:
 		if file_extension == 'txt':
-			snv, indel = convertIn.convertTxt(project, vcf_path,  genome,  output_path, ncbi_chrom, log_file)
+			snv, indel, skipped = convertIn.convertTxt(project, vcf_path,  genome,  output_path, ncbi_chrom, log_file)
 		elif file_extension == 'vcf':
-			snv, indel = convertIn.convertVCF(project, vcf_path,  genome, output_path, ncbi_chrom, log_file)
+			snv, indel, skipped = convertIn.convertVCF(project, vcf_path,  genome, output_path, ncbi_chrom, log_file)
 		elif file_extension == 'maf':
-			snv, indel = convertIn.convertMAF(project, vcf_path,  genome, output_path, ncbi_chrom, log_file)
+			snv, indel, skipped = convertIn.convertMAF(project, vcf_path,  genome, output_path, ncbi_chrom, log_file)
 		elif file_extension == 'tsv':
-			snv, indel = convertIn.convertICGC(project, vcf_path,  genome, output_path, ncbi_chrom, log_file)
+			snv, indel, skipped = convertIn.convertICGC(project, vcf_path,  genome, output_path, ncbi_chrom, log_file)
 		else:
 			print("File format not supported")
 
-
+	skipped_muts += skipped
+	
 	# Instantiates variables for final output statistics
 	analyzed_muts = [0, 0, 0]
-	skipped_muts = 0
+	
 	sample_count_high = 0
 
 	# Begins matrix generation for all possible contexts
