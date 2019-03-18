@@ -203,19 +203,21 @@ def SigProfilerMatrixGeneratorFunc (project, genome, vcfFiles, exome=False, bed_
 			vcf_files.remove(".DS_Store")
 
 		# Sorts files based on chromosome, sample, and start position
-		sort_file = vcf_files[0]
-		with open(vcf_path + sort_file) as f:
-			lines = [line.strip().split() for line in f]
-		output = open(vcf_path + sort_file, 'w')
-		try:
-			for line in sorted(lines, key = lambda x: (['X','Y','1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', 'MT', 'M'].index(x[5]), x[1], x[6])):
-				print('\t'.join(line), file=output)
-		except ValueError as e:
-			err = str(e).split("'")
-			err = err[1]
-			print("There appears to be unrecognized chromosomes within the file. Please remove the lines that contain the chromosome: " + err)
-			sys.exit()
-		output.close()
+		for file in vcf_files:
+			#sort_file = vcf_files[0]
+			with open(vcf_path + file) as f:
+				lines = [line.strip().split() for line in f]
+			output = open(vcf_path + file, 'w')
+			try:
+				#for line in sorted(lines, key = lambda x: (['X','Y','1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', 'MT', 'M'].index(x[5]), x[1], x[6])):
+				for line in sorted(lines, key = lambda x: (['X','Y','1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', 'MT', 'M'].index(x[1]), x[0], x[2])):
+					print('\t'.join(line), file=output)
+			except ValueError as e:
+				err = str(e).split("'")
+				err = err[1]
+				print("There appears to be unrecognized chromosomes within the file. Please remove the lines that contain the chromosome: " + err)
+				sys.exit()
+			output.close()
 
 		# Generates the bed regions if a bed file was provided
 		if bed_file != None:
