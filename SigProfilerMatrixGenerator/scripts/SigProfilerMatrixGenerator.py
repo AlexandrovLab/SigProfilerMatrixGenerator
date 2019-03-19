@@ -219,7 +219,8 @@ def catalogue_generator_single (vcf_path, vcf_path_original, vcf_files, bed_file
 
 	# Instantiates all relevant variables
 	types = []
-	samples = []
+	#samples = []
+	samples = set()
 	mutation_dict = {}
 	flag = True
 	i = 0
@@ -237,7 +238,6 @@ def catalogue_generator_single (vcf_path, vcf_path_original, vcf_files, bed_file
 	dinucs_context = {}
 	dinucs_context_tsb = {}
 	dinucs_tsb = {}
-	samples = []
 
 	mutation_types = ['AC>CA','AC>CG','AC>CT','AC>GA','AC>GG','AC>GT','AC>TA','AC>TG','AC>TT',
 					  'AT>CA','AT>CC','AT>CG','AT>GA','AT>GC','AT>TA','CC>AA','CC>AG','CC>AT',
@@ -328,10 +328,14 @@ def catalogue_generator_single (vcf_path, vcf_path_original, vcf_files, bed_file
 						mut = line[4][0].upper()
 
 
-						if sample not in mutation_dict:
+						if sample not in samples:
+						#if sample not in mutation_dict:
 							mutation_dict[sample] = {}
-							samples.append(sample)
+							#samples.append(sample)
+							samples.add(sample)
 							mutation_dict[sample] = {}
+							for muts in mut_types:
+								mutation_dict[sample][muts] = 0
 							sample_count[sample] = [0,0]
 
 						# DINUC sorting
@@ -349,7 +353,7 @@ def catalogue_generator_single (vcf_path, vcf_path_original, vcf_files, bed_file
 								dinuc_seq_tsb = bias + ":" + dinuc_seq
 								dinuc_tsb = bias + ":" + dinuc
 
-								if sample not in dinucs.keys():
+								if sample not in dinucs:
 									dinucs[sample] = {}
 									dinucs_context[sample] = {}
 									dinucs_context_tsb[sample] = {}
@@ -476,10 +480,11 @@ def catalogue_generator_single (vcf_path, vcf_path_original, vcf_files, bed_file
 							# Saves the mutation key for the current variant
 							#mut_key = bias + ":" + sequence[0:int(len(sequence)/2)] + '[' + ref + '>' + mut + ']' + sequence[int(len(sequence)/2+1):]
 							mut_key = ''.join([bias,":",sequence[0:int(len(sequence)/2)],'[',ref,'>',mut,']',sequence[int(len(sequence)/2+1):]])
-							if mut_key not in mutation_dict[sample]:
-								mutation_dict[sample][mut_key] = 1
-							else:
-								mutation_dict[sample][mut_key] += 1
+#							if mut_key not in mutation_dict[sample]:
+#								mutation_dict[sample][mut_key] = 1
+#							else:
+#								mutation_dict[sample][mut_key] += 1
+							mutation_dict[sample][mut_key] += 1
 							total_analyzed += 1
 
 
