@@ -77,7 +77,7 @@ def SigProfilerMatrixGeneratorFunc (project, genome, vcfFiles, exome=False, bed_
 			   16:['N','N'], 17:['T','N'], 18:['U','N'], 19:['B','N']}
 
 	# Instantiates the initial contexts to generate matrices for
-	contexts = ['6144', 'DINUC']
+	contexts = ['6144']#, 'DINUC']
 
 	# Organizes all of the reference directories for later reference:
 	current_dir = os.path.realpath(__file__)
@@ -233,10 +233,11 @@ def SigProfilerMatrixGeneratorFunc (project, genome, vcfFiles, exome=False, bed_
 		for context in contexts:
 			if context != 'DINUC' and context != 'INDEL':
 				if not chrom_based:
-					matrix, skipped_mut, total, sample_count = matGen.catalogue_generator_single (vcf_path, vcf_path_original, vcf_files, bed_file_path, chrom_path, project, output_matrix, context, exome, genome, ncbi_chrom, functionFlag, bed, bed_ranges, chrom_based, plot, tsb_ref, transcript_path, tsb_stat, gs, log_file)
+					matrix, matrix_DINUC, skipped_mut, total, total_DINUC, sample_count = matGen.catalogue_generator_single (vcf_path, vcf_path_original, vcf_files, bed_file_path, chrom_path, project, output_matrix, context, exome, genome, ncbi_chrom, functionFlag, bed, bed_ranges, chrom_based, plot, tsb_ref, transcript_path, tsb_stat, gs, log_file)
 					matrices = matrix
 					skipped_muts += skipped_mut
 					analyzed_muts[0] = total
+					analyzed_muts[1] = total_DINUC
 					if sample_count > sample_count_high:
 						sample_count_high = sample_count
 				else:
