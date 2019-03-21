@@ -14,6 +14,26 @@ from SigProfilerMatrixGenerator.scripts import convert_input_to_simple_files as 
 import uuid
 import shutil
 import time
+import numpy as np
+import itertools
+
+def perm(n, seq):
+	'''
+	Generates a list of all available permutations of n-mers.
+
+	Parameters:
+			   n  -> length of the desired permutation string
+			 seq  -> list of all possible string values
+
+	Returns:
+		  permus  -> list of all available permutations
+	'''
+	permus = []
+	for p in itertools.product(seq, repeat=n):
+		permus.append("".join(p))
+	return(permus)
+
+
 
 def SigProfilerMatrixGeneratorFunc (project, genome, vcfFiles, exome=False, bed_file=None, chrom_based=False, plot=False, tsb_stat=False, gs=False):
 	'''
@@ -76,8 +96,42 @@ def SigProfilerMatrixGeneratorFunc (project, genome, vcfFiles, exome=False, bed_
 			   12:['B','A'], 13:['B','C'], 14:['B','G'], 15:['B','T'],
 			   16:['N','N'], 17:['T','N'], 18:['U','N'], 19:['B','N']}
 
+	bias_sort = {'T':0,'U':1,'N':3,'B':2}
+	tsb = ['T','U','N','B']
+	bases = ['A','C','G','T']
+	mutation_types = ['AC>CA','AC>CG','AC>CT','AC>GA','AC>GG','AC>GT','AC>TA','AC>TG','AC>TT',
+					  'AT>CA','AT>CC','AT>CG','AT>GA','AT>GC','AT>TA','CC>AA','CC>AG','CC>AT',
+					  'CC>GA','CC>GG','CC>GT','CC>TA','CC>TG','CC>TT','CG>AT','CG>GC','CG>GT',
+					  'CG>TA','CG>TC','CG>TT','CT>AA','CT>AC','CT>AG','CT>GA','CT>GC','CT>GG',
+					  'CT>TA','CT>TC','CT>TG','GC>AA','GC>AG','GC>AT','GC>CA','GC>CG','GC>TA',
+					  'TA>AT','TA>CG','TA>CT','TA>GC','TA>GG','TA>GT','TC>AA','TC>AG','TC>AT',
+					  'TC>CA','TC>CG','TC>CT','TC>GA','TC>GG','TC>GT','TG>AA','TG>AC','TG>AT',
+					  'TG>CA','TG>CC','TG>CT','TG>GA','TG>GC','TG>GT','TT>AA','TT>AC','TT>AG',
+					  'TT>CA','TT>CC','TT>CG','TT>GA','TT>GC','TT>GG']
+	# Pre-fills the mutation types variable
+	size = 5
+	mut_types_initial = perm(size, "ACGT")
+	mut_types = []
+	for tsbs in tsb:
+		for mut in mut_types_initial:
+			current_base = mut[int(size/2)]
+			if current_base == 'C' or current_base == 'T':
+				for base in bases:
+					if base != current_base:
+						mut_types.append(tsbs+":"+mut[0:int(size/2)] + "[" + current_base+">"+ base+"]"+mut[int(size/2)+1:])
+
+	# Organizes all of the mutation types for DINUCs
+	mutation_types_tsb_context = []
+	for base in bases:
+		for mut in mutation_types:
+			for base2 in bases:
+				for base3 in tsb:
+					mutation_types_tsb_context.append(''.join([base3,":",base,"[",mut,"]",base2]))
+					mut_tsb = base3 + ":" + mut
+
+
 	# Instantiates the initial contexts to generate matrices for
-	contexts = ['6144', 'DINUC']
+	contexts = ['6144']#, 'DINUC']
 
 	# Organizes all of the reference directories for later reference:
 	current_dir = os.path.realpath(__file__)
@@ -204,22 +258,6 @@ def SigProfilerMatrixGeneratorFunc (project, genome, vcfFiles, exome=False, bed_
 		if ".DS_Store" in vcf_files:
 			vcf_files.remove(".DS_Store")
 
-		# Sorts files based on chromosome, sample, and start position
-		for file in vcf_files:
-			#sort_file = vcf_files[0]
-			with open(vcf_path + file) as f:
-				lines = [line.strip().split() for line in f]
-			output = open(vcf_path + file, 'w')
-			try:
-				#for line in sorted(lines, key = lambda x: (['X','Y','1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', 'MT', 'M'].index(x[5]), x[1], x[6])):
-				for line in sorted(lines, key = lambda x: (['X','Y','1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', 'MT', 'M'].index(x[1]), x[0], x[2])):
-					print('\t'.join(line), file=output)
-			except ValueError as e:
-				err = str(e).split("'")
-				err = err[1]
-				print("There appears to be unrecognized chromosomes within the file. Please remove the lines that contain the chromosome: " + err)
-				sys.exit()
-			output.close()
 
 		# Generates the bed regions if a bed file was provided
 		if bed_file != None:
@@ -229,49 +267,57 @@ def SigProfilerMatrixGeneratorFunc (project, genome, vcfFiles, exome=False, bed_
 		else:
 			bed_file_path = None
 
-		# Creates the matrix for each context
-		for context in contexts:
-			if context != 'DINUC' and context != 'INDEL':
-				if not chrom_based:
-					matrix, skipped_mut, total, sample_count = matGen.catalogue_generator_single (vcf_path, vcf_path_original, vcf_files, bed_file_path, chrom_path, project, output_matrix, context, exome, genome, ncbi_chrom, functionFlag, bed, bed_ranges, chrom_based, plot, tsb_ref, transcript_path, tsb_stat, gs, log_file)
-					matrices = matrix
-					skipped_muts += skipped_mut
-					analyzed_muts[0] = total
-					if sample_count > sample_count_high:
-						sample_count_high = sample_count
-				else:
-					matGen.catalogue_generator_single (vcf_path, vcf_path_original, vcf_files, bed_file_path, chrom_path, project, output_matrix, context, exome, genome, ncbi_chrom, functionFlag, bed, bed_ranges, chrom_based, plot, tsb_ref, transcript_path, tsb_stat, gs, log_file)
-					print("Matrices per chromosome have been created.")
+		# Sorts files based on chromosome, sample, and start position
+		zeros = np.zeros(len(mut_types))
+		first_chrom = True
+		first_dinuc = True
+		mutation_pd = pd.DataFrame(index=mut_types)
+		if not chrom_based:
+			chrom_start = None
+		for file in vcf_files:
+			dinuc = True
+			chrom = file.split("_")[0]
+			with open(vcf_path + file) as f:
+				lines = [line.strip().split() for line in f]
+			lines = sorted(lines, key = lambda x: (x[0], int(x[2])))
+			samples = [x[0] for x in lines]
+			samples = set(samples)
+			context = '6144'
+			mutation_dict, skipped_mut, total, total_DINUC, all_dinucs = matGen.catalogue_generator_single (lines, chrom, mutation_types_tsb_context, vcf_path, vcf_path_original, vcf_files, bed_file_path, chrom_path, project, output_matrix, context, exome, genome, ncbi_chrom, functionFlag, bed, bed_ranges, chrom_based, plot, tsb_ref, transcript_path, tsb_stat, gs, log_file)
+			
+			if not any(all_dinucs):
+				dinuc = False
 
-			elif context == 'DINUC':
-				if analyzed_muts[0] > 1:
-					if not chrom_based:
-						matrix, skipped_mut, total, sample_count = matGen.catalogue_generator_DINUC_single (vcf_path, vcf_path_original, vcf_files, bed_file_path, chrom_path, project, output_matrix, exome, genome, ncbi_chrom, functionFlag, bed, bed_ranges, chrom_based, plot, tsb_ref, log_file)
-						matrices[context] = matrix
-						analyzed_muts[1] = total
-						if sample_count > sample_count_high:
-							sample_count_high = sample_count
+			if first_chrom:
+				mutation_pd = pd.DataFrame.from_dict(mutation_dict)
+				if dinuc:
+					mutation_dinuc_pd_all = pd.DataFrame.from_dict(all_dinucs)
+					first_dinuc = False
+				first_chrom = False
+			else:
+				mutation_pd = mutation_pd.add(pd.DataFrame.from_dict(mutation_dict), fill_value=0)
+				if dinuc:
+					if first_dinuc:
+						mutation_dinuc_pd_all = pd.DataFrame.from_dict(all_dinucs)
+						first_dinuc = False
 					else:
-						matGen.catalogue_generator_DINUC_single (vcf_path, vcf_path_original, vcf_files, bed_file_path, chrom_path, project, output_matrix, exome, genome, ncbi_chrom, functionFlag, bed, bed_ranges, chrom_based, plot, tsb_ref, log_file)
-						print("Matrices per chromosome have been created.")
-				else:
-					pass
+						mutation_dinuc_pd_all = mutation_dinuc_pd_all.add(pd.DataFrame.from_dict(all_dinucs), fill_value=0)
 
-			elif context == 'INDEL':
-				if not chrom_based:
-					matrix, skipped_mut, total, sample_count = matGen.catalogue_generator_INDEL_single (vcf_path, vcf_path_original, vcf_files, bed_file_path, chrom_path, project, output_matrix, exome, genome, ncbi_chrom, limited_indel, functionFlag, bed, bed_ranges, chrom_based, plot, tsb_ref, transcript_path, gs, log_file)
-					matrices[context] = matrix
-					skipped_muts += skipped_mut
-					analyzed_muts[2] = total
-					if sample_count > sample_count_high:
-						sample_count_high = sample_count
-				else:
-					matGen.catalogue_generator_INDEL_single (vcf_path, vcf_path_original, vcf_files, bed_file_path, chrom_path, project, output_matrix, exome, genome, ncbi_chrom, limited_indel, functionFlag, bed, bed_ranges, chrom_based, plot, tsb_ref, transcript_path, gs, log_file)
-					print("Matrices per chromosome have been created.")
+			mutation_pd = mutation_pd.fillna(0)
 
-			#logging.info("Catalogue for " + context + " context is complete.")
-			with open(log_file, 'a') as f:
-				print("Catalogue for " + context + " context is complete.", file=f)
+
+			skipped_muts += skipped_mut
+			analyzed_muts[0] += total
+			analyzed_muts[1] += total_DINUC
+		sample_count_high = len(list(mutation_pd.columns.values))	
+
+		if i != 1:
+			matrices = matGen.matrix_generator (context, output_matrix, project, samples, bias_sort, mutation_pd, exome, mut_types, bed, chrom_start, functionFlag, plot, tsb_stat)
+			if analyzed_muts[1] > 0:
+				dinuc_mat = matGen.matrix_generator_DINUC (output_matrix, samples, bias_sort, mutation_dinuc_pd_all, mutation_types_tsb_context, project, exome, bed, chrom_start, plot)
+				matrices['DINUC'] = dinuc_mat
+		else:
+			matGen.matrix_generator_INDEL(output_matrix, samples, indel_types, indel_types_tsb, indel_types_simple, indel_dict, indel_tsb_dict, indel_simple_dict, project, exome, limited_indel, bed, chrom_start, plot)
 
 		if i == 1:
 			os.system("rm -r " + output_matrix + "temp/")
