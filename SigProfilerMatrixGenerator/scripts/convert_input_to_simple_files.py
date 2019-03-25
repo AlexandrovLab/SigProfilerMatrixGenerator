@@ -42,11 +42,13 @@ def convertVCF (project, vcf_path, genome, output_path, ncbi_chrom, log_file):
 	prev_line = None
 	first_chrom = ''
 	skipped_count = 0
+	samples = []
 	
 	# Iterates through each file 
 	for file in files:
 		file_name = file.split(".")
 		sample = file_name[0]
+		samples.append(sample)
 		if file == '.DS_Store':
 			continue
 		with open (vcf_path + file) as f:
@@ -207,7 +209,7 @@ def convertVCF (project, vcf_path, genome, output_path, ncbi_chrom, log_file):
 			files.close()
 		#out_indel.close()
 	out.close()
-	return(snv, indel, skipped_count)
+	return(snv, indel, skipped_count, samples)
 
 
 def convertTxt (project, vcf_path, genome, output_path, ncbi_chrom, log_file):
@@ -241,6 +243,7 @@ def convertTxt (project, vcf_path, genome, output_path, ncbi_chrom, log_file):
 	first_incorrect_file = True
 	prev_line = None
 	skipped_count = 0
+	samples = []
 
 	# Iterates through each file 
 	for file in files:
@@ -251,6 +254,7 @@ def convertTxt (project, vcf_path, genome, output_path, ncbi_chrom, log_file):
 				try:
 					line = lines.strip().split('\t')
 					sample = line[1]
+					samples.append(sample)
 					genome = line[3]
 					chrom = line[5]
 					if len(chrom) > 2:
@@ -398,7 +402,7 @@ def convertTxt (project, vcf_path, genome, output_path, ncbi_chrom, log_file):
 	if indel:
 		out_indel.close()
 	out.close()
-	return(snv, indel, skipped_count)
+	return(snv, indel, skipped_count, samples)
 
 def convertMAF (project, vcf_path, genome, output_path, ncbi_chrom, log_file):
 	'''
@@ -431,6 +435,7 @@ def convertMAF (project, vcf_path, genome, output_path, ncbi_chrom, log_file):
 	first_incorrect_file = True
 	prev_line = None
 	skipped_count = 0
+	samples = []
 
 	# Iterates through each file 
 	for file in files:
@@ -438,6 +443,7 @@ def convertMAF (project, vcf_path, genome, output_path, ncbi_chrom, log_file):
 			continue
 		name = file.split(".")
 		sample = name[0]
+		samples.append(sample)
 		with open (vcf_path + file) as f:
 			for lines in f:
 				try:
@@ -587,7 +593,7 @@ def convertMAF (project, vcf_path, genome, output_path, ncbi_chrom, log_file):
 	if indel:
 		out_indel.close()
 	out.close()
-	return(snv, indel, skipped_count)
+	return(snv, indel, skipped_count, samples)
 
 
 def convertICGC (project, vcf_path, genome, output_path, ncbi_chrom, log_file):
@@ -621,6 +627,7 @@ def convertICGC (project, vcf_path, genome, output_path, ncbi_chrom, log_file):
 	first_incorrect_file = True
 	prev_line = None
 	skipped_count = 0
+	samples = []
 
 	# Iterates through each file 
 	for file in files:
@@ -631,6 +638,7 @@ def convertICGC (project, vcf_path, genome, output_path, ncbi_chrom, log_file):
 				try:
 					line = lines.strip().split('\t')
 					sample = line[1]
+					samples.append(sample)
 					icgc_sample_id = line[4]
 					chrom = line[8]
 					if len(chrom) > 2:
@@ -782,7 +790,7 @@ def convertICGC (project, vcf_path, genome, output_path, ncbi_chrom, log_file):
 	if indel:
 		out_indel.close()
 	out.close()
-	return(snv, indel, skipped_count)
+	return(snv, indel, skipped_count, samples)
 
 
 
