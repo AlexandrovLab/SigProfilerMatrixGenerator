@@ -51,7 +51,7 @@ def df2csv(df,fname,myformats=[],sep='\t'):
 			elif coltype == np.float64:
 				ff = '%f'
 			formats.append(ff)
-	fh=open(fname,'w')
+	fh=open(fname,'w', buffering=200000)
 	fh.write('\t'.join(df.columns) + '\n')
 	for row in df.itertuples(index=True):
 		ss = ''
@@ -427,7 +427,9 @@ def catalogue_generator_single (lines, chrom, mutation_dict, mutation_types_tsb_
 						# else:
 						# 	mutation_dict[sample][mut_key] += 1
 
-						mutation_dict.set_value(mut_key, sample, mutation_dict.at[mut_key, sample] + 1)
+						mutation_dict.at[mut_key, sample] = mutation_dict.at[mut_key, sample] + 1
+
+						#mutation_dict.set_value(mut_key, sample, mutation_dict.at[mut_key, sample] + 1)
 						total_analyzed += 1
 
 
