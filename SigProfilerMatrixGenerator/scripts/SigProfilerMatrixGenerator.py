@@ -24,6 +24,45 @@ import numpy as np
 
 
 ################# Functions and references ###############################################
+def df2csv(df,fname,myformats=[],sep='\t'):
+	"""
+	# function is faster than to_csv
+	# 7 times faster for numbers if formats are specified, 
+	# 2 times faster for strings.
+	# Note - be careful. It doesn't add quotes and doesn't check
+	# for quotes or separators inside elements
+	# We've seen output time going down from 45 min to 6 min 
+	# on a simple numeric 4-col dataframe with 45 million rows.
+	"""
+	if len(df.columns) <= 0:
+		return
+	Nd = len(df.columns)
+	Nd_1 = Nd - 1
+	formats = myformats[:] # take a copy to modify it
+	Nf = len(formats)
+	formats.append('%s')
+	# make sure we have formats for all columns
+	if Nf < Nd:
+		for ii in range(Nf,Nd):
+			coltype = df[df.columns[ii]].dtype
+			ff = '%s'
+			if coltype == np.int64:
+				ff = '%d'
+			elif coltype == np.float64:
+				ff = '%f'
+			formats.append(ff)
+	fh=open(fname,'w')
+	fh.write('\t'.join(df.columns) + '\n')
+	for row in df.itertuples(index=True):
+		ss = ''
+		for ii in range(0,Nd,1):
+			ss += formats[ii] % row[ii]
+			if ii < Nd_1:
+				ss += sep
+		fh.write(ss+'\n')
+	fh.close()
+
+
 def perm(n, seq):
 	'''
 	Generates a list of all available permutations of n-mers.
@@ -152,7 +191,7 @@ def gene_range (files_path, indel=False):
 
 
 
-def catalogue_generator_single (lines, chrom, mutation_types_tsb_context, vcf_path, vcf_path_original, vcf_files, bed_file_path, chrom_path, project, output_matrix, context, exome, genome, ncbi_chrom, functionFlag, bed, bed_ranges, chrom_based, plot, tsb_ref, transcript_path, tsb_stat, gs, log_file):
+def catalogue_generator_single (lines, chrom, mutation_dict, mutation_types_tsb_context, vcf_path, vcf_path_original, vcf_files, bed_file_path, chrom_path, project, output_matrix, context, exome, genome, ncbi_chrom, functionFlag, bed, bed_ranges, chrom_based, plot, tsb_ref, transcript_path, tsb_stat, gs, log_file):
 	'''
 	Generates the mutational matrix for 96, 1536, 384, and 6144 context using a single vcf file with all samples of interest.
 
@@ -205,7 +244,7 @@ def catalogue_generator_single (lines, chrom, mutation_types_tsb_context, vcf_pa
 	types = []
 	#samples = []
 	#samples = set()
-	mutation_dict = {}
+	#mutation_dict = {}
 	flag = True
 	i = 0
 	#file = vcf_files[0]
@@ -250,7 +289,7 @@ def catalogue_generator_single (lines, chrom, mutation_types_tsb_context, vcf_pa
 			previous_ref = line1[3]
 			ref = line2[3]
 			previous_mut = line1[4]
-			mut = line1[4]
+			mut = line2[4]
 			dinuc = ''.join([previous_ref, ref, ">", previous_mut, mut])
 			sample = line1[0]
 			sample2 = line2[0]
@@ -309,8 +348,8 @@ def catalogue_generator_single (lines, chrom, mutation_types_tsb_context, vcf_pa
 					ref = line[3][0].upper()
 					mut = line[4][0].upper()
 
-					if sample not in mutation_dict:
-						mutation_dict[sample] = {}
+					# if sample not in mutation_dict:
+					# 	mutation_dict[sample] = {}
 
 					# Pulls out the relevant sequence depending on the context
 					try:
@@ -383,12 +422,12 @@ def catalogue_generator_single (lines, chrom, mutation_types_tsb_context, vcf_pa
 						# Saves the mutation key for the current variant
 						#mut_key = bias + ":" + sequence[0:int(len(sequence)/2)] + '[' + ref + '>' + mut + ']' + sequence[int(len(sequence)/2+1):]
 						mut_key = ''.join([bias,":",sequence[0:int(len(sequence)/2)],'[',ref,'>',mut,']',sequence[int(len(sequence)/2+1):]])
-						if mut_key not in mutation_dict[sample]:
-							mutation_dict[sample][mut_key] = 1
-						else:
-							mutation_dict[sample][mut_key] += 1
+						# if mut_key not in mutation_dict[sample]:
+						# 	mutation_dict[sample][mut_key] = 1
+						# else:
+						# 	mutation_dict[sample][mut_key] += 1
 
-						#mutation_dict[sample][mut_key] += 1
+						mutation_dict.set_value(mut_key, sample, mutation_dict.at[mut_key, sample] + 1)
 						total_analyzed += 1
 
 
@@ -589,7 +628,7 @@ def catalogue_generator_single (lines, chrom, mutation_types_tsb_context, vcf_pa
 	out.close()
 		
 
-			
+
 
 def catalogue_generator_INDEL_single (vcf_path, vcf_path_original, vcf_files, bed_file_path, chrom_path, project, output_matrix, exome, genome, ncbi_chrom, limited_indel, functionFlag, bed, bed_ranges, chrom_based, plot, tsb_ref, transcript_path, gs, log_file):
 	'''
@@ -1601,7 +1640,7 @@ def panel_check (genome, bed_temp_file, output_matrix, bed_file_path, project):
 
 
 
-def matrix_generator (context, output_matrix, project, samples, bias_sort, mutation_dict, exome, mut_types, bed, chrom_start=None, functionFlag=False, plot=False, tsb_stat=False):
+def matrix_generator (context, output_matrix, project, samples, bias_sort, mut_6144, exome, mut_types, bed, chrom_start=None, functionFlag=False, plot=False, tsb_stat=False):
 	'''
 	Writes the final mutational matrix given a dictionary of samples, mutation types, and counts
 
@@ -1639,18 +1678,25 @@ def matrix_generator (context, output_matrix, project, samples, bias_sort, mutat
 	mut_types_all = {'96':[], '384':[], '1536':[], '6':[], '24':[], '6_pvalue':[], '7_pvalue':[]}
 	mut_count_all = {'96':{}, '384':{}, '1536':{}, '6':{}, '24':{}, '6_pvalue':{}, '7_pvalue':{}, '6_pvalue_temp':{}, '7_pvalue_temp':{}}
 
-	mut_6144 = pd.DataFrame.from_dict(mutation_dict)
-	mut_6144 = mut_6144.fillna(0)
+	#mut_6144 = pd.DataFrame.from_dict(mutation_dict)
+	#mut_6144 = mut_6144.fillna(0)
 	mut_6144.index.name = 'MutationType'
 
 
 	mut_6144 = mut_6144.astype(int)
 	mut_count_all['6144'] = mut_6144
 	mut_count_all['1536'] = mut_6144.groupby(mut_6144.index.str[2:]).sum()
-	mut_count_all['96'] = mut_6144.groupby(mut_6144.index.str[3:10]).sum()
-	mut_count_all['6'] = mut_6144.groupby(mut_6144.index.str[5:8]).sum()
+
+	#mut_count_all['96'] = mut_6144.groupby(mut_6144.index.str[3:10]).sum()
+	mut_count_all['96'] = mut_count_all['1536'].groupby(mut_count_all['1536'].index.str[1:8]).sum()
+
+	#mut_count_all['6'] = mut_6144.groupby(mut_6144.index.str[5:8]).sum()
+	mut_count_all['6'] = mut_count_all['96'].groupby(mut_count_all['96'].index.str[2:5]).sum()
+
 	mut_count_all['384'] = mut_6144.groupby(mut_6144.index.str[0:2] + mut_6144.index.str[3:10]).sum()
-	mut_count_all['24'] = mut_6144.groupby(mut_6144.index.str[0:2] + mut_6144.index.str[5:8]).sum()
+
+#	mut_count_all['24'] = mut_6144.groupby(mut_6144.index.str[0:2] + mut_6144.index.str[5:8]).sum()
+	mut_count_all['24'] = mut_count_all['384'].groupby(mut_count_all['384'].index.str[0:2] + mut_count_all['384'].index.str[4:7]).sum()
 
 	mut_count_all['1536'].index.name = 'MutationType'
 	mut_count_all['96'].index.name = 'MutationType'
@@ -1688,8 +1734,8 @@ def matrix_generator (context, output_matrix, project, samples, bias_sort, mutat
 	types = sorted(types, key=lambda val: (bias_sort[val[0]], val[2:]))
 	mut_count_all['24'] = mut_count_all['24'].reindex(types)
 
-	mut_6144.to_csv(output_file_matrix, header=True, sep='\t')
-
+	#mut_6144.to_csv(output_file_matrix, header=True, sep='\t', chunksize=100000, compression='gzip')
+	df2csv(mut_6144, output_file_matrix)
 	# TSB test:
 	if tsb_stat:
 
@@ -1849,8 +1895,8 @@ def matrix_generator (context, output_matrix, project, samples, bias_sort, mutat
 		if chrom_start != None:
 			output_file_matrix += ".chr" + chrom_start
 
-		mutation_dict.to_csv(output_file_matrix, header=True, sep='\t')
-						
+		#mutation_dict.to_csv(output_file_matrix, header=True, sep='\t')
+		df2csv(mutation_dict, output_file_matrix)		
 
 
 		if plot:

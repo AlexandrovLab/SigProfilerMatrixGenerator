@@ -209,16 +209,16 @@ def SigProfilerMatrixGeneratorFunc (project, genome, vcfFiles, exome=False, bed_
 	skipped_muts = 0
 	# Converts the input files to standard text in the temporary folder
 	if file_extension == 'genome':
-			snv, indel, skipped = convertIn.convertTxt(project, vcf_path, genome, output_path)
+			snv, indel, skipped, samples = convertIn.convertTxt(project, vcf_path, genome, output_path)
 	else:
 		if file_extension == 'txt':
-			snv, indel, skipped = convertIn.convertTxt(project, vcf_path,  genome,  output_path, ncbi_chrom, log_file)
+			snv, indel, skipped, samples = convertIn.convertTxt(project, vcf_path,  genome,  output_path, ncbi_chrom, log_file)
 		elif file_extension == 'vcf':
-			snv, indel, skipped = convertIn.convertVCF(project, vcf_path,  genome, output_path, ncbi_chrom, log_file)
+			snv, indel, skipped, samples = convertIn.convertVCF(project, vcf_path,  genome, output_path, ncbi_chrom, log_file)
 		elif file_extension == 'maf':
-			snv, indel, skipped = convertIn.convertMAF(project, vcf_path,  genome, output_path, ncbi_chrom, log_file)
+			snv, indel, skipped, samples = convertIn.convertMAF(project, vcf_path,  genome, output_path, ncbi_chrom, log_file)
 		elif file_extension == 'tsv':
-			snv, indel, skipped = convertIn.convertICGC(project, vcf_path,  genome, output_path, ncbi_chrom, log_file)
+			snv, indel, skipped, samples = convertIn.convertICGC(project, vcf_path,  genome, output_path, ncbi_chrom, log_file)
 		else:
 			print("File format not supported")
 
@@ -228,6 +228,8 @@ def SigProfilerMatrixGeneratorFunc (project, genome, vcfFiles, exome=False, bed_
 	analyzed_muts = [0, 0, 0]
 	
 	sample_count_high = 0
+
+	mutation_pd = pd.DataFrame(0, index=mut_types, columns=samples)
 
 	# Begins matrix generation for all possible contexts
 	for i in range(0, 2, 1):
@@ -268,10 +270,10 @@ def SigProfilerMatrixGeneratorFunc (project, genome, vcfFiles, exome=False, bed_
 			bed_file_path = None
 
 		# Sorts files based on chromosome, sample, and start position
-		zeros = np.zeros(len(mut_types))
+		#zeros = np.zeros(len(mut_types))
 		first_chrom = True
 		first_dinuc = True
-		mutation_pd = pd.DataFrame(index=mut_types)
+		#mutation_pd = pd.DataFrame(index=mut_types)
 		if not chrom_based:
 			chrom_start = None
 		for file in vcf_files:
@@ -280,22 +282,22 @@ def SigProfilerMatrixGeneratorFunc (project, genome, vcfFiles, exome=False, bed_
 			with open(vcf_path + file) as f:
 				lines = [line.strip().split() for line in f]
 			lines = sorted(lines, key = lambda x: (x[0], int(x[2])))
-			samples = [x[0] for x in lines]
-			samples = set(samples)
+			#samples = [x[0] for x in lines]
+			#samples = set(samples)
 			context = '6144'
-			mutation_dict, skipped_mut, total, total_DINUC, all_dinucs = matGen.catalogue_generator_single (lines, chrom, mutation_types_tsb_context, vcf_path, vcf_path_original, vcf_files, bed_file_path, chrom_path, project, output_matrix, context, exome, genome, ncbi_chrom, functionFlag, bed, bed_ranges, chrom_based, plot, tsb_ref, transcript_path, tsb_stat, gs, log_file)
+			mutation_pd, skipped_mut, total, total_DINUC, all_dinucs = matGen.catalogue_generator_single (lines, chrom, mutation_pd, mutation_types_tsb_context, vcf_path, vcf_path_original, vcf_files, bed_file_path, chrom_path, project, output_matrix, context, exome, genome, ncbi_chrom, functionFlag, bed, bed_ranges, chrom_based, plot, tsb_ref, transcript_path, tsb_stat, gs, log_file)
 			
 			if not any(all_dinucs):
 				dinuc = False
 
 			if first_chrom:
-				mutation_pd = pd.DataFrame.from_dict(mutation_dict)
+				#mutation_pd = pd.DataFrame.from_dict(mutation_dict)
 				if dinuc:
 					mutation_dinuc_pd_all = pd.DataFrame.from_dict(all_dinucs)
 					first_dinuc = False
 				first_chrom = False
 			else:
-				mutation_pd = mutation_pd.add(pd.DataFrame.from_dict(mutation_dict), fill_value=0)
+				#mutation_pd = mutation_pd.add(pd.DataFrame.from_dict(mutation_dict), fill_value=0)
 				if dinuc:
 					if first_dinuc:
 						mutation_dinuc_pd_all = pd.DataFrame.from_dict(all_dinucs)
@@ -303,13 +305,15 @@ def SigProfilerMatrixGeneratorFunc (project, genome, vcfFiles, exome=False, bed_
 					else:
 						mutation_dinuc_pd_all = mutation_dinuc_pd_all.add(pd.DataFrame.from_dict(all_dinucs), fill_value=0)
 
-			mutation_pd = mutation_pd.fillna(0)
+			#mutation_pd = mutation_pd.fillna(0)
 
 
 			skipped_muts += skipped_mut
 			analyzed_muts[0] += total
 			analyzed_muts[1] += total_DINUC
-		sample_count_high = len(list(mutation_pd.columns.values))	
+		#sample_count_high = len(list(mutation_pd.columns.values))	
+
+		sample_count_high = len(samples)	
 
 		if i != 1:
 			matrices = matGen.matrix_generator (context, output_matrix, project, samples, bias_sort, mutation_pd, exome, mut_types, bed, chrom_start, functionFlag, plot, tsb_stat)
@@ -327,12 +331,13 @@ def SigProfilerMatrixGeneratorFunc (project, genome, vcfFiles, exome=False, bed_
 	# Prints a summary for the given run (total samples, skipped mutations, etc.)
 	if not chrom_based:
 		print("Matrices generated for " + str(sample_count_high) + " samples with " + str(skipped_muts) + " errors. Total of " + str(analyzed_muts[0]) + " SNVs, " + str(analyzed_muts[1]) + " DINUCs, and " + str(analyzed_muts[2]) + " INDELs were successfully analyzed.")
-	final_matrices = {}
-	for conts in matrices.keys():
-		final_matrices[conts] = pd.DataFrame.from_dict(matrices[conts])
-		for column in final_matrices[conts].columns:
-			final_matrices[conts][column] = final_matrices[conts][column].fillna(0)
+	# final_matrices = {}
+	# for conts in matrices.keys():
+	# 	final_matrices[conts] = pd.DataFrame.from_dict(matrices[conts])
+	# 	for column in final_matrices[conts].columns:
+	# 		final_matrices[conts][column] = final_matrices[conts][column].fillna(0)
 	# Returns a dictionary of panda data frames for each matrix context.
-	return(final_matrices)
+	# return(final_matrices)
+	return(matrices)
 
 	
