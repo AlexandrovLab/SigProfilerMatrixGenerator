@@ -21,6 +21,7 @@ import uuid
 from collections import defaultdict
 from collections import OrderedDict
 import numpy as np
+import gc
 
 
 ################# Functions and references ###############################################
@@ -1686,7 +1687,7 @@ def matrix_generator (context, output_matrix, project, samples, bias_sort, mut_6
 
 
 	mut_6144 = mut_6144.astype(int)
-	mut_count_all['6144'] = mut_6144
+	#mut_count_all['6144'] = mut_6144
 	mut_count_all['1536'] = mut_6144.groupby(mut_6144.index.str[2:]).sum()
 
 	#mut_count_all['96'] = mut_6144.groupby(mut_6144.index.str[3:10]).sum()
@@ -1735,7 +1736,7 @@ def matrix_generator (context, output_matrix, project, samples, bias_sort, mut_6
 	types = list(mut_count_all['24'].index)
 	types = sorted(types, key=lambda val: (bias_sort[val[0]], val[2:]))
 	mut_count_all['24'] = mut_count_all['24'].reindex(types)
-
+	gc.collect()
 	#mut_6144.to_csv(output_file_matrix, header=True, sep='\t', chunksize=100000, compression='gzip')
 	df2csv(mut_6144, output_file_matrix)
 	# TSB test:
