@@ -142,7 +142,7 @@ def convertVCF (project, vcf_path, genome, output_path, ncbi_chrom, log_file):
 						if chrom in outFiles:
 							print("\t".join([sample, chrom, start, ref, mut]), file=outFiles[chrom])
 						else:
-							print(chrom_start + " is not supported. You will need to download that chromosome and create the required files. Continuing with the matrix generation...", file=out)
+							print(chrom + " is not supported. You will need to download that chromosome and create the required files. Continuing with the matrix generation...", file=out)
 							out.flush()
 
 
@@ -188,10 +188,10 @@ def convertVCF (project, vcf_path, genome, output_path, ncbi_chrom, log_file):
 							first_indel = False
 
 						#print("\t".join([project, sample, ".", genome, "INDEL", chrom, start, start, ref, mut, "SOMATIC"]), file=out_indel)
-						if chrom in outFiles:
+						if chrom in outFilesI:
 							print("\t".join([sample, chrom, start, ref, mut]), file=outFilesI[chrom])
 						else:
-							print(chrom_start + " is not supported. You will need to download that chromosome and create the required files. Continuing with the matrix generation...", file=out)
+							print(chrom + " is not supported. You will need to download that chromosome and create the required files. Continuing with the matrix generation...", file=out)
 							out.flush()
 
 					prev_line = line
@@ -250,11 +250,13 @@ def convertTxt (project, vcf_path, genome, output_path, ncbi_chrom, log_file):
 		if file == '.DS_Store':
 			continue
 		with open (vcf_path + file) as f:
+			next(f)
 			for lines in f:
 				try:
 					line = lines.strip().split('\t')
 					sample = line[1]
-					samples.append(sample)
+					if sample not in samples:
+						samples.append(sample)
 					genome = line[3]
 					chrom = line[5]
 					if len(chrom) > 2:
@@ -341,7 +343,7 @@ def convertTxt (project, vcf_path, genome, output_path, ncbi_chrom, log_file):
 					if chrom in outFiles:
 						print("\t".join([sample, chrom, start, ref, mut]), file=outFiles[chrom])
 					else:
-						print(chrom_start + " is not supported. You will need to download that chromosome and create the required files. Continuing with the matrix generation...", file=out)
+						print(chrom + " is not supported. You will need to download that chromosome and create the required files. Continuing with the matrix generation...", file=out)
 						out.flush()
 
 				
@@ -385,10 +387,10 @@ def convertTxt (project, vcf_path, genome, output_path, ncbi_chrom, log_file):
 
 						first_indel = False
 
-					if chrom in outFiles:
+					if chrom in outFilesI:
 						print("\t".join([sample, chrom, start, ref, mut]), file=outFilesI[chrom])
 					else:
-						print(chrom_start + " is not supported. You will need to download that chromosome and create the required files. Continuing with the matrix generation...", file=out)
+						print(chrom + " is not supported. You will need to download that chromosome and create the required files. Continuing with the matrix generation...", file=out)
 						out.flush()
 
 
@@ -398,9 +400,13 @@ def convertTxt (project, vcf_path, genome, output_path, ncbi_chrom, log_file):
 
 	# Closes the output files and returns the boolean flags
 	if snv:
-		out_snv.close()
+		for files in outFiles.values():
+			files.close()
+		#out_snv.close()
 	if indel:
-		out_indel.close()
+		for files in outFilesI.values():
+			files.close()
+		#out_indel.close()
 	out.close()
 	return(snv, indel, skipped_count, samples)
 
@@ -443,7 +449,8 @@ def convertMAF (project, vcf_path, genome, output_path, ncbi_chrom, log_file):
 			continue
 		name = file.split(".")
 		sample = name[0]
-		samples.append(sample)
+		if sample not in samples:
+			samples.append(sample)
 		with open (vcf_path + file) as f:
 			for lines in f:
 				try:
@@ -533,7 +540,7 @@ def convertMAF (project, vcf_path, genome, output_path, ncbi_chrom, log_file):
 					if chrom in outFiles:
 						print("\t".join([sample, chrom, start, ref, mut]), file=outFiles[chrom])
 					else:
-						print(chrom_start + " is not supported. You will need to download that chromosome and create the required files. Continuing with the matrix generation...", file=out)
+						print(chrom + " is not supported. You will need to download that chromosome and create the required files. Continuing with the matrix generation...", file=out)
 						out.flush()
 
 
@@ -576,10 +583,10 @@ def convertMAF (project, vcf_path, genome, output_path, ncbi_chrom, log_file):
 
 						first_indel = False
 
-					if chrom in outFiles:
+					if chrom in outFilesI:
 						print("\t".join([sample, chrom, start, ref, mut]), file=outFilesI[chrom])
 					else:
-						print(chrom_start + " is not supported. You will need to download that chromosome and create the required files. Continuing with the matrix generation...", file=out)
+						print(chrom + " is not supported. You will need to download that chromosome and create the required files. Continuing with the matrix generation...", file=out)
 						out.flush()
 
 
@@ -589,11 +596,16 @@ def convertMAF (project, vcf_path, genome, output_path, ncbi_chrom, log_file):
 
 	# Closes the output files and returns the boolean flags
 	if snv:
-		out_snv.close()
+		for files in outFiles.values():
+			files.close()
+		#out_snv.close()
 	if indel:
-		out_indel.close()
+		for files in outFilesI.values():
+			files.close()
+		#out_indel.close()
 	out.close()
 	return(snv, indel, skipped_count, samples)
+
 
 
 def convertICGC (project, vcf_path, genome, output_path, ncbi_chrom, log_file):
@@ -638,7 +650,8 @@ def convertICGC (project, vcf_path, genome, output_path, ncbi_chrom, log_file):
 				try:
 					line = lines.strip().split('\t')
 					sample = line[1]
-					samples.append(sample)
+					if sample not in samples:
+						samples.append(sample)
 					icgc_sample_id = line[4]
 					chrom = line[8]
 					if len(chrom) > 2:
@@ -731,7 +744,7 @@ def convertICGC (project, vcf_path, genome, output_path, ncbi_chrom, log_file):
 					if chrom in outFiles:
 						print("\t".join([sample, chrom, start, ref, mut]), file=outFiles[chrom])
 					else:
-						print(chrom_start + " is not supported. You will need to download that chromosome and create the required files. Continuing with the matrix generation...", file=out)
+						print(chrom + " is not supported. You will need to download that chromosome and create the required files. Continuing with the matrix generation...", file=out)
 						out.flush()
 
 
@@ -774,10 +787,10 @@ def convertICGC (project, vcf_path, genome, output_path, ncbi_chrom, log_file):
 
 						first_indel = False
 
-					if chrom in outFiles:
+					if chrom in outFilesI:
 						print("\t".join([sample, chrom, start, ref, mut]), file=outFilesI[chrom])
 					else:
-						print(chrom_start + " is not supported. You will need to download that chromosome and create the required files. Continuing with the matrix generation...", file=out)
+						print(chrom + " is not supported. You will need to download that chromosome and create the required files. Continuing with the matrix generation...", file=out)
 						out.flush()
 
 				prev_line = line
@@ -786,11 +799,16 @@ def convertICGC (project, vcf_path, genome, output_path, ncbi_chrom, log_file):
 
 	# Closes the output files and returns the boolean flags
 	if snv:
-		out_snv.close()
+		for files in outFiles.values():
+			files.close()
+		#out_snv.close()
 	if indel:
-		out_indel.close()
+		for files in outFilesI.values():
+			files.close()
+		#out_indel.close()
 	out.close()
 	return(snv, indel, skipped_count, samples)
+
 
 
 
