@@ -108,6 +108,7 @@ def SigProfilerMatrixGeneratorFunc (project, genome, vcfFiles, exome=False, bed_
 					  'TC>CA','TC>CG','TC>CT','TC>GA','TC>GG','TC>GT','TG>AA','TG>AC','TG>AT',
 					  'TG>CA','TG>CC','TG>CT','TG>GA','TG>GC','TG>GT','TT>AA','TT>AC','TT>AG',
 					  'TT>CA','TT>CC','TT>CG','TT>GA','TT>GC','TT>GG']
+
 	# Pre-fills the mutation types variable
 	size = 5
 	mut_types_initial = perm(size, "ACGT")
@@ -129,7 +130,37 @@ def SigProfilerMatrixGeneratorFunc (project, genome, vcfFiles, exome=False, bed_
 					mutation_types_tsb_context.append(''.join([base3,":",base,"[",mut,"]",base2]))
 					mut_tsb = base3 + ":" + mut
 
+	indel_types_tsb = []
+	indel_types_simple = []
 
+	indel_types = ['1:Del:C:0', '1:Del:C:1', '1:Del:C:2', '1:Del:C:3', '1:Del:C:4', '1:Del:C:5',
+				   '1:Del:T:0', '1:Del:T:1', '1:Del:T:2', '1:Del:T:3', '1:Del:T:4', '1:Del:T:5',
+				   '1:Ins:C:0', '1:Ins:C:1', '1:Ins:C:2', '1:Ins:C:3', '1:Ins:C:4', '1:Ins:C:5',
+				   '1:Ins:T:0', '1:Ins:T:1', '1:Ins:T:2', '1:Ins:T:3', '1:Ins:T:4', '1:Ins:T:5', 
+						# >1bp INDELS
+				   '2:Del:R:0', '2:Del:R:1', '2:Del:R:2', '2:Del:R:3', '2:Del:R:4', '2:Del:R:5',
+				   '3:Del:R:0', '3:Del:R:1', '3:Del:R:2', '3:Del:R:3', '3:Del:R:4', '3:Del:R:5',
+				   '4:Del:R:0', '4:Del:R:1', '4:Del:R:2', '4:Del:R:3', '4:Del:R:4', '4:Del:R:5',
+				   '5:Del:R:0', '5:Del:R:1', '5:Del:R:2', '5:Del:R:3', '5:Del:R:4', '5:Del:R:5',
+				   '2:Ins:R:0', '2:Ins:R:1', '2:Ins:R:2', '2:Ins:R:3', '2:Ins:R:4', '2:Ins:R:5', 
+				   '3:Ins:R:0', '3:Ins:R:1', '3:Ins:R:2', '3:Ins:R:3', '3:Ins:R:4', '3:Ins:R:5', 
+				   '4:Ins:R:0', '4:Ins:R:1', '4:Ins:R:2', '4:Ins:R:3', '4:Ins:R:4', '4:Ins:R:5',
+				   '5:Ins:R:0', '5:Ins:R:1', '5:Ins:R:2', '5:Ins:R:3', '5:Ins:R:4', '5:Ins:R:5',
+						#MicroHomology INDELS
+				   '2:Del:M:1', '3:Del:M:1', '3:Del:M:2', '4:Del:M:1', '4:Del:M:2', '4:Del:M:3',
+				   '5:Del:M:1', '5:Del:M:2', '5:Del:M:3', '5:Del:M:4', '5:Del:M:5', '2:Ins:M:1', 
+				   '3:Ins:M:1', '3:Ins:M:2', '4:Ins:M:1', '4:Ins:M:2', '4:Ins:M:3', '5:Ins:M:1', 
+				   '5:Ins:M:2', '5:Ins:M:3', '5:Ins:M:4', '5:Ins:M:5', 'complex', 'non_matching']
+
+	for indels in indel_types[:24]:
+		for tsbs in tsb:
+			indel_types_tsb.append(tsbs + ":" + indels)
+
+	indel_types_simple = indel_types[:24]
+	indel_types_simple.append('long_Del')
+	indel_types_simple.append('long_Ins')
+	indel_types_simple.append('MH')
+	indel_types_simple.append('complex')
 	# Instantiates the initial contexts to generate matrices for
 	contexts = ['6144']#, 'DINUC']
 
@@ -229,11 +260,13 @@ def SigProfilerMatrixGeneratorFunc (project, genome, vcfFiles, exome=False, bed_
 	
 	sample_count_high = 0
 
-	mutation_pd = pd.DataFrame(0, index=mut_types, columns=samples)
 
 	# Begins matrix generation for all possible contexts
 	for i in range(0, 2, 1):
 		if i == 0 and snv:
+			mutation_pd = {}
+			mutation_pd['6144'] = pd.DataFrame(0, index=mut_types, columns=samples)
+
 			output_path_snv = output_path + "SNV/"
 			vcf_files = os.listdir(output_path_snv)
 			vcf_path = output_path_snv
@@ -244,6 +277,11 @@ def SigProfilerMatrixGeneratorFunc (project, genome, vcfFiles, exome=False, bed_
 		elif i == 0 and not snv:
 			continue
 		elif i == 1 and indel:
+			mutation_ID = {}
+			mutation_ID['ID'] = pd.DataFrame(0, index=indel_types, columns=samples)
+			mutation_ID['simple'] = pd.DataFrame(0, index=indel_types_simple, columns=samples)
+			mutation_ID['tsb'] = pd.DataFrame(0, index=indel_types_tsb, columns=samples)
+
 			contexts = ['INDEL']
 			output_path_indel = output_path + "INDEL/"
 			vcf_files = os.listdir(output_path_indel)
@@ -276,52 +314,135 @@ def SigProfilerMatrixGeneratorFunc (project, genome, vcfFiles, exome=False, bed_
 		#mutation_pd = pd.DataFrame(index=mut_types)
 		if not chrom_based:
 			chrom_start = None
-		for file in vcf_files:
-			dinuc = True
-			chrom = file.split("_")[0]
-			with open(vcf_path + file) as f:
-				lines = [line.strip().split() for line in f]
-			lines = sorted(lines, key = lambda x: (x[0], int(x[2])))
-			#samples = [x[0] for x in lines]
-			#samples = set(samples)
-			context = '6144'
-			mutation_pd, skipped_mut, total, total_DINUC, all_dinucs = matGen.catalogue_generator_single (lines, chrom, mutation_pd, mutation_types_tsb_context, vcf_path, vcf_path_original, vcf_files, bed_file_path, chrom_path, project, output_matrix, context, exome, genome, ncbi_chrom, functionFlag, bed, bed_ranges, chrom_based, plot, tsb_ref, transcript_path, tsb_stat, gs, log_file)
-			
-			if not any(all_dinucs):
-				dinuc = False
+		if i != 1:
+			for file in vcf_files:
+				dinuc = True
+				chrom = file.split("_")[0]
+				with open(vcf_path + file) as f:
+					lines = [line.strip().split() for line in f]
+				lines = sorted(lines, key = lambda x: (x[0], int(x[2])))
 
-			if first_chrom:
-				#mutation_pd = pd.DataFrame.from_dict(mutation_dict)
-				if dinuc:
-					mutation_dinuc_pd_all = pd.DataFrame.from_dict(all_dinucs)
-					first_dinuc = False
-				first_chrom = False
-			else:
-				#mutation_pd = mutation_pd.add(pd.DataFrame.from_dict(mutation_dict), fill_value=0)
-				if dinuc:
-					if first_dinuc:
+
+				context = '6144'
+				mutation_pd, skipped_mut, total, total_DINUC, all_dinucs = matGen.catalogue_generator_single (lines, chrom, mutation_pd, mutation_types_tsb_context, vcf_path, vcf_path_original, vcf_files, bed_file_path, chrom_path, project, output_matrix, context, exome, genome, ncbi_chrom, functionFlag, bed, bed_ranges, chrom_based, plot, tsb_ref, transcript_path, tsb_stat, gs, log_file)
+				
+				if not any(all_dinucs):
+					dinuc = False
+
+				if first_chrom:
+					#mutation_pd = pd.DataFrame.from_dict(mutation_dict)
+					if dinuc:
 						mutation_dinuc_pd_all = pd.DataFrame.from_dict(all_dinucs)
 						first_dinuc = False
-					else:
-						mutation_dinuc_pd_all = mutation_dinuc_pd_all.add(pd.DataFrame.from_dict(all_dinucs), fill_value=0)
+					first_chrom = False
+				else:
+					#mutation_pd = mutation_pd.add(pd.DataFrame.from_dict(mutation_dict), fill_value=0)
+					if dinuc:
+						if first_dinuc:
+							mutation_dinuc_pd_all = pd.DataFrame.from_dict(all_dinucs)
+							first_dinuc = False
+						else:
+							mutation_dinuc_pd_all = mutation_dinuc_pd_all.add(pd.DataFrame.from_dict(all_dinucs), fill_value=0)
 
-			#mutation_pd = mutation_pd.fillna(0)
+				#mutation_pd = mutation_pd.fillna(0)
 
 
-			skipped_muts += skipped_mut
-			analyzed_muts[0] += total
-			analyzed_muts[1] += total_DINUC
-		#sample_count_high = len(list(mutation_pd.columns.values))	
+				skipped_muts += skipped_mut
+				analyzed_muts[0] += total
+				analyzed_muts[1] += total_DINUC
+			#sample_count_high = len(list(mutation_pd.columns.values))	
 
-		sample_count_high = len(samples)	
+			sample_count_high = len(samples)	
 
-		if i != 1:
-			matrices = matGen.matrix_generator (context, output_matrix, project, samples, bias_sort, mutation_pd, exome, mut_types, bed, chrom_start, functionFlag, plot, tsb_stat)
+		#if i != 1:
+			if exome:
+				with open(vcf_path + "exome_temp.txt") as f:
+					lines = [line.strip().split() for line in f]
+				output = open(vcf_path + "exome_temp.txt", 'w')
+				for line in sorted(lines, key = lambda x: (['X','Y','1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', 'MT', 'M'].index(x[1]), int(x[2]))):
+					print('\t'.join(line), file=output)
+				output.close()
+				mutation_mat, samples2 = matGen.exome_check(genome, vcf_path + "exome_temp.txt", output_matrix, project)
+				mutation_pd['6144'] = pd.DataFrame.from_dict(mutation_mat)
+				mutation_pd['6144'] = mutation_pd['6144'].fillna(0)
+
+			if bed:
+				with open(vcf_path + "bed_temp.txt") as f:
+					lines = [line.strip().split() for line in f]
+				output = open(vcf_path + "bed_temp.txt", 'w')
+				for line in sorted(lines, key = lambda x: (['X','Y','1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', 'MT', 'M'].index(x[1]), int(x[2]))):
+					print('\t'.join(line), file=output)
+				output.close()
+				mutation_mat, samples2 = matGen.panel_check(genome, vcf_path + "bed_temp.txt", output_matrix, bed_file_path, project)
+				mutation_pd['6144'] = pd.DataFrame.from_dict(mutation_mat)
+				mutation_pd['6144'] = mutation_pd['6144'].fillna(0)
+
+			if not mutation_pd['6144'].empty:
+				matrices = matGen.matrix_generator (context, output_matrix, project, samples, bias_sort, mutation_pd, exome, mut_types, bed, chrom_start, functionFlag, plot, tsb_stat)
+			
 			if analyzed_muts[1] > 0:
-				dinuc_mat = matGen.matrix_generator_DINUC (output_matrix, samples, bias_sort, mutation_dinuc_pd_all, mutation_types_tsb_context, project, exome, bed, chrom_start, plot)
-				matrices['DINUC'] = dinuc_mat
+				if exome:
+					with open(vcf_path + "exome_temp_context_tsb_DINUC.txt") as f:
+						lines = [line.strip().split() for line in f]
+					output = open(vcf_path + "exome_temp_context_tsb_DINUC.txt", 'w')
+					for line in sorted(lines, key = lambda x: (['X','Y','1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', 'MT', 'M'].index(x[1]), int(x[2]))):
+						print('\t'.join(line), file=output)
+					output.close()
+
+					all_dinucs, samples2 = matGen.exome_check(genome, vcf_path + "exome_temp_context_tsb_DINUC.txt", output_matrix, project)
+					mutation_dinuc_pd_all = pd.DataFrame.from_dict(all_dinucs)
+
+				if bed:
+					with open(vcf_path + "bed_temp_context_tsb_DINUC.txt") as f:
+						lines = [line.strip().split() for line in f]
+					output = open(vcf_path + "bed_temp_context_tsb_DINUC.txt", 'w')
+					for line in sorted(lines, key = lambda x: (['X','Y','1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', 'MT', 'M'].index(x[1]), int(x[2]))):
+						print('\t'.join(line), file=output)
+					output.close()
+
+					all_dinucs, samples2 = matGen.panel_check(genome, vcf_path + "bed_temp_context_tsb_DINUC.txt", output_matrix, bed_file_path, project)
+					mutation_dinuc_pd_all = pd.DataFrame.from_dict(all_dinucs)
+
+				if not mutation_dinuc_pd_all.empty:
+					dinuc_mat = matGen.matrix_generator_DINUC (output_matrix, samples, bias_sort, mutation_dinuc_pd_all, mutation_types_tsb_context, project, exome, bed, chrom_start, plot)
+					matrices['DINUC'] = dinuc_mat
+
 		else:
-			matGen.matrix_generator_INDEL(output_matrix, samples, indel_types, indel_types_tsb, indel_types_simple, indel_dict, indel_tsb_dict, indel_simple_dict, project, exome, limited_indel, bed, chrom_start, plot)
+			for file in vcf_files:
+				chrom = file.split("_")[0]
+				with open(vcf_path + file) as f:
+					lines = [line.strip().split() for line in f]
+				lines = sorted(lines, key = lambda x: (x[0], int(x[2])))			
+				mutation_ID, skipped_mut, total = matGen.catalogue_generator_INDEL_single (mutation_ID, lines, chrom, vcf_path, vcf_path_original, vcf_files, bed_file_path, chrom_path, project, output_matrix, exome, genome, ncbi_chrom, limited_indel, functionFlag, bed, bed_ranges, chrom_based, plot, tsb_ref, transcript_path, gs, log_file)
+				skipped_muts += skipped_mut
+				analyzed_muts[2] += total
+
+			# Performs the final filter on the variants base upon the exome if desired
+			if exome:
+				with open(vcf_path + "exome_temp.txt") as f:
+					lines = [line.strip().split() for line in f]
+				output = open(vcf_path + "exome_temp.txt", 'w')
+				for line in sorted(lines, key = lambda x: (['X','Y','1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', 'MT', 'M'].index(x[1]), int(x[2]))):
+					print('\t'.join(line), file=output)
+				output.close()
+
+				indel_dict, samples2 = matGen.exome_check(genome, vcf_path + "exome_temp.txt", output_matrix, project)
+				mutation_ID['ID'] = pd.DataFrame.from_dict(indel_dict)
+
+			if bed:
+				with open(vcf_path + "bed_temp.txt") as f:
+					lines = [line.strip().split() for line in f]
+				output = open(vcf_path + "bed_temp.txt", 'w')
+				for line in sorted(lines, key = lambda x: (['X','Y','1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', 'MT', 'M'].index(x[1]), int(x[2]))):
+					print('\t'.join(line), file=output)
+				output.close()
+				indel_dict, samples2 = matGen.panel_check(genome, vcf_path + "bed_temp.txt", output_matrix, bed_file_path, project)
+				mutation_ID['ID'] = pd.DataFrame.from_dict(indel_dict)
+
+			mutation_ID['ID'] = mutation_ID['ID'].to_dict('dict')
+			mutation_ID['simple'] = mutation_ID['simple'].to_dict('dict')
+			mutation_ID['tsb'] = mutation_ID['tsb'].to_dict('dict')
+			matGen.matrix_generator_INDEL(output_matrix, samples, indel_types, indel_types_tsb, indel_types_simple, mutation_ID['ID'], mutation_ID['tsb'], mutation_ID['simple'], project, exome, limited_indel, bed, chrom_start, plot)
 
 		if i == 1:
 			os.system("rm -r " + output_matrix + "temp/")
@@ -331,13 +452,6 @@ def SigProfilerMatrixGeneratorFunc (project, genome, vcfFiles, exome=False, bed_
 	# Prints a summary for the given run (total samples, skipped mutations, etc.)
 	if not chrom_based:
 		print("Matrices generated for " + str(sample_count_high) + " samples with " + str(skipped_muts) + " errors. Total of " + str(analyzed_muts[0]) + " SNVs, " + str(analyzed_muts[1]) + " DINUCs, and " + str(analyzed_muts[2]) + " INDELs were successfully analyzed.")
-	# final_matrices = {}
-	# for conts in matrices.keys():
-	# 	final_matrices[conts] = pd.DataFrame.from_dict(matrices[conts])
-	# 	for column in final_matrices[conts].columns:
-	# 		final_matrices[conts][column] = final_matrices[conts][column].fillna(0)
-	# Returns a dictionary of panda data frames for each matrix context.
-	# return(final_matrices)
 	return(matrices)
 
 	

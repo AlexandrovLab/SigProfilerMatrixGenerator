@@ -25,7 +25,7 @@ import gc
 
 
 ################# Functions and references ###############################################
-def df2csv(df,fname,myformats=[],sep='\t'):
+def df2csv(df,fname,formats=[],sep='\t'):
 	"""
 	# function is faster than to_csv
 	# 7 times faster for numbers if formats are specified, 
@@ -38,13 +38,13 @@ def df2csv(df,fname,myformats=[],sep='\t'):
 	if len(df.columns) <= 0:
 		return
 	Nd = len(df.columns)
-	Nd_1 = Nd - 1
-	formats = myformats[:] # take a copy to modify it
-	Nf = len(formats)
+	Nd_1 = Nd 
+	#formats = myformats[:] # take a copy to modify it
+	Nf = 0
 	formats.append('%s')
 	# make sure we have formats for all columns
 	if Nf < Nd:
-		for ii in range(Nf,Nd):
+		for ii in range(Nf,Nd, 1):
 			coltype = df[df.columns[ii]].dtype
 			ff = '%s'
 			if coltype == np.int64:
@@ -53,10 +53,11 @@ def df2csv(df,fname,myformats=[],sep='\t'):
 				ff = '%f'
 			formats.append(ff)
 	fh=open(fname,'w', buffering=200000)
-	fh.write('\t'.join(df.columns) + '\n')
+	header = ['MutationType'] + list(df.columns)
+	fh.write('\t'.join(header) + '\n')
 	for row in df.itertuples(index=True):
 		ss = ''
-		for ii in range(0,Nd,1):
+		for ii in range(0,Nd+1,1):
 			ss += formats[ii] % row[ii]
 			if ii < Nd_1:
 				ss += sep
@@ -243,15 +244,10 @@ def catalogue_generator_single (lines, chrom, mutation_dict, mutation_types_tsb_
 	
 	# Instantiates all relevant variables
 	types = []
-	#samples = []
-	#samples = set()
-	#mutation_dict = {}
 	flag = True
 	i = 0
-	#file = vcf_files[0]
 	sample_start = None
 	gene_counts = {}
-	#sample_count = {}
 	skipped_count = 0
 	total_analyzed = 0
 	total_analyzed_DINUC = 0
@@ -265,9 +261,9 @@ def catalogue_generator_single (lines, chrom, mutation_dict, mutation_types_tsb_
 
 	if exome:
 		exome_temp_file = "exome_temp.txt"
-		exome_file = open(vcf_path + exome_temp_file, 'w')
+		exome_file = open(vcf_path + exome_temp_file, 'a')
 		exome_temp_file_context_tsb_DINUC = "exome_temp_context_tsb_DINUC.txt"
-		exome_file_context_tsb_DINUC = open(vcf_path + exome_temp_file_context_tsb_DINUC, 'w')
+		exome_file_context_tsb_DINUC = open(vcf_path + exome_temp_file_context_tsb_DINUC, 'a')
 
 
 	if bed:
@@ -349,9 +345,6 @@ def catalogue_generator_single (lines, chrom, mutation_dict, mutation_types_tsb_
 					ref = line[3][0].upper()
 					mut = line[4][0].upper()
 
-					# if sample not in mutation_dict:
-					# 	mutation_dict[sample] = {}
-
 					# Pulls out the relevant sequence depending on the context
 					try:
 						sequence = ''.join([tsb_ref[chrom_string[start-3]][1],tsb_ref[chrom_string[start-2]][1], tsb_ref[chrom_string[start-1]][1], tsb_ref[chrom_string[start]][1], tsb_ref[chrom_string[start+1]][1]])
@@ -423,14 +416,9 @@ def catalogue_generator_single (lines, chrom, mutation_dict, mutation_types_tsb_
 						# Saves the mutation key for the current variant
 						#mut_key = bias + ":" + sequence[0:int(len(sequence)/2)] + '[' + ref + '>' + mut + ']' + sequence[int(len(sequence)/2+1):]
 						mut_key = ''.join([bias,":",sequence[0:int(len(sequence)/2)],'[',ref,'>',mut,']',sequence[int(len(sequence)/2+1):]])
-						# if mut_key not in mutation_dict[sample]:
-						# 	mutation_dict[sample][mut_key] = 1
-						# else:
-						# 	mutation_dict[sample][mut_key] += 1
+						#mutation_dict['6144'].at[mut_key, sample] = mutation_dict['6144'].at[mut_key, sample] + 1
+						mutation_dict['6144'].at[mut_key, sample] += 1
 
-						mutation_dict.at[mut_key, sample] = mutation_dict.at[mut_key, sample] + 1
-
-						#mutation_dict.set_value(mut_key, sample, mutation_dict.at[mut_key, sample] + 1)
 						total_analyzed += 1
 
 
@@ -565,53 +553,55 @@ def catalogue_generator_single (lines, chrom, mutation_dict, mutation_types_tsb_
 	print("Chromosome " + chrom_start + " done", file=out)
 	out.flush()
 
-	# Organizes the variants based upon the exome
-	if exome:
-		exome_file.close()
-		sort_file = exome_temp_file
-		with open(vcf_path + sort_file) as f:
-			lines = [line.strip().split() for line in f]
-		output = open(vcf_path + sort_file, 'w')
-		for line in sorted(lines, key = lambda x: (['X','Y','1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', 'MT', 'M'].index(x[1]), int(x[2]))):
-			print('\t'.join(line), file=output)
-		output.close()
-		mutation_dict, samples2 = exome_check(genome, vcf_path + exome_temp_file, output_matrix, project)
+	# # Organizes the variants based upon the exome
+	# if exome:
+	# 	exome_file.close()
+	# 	sort_file = exome_temp_file
+	# 	with open(vcf_path + sort_file) as f:
+	# 		lines = [line.strip().split() for line in f]
+	# 	output = open(vcf_path + sort_file, 'w')
+	# 	for line in sorted(lines, key = lambda x: (['X','Y','1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', 'MT', 'M'].index(x[1]), int(x[2]))):
+	# 		print('\t'.join(line), file=output)
+	# 	output.close()
+	# 	mutation_dict_6144, samples2 = exome_check(genome, vcf_path + exome_temp_file, output_matrix, project, chrom_start)
+
+	# 	mutation_dict['6144'] = mutation_dict['6144'].add(pd.DataFrame.from_dict(mutation_dict_6144), fill_value=0)
 
 
-		exome_file_context_tsb_DINUC.close()
-		sort_file = exome_temp_file_context_tsb_DINUC
-		with open(vcf_path + sort_file) as f:
-			lines = [line.strip().split() for line in f]
-		output = open(vcf_path + sort_file, 'w')
-		for line in sorted(lines, key = lambda x: (['X','Y','1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', 'MT', 'M'].index(x[1]), int(x[2]))):
-			print('\t'.join(line), file=output)
-		output.close()
+	# 	exome_file_context_tsb_DINUC.close()
+	# 	sort_file = exome_temp_file_context_tsb_DINUC
+	# 	with open(vcf_path + sort_file) as f:
+	# 		lines = [line.strip().split() for line in f]
+	# 	output = open(vcf_path + sort_file, 'w')
+	# 	for line in sorted(lines, key = lambda x: (['X','Y','1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', 'MT', 'M'].index(x[1]), int(x[2]))):
+	# 		print('\t'.join(line), file=output)
+	# 	output.close()
 
-		all_dinucs, samples2 = exome_check(genome, vcf_path + exome_temp_file_context_tsb_DINUC, output_matrix, project)
+	# 	all_dinucs, samples2 = exome_check(genome, vcf_path + exome_temp_file_context_tsb_DINUC, output_matrix, project, chrom_start)
 
 
-	# Organizes the variants based upon the user-provided bed file
-	if bed:
-		bed_file.close()
-		sort_file = bed_temp_file
-		with open(vcf_path + sort_file) as f:
-			lines = [line.strip().split() for line in f]
-		output = open(vcf_path + sort_file, 'w')
-		for line in sorted(lines, key = lambda x: (['X','Y','1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', 'MT', 'M'].index(x[1]), int(x[2]))):
-			print('\t'.join(line), file=output)
-		output.close()
-		mutation_dict, samples2 = panel_check(genome, vcf_path + bed_temp_file, output_matrix, bed_file_path, project)
+	# # Organizes the variants based upon the user-provided bed file
+	# if bed:
+	# 	bed_file.close()
+	# 	sort_file = bed_temp_file
+	# 	with open(vcf_path + sort_file) as f:
+	# 		lines = [line.strip().split() for line in f]
+	# 	output = open(vcf_path + sort_file, 'w')
+	# 	for line in sorted(lines, key = lambda x: (['X','Y','1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', 'MT', 'M'].index(x[1]), int(x[2]))):
+	# 		print('\t'.join(line), file=output)
+	# 	output.close()
+	# 	mutation_dict, samples2 = panel_check(genome, vcf_path + bed_temp_file, output_matrix, bed_file_path, project)
 
-		bed_file_context_tsb_DINUC.close()
-		sort_file = bed_temp_file_context_tsb_DINUC
-		with open(vcf_path + sort_file) as f:
-			lines = [line.strip().split() for line in f]
-		output = open(vcf_path + sort_file, 'w')
-		for line in sorted(lines, key = lambda x: (['X','Y','1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', 'MT', 'M'].index(x[1]), int(x[2]))):
-			print('\t'.join(line), file=output)
-		output.close()
+	# 	bed_file_context_tsb_DINUC.close()
+	# 	sort_file = bed_temp_file_context_tsb_DINUC
+	# 	with open(vcf_path + sort_file) as f:
+	# 		lines = [line.strip().split() for line in f]
+	# 	output = open(vcf_path + sort_file, 'w')
+	# 	for line in sorted(lines, key = lambda x: (['X','Y','1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', 'MT', 'M'].index(x[1]), int(x[2]))):
+	# 		print('\t'.join(line), file=output)
+	# 	output.close()
 
-		all_dinucs, samples2 = panel_check(genome, vcf_path + bed_temp_file_context_tsb_DINUC, output_matrix, bed_file_path, project)
+	# 	all_dinucs, samples2 = panel_check(genome, vcf_path + bed_temp_file_context_tsb_DINUC, output_matrix, bed_file_path, project)
 
 
 
@@ -622,7 +612,6 @@ def catalogue_generator_single (lines, chrom, mutation_dict, mutation_types_tsb_
 		chrom_start=None
 		out.close()
 
-		#return(matrices, dinucs, skipped_count, total_analyzed, total_analyzed_DINUC, len(samples))
 		return(mutation_dict, skipped_count, total_analyzed, total_analyzed_DINUC, all_dinucs)
 	else:
 		if not chrom_based:
@@ -633,7 +622,7 @@ def catalogue_generator_single (lines, chrom, mutation_dict, mutation_types_tsb_
 
 
 
-def catalogue_generator_INDEL_single (vcf_path, vcf_path_original, vcf_files, bed_file_path, chrom_path, project, output_matrix, exome, genome, ncbi_chrom, limited_indel, functionFlag, bed, bed_ranges, chrom_based, plot, tsb_ref, transcript_path, gs, log_file):
+def catalogue_generator_INDEL_single (mutation_ID, lines, chrom, vcf_path, vcf_path_original, vcf_files, bed_file_path, chrom_path, project, output_matrix, exome, genome, ncbi_chrom, limited_indel, functionFlag, bed, bed_ranges, chrom_based, plot, tsb_ref, transcript_path, gs, log_file):
 	'''
 	Generates the mutational matrix for the INDEL context.
 
@@ -670,50 +659,9 @@ def catalogue_generator_INDEL_single (vcf_path, vcf_path_original, vcf_files, be
 	'''
 
 	out = open(log_file, 'a')
-	# Instantiates the necessary variables/data structures
-	indel_dict = {}
-	indel_tsb_dict = {}
-	indel_simple_dict = {}
-	samples = []
-	indel_types_tsb = []
-	indel_types_simple = []
 	range_index = 0
 	tsb_abrev = ['T','U','B','N']
-
 	revcompl = lambda x: ''.join([{'A':'T','C':'G','G':'C','T':'A','N':'N'}[B] for B in x][::-1])
-
-						# Single point mutations
-	indel_types = ['1:Del:C:0', '1:Del:C:1', '1:Del:C:2', '1:Del:C:3', '1:Del:C:4', '1:Del:C:5',
-				   '1:Del:T:0', '1:Del:T:1', '1:Del:T:2', '1:Del:T:3', '1:Del:T:4', '1:Del:T:5',
-				   '1:Ins:C:0', '1:Ins:C:1', '1:Ins:C:2', '1:Ins:C:3', '1:Ins:C:4', '1:Ins:C:5',
-				   '1:Ins:T:0', '1:Ins:T:1', '1:Ins:T:2', '1:Ins:T:3', '1:Ins:T:4', '1:Ins:T:5', 
-						# >1bp INDELS
-				   '2:Del:R:0', '2:Del:R:1', '2:Del:R:2', '2:Del:R:3', '2:Del:R:4', '2:Del:R:5',
-				   '3:Del:R:0', '3:Del:R:1', '3:Del:R:2', '3:Del:R:3', '3:Del:R:4', '3:Del:R:5',
-				   '4:Del:R:0', '4:Del:R:1', '4:Del:R:2', '4:Del:R:3', '4:Del:R:4', '4:Del:R:5',
-				   '5:Del:R:0', '5:Del:R:1', '5:Del:R:2', '5:Del:R:3', '5:Del:R:4', '5:Del:R:5',
-				   '2:Ins:R:0', '2:Ins:R:1', '2:Ins:R:2', '2:Ins:R:3', '2:Ins:R:4', '2:Ins:R:5', 
-				   '3:Ins:R:0', '3:Ins:R:1', '3:Ins:R:2', '3:Ins:R:3', '3:Ins:R:4', '3:Ins:R:5', 
-				   '4:Ins:R:0', '4:Ins:R:1', '4:Ins:R:2', '4:Ins:R:3', '4:Ins:R:4', '4:Ins:R:5',
-				   '5:Ins:R:0', '5:Ins:R:1', '5:Ins:R:2', '5:Ins:R:3', '5:Ins:R:4', '5:Ins:R:5',
-						#MicroHomology INDELS
-				   '2:Del:M:1', '3:Del:M:1', '3:Del:M:2', '4:Del:M:1', '4:Del:M:2', '4:Del:M:3',
-				   '5:Del:M:1', '5:Del:M:2', '5:Del:M:3', '5:Del:M:4', '5:Del:M:5', '2:Ins:M:1', 
-				   '3:Ins:M:1', '3:Ins:M:2', '4:Ins:M:1', '4:Ins:M:2', '4:Ins:M:3', '5:Ins:M:1', 
-				   '5:Ins:M:2', '5:Ins:M:3', '5:Ins:M:4', '5:Ins:M:5', 'complex', 'non_matching']
-
-	for indels in indel_types[:24]:
-		for tsbs in tsb_abrev:
-			indel_types_tsb.append(tsbs + ":" + indels)
-
-	if limited_indel:
-		indel_types = indel_types[:-13]
-
-	indel_types_simple = indel_types[:24]
-	indel_types_simple.append('long_Del')
-	indel_types_simple.append('long_Ins')
-	indel_types_simple.append('MH')
-	indel_types_simple.append('complex')
 
 	# Instantiates the remaining varibales/data structures
 	i = 0
@@ -727,14 +675,16 @@ def catalogue_generator_INDEL_single (vcf_path, vcf_path_original, vcf_files, be
 	# Creates files for exome and region sorting
 	if exome:
 		exome_temp_file = "exome_temp.txt"
-		exome_file = open(vcf_path + exome_temp_file, 'w')
+		exome_file = open(vcf_path + exome_temp_file, 'a')
 
 	if bed:
 		bed_temp_file = "bed_temp.txt"
-		bed_file = open(vcf_path + bed_temp_file, "w")
+		bed_file = open(vcf_path + bed_temp_file, "a")
 
 	# Opens the input vcf files
-	with open (vcf_path + vcf_files[0]) as data:
+	with open (chrom_path + chrom + '.txt', "rb") as f:
+		chrom_string = f.read().strip()	
+	# with open (vcf_path + vcf_files[0]) as data:
 		prev_line = None
 
 		# Creates files for the genes strand bias test
@@ -746,23 +696,10 @@ def catalogue_generator_INDEL_single (vcf_path, vcf_path_original, vcf_files, be
 		first_flag = True
 
 		# Saves the relevant data from each line
-		for lines in data:
+		for line in lines:
 			try:
-				line = lines.strip().split('\t')
-				# sample = line[1]
-				# chrom = line[5]
-				# # if chrom in ncbi_chrom.keys():
-				# # 	chrom = ncbi_chrom[chrom]
-
-				# start = int(line[6])
-				# ref = line[8].upper()
-				# mut = line[9].upper()
-
 				sample = line[0]
 				chrom = line[1]
-				# if chrom in ncbi_chrom.keys():
-				# 	chrom = ncbi_chrom[chrom]
-
 				start = int(line[2])
 				ref = line[3].upper()
 				mut = line[4].upper()
@@ -807,34 +744,6 @@ def catalogue_generator_INDEL_single (vcf_path, vcf_path_original, vcf_files, be
 
 				prev_line = line
 
-				# Opens the first chromosome reference file
-				if first_flag:
-					initial_chrom = chrom
-					try:
-						with open (chrom_path + initial_chrom + '.txt', "rb") as f:
-							chrom_string = f.read().strip()
-						first_flag = False
-					except:
-						print(initial_chrom + " is not supported. You will need to download that chromosome and create the required files. Continuing with the matrix generation...", file=out)
-						continue
-
-				# Opens the next chromosome when a new chromosome is reached in the file
-				if chrom != initial_chrom:
-					if chrom_based:
-						matrix_generator_INDEL(output_matrix, samples, indel_types, indel_types_tsb, indel_types_simple, indel_dict, indel_tsb_dict, indel_simple_dict, project, exome, limited_indel, bed, initial_chrom)
-						indel_dict = {}
-						indel_tsb_dict = {}
-						indel_simple_dict = {}
-					initial_chrom = chrom
-					try:
-						with open (chrom_path + initial_chrom + '.txt', "rb") as f:
-							chrom_string = f.read().strip()
-						i += 1
-						print("Chromosome "+ chrom + " complete", file=out)
-					except:
-						print(initial_chrom + " is not supported. You will need to download that chromosome and create the required files. Continuing with the matrix generation...", file=out)
-						continue
-
 				# Saves the relevant chromosome information from the reference file
 				try:
 					base = tsb_ref[chrom_string[start-1]][1]
@@ -870,21 +779,7 @@ def catalogue_generator_INDEL_single (vcf_path, vcf_path_original, vcf_files, be
 							strand = '1'
 						else:
 							strand = '-1'
-					else:
-						# Add code to count complex mutations
-						if sample not in indel_dict.keys():
-							indel_dict[sample] = {}
-							indel_tsb_dict[sample] = {}
-							indel_simple_dict[sample] = {}
 
-						if not functionFlag:
-							if 'complex' not in indel_dict[sample].keys():
-								indel_dict[sample]['complex'] = 1
-								indel_simple_dict[sample]['complex'] = 1
-							else:
-								indel_dict[sample]['complex'] += 1
-								indel_simple_dict[sample]['complex'] += 1
-						continue
 					
 
 					type_sequence = ''
@@ -1003,13 +898,6 @@ def catalogue_generator_INDEL_single (vcf_path, vcf_path_original, vcf_files, be
 										mut_type += '_Micro_rev'
 										break
 
-					# Saves the sample name for later reference
-					if sample not in indel_dict.keys():
-						indel_dict[sample] = {}
-						indel_tsb_dict[sample] = {}
-						indel_simple_dict[sample] = {}
-					if sample not in samples:
-						samples.append(sample)
 
 					# Instantiates variables used to create the unique INDEL keys
 					indel_key_1 = None
@@ -1134,7 +1022,8 @@ def catalogue_generator_INDEL_single (vcf_path, vcf_path_original, vcf_files, be
 
 
 					indel_key_tsb = bias + ":" + indel_key
-
+					if indel_key_3 != 'M' and indel_key_3 != 'R':
+						mutation_ID['tsb'].at[indel_key_tsb, sample] += 1
 
 					# Performs the gene strand bias test if desired
 					if gs:
@@ -1173,24 +1062,9 @@ def catalogue_generator_INDEL_single (vcf_path, vcf_path_original, vcf_files, be
 
 
 
-
-					# Saves the mutation type into the correct dictionary key
-					if indel_key not in indel_dict[sample].keys():
-						indel_dict[sample][indel_key] = 1
-					else:
-						indel_dict[sample][indel_key] += 1
-
-					if indel_key_tsb not in indel_tsb_dict[sample].keys():
-						indel_tsb_dict[sample][indel_key_tsb] = 1
-					else:
-						indel_tsb_dict[sample][indel_key_tsb] += 1
-
-					if indel_key_simple not in indel_simple_dict[sample].keys():
-						indel_simple_dict[sample][indel_key_simple] = 1
-					else:
-						indel_simple_dict[sample][indel_key_simple] += 1
-
-
+					mutation_ID['ID'].at[indel_key, sample] += 1
+					
+					mutation_ID['simple'].at[indel_key_simple, sample] += 1
 					total_analyzed += 1
 
 					# Writes the INDEL to a temporary file for exome/region sorting
@@ -1338,9 +1212,9 @@ def catalogue_generator_INDEL_single (vcf_path, vcf_path_original, vcf_files, be
 	# Calls the function to generate the final mutational matrix
 	if not chrom_based:
 		initial_chrom=None
-		matrix_generator_INDEL(output_matrix, samples, indel_types, indel_types_tsb, indel_types_simple, indel_dict, indel_tsb_dict, indel_simple_dict, project, exome, limited_indel, bed, initial_chrom, plot)
+		#matrix_generator_INDEL(output_matrix, samples, indel_types, indel_types_tsb, indel_types_simple, indel_dict, indel_tsb_dict, indel_simple_dict, project, exome, limited_indel, bed, initial_chrom, plot)
 		if functionFlag:
-			return(pd.DataFrame.from_dict(indel_dict), skipped_count, total_analyzed, len(samples))
+			return(mutation_ID, skipped_count, total_analyzed)
 
 def exome_check (genome, exome_temp_file, output_matrix, project):
 	'''
@@ -1366,15 +1240,12 @@ def exome_check (genome, exome_temp_file, output_matrix, project):
 	initial = True
 	udpate_chrom = False
 	current_dir = os.path.realpath(__file__)
-	#current_dir = os.getcwd()
 	ref_dir = re.sub('\/scripts/SigProfilerMatrixGenerator.py$', '', current_dir)
 
 	exome_file = ref_dir + "/references/chromosomes/exome/" + genome + "/" + genome + "_exome.interval_list"
 
-	#exome_output_path = ref_dir + "/references/vcf_files/" + project + "_exome/SNV/"
 	exome_output_path = output_matrix + "vcf_files/SNV/"
 	exome_output = exome_output_path + project + "_exome.vcf"
-	#exome_output = ref_dir + "/references/vcf_files/" + project + "_exome/SNV/" + project + "_exome.vcf"
 	if not os.path.exists(exome_output_path):
 		os.makedirs(exome_output_path)
 
@@ -1487,8 +1358,7 @@ def exome_check (genome, exome_temp_file, output_matrix, project):
 			previous_chrom_start = start_ref
 			previous_chrom_end = end_ref
 
-	# logging.info("Exome filtering is complete. Proceeding with the final catalogue generation...")
-	# print("Exome filtering is complete. Proceeding with the final catalogue generation...")
+
 	return(mutation_dict, samples)
 
 def panel_check (genome, bed_temp_file, output_matrix, bed_file_path, project):
@@ -1568,10 +1438,10 @@ def panel_check (genome, bed_temp_file, output_matrix, bed_file_path, project):
 			while not stop:
 				if chrom == previous_chrom_ref:
 					if start >= previous_chrom_start - base_cushion and start <= previous_chrom_end + base_cushion:
-						if sample not in mutation_dict.keys():
+						if sample not in mutation_dict:
 							samples.append(sample)
 							mutation_dict[sample] = {}
-						if mut_type not in mutation_dict[sample].keys():
+						if mut_type not in mutation_dict[sample]:
 							mutation_dict[sample][mut_type] = 1
 						else:
 							mutation_dict[sample][mut_type] += 1
@@ -1607,7 +1477,7 @@ def panel_check (genome, bed_temp_file, output_matrix, bed_file_path, project):
 							read = True
 							continue
 						elif start >= start_ref - base_cushion and start <= end_ref + base_cushion: 
-							if sample not in mutation_dict.keys():
+							if sample not in mutation_dict:
 								samples.append(sample)
 								mutation_dict[sample] = {}
 							if mut_type not in mutation_dict[sample].keys():
@@ -1643,7 +1513,7 @@ def panel_check (genome, bed_temp_file, output_matrix, bed_file_path, project):
 
 
 
-def matrix_generator (context, output_matrix, project, samples, bias_sort, mut_6144, exome, mut_types, bed, chrom_start=None, functionFlag=False, plot=False, tsb_stat=False):
+def matrix_generator (context, output_matrix, project, samples, bias_sort, mut_count_all, exome, mut_types, bed, chrom_start=None, functionFlag=False, plot=False, tsb_stat=False):
 	'''
 	Writes the final mutational matrix given a dictionary of samples, mutation types, and counts
 
@@ -1678,17 +1548,19 @@ def matrix_generator (context, output_matrix, project, samples, bias_sort, mut_6
 	ref_dir = re.sub('\/scripts$', '', current_dir)
 
 	contexts = ['96', '384', '1536', '6', '24']
-	mut_types_all = {'96':[], '384':[], '1536':[], '6':[], '24':[], '6_pvalue':[], '7_pvalue':[]}
-	mut_count_all = {'96':{}, '384':{}, '1536':{}, '6':{}, '24':{}, '6_pvalue':{}, '7_pvalue':{}, '6_pvalue_temp':{}, '7_pvalue_temp':{}}
+	#mut_types_all = {'96':[], '384':[], '1536':[], '6':[], '24':[], '6_pvalue':[], '7_pvalue':[]}
+	#mut_count_all = {'96':{}, '384':{}, '1536':{}, '6':{}, '24':{}, '6_pvalue':{}, '7_pvalue':{}, '6_pvalue_temp':{}, '7_pvalue_temp':{}}
 
 	#mut_6144 = pd.DataFrame.from_dict(mutation_dict)
 	#mut_6144 = mut_6144.fillna(0)
-	mut_6144.index.name = 'MutationType'
+	mut_count_all['6144'].index.name = 'MutationType'
 
 
-	mut_6144 = mut_6144.astype(int)
+	mut_count_all['6144'] = mut_count_all['6144'].astype(int)
 	#mut_count_all['6144'] = mut_6144
-	mut_count_all['1536'] = mut_6144.groupby(mut_6144.index.str[2:]).sum()
+	mut_count_all['384'] = mut_count_all['6144'].groupby(mut_count_all['6144'].index.str[0:2] + mut_count_all['6144'].index.str[3:10]).sum()
+
+	mut_count_all['1536'] = mut_count_all['6144'].groupby(mut_count_all['6144'].index.str[2:]).sum()
 
 	#mut_count_all['96'] = mut_6144.groupby(mut_6144.index.str[3:10]).sum()
 	mut_count_all['96'] = mut_count_all['1536'].groupby(mut_count_all['1536'].index.str[1:8]).sum()
@@ -1696,7 +1568,6 @@ def matrix_generator (context, output_matrix, project, samples, bias_sort, mut_6
 	#mut_count_all['6'] = mut_6144.groupby(mut_6144.index.str[5:8]).sum()
 	mut_count_all['6'] = mut_count_all['96'].groupby(mut_count_all['96'].index.str[2:5]).sum()
 
-	mut_count_all['384'] = mut_6144.groupby(mut_6144.index.str[0:2] + mut_6144.index.str[3:10]).sum()
 
 #	mut_count_all['24'] = mut_6144.groupby(mut_6144.index.str[0:2] + mut_6144.index.str[5:8]).sum()
 	mut_count_all['24'] = mut_count_all['384'].groupby(mut_count_all['384'].index.str[0:2] + mut_count_all['384'].index.str[4:7]).sum()
@@ -1725,9 +1596,9 @@ def matrix_generator (context, output_matrix, project, samples, bias_sort, mut_6
 	if chrom_start != None:
 		output_file_matrix += ".chr" + chrom_start
 
-	types = list(mut_6144.index)
+	types = list(mut_count_all['6144'].index)
 	types = sorted(types, key=lambda val: (bias_sort[val[0]], val[2:]))
-	mut_6144 = mut_6144.reindex(types)
+	mut_count_all['6144'] = mut_count_all['6144'].reindex(types)
 
 	types = list(mut_count_all['384'].index)
 	types = sorted(types, key=lambda val: (bias_sort[val[0]], val[2:]))
@@ -1736,9 +1607,9 @@ def matrix_generator (context, output_matrix, project, samples, bias_sort, mut_6
 	types = list(mut_count_all['24'].index)
 	types = sorted(types, key=lambda val: (bias_sort[val[0]], val[2:]))
 	mut_count_all['24'] = mut_count_all['24'].reindex(types)
-	gc.collect()
+	#gc.collect()
 	#mut_6144.to_csv(output_file_matrix, header=True, sep='\t', chunksize=100000, compression='gzip')
-	df2csv(mut_6144, output_file_matrix)
+	df2csv(mut_count_all['6144'], output_file_matrix)
 	# TSB test:
 	if tsb_stat:
 
@@ -1817,8 +1688,8 @@ def matrix_generator (context, output_matrix, project, samples, bias_sort, mut_6
 		significant_tsb = open(strandBiasOut + "significantResults_strandBiasTest.txt", 'w')
 		with open (strandBiasOut + "strandBiasTest_6144.txt", 'w') as out2, open (strandBiasOut + "strandBiasTest_384.txt", 'w') as out384, open (strandBiasOut + "strandBiasTest_24.txt", 'w') as out24:
 			print("Sample\tMutationType\tEnrichment[Trans/UnTrans]\tp.value\tFDR_q.value",file=out2)
-			tsb_6144 = mut_6144[mut_6144.index.str[0] == 'T']
-			tsb_6144_U = mut_6144[mut_6144.index.str[0] == 'U']
+			tsb_6144 = mut_count_all['6144'][mut_count_all['6144'].index.str[0] == 'T']
+			tsb_6144_U = mut_count_all['6144'][mut_count_all['6144'].index.str[0] == 'U']
 			tsb_index = [x[2:] for x in list(tsb_6144.index)]
 			tsb_6144.index = tsb_index
 			tsb_6144_U.index = tsb_index
@@ -1884,7 +1755,7 @@ def matrix_generator (context, output_matrix, project, samples, bias_sort, mut_6
 	# Generates the matrices for the remaining matrices (1536, 384, 96, 24, 6) by 
 	# summing the counts from the 6144 matrix
 	for cont in contexts:
-		mutation_dict = mut_count_all[cont]
+		#mutation_dict = mut_count_all[cont]
 
 		file_prefix = project + ".SBS" + cont
 		if exome:
@@ -1899,7 +1770,7 @@ def matrix_generator (context, output_matrix, project, samples, bias_sort, mut_6
 			output_file_matrix += ".chr" + chrom_start
 
 		#mutation_dict.to_csv(output_file_matrix, header=True, sep='\t')
-		df2csv(mutation_dict, output_file_matrix)		
+		df2csv(mut_count_all[cont], output_file_matrix)		
 
 
 		if plot:
