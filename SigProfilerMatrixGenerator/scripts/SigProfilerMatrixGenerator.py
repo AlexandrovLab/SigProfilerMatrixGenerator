@@ -275,6 +275,7 @@ def catalogue_generator_single (lines, chrom, mutation_dict, mutation_types_tsb_
 	chrom_start = chrom
 	# Opens the input vcf file
 	with open (chrom_path + chrom_start + ".txt", "rb") as f2:
+		strand = '1'
 		chrom_string = f2.read()
 
 		dinuc_sub = [int(y[2])-int(x[2]) for x,y in zip(lines, lines[1:])]
@@ -328,10 +329,12 @@ def catalogue_generator_single (lines, chrom, mutation_dict, mutation_types_tsb_
 				dinucs_context_tsb[sample][dinuc_seq_tsb] += 1
 
 			else:
+				strand = '-1'
 				dinuc_seq_tsb = "".join([revbias(dinuc_seq_tsb[0]),":",revcompl(dinuc_seq_tsb[-1]),"[",revcompl(dinuc_seq_tsb[4:6]),">",revcompl(dinuc_seq_tsb[7:9]),"]",revcompl(dinuc_seq_tsb[2])])
 				dinucs_context_tsb[sample][dinuc_seq_tsb] += 1
 			
-			print("\t".join([sample, chrom, str(start), dinuc_seq_tsb]), file=seqOut_dinuc)
+			if seqInfo:
+				print("\t".join([sample, chrom, str(start), dinuc_seq_tsb, strand]), file=seqOut_dinuc)
 
 			# Saves the DINUC into temporary files for exome sorting
 			if exome:
@@ -439,7 +442,7 @@ def catalogue_generator_single (lines, chrom, mutation_dict, mutation_types_tsb_
 							bed_file.write(sample + '\t' + chrom + '\t' + str(start) + '\t' + mut_key + "\t" + ref + "\t" + mut + "\n")
 
 						if seqInfo:
-							print("\t".join([sample, chrom, str(start), mut_key]), file=seqOut)
+							print("\t".join([sample, chrom, str(start), mut_key, strand]), file=seqOut)
 
 				except:
 					print("There appears to be an error in this line. Skipping this mutation: " + chrom + " " + str(start) + " " + ref + " " + mut,file=out)
@@ -1034,7 +1037,7 @@ def catalogue_generator_INDEL_single (mutation_ID, lines, chrom, vcf_path, vcf_p
 						bed_file.write(sample + '\t' + chrom + '\t' + str(start) + '\t' + indel_key + "\t" + ref + "\t" + mut + "\n")
 
 					if seqInfo:
-						print("\t".join([sample, chrom, str(start), indel_key, ref, mut]), file=seqOut)
+						print("\t".join([sample, chrom, str(start), indel_key, ref, mut, strand]), file=seqOut)
 
 				else:
 					if not functionFlag:
