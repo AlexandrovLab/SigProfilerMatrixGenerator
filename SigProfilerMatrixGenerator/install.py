@@ -27,7 +27,7 @@ def md5(fname):
     return (hash_md5.hexdigest())
 
 
-def install_chromosomes (genomes, ref_dir, custom):
+def install_chromosomes (genomes, ref_dir, custom, rsync):
 	if custom:
 		for genome in genomes:
 			os.system("gunzip references/chromosomes/fasta/" + genome + "/*.gz")
@@ -57,28 +57,42 @@ def install_chromosomes (genomes, ref_dir, custom):
 			if os.path.exists(chromosome_string_path) == False or len(os.listdir(chromosome_string_path)) <= chrom_number:
 				if os.path.exists(chromosome_fasta_path) == False or len(os.listdir(chromosome_fasta_path)) <= chrom_number:
 					print("Chromosomes are not currently saved as individual text files for " + genome + ". Downloading the files now...")
-					try:
-						p = subprocess.Popen("wget", stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-					except:
-						proceed = input("You may not have wget or homebrew installed. Download those dependencies now?[Y/N]").upper()
-						if proceed == 'Y':
+					if not rsync:
+					#os.system("rsync -av -m --include='*/' --include='*.dna.chromosome.*' --exclude='*' rsync://ftp.ensembl.org/ensembl/pub/grch37/update/fasta/homo_sapiens/dna/ " + chromosome_fasta_path + " 2>&1>> install.log")
+						try:
+							p = subprocess.Popen("wget", stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+						except:
+							proceed = input("You may not have wget or homebrew installed. Download those dependencies now?[Y/N]").upper()
+							if proceed == 'Y':
+								try:
+									os.system("brew install wget")
+								except:
+									os.system('/usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"')
+									os.system("brew install wget")
+							else:
+								print("Installation has stopped. Please download the chromosome files before proceeding with the installation.")
+								wget_flag = False
+								sys.exit()
+						if wget_flag:
 							try:
-								os.system("brew install wget")
+								if genome == 'GRCh37':
+									os.system("wget -r -l1 -c -nc --no-parent -A '*.dna.chromosome.*' -nd -P " + chromosome_fasta_path + " ftp://ftp.ensembl.org/pub/grch37/update/fasta/homo_sapiens/dna/ 2>> install.log")
+								elif genome == 'mm9':
+									os.system("wget -r -l1 -c -nc --no-parent -A '*.dna.chromosome.*' -nd -P " + chromosome_fasta_path + " ftp://ftp.ensembl.org/pub/release-67/fasta/mus_musculus/dna/ 2>> install.log")
+								else:
+									os.system("wget -r -l1 -c -nc --no-parent -A '*.dna.chromosome.*' -nd -P " + chromosome_fasta_path + " ftp://ftp.ensembl.org/pub/release-93/fasta/"+species+"/dna/ 2>> install.log")
+								os.system("gunzip references/chromosomes/fasta/" + genome + "/*.gz")
 							except:
-								os.system('/usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"')
-								os.system("brew install wget")
-						else:
-							print("Installation has stopped. Please download the chromosome files before proceeding with the installation.")
-							wget_flag = False
-							sys.exit()
-					if wget_flag:
+								print("The ensembl ftp site is not currently responding.")
+								sys.exit()
+					else:
 						try:
 							if genome == 'GRCh37':
-								os.system("wget -r -l1 -c -nc --no-parent -A '*.dna.chromosome.*' -nd -P " + chromosome_fasta_path + " ftp://ftp.ensembl.org/pub/grch37/update/fasta/homo_sapiens/dna/ 2>> install.log ")
+								os.system("rsync -av -m --include='*/' --include='*.dna.chromosome.*' --exclude='*' rsync://ftp.ensembl.org/ensembl/pub/grch37/update/fasta/homo_sapiens/dna/ " + chromosome_fasta_path + " 2>&1>> install.log")
 							elif genome == 'mm9':
-								os.system("wget -r -l1 -c -nc --no-parent -A '*.dna.chromosome.*' -nd -P " + chromosome_fasta_path + " ftp://ftp.ensembl.org/pub/release-67/fasta/mus_musculus/dna/ 2>> install.log")
+								os.system("rsync -av -m --include='*/' --include='*.dna.chromosome.*' --exclude='*' rsync://ftp.ensembl.org/ensembl/pub/release-67/fasta/mus_musculus/dna/ " + chromosome_fasta_path + " 2>&1>> install.log")
 							else:
-								os.system("wget -r -l1 -c -nc --no-parent -A '*.dna.chromosome.*' -nd -P " + chromosome_fasta_path + " ftp://ftp.ensembl.org/pub/release-93/fasta/"+species+"/dna/ 2>> install.log")
+								os.system("rsync -av -m --include='*/' --include='*.dna.chromosome.*' --exclude='*' rsync://ftp.ensembl.org/ensembl/pub/release-93/fasta/"+species+"/dna/ " + chromosome_fasta_path + " 2>&1>> install.log")
 							os.system("gunzip references/chromosomes/fasta/" + genome + "/*.gz")
 						except:
 							print("The ensembl ftp site is not currently responding.")
@@ -167,7 +181,8 @@ def install_chromosomes_tsb (genomes, ref_dir, custom):
 				os.remove(chromosome_TSB_path + files)
 		if corrupt:
 			print("The transcriptional reference data appears to be corrupted. Please reinstall the " + genome + " genome.")
-
+			sys.exit()
+			
 		print("The transcriptional reference data for " + genome + " has been saved.")
 
 def install_chromosomes_tsb_BED (genomes, custom, ref_dir):
@@ -230,7 +245,7 @@ def benchmark (ref_dir):
 	print("Installation was succesful.\nSigProfilerMatrixGenerator took " + str(end_time-start_time) + " seconds to complete.")
 
 
-def install (genome, custom=False):
+def install (genome, custom=False, rsync=False):
 	print("Beginning installation. This may take up to 20 minutes to complete.")
 	first_path = os.getcwd()
 	current_dir = os.path.realpath(__file__)
@@ -259,7 +274,7 @@ def install (genome, custom=False):
 		if not os.path.exists(dirs):
 			os.makedirs(dirs)
 
-	install_chromosomes(genomes, ref_dir, custom)
+	install_chromosomes(genomes, ref_dir, custom, rsync)
 	install_chromosomes_tsb (genomes, ref_dir, custom)
 
 	if os.path.exists("BRCA_example/"):
