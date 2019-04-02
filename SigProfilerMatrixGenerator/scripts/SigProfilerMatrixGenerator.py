@@ -564,6 +564,10 @@ def catalogue_generator_single (lines, chrom, mutation_dict, mutation_types_tsb_
 		seqOut_dinuc.close()
 
 
+	if exome:
+		exome_file.close()
+	if bed:
+		bed_file.close()
 	# Calls the function to generate the final matrix
 	if functionFlag:
 		chrom_start = None
@@ -633,11 +637,19 @@ def catalogue_generator_INDEL_single (mutation_ID, lines, chrom, vcf_path, vcf_p
 	# Creates files for exome and region sorting
 	if exome:
 		exome_temp_file = "exome_temp.txt"
+		exome_temp_file_simple = "exome_temp_simple.txt"
+		exome_temp_file_tsb = "exome_temp_tsb.txt"
 		exome_file = open(vcf_path + exome_temp_file, 'a')
+		exome_file_simple = open(vcf_path + exome_temp_file_simple, 'a')
+		exome_file_tsb = open(vcf_path + exome_temp_file_tsb, 'a')
 
 	if bed:
 		bed_temp_file = "bed_temp.txt"
+		bed_temp_file_simple = "bed_temp_simple.txt"
+		bed_temp_file_tsb = "bed_temp_tsb.txt"
 		bed_file = open(vcf_path + bed_temp_file, "a")
+		bed_file_simple = open(vcf_path + bed_temp_file_simple, "a")
+		bed_file_tsb = open(vcf_path + bed_temp_file_tsb, "a")
 
 	# Opens the input vcf files
 	with open (chrom_path + chrom + '.txt', "rb") as f:
@@ -743,7 +755,10 @@ def catalogue_generator_INDEL_single (mutation_ID, lines, chrom, vcf_path, vcf_p
 						else:
 							strand = '-1'
 
-					
+					else:
+						mutation_ID['ID'].at['complex', sample] += 1
+						mutation_ID['simple'].at['complex', sample] += 1
+						continue
 
 					type_sequence = ''
 					
@@ -1033,18 +1048,20 @@ def catalogue_generator_INDEL_single (mutation_ID, lines, chrom, vcf_path, vcf_p
 					# Writes the INDEL to a temporary file for exome/region sorting
 					if exome:
 						exome_file.write(sample + '\t' + chrom + '\t' + str(start) + '\t' + indel_key + "\t" + ref + "\t" + mut + "\n")
+						exome_file_simple.write(sample + '\t' + chrom + '\t' + str(start) + '\t' + indel_key_simple + "\t" + ref + "\t" + mut + "\n")
+						exome_file_tsb.write(sample + '\t' + chrom + '\t' + str(start) + '\t' + indel_key_tsb + "\t" + ref + "\t" + mut + "\n")
 					if bed:
 						bed_file.write(sample + '\t' + chrom + '\t' + str(start) + '\t' + indel_key + "\t" + ref + "\t" + mut + "\n")
+						bed_file_simple.write(sample + '\t' + chrom + '\t' + str(start) + '\t' + indel_key_simple + "\t" + ref + "\t" + mut + "\n")
+						bed_file_tsb.write(sample + '\t' + chrom + '\t' + str(start) + '\t' + indel_key_tsb + "\t" + ref + "\t" + mut + "\n")
 
 					if seqInfo:
 						print("\t".join([sample, chrom, str(start), indel_key, ref, mut, strand]), file=seqOut)
 
 				else:
 					if not functionFlag:
-						if 'non_matching' not in indel_dict[sample].keys():
-							indel_dict[sample]['non_matching'] = 1
-						else:
-							indel_dict[sample]['non_matching'] += 1
+						mutation_ID['ID'].at['non_matching', sample] += 1
+
 			except:
 				print("There appears to be an error in this line. Skipping this mutation: " + chrom + " " + str(start) + " " + ref + " " + mut, file=out)
 				skipped_count += 1
@@ -1153,30 +1170,15 @@ def catalogue_generator_INDEL_single (mutation_ID, lines, chrom, vcf_path, vcf_p
 	if seqInfo:
 		seqOut.close()
 
-	# Performs the final filter on the variants base upon the exome if desired
 	if exome:
 		exome_file.close()
-		sort_file = exome_temp_file
-		with open(vcf_path + sort_file) as f:
-			lines = [line.strip().split() for line in f]
-		output = open(vcf_path + sort_file, 'w')
-		for line in sorted(lines, key = lambda x: (['X','Y','1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', 'MT', 'M'].index(x[1]), int(x[2]))):
-			print('\t'.join(line), file=output)
-		output.close()
+		exome_file_simple.close()
+		exome_file_tsb.close()
 
-		indel_dict, samples2 = exome_check(genome, vcf_path + exome_temp_file, output_matrix, project)
-
-	# Performs the final filter on the variants base upon the region if desired
 	if bed:
 		bed_file.close()
-		sort_file = bed_temp_file
-		with open(vcf_path + sort_file) as f:
-			lines = [line.strip().split() for line in f]
-		output = open(vcf_path + sort_file, 'w')
-		for line in sorted(lines, key = lambda x: (['X','Y','1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', 'MT', 'M'].index(x[1]), int(x[2]))):
-			print('\t'.join(line), file=output)
-		output.close()
-		indel_dict, samples2 = panel_check(genome, vcf_path + bed_temp_file, output_matrix, bed_file_path, project)
+		bed_file_simple.close()
+		bed_file_tsb.close()
 
 	# Calls the function to generate the final mutational matrix
 	if not chrom_based:
@@ -1266,7 +1268,7 @@ def exome_check (genome, exome_temp_file, output_matrix, project):
 						else:
 							mutation_dict[sample][mut_type] += 1
 						read = True
-						print('\t'.join([chrom, str(start), ".", ref, mut ]), file=out)
+						print('\t'.join([chrom, str(start), ".", ref, mut]), file=out)
 						break
 
 				if read:
@@ -1305,7 +1307,7 @@ def exome_check (genome, exome_temp_file, output_matrix, project):
 							else:
 								mutation_dict[sample][mut_type] += 1
 							read = True
-							print('\t'.join([chrom, str(start), ".", ref, mut ]), file=out)
+							print('\t'.join([chrom, str(start), ".", ref, mut]), file=out)
 							break
 						elif start < (start_ref - base_cushion):
 							read = False
