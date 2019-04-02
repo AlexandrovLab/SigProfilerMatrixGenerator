@@ -429,6 +429,27 @@ def SigProfilerMatrixGeneratorFunc (project, genome, vcfFiles, exome=False, bed_
 				indel_dict, samples2 = matGen.exome_check(genome, vcf_path + "exome_temp.txt", output_matrix, project)
 				mutation_ID['ID'] = pd.DataFrame.from_dict(indel_dict)
 
+				with open(vcf_path + "exome_temp_simple.txt") as f:
+					lines = [line.strip().split() for line in f]
+				output = open(vcf_path + "exome_temp_simple.txt", 'w')
+				for line in sorted(lines, key = lambda x: (['X','Y','1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', 'MT', 'M'].index(x[1]), int(x[2]))):
+					print('\t'.join(line), file=output)
+				output.close()
+
+				indel_dict, samples2 = matGen.exome_check(genome, vcf_path + "exome_temp_simple.txt", output_matrix, project)
+				mutation_ID['simple'] = pd.DataFrame.from_dict(indel_dict)
+
+
+				with open(vcf_path + "exome_temp_tsb.txt") as f:
+					lines = [line.strip().split() for line in f]
+				output = open(vcf_path + "exome_temp_tsb.txt", 'w')
+				for line in sorted(lines, key = lambda x: (['X','Y','1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', 'MT', 'M'].index(x[1]), int(x[2]))):
+					print('\t'.join(line), file=output)
+				output.close()
+
+				indel_dict, samples2 = matGen.exome_check(genome, vcf_path + "exome_temp.txt", output_matrix, project)
+				mutation_ID['tsb'] = pd.DataFrame.from_dict(indel_dict)
+
 			if bed:
 				with open(vcf_path + "bed_temp.txt") as f:
 					lines = [line.strip().split() for line in f]
@@ -438,6 +459,25 @@ def SigProfilerMatrixGeneratorFunc (project, genome, vcfFiles, exome=False, bed_
 				output.close()
 				indel_dict, samples2 = matGen.panel_check(genome, vcf_path + "bed_temp.txt", output_matrix, bed_file_path, project)
 				mutation_ID['ID'] = pd.DataFrame.from_dict(indel_dict)
+
+				with open(vcf_path + "bed_temp_simple.txt") as f:
+					lines = [line.strip().split() for line in f]
+				output = open(vcf_path + "bed_temp_simple.txt", 'w')
+				for line in sorted(lines, key = lambda x: (['X','Y','1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', 'MT', 'M'].index(x[1]), int(x[2]))):
+					print('\t'.join(line), file=output)
+				output.close()
+				indel_dict, samples2 = matGen.panel_check(genome, vcf_path + "bed_temp_simple.txt", output_matrix, bed_file_path, project)
+				mutation_ID['simple'] = pd.DataFrame.from_dict(indel_dict)
+
+				with open(vcf_path + "bed_temp_tsb.txt") as f:
+					lines = [line.strip().split() for line in f]
+				output = open(vcf_path + "bed_temp_tsb.txt", 'w')
+				for line in sorted(lines, key = lambda x: (['X','Y','1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', 'MT', 'M'].index(x[1]), int(x[2]))):
+					print('\t'.join(line), file=output)
+				output.close()
+				indel_dict, samples2 = matGen.panel_check(genome, vcf_path + "bed_temp_tsb.txt", output_matrix, bed_file_path, project)
+				mutation_ID['tsb'] = pd.DataFrame.from_dict(indel_dict)
+
 
 			mutation_ID['ID'] = mutation_ID['ID'].to_dict('dict')
 			mutation_ID['simple'] = mutation_ID['simple'].to_dict('dict')
