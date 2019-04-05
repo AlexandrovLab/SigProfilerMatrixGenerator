@@ -272,10 +272,10 @@ def catalogue_generator_single (lines, chrom, mutation_dict, mutation_types_tsb_
 		bed_temp_file_context_tsb_DINUC = "bed_temp_context_tsb_DINUC.txt"
 		bed_file_context_tsb_DINUC = open(vcf_path + bed_temp_file_context_tsb_DINUC, 'w')
 
+	dinuc_tsb_ref = ['CC', 'CT', 'TC', 'TT', 'AA', 'AG', 'GA', 'GG']
 	chrom_start = chrom
 	# Opens the input vcf file
 	with open (chrom_path + chrom_start + ".txt", "rb") as f2:
-		strand = '1'
 		chrom_string = f2.read()
 
 		dinuc_sub = [int(y[2])-int(x[2]) for x,y in zip(lines, lines[1:])]
@@ -292,6 +292,7 @@ def catalogue_generator_single (lines, chrom, mutation_dict, mutation_types_tsb_
 			seqOut_dinuc = open(seqOut_path_dinuc + chrom_start + "_seqinfo.txt", "w")
 
 		for x in dinuc_index:
+			strand = '1'
 			line1 = lines[x]
 			line2 = lines[x+1]
 			previous_ref = line1[3]
@@ -301,7 +302,7 @@ def catalogue_generator_single (lines, chrom, mutation_dict, mutation_types_tsb_
 			dinuc = ''.join([previous_ref, ref, ">", previous_mut, mut])
 			sample = line1[0]
 			sample2 = line2[0]
-			start = int(line2[2])
+			start = int(line1[2])
 
 			if sample != sample2:
 				continue
@@ -309,12 +310,13 @@ def catalogue_generator_single (lines, chrom, mutation_dict, mutation_types_tsb_
 			try:
 				dinuc_seq = "".join([tsb_ref[chrom_string[start-3]][1],"[",dinuc,"]",tsb_ref[chrom_string[start]][1]])
 				bias = tsb_ref[chrom_string[start-1]][0]
+
+
 			except:
 				print("The position is out of range. Skipping this mutation: " + chrom + " " + str(start) + " " + ref + " " + mut, file=out)
 				skipped_count += 1
 				continue
 			dinuc_seq_tsb = bias + ":" + dinuc_seq
-			dinuc_tsb = bias + ":" + dinuc
 
 			if sample not in dinucs:
 				dinucs[sample] = {}
@@ -325,14 +327,29 @@ def catalogue_generator_single (lines, chrom, mutation_dict, mutation_types_tsb_
 				for dinucl in  mutation_types_tsb_context:
 					dinucs_context_tsb[sample][dinucl]=0
 
-			if dinuc_seq_tsb in mutation_types_tsb_context:
-				dinucs_context_tsb[sample][dinuc_seq_tsb] += 1
+			if dinuc[:2] not in dinuc_tsb_ref:
+				dinuc_seq_tsb = 'Q' + dinuc_seq_tsb[1:]
+				strand = '0'
+
+				if dinuc_seq_tsb in mutation_types_tsb_context:
+					dinucs_context_tsb[sample][dinuc_seq_tsb] += 1
+
+				else:
+					dinuc_seq_tsb = "".join(["Q:",revcompl(dinuc_seq_tsb[-1]),"[",revcompl(dinuc_seq_tsb[4:6]),">",revcompl(dinuc_seq_tsb[7:9]),"]",revcompl(dinuc_seq_tsb[2])])
+					dinucs_context_tsb[sample][dinuc_seq_tsb] += 1
 
 			else:
-				strand = '-1'
-				dinuc_seq_tsb = "".join([revbias(dinuc_seq_tsb[0]),":",revcompl(dinuc_seq_tsb[-1]),"[",revcompl(dinuc_seq_tsb[4:6]),">",revcompl(dinuc_seq_tsb[7:9]),"]",revcompl(dinuc_seq_tsb[2])])
-				dinucs_context_tsb[sample][dinuc_seq_tsb] += 1
-			
+				if dinuc_seq_tsb in mutation_types_tsb_context:
+					dinucs_context_tsb[sample][dinuc_seq_tsb] += 1
+
+				else:
+					strand = '-1'
+					dinuc_seq_tsb = "".join([revbias(dinuc_seq_tsb[0]),":",revcompl(dinuc_seq_tsb[-1]),"[",revcompl(dinuc_seq_tsb[4:6]),">",revcompl(dinuc_seq_tsb[7:9]),"]",revcompl(dinuc_seq_tsb[2])])
+					dinucs_context_tsb[sample][dinuc_seq_tsb] += 1
+
+				
+		
+
 			if seqInfo:
 				print("\t".join([sample, chrom, str(start), dinuc_seq_tsb, strand]), file=seqOut_dinuc)
 
@@ -624,7 +641,7 @@ def catalogue_generator_INDEL_single (mutation_ID, lines, chrom, vcf_path, vcf_p
 	range_index = 0
 	tsb_abrev = ['T','U','B','N']
 	revcompl = lambda x: ''.join([{'A':'T','C':'G','G':'C','T':'A','N':'N'}[B] for B in x][::-1])
-
+	revbias = lambda x: ''.join([{'0':'0', '3':'3', '1':'2','2':'1','U':'T','T':'U','B':'B','N':'N'}[B] for B in x][::-1])
 	# Instantiates the remaining varibales/data structures
 	i = 0
 	chrom_string = None
@@ -737,23 +754,29 @@ def catalogue_generator_INDEL_single (mutation_ID, lines, chrom, vcf_path, vcf_p
 
 					# Saves the mutation type for the given variant
 					if len(ref) - len(mut) == len(ref)-1:
+						strand = '1'
 						mut_type = 'Del'
 						ref_base = ref[1]
 						if ref_base == 'G' or ref_base == 'A':
 							ref_base = revcompl(ref_base)
-						if ref_base == tsb_ref[chrom_string[start-1]][1]:
-							strand = '1'
-						else:
 							strand = '-1'
+							bias = revbias(bias)
+						#if ref_base == tsb_ref[chrom_string[start-1]][1]:
+						#	strand = '1'
+						#else:
+						#	strand = '-1'
 					elif len(mut) - len(ref) == len(mut)-1:
+						strand = '1'
 						mut_type = 'Ins'
 						mut_base = mut[1]
 						if mut_base == 'G' or mut_base == 'A':
 							mut_base = revcompl(mut_base)
-						if mut_base == tsb_ref[chrom_string[start-1]][1]:
-							strand = '1'
-						else:
 							strand = '-1'
+							bias = revbias(bias)
+						# if mut_base == tsb_ref[chrom_string[start-1]][1]:
+						# 	strand = '1'
+						# else:
+						# 	strand = '-1'
 
 					else:
 						mutation_ID['ID'].at['complex', sample] += 1
@@ -1187,7 +1210,7 @@ def catalogue_generator_INDEL_single (mutation_ID, lines, chrom, vcf_path, vcf_p
 		if functionFlag:
 			return(mutation_ID, skipped_count, total_analyzed)
 
-def exome_check (genome, exome_temp_file, output_matrix, project):
+def exome_check (genome, exome_temp_file, output_matrix, project, context, subcontext=None):
 	'''
 	Filters the variants for those present within the exome. 
 
@@ -1215,8 +1238,10 @@ def exome_check (genome, exome_temp_file, output_matrix, project):
 
 	exome_file = ref_dir + "/references/chromosomes/exome/" + genome + "/" + genome + "_exome.interval_list"
 
-	exome_output_path = output_matrix + "vcf_files/SNV/"
-	exome_output = exome_output_path + project + "_exome.vcf"
+	exome_output_path = output_matrix + "vcf_files/" + context + "/"
+	if context == 'INDEL':
+		context = subcontext
+	exome_output = exome_output_path + project + "_" + context + "_exome.vcf"
 	if not os.path.exists(exome_output_path):
 		os.makedirs(exome_output_path)
 
@@ -1332,7 +1357,7 @@ def exome_check (genome, exome_temp_file, output_matrix, project):
 
 	return(mutation_dict, samples)
 
-def panel_check (genome, bed_temp_file, output_matrix, bed_file_path, project):
+def panel_check (genome, bed_temp_file, output_matrix, bed_file_path, project, context, subcontext=None):
 	'''
 	Filters the variants for those present within the exome. 
 
@@ -1363,8 +1388,12 @@ def panel_check (genome, bed_temp_file, output_matrix, bed_file_path, project):
 	udpate_chrom = False
 	current_dir = os.path.realpath(__file__)
 	panel_file = bed_file_path
-	panel_output_path = output_matrix + "vcf_files/SNV/"
-	panel_output = panel_output_path + project + "_panel.vcf"
+	panel_output_path = output_matrix + "vcf_files/" + context + "/"
+
+	if context == 'INDEL':
+		context = subcontext
+	panel_output = panel_output_path + project + "_" + context + "_panel.vcf"
+	
 	if not os.path.exists(panel_output_path):
 		os.makedirs(panel_output_path)
 
@@ -1949,8 +1978,8 @@ def matrix_generator_DINUC (output_matrix, samples, bias_sort, all_dinucs, all_m
 	revcompl = lambda x: ''.join([{'A':'T','C':'G','G':'C','T':'A','N':'N'}[B] for B in x][::-1])
 	revbias = lambda x: ''.join([{'0':'0', '3':'3', '1':'2','2':'1','U':'T','T':'U','B':'B','N':'N'}[B] for B in x][::-1])
 
-	contexts = ['78', '312', '1248']
-	mut_count_all = {'78':{}, '312':{}, '1248':{}}
+	contexts = ['78', '188', '1248']
+	mut_count_all = {'78':{}, '188':{}, '1248':{}}
 
 	if not any(mut_4992):
 		return()
@@ -1968,12 +1997,12 @@ def matrix_generator_DINUC (output_matrix, samples, bias_sort, all_dinucs, all_m
 	mut_4992 = mut_4992.astype(int)
 
 	mut_count_all['78'] = mut_4992.groupby(mut_4992.index.str[4:9]).sum()
-	mut_count_all['312'] = mut_4992.groupby(mut_4992.index.str[0:2] + mut_4992.index.str[4:9]).sum()
+	mut_count_all['188'] = mut_4992.groupby(mut_4992.index.str[0:2] + mut_4992.index.str[4:9]).sum()
 	mut_count_all['1248'] = mut_4992.groupby(mut_4992.index.str[2:9]).sum()
 
 
 	mut_count_all['78'].index.name = 'MutationType'
-	mut_count_all['312'].index.name = 'MutationType'
+	mut_count_all['188'].index.name = 'MutationType'
 	mut_count_all['1248'].index.name = 'MutationType'
 
 	output_matrix_DINUC = output_matrix + "DINUC/"
@@ -1983,7 +2012,7 @@ def matrix_generator_DINUC (output_matrix, samples, bias_sort, all_dinucs, all_m
 	current_dir = os.getcwd()
 	ref_dir = re.sub('\/scripts$', '', current_dir)
 
-	file_prefix = project + ".DBS4992" 
+	file_prefix = project + ".DBS2976" 
 	if exome:
 		output_file_matrix = output_matrix_DINUC + file_prefix + ".exome"
 	else:
@@ -2001,9 +2030,9 @@ def matrix_generator_DINUC (output_matrix, samples, bias_sort, all_dinucs, all_m
 	types = sorted(types, key=lambda val: (bias_sort[val[0]], val[2:]))
 	mut_4992 = mut_4992.reindex(types)
 
-	types = list(mut_count_all['312'].index)
+	types = list(mut_count_all['188'].index)
 	types = sorted(types, key=lambda val: (bias_sort[val[0]], val[2:]))
-	mut_count_all['312'] = mut_count_all['312'].reindex(types)
+	mut_count_all['188'] = mut_count_all['188'].reindex(types)
 
 
 	mut_4992.to_csv(output_file_matrix, header=True, sep='\t')
@@ -2028,7 +2057,7 @@ def matrix_generator_DINUC (output_matrix, samples, bias_sort, all_dinucs, all_m
 			if not os.path.exists(output_path):
 				os.mkdir(output_path)
 			try:
-				if cont == '78' or cont == '312':
+				if cont == '78' or cont == '188':
 					sigPlt.plotDBS(output_file_matrix, output_path, project, cont, False)
 			except:
 				pass

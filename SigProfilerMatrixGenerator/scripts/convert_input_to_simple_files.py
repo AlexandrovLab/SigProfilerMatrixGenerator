@@ -145,7 +145,101 @@ def convertVCF (project, vcf_path, genome, output_path, ncbi_chrom, log_file):
 							print(chrom + " is not supported. You will need to download that chromosome and create the required files. Continuing with the matrix generation...", file=out)
 							out.flush()
 
+					elif len(ref) == 2 and len(mut) == 2 and "-" not in ref and "-" not in mut:
+						ref_1 = ref[0]
+						ref_2 = ref[1]
+						mut_1 = mut[0]
+						mut_2 = mut[1]
 
+						# Check first base combination
+						if ref_1 not in 'ACGT-':
+							print("The ref base is not recognized. Skipping this mutation: " + chrom + " " + str(start) + " " + ref + " " + mut, file=out)
+							out.flush()
+							skipped_count += 1
+							continue
+						
+						if mut_1 not in 'ACGT-':
+							print("The mutation base is not recognized. Skipping this mutation: " + chrom + " " + str(start) + " " + ref + " " + mut, file=out)
+							out.flush()
+							skipped_count += 1
+							continue
+						
+						if ref_1 == mut_1:
+							print("The ref base appears to match the mutated base. Skipping this mutation: " + chrom + " " + str(start) + " " + ref + " " + mut, file=out)
+							out.flush()
+							skipped_count += 1
+							continue
+
+						if line == prev_line:
+							print("There appears to be a duplicate single base substitution. Skipping this mutation: " + chrom + " " + str(start) + " " + ref + " " + mut, file=out)
+							out.flush()
+							skipped_count += 1
+							continue
+						# Check second base combination
+						if ref_2 not in 'ACGT-':
+							print("The ref base is not recognized. Skipping this mutation: " + chrom + " " + str(start) + " " + ref + " " + mut, file=out)
+							out.flush()
+							skipped_count += 1
+							continue
+						
+						if mut_2 not in 'ACGT-':
+							print("The mutation base is not recognized. Skipping this mutation: " + chrom + " " + str(start) + " " + ref + " " + mut, file=out)
+							out.flush()
+							skipped_count += 1
+							continue
+						
+						if ref_2 == mut_2:
+							print("The ref base appears to match the mutated base. Skipping this mutation: " + chrom + " " + str(start) + " " + ref + " " + mut, file=out)
+							out.flush()
+							skipped_count += 1
+							continue
+
+						if line == prev_line:
+							print("There appears to be a duplicate single base substitution. Skipping this mutation: " + chrom + " " + str(start) + " " + ref + " " + mut, file=out)
+							out.flush()
+							skipped_count += 1
+							continue
+
+						if first_SNV:
+							if not os.path.exists(output_path + "SNV/"):
+								os.mkdir(output_path + 'SNV/')
+							outputFile_X = open(output_path + "SNV/X_" + project + ".genome", "w")
+							outputFile_Y = open(output_path + "SNV/Y_" + project + ".genome", "w")
+							outputFile_1 = open(output_path + "SNV/1_" + project + ".genome", "w")
+							outputFile_2 = open(output_path + "SNV/2_" + project + ".genome", "w")
+							outputFile_3 = open(output_path + "SNV/3_" + project + ".genome", "w")
+							outputFile_4 = open(output_path + "SNV/4_" + project + ".genome", "w")
+							outputFile_5 = open(output_path + "SNV/5_" + project + ".genome", "w")
+							outputFile_6 = open(output_path + "SNV/6_" + project + ".genome", "w")
+							outputFile_7 = open(output_path + "SNV/7_" + project + ".genome", "w")
+							outputFile_8 = open(output_path + "SNV/8_" + project + ".genome", "w")
+							outputFile_9 = open(output_path + "SNV/9_" + project + ".genome", "w")
+							outputFile_10 = open(output_path + "SNV/10_" + project + ".genome", "w")
+							outputFile_11 = open(output_path + "SNV/11_" + project + ".genome", "w")
+							outputFile_12 = open(output_path + "SNV/12_" + project + ".genome", "w")
+							outputFile_13 = open(output_path + "SNV/13_" + project + ".genome", "w")
+							outputFile_14 = open(output_path + "SNV/14_" + project + ".genome", "w")
+							outputFile_15 = open(output_path + "SNV/15_" + project + ".genome", "w")
+							outputFile_16 = open(output_path + "SNV/16_" + project + ".genome", "w")
+							outputFile_17 = open(output_path + "SNV/17_" + project + ".genome", "w")
+							outputFile_18 = open(output_path + "SNV/18_" + project + ".genome", "w")
+							outputFile_19 = open(output_path + "SNV/19_" + project + ".genome", "w")
+							outputFile_20 = open(output_path + "SNV/20_" + project + ".genome", "w")
+							outputFile_21 = open(output_path + "SNV/21_" + project + ".genome", "w")
+							outputFile_22 = open(output_path + "SNV/22_" + project + ".genome", "w")
+
+							outFiles = {'X': outputFile_X, 'Y':outputFile_Y, '1':outputFile_1, '2':outputFile_2, '3':outputFile_3, '4':outputFile_4,
+										'5':outputFile_5, '6':outputFile_6, '7':outputFile_7, '8':outputFile_8, '9':outputFile_9, '10':outputFile_10,
+										'11':outputFile_11, '12':outputFile_12, '13':outputFile_13, '14':outputFile_14, '15':outputFile_15, '16':outputFile_16,
+										'17':outputFile_17, '18':outputFile_18, '19':outputFile_19, '20':outputFile_20, '21':outputFile_21, '22':outputFile_22}
+							first_SNV = False
+
+						if chrom in outFiles:
+							print("\t".join([sample, chrom, start, ref_1, mut_1]), file=outFiles[chrom])
+							print("\t".join([sample, chrom, str(int(start)+1), ref_2, mut_2]), file=outFiles[chrom])
+						else:
+							print(chrom + " is not supported. You will need to download that chromosome and create the required files. Continuing with the matrix generation...", file=out)
+							out.flush()
 
 					# Saves INDEL mutations into an INDEL simple text file
 					else:
@@ -345,7 +439,101 @@ def convertTxt (project, vcf_path, genome, output_path, ncbi_chrom, log_file):
 					else:
 						print(chrom + " is not supported. You will need to download that chromosome and create the required files. Continuing with the matrix generation...", file=out)
 						out.flush()
+				elif len(ref) == 2 and len(mut) == 2 and "-" not in ref and "-" not in mut:
+					ref_1 = ref[0]
+					ref_2 = ref[1]
+					mut_1 = mut[0]
+					mut_2 = mut[1]
 
+					# Check first base combination
+					if ref_1 not in 'ACGT-':
+						print("The ref base is not recognized. Skipping this mutation: " + chrom + " " + str(start) + " " + ref + " " + mut, file=out)
+						out.flush()
+						skipped_count += 1
+						continue
+					
+					if mut_1 not in 'ACGT-':
+						print("The mutation base is not recognized. Skipping this mutation: " + chrom + " " + str(start) + " " + ref + " " + mut, file=out)
+						out.flush()
+						skipped_count += 1
+						continue
+					
+					if ref_1 == mut_1:
+						print("The ref base appears to match the mutated base. Skipping this mutation: " + chrom + " " + str(start) + " " + ref + " " + mut, file=out)
+						out.flush()
+						skipped_count += 1
+						continue
+
+					if line == prev_line:
+						print("There appears to be a duplicate single base substitution. Skipping this mutation: " + chrom + " " + str(start) + " " + ref + " " + mut, file=out)
+						out.flush()
+						skipped_count += 1
+						continue
+					# Check second base combination
+					if ref_2 not in 'ACGT-':
+						print("The ref base is not recognized. Skipping this mutation: " + chrom + " " + str(start) + " " + ref + " " + mut, file=out)
+						out.flush()
+						skipped_count += 1
+						continue
+					
+					if mut_2 not in 'ACGT-':
+						print("The mutation base is not recognized. Skipping this mutation: " + chrom + " " + str(start) + " " + ref + " " + mut, file=out)
+						out.flush()
+						skipped_count += 1
+						continue
+					
+					if ref_2 == mut_2:
+						print("The ref base appears to match the mutated base. Skipping this mutation: " + chrom + " " + str(start) + " " + ref + " " + mut, file=out)
+						out.flush()
+						skipped_count += 1
+						continue
+
+					if line == prev_line:
+						print("There appears to be a duplicate single base substitution. Skipping this mutation: " + chrom + " " + str(start) + " " + ref + " " + mut, file=out)
+						out.flush()
+						skipped_count += 1
+						continue
+
+					if first_SNV:
+						if not os.path.exists(output_path + "SNV/"):
+							os.mkdir(output_path + 'SNV/')
+						outputFile_X = open(output_path + "SNV/X_" + project + ".genome", "w")
+						outputFile_Y = open(output_path + "SNV/Y_" + project + ".genome", "w")
+						outputFile_1 = open(output_path + "SNV/1_" + project + ".genome", "w")
+						outputFile_2 = open(output_path + "SNV/2_" + project + ".genome", "w")
+						outputFile_3 = open(output_path + "SNV/3_" + project + ".genome", "w")
+						outputFile_4 = open(output_path + "SNV/4_" + project + ".genome", "w")
+						outputFile_5 = open(output_path + "SNV/5_" + project + ".genome", "w")
+						outputFile_6 = open(output_path + "SNV/6_" + project + ".genome", "w")
+						outputFile_7 = open(output_path + "SNV/7_" + project + ".genome", "w")
+						outputFile_8 = open(output_path + "SNV/8_" + project + ".genome", "w")
+						outputFile_9 = open(output_path + "SNV/9_" + project + ".genome", "w")
+						outputFile_10 = open(output_path + "SNV/10_" + project + ".genome", "w")
+						outputFile_11 = open(output_path + "SNV/11_" + project + ".genome", "w")
+						outputFile_12 = open(output_path + "SNV/12_" + project + ".genome", "w")
+						outputFile_13 = open(output_path + "SNV/13_" + project + ".genome", "w")
+						outputFile_14 = open(output_path + "SNV/14_" + project + ".genome", "w")
+						outputFile_15 = open(output_path + "SNV/15_" + project + ".genome", "w")
+						outputFile_16 = open(output_path + "SNV/16_" + project + ".genome", "w")
+						outputFile_17 = open(output_path + "SNV/17_" + project + ".genome", "w")
+						outputFile_18 = open(output_path + "SNV/18_" + project + ".genome", "w")
+						outputFile_19 = open(output_path + "SNV/19_" + project + ".genome", "w")
+						outputFile_20 = open(output_path + "SNV/20_" + project + ".genome", "w")
+						outputFile_21 = open(output_path + "SNV/21_" + project + ".genome", "w")
+						outputFile_22 = open(output_path + "SNV/22_" + project + ".genome", "w")
+
+						outFiles = {'X': outputFile_X, 'Y':outputFile_Y, '1':outputFile_1, '2':outputFile_2, '3':outputFile_3, '4':outputFile_4,
+									'5':outputFile_5, '6':outputFile_6, '7':outputFile_7, '8':outputFile_8, '9':outputFile_9, '10':outputFile_10,
+									'11':outputFile_11, '12':outputFile_12, '13':outputFile_13, '14':outputFile_14, '15':outputFile_15, '16':outputFile_16,
+									'17':outputFile_17, '18':outputFile_18, '19':outputFile_19, '20':outputFile_20, '21':outputFile_21, '22':outputFile_22}
+						first_SNV = False
+
+					if chrom in outFiles:
+						print("\t".join([sample, chrom, start, ref_1, mut_1]), file=outFiles[chrom])
+						print("\t".join([sample, chrom, str(int(start)+1), ref_2, mut_2]), file=outFiles[chrom])
+					else:
+						print(chrom + " is not supported. You will need to download that chromosome and create the required files. Continuing with the matrix generation...", file=out)
+						out.flush()
 				
 				# Saves INDEL mutations into an INDEL simple text file
 				else:
@@ -448,11 +636,9 @@ def convertMAF (project, vcf_path, genome, output_path, ncbi_chrom, log_file):
 		if file == '.DS_Store':
 			continue
 		name = file.split(".")
-		sample = name[0]
-		if sample not in samples:
-			samples.append(sample)
 		with open (vcf_path + file) as f:
 			for lines in f:
+				next(f)
 				try:
 					line = lines.strip().split('\t')
 					genome = line[3]
@@ -465,7 +651,10 @@ def convertMAF (project, vcf_path, genome, output_path, ncbi_chrom, log_file):
 					start = line[5]
 					end = line[6]
 					ref = line[10]
-					mut = line[47]
+					mut = line[12]
+					sample = line[15]
+					if sample not in samples:
+						samples.append(sample)
 					int(start)
 					int(end)
 
@@ -543,6 +732,101 @@ def convertMAF (project, vcf_path, genome, output_path, ncbi_chrom, log_file):
 						print(chrom + " is not supported. You will need to download that chromosome and create the required files. Continuing with the matrix generation...", file=out)
 						out.flush()
 
+				elif len(ref) == 2 and len(mut) == 2 and "-" not in ref and "-" not in mut:
+					ref_1 = ref[0]
+					ref_2 = ref[1]
+					mut_1 = mut[0]
+					mut_2 = mut[1]
+
+					# Check first base combination
+					if ref_1 not in 'ACGT-':
+						print("The ref base is not recognized. Skipping this mutation: " + chrom + " " + str(start) + " " + ref + " " + mut, file=out)
+						out.flush()
+						skipped_count += 1
+						continue
+					
+					if mut_1 not in 'ACGT-':
+						print("The mutation base is not recognized. Skipping this mutation: " + chrom + " " + str(start) + " " + ref + " " + mut, file=out)
+						out.flush()
+						skipped_count += 1
+						continue
+					
+					if ref_1 == mut_1:
+						print("The ref base appears to match the mutated base. Skipping this mutation: " + chrom + " " + str(start) + " " + ref + " " + mut, file=out)
+						out.flush()
+						skipped_count += 1
+						continue
+
+					if line == prev_line:
+						print("There appears to be a duplicate single base substitution. Skipping this mutation: " + chrom + " " + str(start) + " " + ref + " " + mut, file=out)
+						out.flush()
+						skipped_count += 1
+						continue
+					# Check second base combination
+					if ref_2 not in 'ACGT-':
+						print("The ref base is not recognized. Skipping this mutation: " + chrom + " " + str(start) + " " + ref + " " + mut, file=out)
+						out.flush()
+						skipped_count += 1
+						continue
+					
+					if mut_2 not in 'ACGT-':
+						print("The mutation base is not recognized. Skipping this mutation: " + chrom + " " + str(start) + " " + ref + " " + mut, file=out)
+						out.flush()
+						skipped_count += 1
+						continue
+					
+					if ref_2 == mut_2:
+						print("The ref base appears to match the mutated base. Skipping this mutation: " + chrom + " " + str(start) + " " + ref + " " + mut, file=out)
+						out.flush()
+						skipped_count += 1
+						continue
+
+					if line == prev_line:
+						print("There appears to be a duplicate single base substitution. Skipping this mutation: " + chrom + " " + str(start) + " " + ref + " " + mut, file=out)
+						out.flush()
+						skipped_count += 1
+						continue
+
+					if first_SNV:
+						if not os.path.exists(output_path + "SNV/"):
+							os.mkdir(output_path + 'SNV/')
+						outputFile_X = open(output_path + "SNV/X_" + project + ".genome", "w")
+						outputFile_Y = open(output_path + "SNV/Y_" + project + ".genome", "w")
+						outputFile_1 = open(output_path + "SNV/1_" + project + ".genome", "w")
+						outputFile_2 = open(output_path + "SNV/2_" + project + ".genome", "w")
+						outputFile_3 = open(output_path + "SNV/3_" + project + ".genome", "w")
+						outputFile_4 = open(output_path + "SNV/4_" + project + ".genome", "w")
+						outputFile_5 = open(output_path + "SNV/5_" + project + ".genome", "w")
+						outputFile_6 = open(output_path + "SNV/6_" + project + ".genome", "w")
+						outputFile_7 = open(output_path + "SNV/7_" + project + ".genome", "w")
+						outputFile_8 = open(output_path + "SNV/8_" + project + ".genome", "w")
+						outputFile_9 = open(output_path + "SNV/9_" + project + ".genome", "w")
+						outputFile_10 = open(output_path + "SNV/10_" + project + ".genome", "w")
+						outputFile_11 = open(output_path + "SNV/11_" + project + ".genome", "w")
+						outputFile_12 = open(output_path + "SNV/12_" + project + ".genome", "w")
+						outputFile_13 = open(output_path + "SNV/13_" + project + ".genome", "w")
+						outputFile_14 = open(output_path + "SNV/14_" + project + ".genome", "w")
+						outputFile_15 = open(output_path + "SNV/15_" + project + ".genome", "w")
+						outputFile_16 = open(output_path + "SNV/16_" + project + ".genome", "w")
+						outputFile_17 = open(output_path + "SNV/17_" + project + ".genome", "w")
+						outputFile_18 = open(output_path + "SNV/18_" + project + ".genome", "w")
+						outputFile_19 = open(output_path + "SNV/19_" + project + ".genome", "w")
+						outputFile_20 = open(output_path + "SNV/20_" + project + ".genome", "w")
+						outputFile_21 = open(output_path + "SNV/21_" + project + ".genome", "w")
+						outputFile_22 = open(output_path + "SNV/22_" + project + ".genome", "w")
+
+						outFiles = {'X': outputFile_X, 'Y':outputFile_Y, '1':outputFile_1, '2':outputFile_2, '3':outputFile_3, '4':outputFile_4,
+									'5':outputFile_5, '6':outputFile_6, '7':outputFile_7, '8':outputFile_8, '9':outputFile_9, '10':outputFile_10,
+									'11':outputFile_11, '12':outputFile_12, '13':outputFile_13, '14':outputFile_14, '15':outputFile_15, '16':outputFile_16,
+									'17':outputFile_17, '18':outputFile_18, '19':outputFile_19, '20':outputFile_20, '21':outputFile_21, '22':outputFile_22}
+						first_SNV = False
+
+					if chrom in outFiles:
+						print("\t".join([sample, chrom, start, ref_1, mut_1]), file=outFiles[chrom])
+						print("\t".join([sample, chrom, str(int(start)+1), ref_2, mut_2]), file=outFiles[chrom])
+					else:
+						print(chrom + " is not supported. You will need to download that chromosome and create the required files. Continuing with the matrix generation...", file=out)
+						out.flush()
 
 
 				# Saves INDEL mutations into an INDEL simple text file				
@@ -747,7 +1031,101 @@ def convertICGC (project, vcf_path, genome, output_path, ncbi_chrom, log_file):
 						print(chrom + " is not supported. You will need to download that chromosome and create the required files. Continuing with the matrix generation...", file=out)
 						out.flush()
 
+				elif len(ref) == 2 and len(mut) == 2 and "-" not in ref and "-" not in mut:
+					ref_1 = ref[0]
+					ref_2 = ref[1]
+					mut_1 = mut[0]
+					mut_2 = mut[1]
 
+					# Check first base combination
+					if ref_1 not in 'ACGT-':
+						print("The ref base is not recognized. Skipping this mutation: " + chrom + " " + str(start) + " " + ref + " " + mut, file=out)
+						out.flush()
+						skipped_count += 1
+						continue
+					
+					if mut_1 not in 'ACGT-':
+						print("The mutation base is not recognized. Skipping this mutation: " + chrom + " " + str(start) + " " + ref + " " + mut, file=out)
+						out.flush()
+						skipped_count += 1
+						continue
+					
+					if ref_1 == mut_1:
+						print("The ref base appears to match the mutated base. Skipping this mutation: " + chrom + " " + str(start) + " " + ref + " " + mut, file=out)
+						out.flush()
+						skipped_count += 1
+						continue
+
+					if line == prev_line:
+						print("There appears to be a duplicate single base substitution. Skipping this mutation: " + chrom + " " + str(start) + " " + ref + " " + mut, file=out)
+						out.flush()
+						skipped_count += 1
+						continue
+					# Check second base combination
+					if ref_2 not in 'ACGT-':
+						print("The ref base is not recognized. Skipping this mutation: " + chrom + " " + str(start) + " " + ref + " " + mut, file=out)
+						out.flush()
+						skipped_count += 1
+						continue
+					
+					if mut_2 not in 'ACGT-':
+						print("The mutation base is not recognized. Skipping this mutation: " + chrom + " " + str(start) + " " + ref + " " + mut, file=out)
+						out.flush()
+						skipped_count += 1
+						continue
+					
+					if ref_2 == mut_2:
+						print("The ref base appears to match the mutated base. Skipping this mutation: " + chrom + " " + str(start) + " " + ref + " " + mut, file=out)
+						out.flush()
+						skipped_count += 1
+						continue
+
+					if line == prev_line:
+						print("There appears to be a duplicate single base substitution. Skipping this mutation: " + chrom + " " + str(start) + " " + ref + " " + mut, file=out)
+						out.flush()
+						skipped_count += 1
+						continue
+
+					if first_SNV:
+						if not os.path.exists(output_path + "SNV/"):
+							os.mkdir(output_path + 'SNV/')
+						outputFile_X = open(output_path + "SNV/X_" + project + ".genome", "w")
+						outputFile_Y = open(output_path + "SNV/Y_" + project + ".genome", "w")
+						outputFile_1 = open(output_path + "SNV/1_" + project + ".genome", "w")
+						outputFile_2 = open(output_path + "SNV/2_" + project + ".genome", "w")
+						outputFile_3 = open(output_path + "SNV/3_" + project + ".genome", "w")
+						outputFile_4 = open(output_path + "SNV/4_" + project + ".genome", "w")
+						outputFile_5 = open(output_path + "SNV/5_" + project + ".genome", "w")
+						outputFile_6 = open(output_path + "SNV/6_" + project + ".genome", "w")
+						outputFile_7 = open(output_path + "SNV/7_" + project + ".genome", "w")
+						outputFile_8 = open(output_path + "SNV/8_" + project + ".genome", "w")
+						outputFile_9 = open(output_path + "SNV/9_" + project + ".genome", "w")
+						outputFile_10 = open(output_path + "SNV/10_" + project + ".genome", "w")
+						outputFile_11 = open(output_path + "SNV/11_" + project + ".genome", "w")
+						outputFile_12 = open(output_path + "SNV/12_" + project + ".genome", "w")
+						outputFile_13 = open(output_path + "SNV/13_" + project + ".genome", "w")
+						outputFile_14 = open(output_path + "SNV/14_" + project + ".genome", "w")
+						outputFile_15 = open(output_path + "SNV/15_" + project + ".genome", "w")
+						outputFile_16 = open(output_path + "SNV/16_" + project + ".genome", "w")
+						outputFile_17 = open(output_path + "SNV/17_" + project + ".genome", "w")
+						outputFile_18 = open(output_path + "SNV/18_" + project + ".genome", "w")
+						outputFile_19 = open(output_path + "SNV/19_" + project + ".genome", "w")
+						outputFile_20 = open(output_path + "SNV/20_" + project + ".genome", "w")
+						outputFile_21 = open(output_path + "SNV/21_" + project + ".genome", "w")
+						outputFile_22 = open(output_path + "SNV/22_" + project + ".genome", "w")
+
+						outFiles = {'X': outputFile_X, 'Y':outputFile_Y, '1':outputFile_1, '2':outputFile_2, '3':outputFile_3, '4':outputFile_4,
+									'5':outputFile_5, '6':outputFile_6, '7':outputFile_7, '8':outputFile_8, '9':outputFile_9, '10':outputFile_10,
+									'11':outputFile_11, '12':outputFile_12, '13':outputFile_13, '14':outputFile_14, '15':outputFile_15, '16':outputFile_16,
+									'17':outputFile_17, '18':outputFile_18, '19':outputFile_19, '20':outputFile_20, '21':outputFile_21, '22':outputFile_22}
+						first_SNV = False
+
+					if chrom in outFiles:
+						print("\t".join([sample, chrom, start, ref_1, mut_1]), file=outFiles[chrom])
+						print("\t".join([sample, chrom, str(int(start)+1), ref_2, mut_2]), file=outFiles[chrom])
+					else:
+						print(chrom + " is not supported. You will need to download that chromosome and create the required files. Continuing with the matrix generation...", file=out)
+						out.flush()
 				
 				# Saves INDEL mutations into an INDEL simple text file				
 				else:
