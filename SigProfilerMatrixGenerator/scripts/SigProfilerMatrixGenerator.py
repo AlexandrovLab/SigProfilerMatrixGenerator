@@ -308,8 +308,11 @@ def catalogue_generator_single (lines, chrom, mutation_dict, mutation_types_tsb_
 				continue
 
 			try:
-				dinuc_seq = "".join([tsb_ref[chrom_string[start-3]][1],"[",dinuc,"]",tsb_ref[chrom_string[start]][1]])
+				dinuc_seq = "".join([tsb_ref[chrom_string[start-2]][1],"[",dinuc,"]",tsb_ref[chrom_string[start+1]][1]])
 				bias = tsb_ref[chrom_string[start-1]][0]
+				if "N" in dinuc_seq:
+					continue
+
 
 
 			except:
