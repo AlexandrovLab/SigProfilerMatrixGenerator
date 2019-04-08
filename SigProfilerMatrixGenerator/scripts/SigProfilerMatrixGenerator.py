@@ -232,7 +232,7 @@ def catalogue_generator_single (lines, chrom, mutation_dict, mutation_types_tsb_
 
 	'''
 	out = open(log_file, 'a')
-
+	mnv = 5
 	# Small functions to provide reverse complements of TSB and sequence info:
 	revcompl = lambda x: ''.join([{'A':'T','C':'G','G':'C','T':'A','N':'N','[':'[',']':']','>':'>'}[B] for B in x][::-1])
 	revbias = lambda x: ''.join([{'0':'0', '3':'3', '1':'2','2':'1','U':'T','T':'U','B':'B','N':'N'}[B] for B in x][::-1])
@@ -274,22 +274,97 @@ def catalogue_generator_single (lines, chrom, mutation_dict, mutation_types_tsb_
 
 	dinuc_tsb_ref = ['CC', 'CT', 'TC', 'TT', 'AA', 'AG', 'GA', 'GG']
 	chrom_start = chrom
+
 	# Opens the input vcf file
 	with open (chrom_path + chrom_start + ".txt", "rb") as f2:
 		chrom_string = f2.read()
 
 		dinuc_sub = [int(y[2])-int(x[2]) for x,y in zip(lines, lines[1:])]
-		dinuc_index = [i for i, x in enumerate(dinuc_sub) if x == 1]
+		dinuc_index_temp = [i for i, x in enumerate(dinuc_sub) if x == 1]
+		mnv_index_temp = [i for i, x in enumerate(dinuc_sub) if x <= mnv]
+
 
 		if seqInfo:
 			seqOut_path = output_matrix + "vcf_files/SNV/"
 			seqOut_path_dinuc = output_matrix + "vcf_files/DINUC/"
+			seqOut_path_mns = output_matrix + "vcf_files/MNS/"
 			if not os.path.exists(seqOut_path):
 				os.makedirs(seqOut_path)
 			if not os.path.exists(seqOut_path_dinuc):
-				os.makedirs(seqOut_path_dinuc)			
+				os.makedirs(seqOut_path_dinuc)	
+			if not os.path.exists(seqOut_path_mns):
+				os.makedirs(seqOut_path_mns)		
 			seqOut = open(seqOut_path + chrom_start + "_seqinfo.txt", "w")
 			seqOut_dinuc = open(seqOut_path_dinuc + chrom_start + "_seqinfo.txt", "w")
+			seqOut_mns = open(seqOut_path_mns + chrom_start + "_seqinfo.txt", "w")
+
+			mnv_index = []
+			if len(mnv_index_temp) > 1:
+				if mnv_index_temp[0] + 1 == mnv_index_temp[1] or mnv_index_temp[0] not in dinuc_index_temp:
+					mnv_index.append(mnv_index_temp[0])
+				if mnv_index_temp[-1] -1 == mnv_index_temp[-2] or mnv_index_temp[-1] not in dinuc_index_temp:
+					mnv_index.append(mnv_index_temp[-1])		
+				for i in range (1, len(mnv_index_temp)-1, 1):
+					if mnv_index_temp[i] + 1 == mnv_index_temp[i+1] or mnv_index_temp[i]-1 == mnv_index_temp[i-1] or mnv_index_temp[i] not in dinuc_index_temp:
+						mnv_index.append(mnv_index_temp[i])
+
+
+				dinuc_index = [x for x in dinuc_index_temp if x not in mnv_index]
+
+			else:
+				dinuc_index = dinuc_index_temp
+				mnv_index = [x for x in mnv_index_temp if x not in dinuc_index]
+
+			if mnv_index:
+				i = 0
+				mnv_seq = ''
+				mut_seq = ''
+				save_start = None
+				change_start = True
+				while i < len(mnv_index):
+					line1 = lines[mnv_index[i]]
+					line2 = lines[mnv_index[i]+1]
+					start1 = int(line1[2])
+					start2 = int(line2[2])
+					previous_ref = line1[3]
+					ref = line2[3]
+					previous_mut = line1[4]
+					mut = line2[4]
+					sample = line1[0]
+					sample2 = line2[0]
+
+					if change_start:
+						save_start = start1
+						change_start = False
+					mnv_seq += previous_ref
+					mut_seq += previous_mut
+
+					if sample != sample2:
+						# if mnv_seq != '':
+						# 	print('\t'.join([sample, chrom, str(save_start), mnv_seq + ">" + mut_seq]), file=seqOut_mns)
+						mnv_seq = ''
+						mut_seq = ''
+					else:						
+						for l in range(start1+1, start2, 1):
+							mnv_seq += tsb_ref[chrom_string[l-1]][1]
+							mut_seq += tsb_ref[chrom_string[l-1]][1]
+
+						if i < len(mnv_index) -1 :
+							if mnv_index[i]+1 != mnv_index[i+1]:
+								mnv_seq += tsb_ref[chrom_string[start2-1]][1]
+								mut_seq += mut
+								print('\t'.join([sample, chrom, str(save_start), mnv_seq + ">" + mut_seq]), file=seqOut_mns)
+								mnv_seq = ''
+								mut_seq = ''
+								change_start = True
+						elif i == len(mnv_index)-1:
+							mnv_seq += tsb_ref[chrom_string[start2-1]][1]
+							mut_seq += mut
+							print('\t'.join([sample, chrom, str(save_start), mnv_seq + ">" + mut_seq]), file=seqOut_mns)
+					i += 1
+
+		else:
+			dinuc_index = dinuc_index_temp
 
 		for x in dinuc_index:
 			strand = '1'
@@ -311,14 +386,16 @@ def catalogue_generator_single (lines, chrom, mutation_dict, mutation_types_tsb_
 				dinuc_seq = "".join([tsb_ref[chrom_string[start-2]][1],"[",dinuc,"]",tsb_ref[chrom_string[start+1]][1]])
 				bias = tsb_ref[chrom_string[start-1]][0]
 				if "N" in dinuc_seq:
+					print("The position is out of range. Skipping this mutation: " + chrom + " " + str(start) + " " + ref + " " + mut, file=out)
+					skipped_count += 1
 					continue
-
 
 
 			except:
 				print("The position is out of range. Skipping this mutation: " + chrom + " " + str(start) + " " + ref + " " + mut, file=out)
 				skipped_count += 1
 				continue
+
 			dinuc_seq_tsb = bias + ":" + dinuc_seq
 
 			if sample not in dinucs:
@@ -1307,7 +1384,7 @@ def exome_check (genome, exome_temp_file, output_matrix, project, context, subco
 				except:
 					break
 				else:
-					line2 = lines2.strip().split('\t')
+					line2 = lines2.strip().split()
 					chrom_ref = line2[0]
 					if len(chrom_ref) > 2:
 						chrom_ref = chrom_ref[3:]
@@ -1981,8 +2058,8 @@ def matrix_generator_DINUC (output_matrix, samples, bias_sort, all_dinucs, all_m
 	revcompl = lambda x: ''.join([{'A':'T','C':'G','G':'C','T':'A','N':'N'}[B] for B in x][::-1])
 	revbias = lambda x: ''.join([{'0':'0', '3':'3', '1':'2','2':'1','U':'T','T':'U','B':'B','N':'N'}[B] for B in x][::-1])
 
-	contexts = ['78', '188', '1248']
-	mut_count_all = {'78':{}, '188':{}, '1248':{}}
+	contexts = ['78', '186', '1248']
+	mut_count_all = {'78':{}, '186':{}, '1248':{}}
 
 	if not any(mut_4992):
 		return()
@@ -2000,12 +2077,12 @@ def matrix_generator_DINUC (output_matrix, samples, bias_sort, all_dinucs, all_m
 	mut_4992 = mut_4992.astype(int)
 
 	mut_count_all['78'] = mut_4992.groupby(mut_4992.index.str[4:9]).sum()
-	mut_count_all['188'] = mut_4992.groupby(mut_4992.index.str[0:2] + mut_4992.index.str[4:9]).sum()
+	mut_count_all['186'] = mut_4992.groupby(mut_4992.index.str[0:2] + mut_4992.index.str[4:9]).sum()
 	mut_count_all['1248'] = mut_4992.groupby(mut_4992.index.str[2:9]).sum()
 
 
 	mut_count_all['78'].index.name = 'MutationType'
-	mut_count_all['188'].index.name = 'MutationType'
+	mut_count_all['186'].index.name = 'MutationType'
 	mut_count_all['1248'].index.name = 'MutationType'
 
 	output_matrix_DINUC = output_matrix + "DINUC/"
@@ -2033,9 +2110,9 @@ def matrix_generator_DINUC (output_matrix, samples, bias_sort, all_dinucs, all_m
 	types = sorted(types, key=lambda val: (bias_sort[val[0]], val[2:]))
 	mut_4992 = mut_4992.reindex(types)
 
-	types = list(mut_count_all['188'].index)
+	types = list(mut_count_all['186'].index)
 	types = sorted(types, key=lambda val: (bias_sort[val[0]], val[2:]))
-	mut_count_all['188'] = mut_count_all['188'].reindex(types)
+	mut_count_all['186'] = mut_count_all['186'].reindex(types)
 
 
 	mut_4992.to_csv(output_file_matrix, header=True, sep='\t')
