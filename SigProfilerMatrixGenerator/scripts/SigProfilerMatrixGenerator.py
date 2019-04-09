@@ -1395,6 +1395,8 @@ def exome_check (genome, exome_temp_file, output_matrix, project, context, subco
 						ref_chrom_value = -1
 					elif chrom_ref == 'Y':
 						ref_chrom_value = 0
+					elif chrom_ref == 'MT' or chrom_ref == 'M':
+						chrom_value = 100
 					else:
 						ref_chrom_value = int(chrom_ref)
 
