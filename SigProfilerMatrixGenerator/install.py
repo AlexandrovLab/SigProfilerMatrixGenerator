@@ -45,8 +45,12 @@ def install_chromosomes (genomes, ref_dir, custom, rsync):
 			elif genome == 'mm10' or genome == 'mm9':
 				species = "mus_musculus"
 				chrom_number = 21
+			elif genome == 'rn6':
+				species = 'rattus_norvegicus'
+				chrom_number = 22
 			else:
 				print(genome + " is not supported. The following genomes are supported:\nGRCh37, GRCh38, mm10")
+				sys.exit()
 			
 			chromosome_string_path = "references/chromosomes/chrom_string/" + genome + "/"
 			chromosome_fasta_path = "references/chromosomes/fasta/" + genome + "/"
@@ -79,6 +83,8 @@ def install_chromosomes (genomes, ref_dir, custom, rsync):
 									os.system("wget -r -l1 -c -nc --no-parent -A '*.dna.chromosome.*' -nd -P " + chromosome_fasta_path + " ftp://ftp.ensembl.org/pub/grch37/update/fasta/homo_sapiens/dna/ 2>> install.log")
 								elif genome == 'mm9':
 									os.system("wget -r -l1 -c -nc --no-parent -A '*.dna.chromosome.*' -nd -P " + chromosome_fasta_path + " ftp://ftp.ensembl.org/pub/release-67/fasta/mus_musculus/dna/ 2>> install.log")
+								elif genome == 'rn6':
+									os.system("wget -r -l1 -c -nc --no-parent -A '*.dna.chromosome.*' -nd -P " + chromosome_fasta_path + " ftp://ftp.ensembl.org/pub/release-96/fasta/rattus_norvegicus/dna/ 2>> install.log")									
 								else:
 									os.system("wget -r -l1 -c -nc --no-parent -A '*.dna.chromosome.*' -nd -P " + chromosome_fasta_path + " ftp://ftp.ensembl.org/pub/release-93/fasta/"+species+"/dna/ 2>> install.log")
 								os.system("gunzip references/chromosomes/fasta/" + genome + "/*.gz")
@@ -91,6 +97,8 @@ def install_chromosomes (genomes, ref_dir, custom, rsync):
 								os.system("rsync -av -m --include='*/' --include='*.dna.chromosome.*' --exclude='*' rsync://ftp.ensembl.org/ensembl/pub/grch37/update/fasta/homo_sapiens/dna/ " + chromosome_fasta_path + " 2>&1>> install.log")
 							elif genome == 'mm9':
 								os.system("rsync -av -m --include='*/' --include='*.dna.chromosome.*' --exclude='*' rsync://ftp.ensembl.org/ensembl/pub/release-67/fasta/mus_musculus/dna/ " + chromosome_fasta_path + " 2>&1>> install.log")
+							elif genome == 'rn6':
+								os.system("rsync -av -m --include='*/' --include='*.dna.chromosome.*' --exclude='*' rsync://ftp.ensembl.org/ensembl/pub/release-96/fasta/rattus_norvegicus/dna/ " + chromosome_fasta_path + " 2>> install.log")									
 							else:
 								os.system("rsync -av -m --include='*/' --include='*.dna.chromosome.*' --exclude='*' rsync://ftp.ensembl.org/ensembl/pub/release-93/fasta/"+species+"/dna/ " + chromosome_fasta_path + " 2>&1>> install.log")
 							os.system("gunzip references/chromosomes/fasta/" + genome + "/*.gz")
@@ -148,8 +156,16 @@ def install_chromosomes_tsb (genomes, ref_dir, custom):
 							'13':'f81b976e4e4617b25945d06f9aa30846','14':'95dc042eb2aa7d4cc0abe071d4d7966e','15':'fbf2477833aff73ae085537cd7ee0f85',
 							'16':'77cbcd009ba50891571f785595717ec1','17':'cd9e4dfdd168ed3de05dac4d44c6e692', '18':'945e83694c7c8f69d6186e1a2abc9771',
 							'19':'e57b25f8869de31a9dbce06510711db6','Y':'c2146ba4ab1ec262f5e38b2a1ebc5f5b','X':'9af543088be046fdc63976c2d41de94c',
-							'MT':'a1d56043ed8308908965dd080a4d0c8d'}
-
+							'MT':'a1d56043ed8308908965dd080a4d0c8d'},
+				'rn6':
+							{'1':'003723513cbdb3708fcc5d737c05199c','2':'53e52c5facc7f05462be533845f37425','3':'8d157a9b71fe9770cf783ea5459b19d7',
+							'4':'a66dc1999bcc960ff11fe0b24c0d7b14','5':'601cf83411234adbdd9f911b89509564','6':'03b1f4af58fffdf213466ea85b570b3d',
+							'7':'4ed05ddf9502ef79e121c02e391660e6','8':'3e2458daaf1b3e8ab4d0e0a9e60c067b','9':'8f83caeccec7ea6e35e404737138ee67',
+							'10':'9c1af453a5facc9bfa821457bcfc4d30','11':'ef0480a905c55d76a3c58e295a85bc75','12':'643b6fe4a3a6363ffe64a6c316fa3e1a',
+							'13':'102bb3fb420a4104c216bcdf99870374','14':'e26b8b63fba0ea7ced4f0330e93a8cdc','15':'da747616a1362d374d4786102fab6f9f',
+							'16':'54e4f932eb0eda4cbf31156f96ef7235','17':'46c2facf5415e4eff8b0804161db722d', '18':'f1cb84f002967854b83bf266ec59a7a3',
+							'19':'b85ca155fd1780fe5c327a4589c212a6','20':,'Y':'6a7a3539c329dc540dfa6db006003bb1',
+							'X':'7a06bafab97c59a819f03633f0a6b7a2'}
 	}
 	for genome in genomes:
 		chrom_number = None
@@ -157,6 +173,8 @@ def install_chromosomes_tsb (genomes, ref_dir, custom):
 			chrom_number = 24
 		elif genome == 'mm10' or genome == 'mm9':
 			chrom_number = 21
+		elif genome == 'rn6':
+			chrom_number = 22
 
 		chromosome_TSB_path = "references/chromosomes/tsb/" + genome + "/"
 		transcript_files = "references/chromosomes/transcripts/" + genome + "/"
@@ -192,23 +210,17 @@ def install_chromosomes_tsb_BED (genomes, custom, ref_dir):
 			print("The TSB BED files for " + genome + " have been saved.")
 
 def benchmark (ref_dir):
-	# if os.path.exists("scripts/Benchmark/BRCA_bench/"):
-	# 	shutil.move("scripts/Benchmark/BRCA_bench/", "references/vcf_files/")
 	current_dir = os.path.realpath(__file__)
 	ref_dir = re.sub('\/install.py$', '', current_dir)
 	vcf_path = ref_dir + "/references/vcf_files/BRCA_bench/"
-	#output_path = ref_dir + "/references/matrix/"
 
 	start_time = time.time()
-	#os.system("python3 " + ref_dir + "/scripts/SigProfilerMatrixGenerator.py -g GRCh37 -p BRCA_bench -vf " + vcf_path + " -op " + output_path + " -snv")
 	matGen.SigProfilerMatrixGeneratorFunc("BRCA_bench", "GRCh37", vcf_path)
 	end_time = time.time()
 
 	original_matrix_96 = ref_dir + "/scripts/Benchmark/BRCA_bench_orig_96.txt"
 	original_matrix_3072 = ref_dir + "/scripts/Benchmark/BRCA_bench_orig_3072.txt"
 	new_matrix_96 = vcf_path + "output/SBS/BRCA_bench.SBS96.all"
-#	new_matrix_96 = ref_dir + "/references/matrix/BRCA_bench/SBS/BRCA_bench.SBS96.all"
-#	new_matrix_3072 = ref_dir + "/references/matrix/BRCA_bench/SBS/BRCA_bench.SBS3072.all"
 	new_matrix_3072 = vcf_path + "output/SBS/BRCA_bench.SBS6144.all"
 
 	genome = "GRCh37"
@@ -251,8 +263,6 @@ def install (genome, custom=False, rsync=False):
 	current_dir = os.path.realpath(__file__)
 	ref_dir = re.sub('\/install.py$', '', current_dir)
 	os.chdir(ref_dir)
-	#genomes = ['mm9', 'mm10','GRCh37', 'GRCh38' ]
-	#genomes = ['GRCh37']
 
 	genomes = [genome]
 
@@ -288,8 +298,7 @@ def install (genome, custom=False, rsync=False):
 	if genome == "GRCh37":
 		print("Verifying and benchmarking installation now...")
 		benchmark(ref_dir)
-	# if os.path.exists(chrom_tsb_dir + "GRCh37/"):
-	# 	benchmark(ref_dir)
+
 	print ("To proceed with matrix_generation, please provide the path to your vcf files and an appropriate output path.")
 	os.system("rm -r " + chrom_string_dir)
 	print("Installation complete.")
@@ -330,16 +339,6 @@ def main ():
 		if not os.path.exists(dirs):
 			os.makedirs(dirs)
 
-	#initial_transcripts = os.listdir("transcripts_original/")
-	#for file in initial_transcripts:
-	#	name = file.split("_")
-	#	if not os.path.exists("references/chromosomes/transcripts/"+name[0]+"/"):
-	#		os.makedirs("references/chromosomes/transcripts/"+name[0]+"/")
-	#	if name != ".DS":
-	#		os.system("cp transcripts_original/"+file +" references/chromosomes/transcripts/" + name[0]+"/")
-
-	#if os.path.exists("exome/"):
-	#	os.system("mv exome/ references/chromosomes/")
 
 	install_chromosomes(genomes, ref_dir, custom)
 	install_chromosomes_tsb (genomes, ref_dir, custom)

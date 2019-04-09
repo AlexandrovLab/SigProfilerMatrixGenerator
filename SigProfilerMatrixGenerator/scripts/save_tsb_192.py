@@ -52,8 +52,13 @@ def save_tsb (chromosome_string_path, transcript_path, output_path):
             else:
 
                 # Sorts the transcript file by chromosome and transcript range
-                os.system("sort -t $'\t' -k 3,3n -k 3,3 -k 5,5 -k 6,6 " + transcript_path+file + " -o " + transcript_path+file)
-                 
+                #os.system("sort -t $'\t' -k 3,3n -k 3,3 -k 5,5 -k 6,6 " + transcript_path+file + " -o " + transcript_path+file)
+                with open(transcript_path + file) as f:
+                    lines = [line.strip().split() for line in f]
+                output = open(transcript_path + file, 'w')
+                for line in sorted(lines, key = lambda x: (['X','Y','1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', 'MT', 'M'].index(x[2]), int(x[4]), int(x[5]))):
+                    print('\t'.join(line), file=output)
+
                 with open (transcript_path + file) as f:
                     #next(f)
 
