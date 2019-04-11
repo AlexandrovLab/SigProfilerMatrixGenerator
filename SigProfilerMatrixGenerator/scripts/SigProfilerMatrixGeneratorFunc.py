@@ -99,6 +99,7 @@ def SigProfilerMatrixGeneratorFunc (project, genome, vcfFiles, exome=False, bed_
 
 	bias_sort = {'T':0,'U':1,'N':3,'B':2, 'Q':4}
 	tsb = ['T','U','N','B']
+	tsb_I = ['T','U','N','B','Q']
 	bases = ['A','C','G','T']
 	mutation_types = ['CC>AA','CC>AG','CC>AT','CC>GA','CC>GG','CC>GT','CC>TA','CC>TG','CC>TT',
 					  'CT>AA','CT>AC','CT>AG','CT>GA','CT>GC','CT>GG','CT>TA','CT>TC','CT>TG',
@@ -171,9 +172,10 @@ def SigProfilerMatrixGeneratorFunc (project, genome, vcfFiles, exome=False, bed_
 				   '3:Ins:M:1', '3:Ins:M:2', '4:Ins:M:1', '4:Ins:M:2', '4:Ins:M:3', '5:Ins:M:1', 
 				   '5:Ins:M:2', '5:Ins:M:3', '5:Ins:M:4', '5:Ins:M:5', 'complex', 'non_matching']
 
-	for indels in indel_types[:24]:
-		for tsbs in tsb:
+	for indels in indel_types[:-13]:
+		for tsbs in tsb_I:
 			indel_types_tsb.append(tsbs + ":" + indels)
+
 
 	indel_types_simple = indel_types[:24]
 	indel_types_simple.append('long_Del')
