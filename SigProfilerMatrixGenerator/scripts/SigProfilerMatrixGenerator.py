@@ -1102,8 +1102,12 @@ def catalogue_generator_INDEL_single (mutation_ID, lines, chrom, vcf_path, vcf_p
 						indel_key_simple = indel_key
 
 
-					indel_key_tsb = bias + ":" + indel_key
-					if indel_key_3 != 'M' and indel_key_3 != 'R':
+					
+					if bool(re.match("^[CT]*$", sequence)) or bool(re.match("^[GA]*$", sequence)):
+						indel_key_tsb = bias + ":" + indel_key
+						mutation_ID['tsb'].at[indel_key_tsb, sample] += 1
+					else:
+						indel_key_tsb = "Q:" + indel_key
 						mutation_ID['tsb'].at[indel_key_tsb, sample] += 1
 
 					# Performs the gene strand bias test if desired
@@ -1918,7 +1922,8 @@ def matrix_generator_INDEL (output_matrix, samples, indel_types, indel_types_tsb
 	current_dir = os.getcwd()
 	ref_dir = re.sub('\/scripts$', '', current_dir)
 
-	bias_sort = {'T':0,'U':1,'N':3,'B':2}
+	bias_sort = {'T':0,'U':1,'N':3,'B':2, 'Q':4}
+	col_sort = {'C':0, 'T':1, 'R':2, 'M':3}
 
 	output_matrix_INDEL = output_matrix + "INDEL/"
 	if not os.path.exists(output_matrix_INDEL):
@@ -1926,11 +1931,11 @@ def matrix_generator_INDEL (output_matrix, samples, indel_types, indel_types_tsb
 
 	if limited_indel:
 		file_prefix = project + ".INDEL83"
-		file_prefix_tsb = project + ".INDEL96"
+		file_prefix_tsb = project + ".INDEL415"
 		file_prefix_simple = project + ".INDEL28"
 	else:
 		file_prefix = project + ".INDEL94"
-		file_prefix_tsb = project + ".INDEL96"
+		file_prefix_tsb = project + ".INDEL415"
 		file_prefix_simple = project + ".INDEL28"
 	
 	if exome:
@@ -1982,7 +1987,7 @@ def matrix_generator_INDEL (output_matrix, samples, indel_types, indel_types_tsb
 			print (sample + '\t', end='', flush=False, file=out)
 		print(file=out)
 
-		types = sorted(indel_types_tsb, key=lambda val: (bias_sort[val[0]], val[2:]))
+		types = sorted(indel_types_tsb, key=lambda val: (bias_sort[val[0]], val[4:7], col_sort[val[8]] , val[2], val[10]))
 		# Prints the mutation count for each INDEL type across every sample
 		for indel in types:
 			print (indel + '\t', end='', flush =False, file=out)
@@ -2027,8 +2032,8 @@ def matrix_generator_INDEL (output_matrix, samples, indel_types, indel_types_tsb
 		try:
 			sigPlt.plotID(output_file_matrix_tsb, output_path, project, '96ID', False)
 		except:
-			print("no")
 			pass
+
 
 def matrix_generator_DINUC (output_matrix, samples, bias_sort, all_dinucs, all_mut_types, project, exome, bed, chrom_start=None, plot=False):
 	'''

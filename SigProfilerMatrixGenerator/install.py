@@ -164,7 +164,7 @@ def install_chromosomes_tsb (genomes, ref_dir, custom):
 							'10':'9c1af453a5facc9bfa821457bcfc4d30','11':'ef0480a905c55d76a3c58e295a85bc75','12':'643b6fe4a3a6363ffe64a6c316fa3e1a',
 							'13':'102bb3fb420a4104c216bcdf99870374','14':'e26b8b63fba0ea7ced4f0330e93a8cdc','15':'da747616a1362d374d4786102fab6f9f',
 							'16':'54e4f932eb0eda4cbf31156f96ef7235','17':'46c2facf5415e4eff8b0804161db722d', '18':'f1cb84f002967854b83bf266ec59a7a3',
-							'19':'b85ca155fd1780fe5c327a4589c212a6','20':,'Y':'6a7a3539c329dc540dfa6db006003bb1',
+							'19':'b85ca155fd1780fe5c327a4589c212a6','20':'53e52c5facc7f05462be533845f37425','Y':'6a7a3539c329dc540dfa6db006003bb1',
 							'X':'7a06bafab97c59a819f03633f0a6b7a2'}
 	}
 	for genome in genomes:
@@ -209,21 +209,21 @@ def install_chromosomes_tsb_BED (genomes, custom, ref_dir):
 			os.system("python3 scripts/save_chrom_tsb_separate.py -g " + genome)
 			print("The TSB BED files for " + genome + " have been saved.")
 
-def benchmark (ref_dir):
+def benchmark (genome, ref_dir):
 	current_dir = os.path.realpath(__file__)
 	ref_dir = re.sub('\/install.py$', '', current_dir)
-	vcf_path = ref_dir + "/references/vcf_files/BRCA_bench/"
+	vcf_path = ref_dir + "/references/vcf_files/" + genome + "_bench/"
 
 	start_time = time.time()
-	matGen.SigProfilerMatrixGeneratorFunc("BRCA_bench", "GRCh37", vcf_path)
+	matGen.SigProfilerMatrixGeneratorFunc(genome + "_bench", genome, vcf_path)
 	end_time = time.time()
 
-	original_matrix_96 = ref_dir + "/scripts/Benchmark/BRCA_bench_orig_96.txt"
-	original_matrix_3072 = ref_dir + "/scripts/Benchmark/BRCA_bench_orig_3072.txt"
-	new_matrix_96 = vcf_path + "output/SBS/BRCA_bench.SBS96.all"
-	new_matrix_3072 = vcf_path + "output/SBS/BRCA_bench.SBS6144.all"
+	original_matrix_96 = ref_dir + "/scripts/Benchmark/" + genome + "_bench_orig_96.txt"
+	original_matrix_3072 = ref_dir + "/scripts/Benchmark/" + genome + "_bench_orig_3072.txt"
+	new_matrix_96 = vcf_path + "output/SBS/" + genome + "_bench.SBS96.all"
+	new_matrix_3072 = vcf_path + "output/SBS/" + genome + "_bench.SBS6144.all"
 
-	genome = "GRCh37"
+	#genome = "GRCh37"
 
 	############# Cosine Test ###################################################
 	data_orig = pd.read_csv(original_matrix_96, sep='\t', header=0)
@@ -295,9 +295,9 @@ def install (genome, custom=False, rsync=False):
 		os.system("mv context_distributions/ references/chromosomes/")
 
 	print("All reference files have been created.")
-	if genome == "GRCh37":
+	if genome != "rn6":
 		print("Verifying and benchmarking installation now...")
-		benchmark(ref_dir)
+		benchmark(genome, ref_dir)
 
 	print ("To proceed with matrix_generation, please provide the path to your vcf files and an appropriate output path.")
 	os.system("rm -r " + chrom_string_dir)

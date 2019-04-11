@@ -1,5 +1,8 @@
 include README.rst
-include SigProfilerMatrixGenerator/references/vcf_files/BRCA_bench/*
+include SigProfilerMatrixGenerator/references/vcf_files/GRCh37_bench/*
+include SigProfilerMatrixGenerator/references/vcf_files/GRCh38_bench/*
+include SigProfilerMatrixGenerator/references/vcf_files/mm9_bench/*
+include SigProfilerMatrixGenerator/references/vcf_files/mm10_bench/*
 include SigProfilerMatrixGenerator/references/vcf_files/BRCA_example/SNV/*
 include SigProfilerMatrixGenerator/references/chromosomes/transcripts/GRCh37/*
 include SigProfilerMatrixGenerator/references/chromosomes/transcripts/GRCh38/*
@@ -16,3 +19,5 @@ include SigProfilerMatrixGenerator/references/chromosomes/tsb_BED/mm10/*
 include SigProfilerMatrixGenerator/references/chromosomes/context_distributions/*
 include SigProfilerMatrixGenerator/scripts/Benchmark/*
 include SigProfilerMatrixGenerator/references/matrix/BRCA_bench/*
+include SigProfilerMatrixGenerator/references/chromosomes/transcripts/rn6/*
+include SigProfilerMatrixGenerator/references/chromosomes/exome/rn6/*
