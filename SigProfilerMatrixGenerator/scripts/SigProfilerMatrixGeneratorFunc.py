@@ -190,7 +190,8 @@ def SigProfilerMatrixGeneratorFunc (project, genome, vcfFiles, exome=False, bed_
 	# current_dir = Path(os.path.realpath(__file__))
 	# ref_dir = Path(*current_dir.parent.parts[:-1])
 
-	ref_dir = re.sub('\/scripts/SigProfilerMatrixGeneratorFunc.py$', '', current_dir)
+	ref_dir, tail = os.path.split(os.path.dirname(os.path.abspath(__file__)))
+	#ref_dir = re.sub('\/scripts/SigProfilerMatrixGeneratorFunc.py$', '', current_dir)
 	chrom_path =ref_dir + '/references/chromosomes/tsb/' + genome + "/"
 	transcript_path = ref_dir + '/references/chromosomes/transcripts/' + genome + "/"
 	# chrom_path = ref_dir / 'references/chromosomes/tsb/' / genome
@@ -200,7 +201,7 @@ def SigProfilerMatrixGeneratorFunc (project, genome, vcfFiles, exome=False, bed_
 	#print(ref_dir, chrom_path, transcript_path)
 	# Terminates the code if the genome reference files have not been created/installed
 	if not os.path.exists(chrom_path):
-		print("The specified genome: " + genome + " has not been installed\nRun the following command to install the genome:\n\tpython3 sigProfilerMatrixGenerator/install.py -g " + genome)
+		print("The specified genome: " + genome + " has not been installed\nRun the following command to install the genome:\n\tpython sigProfilerMatrixGenerator/install.py -g " + genome)
 		sys.exit()
 
 	# Organizes all of the input and output directories:
@@ -230,21 +231,25 @@ def SigProfilerMatrixGeneratorFunc (project, genome, vcfFiles, exome=False, bed_
 	#output_matrix = vcfFiles / "output"
 
 	if not os.path.exists(output_matrix):
-		os.system("mkdir " + output_matrix)
+		#os.system("mkdir " + output_matrix)
+		os.makedirs(output_matrix)
 
 
 	# Organizes the error and log files
 	time_stamp = datetime.date.today()
 	output_log_path = vcfFiles + "logs/"
 	if not os.path.exists(output_log_path):
-		os.system("mkdir " + output_log_path)
+		#os.system("mkdir " + output_log_path)
+		os.makedirs(output_log_path)
 	error_file = output_log_path + 'SigProfilerMatrixGenerator_' + project + "_" + genome + str(time_stamp) + ".err"
 	log_file = output_log_path + 'SigProfilerMatrixGenerator_' + project + "_" + genome + str(time_stamp) + ".out"
 
 	if os.path.exists(error_file):
-		os.system("rm " + error_file)
+		# os.system("rm " + error_file)
+		os.remove(error_file)
 	if os.path.exists(log_file):
-		 os.system("rm " + log_file)
+		 # os.system("rm " + log_file)
+		 os.remove(log_file)
 	sys.stderr = open(error_file, 'w')
 	#out = open(log_file, 'w')
 
@@ -267,7 +272,9 @@ def SigProfilerMatrixGeneratorFunc (project, genome, vcfFiles, exome=False, bed_
 	unique_folder = project + "_"+ str(uuid.uuid4())
 	output_path = output_matrix + "temp/" + unique_folder + "/"
 	if os.path.exists(output_path):
-		os.system("rm -r " + output_path)
+		# os.system("rm -r " + output_path)
+		# os.remove(output_path)
+		shutil.rmtree(output_path)
 	os.makedirs(output_path)
 
 	skipped_muts = 0
@@ -518,7 +525,9 @@ def SigProfilerMatrixGeneratorFunc (project, genome, vcfFiles, exome=False, bed_
 			matGen.matrix_generator_INDEL(output_matrix, samples, indel_types, indel_types_tsb, indel_types_simple, mutation_ID['ID'], mutation_ID['tsb'], mutation_ID['simple'], project, exome, limited_indel, bed, chrom_start, plot)
 
 		if i == 1:
-			os.system("rm -r " + output_matrix + "temp/")
+			# os.system("rm -r " + output_matrix + "temp/")
+			shutil.rmtree(output_matrix + "temp/")
+			#os.remove(output_matrix + "temp/")
 		end = time.time() - start
 		print("Completed! Elapsed time: " + str(round(end, 2)) + " seconds.")
 

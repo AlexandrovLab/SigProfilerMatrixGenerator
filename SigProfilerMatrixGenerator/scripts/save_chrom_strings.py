@@ -27,8 +27,9 @@ def save_chrom_strings (genome):
 	'''
 
 	# Instantiates all of the relevant paths/creates them if not present
-	current_dir = os.getcwd()
-	ref_dir = re.sub('\/scripts$', '', current_dir)
+	#current_dir = os.getcwd()
+	#ref_dir = re.sub('\/scripts$', '', current_dir)
+	ref_dir, tail = os.path.split(os.path.dirname(os.path.abspath(__file__)))
 	chrom_fasta_path = ref_dir + '/references/chromosomes/fasta/' + genome + "/"
 	chrom_string_path = ref_dir + '/references/chromosomes/chrom_string/' + genome + '/'
 	chrom_fasta_files = os.listdir(chrom_fasta_path)
