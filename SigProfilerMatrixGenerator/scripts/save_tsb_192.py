@@ -83,7 +83,8 @@ def save_tsb (chromosome_string_path, transcript_path, output_path):
                     out.close()
 
             # Removes the initial transcript file
-            os.system("rm " + transcript_path + file)
+            # os.system("rm " + transcript_path + file)
+            os.remove(transcript_path + file)
 
     # Retrieves the chromosome based list of transcript files 
     transcript_files = os.listdir(transcript_path)
@@ -325,8 +326,9 @@ def main ():
     args=parser.parse_args()
     genome = args.genome
 
-    script_dir = os.getcwd()
-    ref_dir = re.sub('\/scripts$', '', script_dir)
+    #script_dir = os.getcwd()
+    #ref_dir = re.sub('\/scripts$', '', script_dir)
+    ref_dir, tail = os.path.split(os.path.dirname(os.path.abspath(__file__)))
 
     chromosome_string_path = ref_dir + "/references/chromosomes/chrom_string/" + genome + "/"
     transcript_path = ref_dir + "/references/chromosomes/transcripts/" + genome + "/"

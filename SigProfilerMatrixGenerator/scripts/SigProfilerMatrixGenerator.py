@@ -91,8 +91,9 @@ def reference_paths (genome):
 	Returns:
 		chrom_path  -> path to the reference genome's chromosome files
 	'''
-	current_dir = os.path.realpath(__file__)
-	ref_dir = re.sub('\/scripts/SigProfilerMatrixGenerator.py$', '', current_dir)
+	# current_dir = os.path.realpath(__file__)
+	# ref_dir = re.sub('\/scripts/SigProfilerMatrixGenerator.py$', '', current_dir)
+	ref_dir = os.path.dirname(os.path.abspath(__file__))
 	chrom_path =ref_dir + '/references/chromosomes/tsb/' + genome + "/"
 
 	return(chrom_path)
@@ -286,7 +287,7 @@ def catalogue_generator_single (lines, chrom, mutation_dict, mutation_types_tsb_
 
 		if seqInfo:
 			seqOut_path = output_matrix + "vcf_files/SNV/"
-			seqOut_path_dinuc = output_matrix + "vcf_files/DINUC/"
+			seqOut_path_dinuc = output_matrix + "vcf_files/DBS/"
 			seqOut_path_mns = output_matrix + "vcf_files/MNS/"
 			if not os.path.exists(seqOut_path):
 				os.makedirs(seqOut_path)
@@ -754,7 +755,7 @@ def catalogue_generator_INDEL_single (mutation_ID, lines, chrom, vcf_path, vcf_p
 		prev_line = None
 
 		if seqInfo:
-			seqOut_path = output_matrix + "vcf_files/INDEL/"
+			seqOut_path = output_matrix + "vcf_files/ID/"
 			if not os.path.exists(seqOut_path):
 				os.makedirs(seqOut_path)
 			seqOut = open(seqOut_path + chrom + "_seqinfo.txt", "w")
@@ -1317,8 +1318,9 @@ def exome_check (genome, exome_temp_file, output_matrix, project, context, subco
 
 	initial = True
 	udpate_chrom = False
-	current_dir = os.path.realpath(__file__)
-	ref_dir = re.sub('\/scripts/SigProfilerMatrixGenerator.py$', '', current_dir)
+	#current_dir = os.path.realpath(__file__)
+	#ref_dir = re.sub('\/scripts/SigProfilerMatrixGenerator.py$', '', current_dir)
+	ref_dir = os.path.dirname(os.path.abspath(__file__))
 
 	exome_file = ref_dir + "/references/chromosomes/exome/" + genome + "/" + genome + "_exome.interval_list"
 
@@ -1466,13 +1468,14 @@ def panel_check (genome, bed_temp_file, output_matrix, bed_file_path, project, c
 	mutation_dict = {}
 	samples = []
 
-	current_dir = os.getcwd()
-	ref_dir = re.sub('\/scripts$', '', current_dir)
+	# current_dir = os.getcwd()
+	# ref_dir = re.sub('\/scripts$', '', current_dir)
+	ref_dir = os.path.dirname(os.path.abspath(__file__))
 
 
 	initial = True
 	udpate_chrom = False
-	current_dir = os.path.realpath(__file__)
+	#current_dir = os.path.realpath(__file__)
 	panel_file = bed_file_path
 	panel_output_path = output_matrix + "vcf_files/" + context + "/"
 
@@ -1630,8 +1633,9 @@ def matrix_generator (context, output_matrix, project, samples, bias_sort, mut_c
 	'''
 
 	# Prepares all of the required data structures and files
-	current_dir = os.getcwd()
-	ref_dir = re.sub('\/scripts$', '', current_dir)
+	# current_dir = os.getcwd()
+	# ref_dir = re.sub('\/scripts$', '', current_dir)
+	ref_dir = os.path.dirname(os.path.abspath(__file__))
 
 	contexts = ['96', '384', '1536', '6', '24']
 	#mut_types_all = {'96':[], '384':[], '1536':[], '6':[], '24':[], '6_pvalue':[], '7_pvalue':[]}
@@ -1919,24 +1923,25 @@ def matrix_generator_INDEL (output_matrix, samples, indel_types, indel_types_tsb
 	'''
 
 	# Instantiates all of the required data structures and output files
-	current_dir = os.getcwd()
-	ref_dir = re.sub('\/scripts$', '', current_dir)
+	# current_dir = os.getcwd()
+	# ref_dir = re.sub('\/scripts$', '', current_dir)
+	ref_dir = os.path.dirname(os.path.abspath(__file__))
 
 	bias_sort = {'T':0,'U':1,'N':3,'B':2, 'Q':4}
 	col_sort = {'C':0, 'T':1, 'R':2, 'M':3}
 
-	output_matrix_INDEL = output_matrix + "INDEL/"
+	output_matrix_INDEL = output_matrix + "ID/"
 	if not os.path.exists(output_matrix_INDEL):
 		os.mkdir(output_matrix_INDEL)
 
 	if limited_indel:
-		file_prefix = project + ".INDEL83"
-		file_prefix_tsb = project + ".INDEL415"
-		file_prefix_simple = project + ".INDEL28"
+		file_prefix = project + ".ID83"
+		file_prefix_tsb = project + ".ID415"
+		file_prefix_simple = project + ".ID28"
 	else:
-		file_prefix = project + ".INDEL94"
-		file_prefix_tsb = project + ".INDEL415"
-		file_prefix_simple = project + ".INDEL28"
+		file_prefix = project + ".ID94"
+		file_prefix_tsb = project + ".ID415"
+		file_prefix_simple = project + ".ID28"
 	
 	if exome:
 		output_file_matrix = output_matrix_INDEL + file_prefix + ".exome"
@@ -2092,13 +2097,13 @@ def matrix_generator_DINUC (output_matrix, samples, bias_sort, all_dinucs, all_m
 	mut_count_all['186'].index.name = 'MutationType'
 	mut_count_all['1248'].index.name = 'MutationType'
 
-	output_matrix_DINUC = output_matrix + "DINUC/"
+	output_matrix_DINUC = output_matrix + "DBS/"
 	if not os.path.exists(output_matrix_DINUC):
 		os.mkdir(output_matrix_DINUC)
 
-	current_dir = os.getcwd()
-	ref_dir = re.sub('\/scripts$', '', current_dir)
-
+	# current_dir = os.getcwd()
+	# ref_dir = re.sub('\/scripts$', '', current_dir)
+	ref_dir = os.path.dirname(os.path.abspath(__file__))
 	file_prefix = project + ".DBS2976" 
 	if exome:
 		output_file_matrix = output_matrix_DINUC + file_prefix + ".exome"

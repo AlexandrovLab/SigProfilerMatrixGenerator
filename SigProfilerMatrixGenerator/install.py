@@ -30,9 +30,9 @@ def md5(fname):
 def install_chromosomes (genomes, ref_dir, custom, rsync):
 	if custom:
 		for genome in genomes:
-			os.system("gunzip references/chromosomes/fasta/" + genome + "/*.gz")
+			os.system("gzip -d references/chromosomes/fasta/" + genome + "/*.gz")
 			chromosome_fasta_path = "references/chromosomes/fasta/" + genome + "/"
-			os.system("python3 scripts/save_chrom_strings.py -g " + genome)
+			os.system("python scripts/save_chrom_strings.py -g " + genome)
 			print("Chromosome string files for " + genome + " have been created. Continuing with installation.")
 			#os.system("rm -r " + chromosome_fasta_path)
 	else:
@@ -63,31 +63,34 @@ def install_chromosomes (genomes, ref_dir, custom, rsync):
 					print("Chromosomes are not currently saved as individual text files for " + genome + ". Downloading the files now...")
 					if not rsync:
 					#os.system("rsync -av -m --include='*/' --include='*.dna.chromosome.*' --exclude='*' rsync://ftp.ensembl.org/ensembl/pub/grch37/update/fasta/homo_sapiens/dna/ " + chromosome_fasta_path + " 2>&1>> install.log")
-						try:
-							p = subprocess.Popen("wget", stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-						except:
-							proceed = input("You may not have wget or homebrew installed. Download those dependencies now?[Y/N]").upper()
-							if proceed == 'Y':
-								try:
-									os.system("brew install wget")
-								except:
-									os.system('/usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"')
-									os.system("brew install wget")
-							else:
-								print("Installation has stopped. Please download the chromosome files before proceeding with the installation.")
-								wget_flag = False
-								sys.exit()
+						# try:
+						# 	p = subprocess.Popen("wget", stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+						# except:
+						# 	proceed = input("You may not have wget or homebrew installed. Download those dependencies now?[Y/N]").upper()
+						# 	if proceed == 'Y':
+						# 		try:
+						# 			os.system("brew install wget")
+						# 		except:
+						# 			os.system('/usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"')
+						# 			os.system("brew install wget")
+						# 	else:
+						# 		print("Installation has stopped. Please download the chromosome files before proceeding with the installation.")
+						# 		wget_flag = False
+						# 		sys.exit()
 						if wget_flag:
 							try:
 								if genome == 'GRCh37':
-									os.system("wget -r -l1 -c -nc --no-parent -A '*.dna.chromosome.*' -nd -P " + chromosome_fasta_path + " ftp://ftp.ensembl.org/pub/grch37/update/fasta/homo_sapiens/dna/ 2>> install.log")
+									os.system('wget -r -l1 -c -nc --no-parent -A "*.dna.chromosome.*" -nd -P ' + chromosome_fasta_path + ' ftp://ftp.ensembl.org/pub/grch37/current/fasta/homo_sapiens/dna/ 2>> install.log')
+									#os.system("wget -r -l1 -c -nc --no-parent -A '*.dna.chromosome.*' -nd -P " + chromosome_fasta_path + " ftp://ftp.ensembl.org/pub/grch37/update/fasta/homo_sapiens/dna/ 2>> install.log")
 								elif genome == 'mm9':
 									os.system("wget -r -l1 -c -nc --no-parent -A '*.dna.chromosome.*' -nd -P " + chromosome_fasta_path + " ftp://ftp.ensembl.org/pub/release-67/fasta/mus_musculus/dna/ 2>> install.log")
 								elif genome == 'rn6':
 									os.system("wget -r -l1 -c -nc --no-parent -A '*.dna.chromosome.*' -nd -P " + chromosome_fasta_path + " ftp://ftp.ensembl.org/pub/release-96/fasta/rattus_norvegicus/dna/ 2>> install.log")									
 								else:
 									os.system("wget -r -l1 -c -nc --no-parent -A '*.dna.chromosome.*' -nd -P " + chromosome_fasta_path + " ftp://ftp.ensembl.org/pub/release-93/fasta/"+species+"/dna/ 2>> install.log")
-								os.system("gunzip references/chromosomes/fasta/" + genome + "/*.gz")
+								#os.system("gunzip references/chromosomes/fasta/" + genome + "/*.gz")
+								os.system("gzip -d references/chromosomes/fasta/" + genome + "/*.gz")
+
 							except:
 								print("The ensembl ftp site is not currently responding.")
 								sys.exit()
@@ -101,15 +104,19 @@ def install_chromosomes (genomes, ref_dir, custom, rsync):
 								os.system("rsync -av -m --include='*/' --include='*.dna.chromosome.*' --exclude='*' rsync://ftp.ensembl.org/ensembl/pub/release-96/fasta/rattus_norvegicus/dna/ " + chromosome_fasta_path + " 2>> install.log")									
 							else:
 								os.system("rsync -av -m --include='*/' --include='*.dna.chromosome.*' --exclude='*' rsync://ftp.ensembl.org/ensembl/pub/release-93/fasta/"+species+"/dna/ " + chromosome_fasta_path + " 2>&1>> install.log")
-							os.system("gunzip references/chromosomes/fasta/" + genome + "/*.gz")
+							#os.system("gunzip references/chromosomes/fasta/" + genome + "/*.gz")
+							os.system("gzip -d references/chromosomes/fasta/" + genome + "/*.gz")
+
 						except:
 							print("The ensembl ftp site is not currently responding.")
 							sys.exit()
 
 				print("Chromosome fasta files for " + genome + " have been installed. Creating the chromosome string files now...")
-				os.system("python3 scripts/save_chrom_strings.py -g " + genome)
+				os.system("python scripts/save_chrom_strings.py -g " + genome)
 				print("Chromosome string files for " + genome + " have been created. Continuing with installation.")
-				os.system("rm -r " + chromosome_fasta_path)
+				# os.system("rm -r " + chromosome_fasta_path)
+				# os.remove(chromosome_fasta_path)
+				shutil.rmtree(chromosome_fasta_path)
 
 			else:
 				print("Chromosome reference files exist for " + genome + ". Continuing with installation.")
@@ -176,6 +183,7 @@ def install_chromosomes_tsb (genomes, ref_dir, custom):
 		elif genome == 'rn6':
 			chrom_number = 22
 
+
 		chromosome_TSB_path = "references/chromosomes/tsb/" + genome + "/"
 		transcript_files = "references/chromosomes/transcripts/" + genome + "/"
 
@@ -185,7 +193,7 @@ def install_chromosomes_tsb (genomes, ref_dir, custom):
 			sys.exit()
 		if os.path.exists(chromosome_TSB_path) == False or len(os.listdir(chromosome_TSB_path)) < chrom_number:
 			print("The transcriptional reference data for " + genome + " has not been saved. Creating these files now")
-			os.system("python3 scripts/save_tsb_192.py -g " + genome)
+			os.system("python scripts/save_tsb_192.py -g " + genome)
 
 		corrupt = False
 		for files in os.listdir(chromosome_TSB_path):
@@ -206,12 +214,13 @@ def install_chromosomes_tsb (genomes, ref_dir, custom):
 def install_chromosomes_tsb_BED (genomes, custom, ref_dir):
 	for genome in genomes:
 		if not os.path.exists(ref_dir + "chromosomes/tsb_BED/" + genome + "/") or len(os.listdir(ref_dir + "chromosomes/tsb_BED/" + genome + "/")) < 19:
-			os.system("python3 scripts/save_chrom_tsb_separate.py -g " + genome)
+			os.system("python scripts/save_chrom_tsb_separate.py -g " + genome)
 			print("The TSB BED files for " + genome + " have been saved.")
 
 def benchmark (genome, ref_dir):
-	current_dir = os.path.realpath(__file__)
-	ref_dir = re.sub('\/install.py$', '', current_dir)
+	#current_dir = os.path.realpath(__file__)
+	#ref_dir = re.sub('\/install.py$', '', current_dir)
+	ref_dir = os.path.dirname(os.path.abspath(__file__))
 	vcf_path = ref_dir + "/references/vcf_files/" + genome + "_bench/"
 
 	start_time = time.time()
@@ -260,14 +269,16 @@ def benchmark (genome, ref_dir):
 def install (genome, custom=False, rsync=False):
 	print("Beginning installation. This may take up to 20 minutes to complete.")
 	first_path = os.getcwd()
-	current_dir = os.path.realpath(__file__)
-	ref_dir = re.sub('\/install.py$', '', current_dir)
+	# current_dir = os.path.realpath(__file__)
+	# ref_dir = re.sub('\/install.py$', '', current_dir)
+	ref_dir = os.path.dirname(os.path.abspath(__file__))
 	os.chdir(ref_dir)
 
 	genomes = [genome]
 
 	if os.path.exists("install.log"):
-		os.system("rm install.log")
+		# os.system("rm install.log")
+		os.remove("install.log")
 
 	ref_dir = "references/"
 	chrom_string_dir = ref_dir + "chromosomes/chrom_string/"
@@ -279,7 +290,6 @@ def install (genome, custom=False, rsync=False):
 	log_dir = "logs/"
 	new_dirs = [ref_dir, chrom_string_dir, chrom_fasta_dir, chrom_tsb_dir, matrix_dir, vcf_dir, bed_dir, log_dir]
 
-	current_dir = os.getcwd()
 	for dirs in new_dirs:
 		if not os.path.exists(dirs):
 			os.makedirs(dirs)
@@ -288,11 +298,14 @@ def install (genome, custom=False, rsync=False):
 	install_chromosomes_tsb (genomes, ref_dir, custom)
 
 	if os.path.exists("BRCA_example/"):
-		os.system("mv BRCA_example/ references/vcf_files/")
+		#os.system("mv BRCA_example/ references/vcf_files/")
+		shutil.copy("BRCA_example/", "references/vcf_files/")
 	if os.path.exists("example_test"):
-		os.system("mv example_test/ references/vcf_files/")
+		#os.system("mv example_test/ references/vcf_files/")
+		shutil.copy("example_test/", "references/vcf_files/")
 	if os.path.exists("context_distributions/"):
-		os.system("mv context_distributions/ references/chromosomes/")
+		#os.system("mv context_distributions/ references/chromosomes/")
+		shutil.copy("context_distributions/", "references/chromosomes/")
 
 	print("All reference files have been created.")
 	if genome != "rn6":
@@ -300,7 +313,9 @@ def install (genome, custom=False, rsync=False):
 		benchmark(genome, ref_dir)
 
 	print ("To proceed with matrix_generation, please provide the path to your vcf files and an appropriate output path.")
-	os.system("rm -r " + chrom_string_dir)
+	# os.system("rm -r " + chrom_string_dir)
+	# os.remove(chrom_string_dir)
+	shutil.rmtree(chrom_string_dir)
 	print("Installation complete.")
 	os.chdir(first_path)
 
