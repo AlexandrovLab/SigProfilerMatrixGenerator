@@ -6,6 +6,7 @@
 
 from . import SigProfilerMatrixGenerator as matGen
 import os
+import SigProfilerMatrixGenerator as sig
 import re
 import sys
 import pandas as pd
@@ -15,8 +16,13 @@ import uuid
 import shutil
 import time
 import numpy as np
+import platform
 import itertools
+import statsmodels
+import matplotlib as plt
 from pathlib import Path
+import sigProfilerPlotting as sigPlt
+import scipy
 
 def perm(n, seq):
 	'''
@@ -42,19 +48,19 @@ def SigProfilerMatrixGeneratorFunc (project, genome, vcfFiles, exome=False, bed_
 	with each context serving as the first level of keys. 
 
 	Parameters:
-			   	  project  -> unique name given to the current samples
+				  project  -> unique name given to the current samples
 				   genome  -> reference genome 
 				 vcfFiles  -> path where the input vcf files are located.
-				 	exome  -> flag to use only the exome or not
-			  	 bed_file  -> BED file that contains a list of ranges to be used in generating the matrices
+					exome  -> flag to use only the exome or not
+				 bed_file  -> BED file that contains a list of ranges to be used in generating the matrices
 			  chrom_based  -> flag to create the matrices on a per chromosome basis
-			  		 plot  -> flag to generate the plots for each context
-			  	 tsb_stat  -> performs a transcriptional strand bias test for the 24, 384, and 6144 contexts. The output is
-			  		  		  saved into the output/TSB directory
-			  		   gs  -> flag that performs a gene strand bias test
+					 plot  -> flag to generate the plots for each context
+				 tsb_stat  -> performs a transcriptional strand bias test for the 24, 384, and 6144 contexts. The output is
+							  saved into the output/TSB directory
+					   gs  -> flag that performs a gene strand bias test
 
 	Returns:
-			  	 matrices  -> dictionary (nested) of the matrices for each context
+				 matrices  -> dictionary (nested) of the matrices for each context
 
 		example:
 			matrices = {'96': {'PD1001a':{'A[A>C]A':23,
@@ -239,19 +245,37 @@ def SigProfilerMatrixGeneratorFunc (project, genome, vcfFiles, exome=False, bed_
 	time_stamp = datetime.date.today()
 	output_log_path = vcfFiles + "logs/"
 	if not os.path.exists(output_log_path):
-		#os.system("mkdir " + output_log_path)
 		os.makedirs(output_log_path)
 	error_file = output_log_path + 'SigProfilerMatrixGenerator_' + project + "_" + genome + str(time_stamp) + ".err"
 	log_file = output_log_path + 'SigProfilerMatrixGenerator_' + project + "_" + genome + str(time_stamp) + ".out"
 
 	if os.path.exists(error_file):
-		# os.system("rm " + error_file)
 		os.remove(error_file)
 	if os.path.exists(log_file):
-		 # os.system("rm " + log_file)
 		 os.remove(log_file)
 	sys.stderr = open(error_file, 'w')
-	#out = open(log_file, 'w')
+	log_out = open(log_file, 'w')
+	log_out.write("THIS FILE CONTAINS THE METADATA ABOUT SYSTEM AND RUNTIME\n\n\n")
+	log_out.write("-------System Info-------\n")
+	log_out.write("Operating System Name: "+ os.uname()[0]+"\n"+"Nodename: "+os.uname()[1]+"\n"+"Release: "+os.uname()[2]+"\n"+"Version: "+os.uname()[3]+"\n")
+	log_out.write("\n-------Python and Package Versions------- \n")
+	log_out.write("Python Version: "+str(platform.sys.version_info.major)+"."+str(platform.sys.version_info.minor)+"."+str(platform.sys.version_info.micro)+"\n")
+	log_out.write("SigProfilerMatrixGenerator Version: "+sig.__version__+"\n")
+	log_out.write("SigProfilerPlotting version: "+sigPlt.__version__+"\n")
+	log_out.write("matplotlib version: "+plt.__version__+"\n")
+	log_out.write("statsmodels version: "+statsmodels.__version__+"\n")
+	log_out.write("scipy version: "+scipy.__version__+"\n")
+	log_out.write("pandas version: "+pd.__version__+"\n")
+	log_out.write("numpy version: "+np.__version__+"\n")
+	
+
+	log_out.write("\n-------Vital Parameters Used for the execution -------\n")
+	log_out.write("Project: {}\nGenome: {}\nInput File Path: {}\nexome: {}\nbed_file: {}\nchrom_based: {}\nplot: {}\ntsb_stat: {}\nseqInfo: {}\n".format(project, genome, vcfFiles, str(exome), str(bed_file), str(chrom_based),  str(plot), str(tsb_stat), str(seqInfo)))
+	log_out.write("\n-------Date and Time Data------- \n")
+	tic = datetime.datetime.now()
+	log_out.write("Date and Clock time when the execution started: "+str(tic)+"\n\n\n")
+	log_out.write("-------Runtime Checkpoints------- \n")
+	log_out.close()
 
 
 

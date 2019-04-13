@@ -93,7 +93,7 @@ def reference_paths (genome):
 	'''
 	# current_dir = os.path.realpath(__file__)
 	# ref_dir = re.sub('\/scripts/SigProfilerMatrixGenerator.py$', '', current_dir)
-	ref_dir = os.path.dirname(os.path.abspath(__file__))
+	ref_dir, tail = os.path.split(os.path.dirname(os.path.abspath(__file__)))
 	chrom_path =ref_dir + '/references/chromosomes/tsb/' + genome + "/"
 
 	return(chrom_path)
@@ -1271,7 +1271,7 @@ def catalogue_generator_INDEL_single (mutation_ID, lines, chrom, vcf_path, vcf_p
 			output.close()
 
 	# Prints the total number of complex mutations
-	print("Non-matching mutations: " + str(non_matching), file=out)
+	#print("Non-matching mutations: " + str(non_matching), file=out)
 	if chrom_based:
 		matrix_generator_INDEL(output_matrix, samples, indel_types, indel_types_tsb, indel_dict, indel_tsb_dict, indel_simple_dict, project, exome, limited_indel, bed, initial_chrom, plot)
 
