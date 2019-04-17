@@ -334,18 +334,19 @@ def catalogue_generator_single (lines, chrom, mutation_dict, mutation_types_tsb_
 					sample = line1[0]
 					sample2 = line2[0]
 
-					if change_start:
-						save_start = start1
-						change_start = False
-					mnv_seq += previous_ref
-					mut_seq += previous_mut
-
 					if sample != sample2:
-						# if mnv_seq != '':
-						# 	print('\t'.join([sample, chrom, str(save_start), mnv_seq + ">" + mut_seq]), file=seqOut_mns)
+						if mnv_seq != '':
+							print('\t'.join([sample, chrom, str(save_start), mnv_seq + ">" + mut_seq]), file=seqOut_mns)
 						mnv_seq = ''
 						mut_seq = ''
+					
 					else:						
+						if change_start:
+							save_start = start1
+							change_start = False
+						mnv_seq += previous_ref
+						mut_seq += previous_mut
+					
 						for l in range(start1+1, start2, 1):
 							mnv_seq += tsb_ref[chrom_string[l-1]][1]
 							mut_seq += tsb_ref[chrom_string[l-1]][1]
@@ -2090,7 +2091,7 @@ def matrix_generator_DINUC (output_matrix, samples, bias_sort, all_dinucs, all_m
 
 	mut_count_all['78'] = mut_4992.groupby(mut_4992.index.str[4:9]).sum()
 	mut_count_all['186'] = mut_4992.groupby(mut_4992.index.str[0:2] + mut_4992.index.str[4:9]).sum()
-	mut_count_all['1248'] = mut_4992.groupby(mut_4992.index.str[2:9]).sum()
+	mut_count_all['1248'] = mut_4992.groupby(mut_4992.index.str[2:]).sum()
 
 
 	mut_count_all['78'].index.name = 'MutationType'
