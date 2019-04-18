@@ -282,7 +282,7 @@ def catalogue_generator_single (lines, chrom, mutation_dict, mutation_types_tsb_
 
 		dinuc_sub = [int(y[2])-int(x[2]) for x,y in zip(lines, lines[1:])]
 		dinuc_index_temp = [i for i, x in enumerate(dinuc_sub) if x == 1]
-		mnv_index_temp = [i for i, x in enumerate(dinuc_sub) if x <= mnv]
+		mnv_index_temp = [i for i, x in enumerate(dinuc_sub) if x <= mnv and x>0]
 
 
 		if seqInfo:
@@ -301,13 +301,27 @@ def catalogue_generator_single (lines, chrom, mutation_dict, mutation_types_tsb_
 
 			mnv_index = []
 			if len(mnv_index_temp) > 1:
-				if mnv_index_temp[0] + 1 == mnv_index_temp[1] or mnv_index_temp[0] not in dinuc_index_temp:
-					mnv_index.append(mnv_index_temp[0])
-				if mnv_index_temp[-1] -1 == mnv_index_temp[-2] or mnv_index_temp[-1] not in dinuc_index_temp:
-					mnv_index.append(mnv_index_temp[-1])		
+				if mnv_index_temp[0] + 1 == mnv_index_temp[1]:
+					if lines[mnv_index_temp[0]][0] == lines[mnv_index_temp[1]][0]:
+						mnv_index.append(mnv_index_temp[0])	
+				elif mnv_index_temp[0] not in dinuc_index_temp:
+					mnv_index.append(mnv_index_temp[0])	
+				else:
+					pass
 				for i in range (1, len(mnv_index_temp)-1, 1):
-					if mnv_index_temp[i] + 1 == mnv_index_temp[i+1] or mnv_index_temp[i]-1 == mnv_index_temp[i-1] or mnv_index_temp[i] not in dinuc_index_temp:
-						mnv_index.append(mnv_index_temp[i])
+					if mnv_index_temp[i] + 1 == mnv_index_temp[i+1]: 
+						if lines[mnv_index_temp[i]][0] == lines[mnv_index_temp[i+1]][0]:
+							mnv_index.append(mnv_index_temp[i])	
+					elif mnv_index_temp[i]-1 == mnv_index_temp[i-1]:
+						if lines[mnv_index_temp[i]][0] == lines[mnv_index_temp[i-1]][0]:
+							mnv_index.append(mnv_index_temp[i])	
+					elif mnv_index_temp[i] not in dinuc_index_temp:
+						mnv_index.append(mnv_index_temp[i])	
+				if mnv_index_temp[-1] -1 == mnv_index_temp[-2]:
+					if lines[mnv_index_temp[-1]][0] == lines[mnv_index_temp[-2]][0]:
+						mnv_index.append(mnv_index_temp[-1])
+				elif mnv_index_temp[-1] not in dinuc_index_temp:
+					mnv_index.append(mnv_index_temp[-1])
 
 
 				dinuc_index = [x for x in dinuc_index_temp if x not in mnv_index]
@@ -335,8 +349,6 @@ def catalogue_generator_single (lines, chrom, mutation_dict, mutation_types_tsb_
 					sample2 = line2[0]
 
 					if sample != sample2:
-						if mnv_seq != '':
-							print('\t'.join([sample, chrom, str(save_start), mnv_seq + ">" + mut_seq]), file=seqOut_mns)
 						mnv_seq = ''
 						mut_seq = ''
 					
