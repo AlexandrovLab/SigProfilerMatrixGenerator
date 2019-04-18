@@ -27,8 +27,6 @@ def save_chrom_strings (genome):
 	'''
 
 	# Instantiates all of the relevant paths/creates them if not present
-	#current_dir = os.getcwd()
-	#ref_dir = re.sub('\/scripts$', '', current_dir)
 	ref_dir, tail = os.path.split(os.path.dirname(os.path.abspath(__file__)))
 	chrom_fasta_path = ref_dir + '/references/chromosomes/fasta/' + genome + "/"
 	chrom_string_path = ref_dir + '/references/chromosomes/chrom_string/' + genome + '/'
@@ -53,13 +51,10 @@ def save_chrom_strings (genome):
 			if file_name[-4] == 'dna':
 				with open(chrom_fasta_path + files) as chrom, open(chrom_string_path + chromosome + ".txt", 'w') as out:
 					next(chrom)
-					chromosome_final = ''
 					for lines in chrom:
 						line = lines.strip()
-						chromosome_final += line
+						print(line, file=out, end='')
 
-
-					print(chromosome_final, file=out)
 					if first:
 						print("The string file has been created for Chromosome: " + chromosome + " (" + str(i) + "/" + str(chrom_total) + ")")
 						first = False

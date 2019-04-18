@@ -119,15 +119,6 @@ def SigProfilerMatrixGeneratorFunc (project, genome, vcfFiles, exome=False, bed_
 					  'TA>AT','TA>CG','TA>CT','TA>GC','TA>GG','TA>GT',
 					  'TG>AA','TG>AC','TG>AT','TG>CA','TG>CC','TG>CT','TG>GA','TG>GC','TG>GT']
 
-	# mutation_types = ['AC>CA','AC>CG','AC>CT','AC>GA','AC>GG','AC>GT','AC>TA','AC>TG','AC>TT',
-	# 				  'AT>CA','AT>CC','AT>CG','AT>GA','AT>GC','AT>TA','CC>AA','CC>AG','CC>AT',
-	# 				  'CC>GA','CC>GG','CC>GT','CC>TA','CC>TG','CC>TT','CG>AT','CG>GC','CG>GT',
-	# 				  'CG>TA','CG>TC','CG>TT','CT>AA','CT>AC','CT>AG','CT>GA','CT>GC','CT>GG',
-	# 				  'CT>TA','CT>TC','CT>TG','GC>AA','GC>AG','GC>AT','GC>CA','GC>CG','GC>TA',
-	# 				  'TA>AT','TA>CG','TA>CT','TA>GC','TA>GG','TA>GT','TC>AA','TC>AG','TC>AT',
-	# 				  'TC>CA','TC>CG','TC>CT','TC>GA','TC>GG','TC>GT','TG>AA','TG>AC','TG>AT',
-	# 				  'TG>CA','TG>CC','TG>CT','TG>GA','TG>GC','TG>GT','TT>AA','TT>AC','TT>AG',
-	# 				  'TT>CA','TT>CC','TT>CG','TT>GA','TT>GC','TT>GG']
 	# Pre-fills the mutation types variable
 	size = 5
 	mut_types_initial = perm(size, "ACGT")
@@ -148,7 +139,6 @@ def SigProfilerMatrixGeneratorFunc (project, genome, vcfFiles, exome=False, bed_
 			for base2 in bases:
 				for base3 in tsb:
 					mutation_types_tsb_context.append(''.join([base3,":",base,"[",mut,"]",base2]))
-					#mut_tsb = base3 + ":" + mut
 
 	for base in bases:
 		for mut in mutation_types_non_tsb:
@@ -189,22 +179,15 @@ def SigProfilerMatrixGeneratorFunc (project, genome, vcfFiles, exome=False, bed_
 	indel_types_simple.append('MH')
 	indel_types_simple.append('complex')
 	# Instantiates the initial contexts to generate matrices for
-	contexts = ['6144']#, 'DINUC']
+	contexts = ['6144']
 
 	# Organizes all of the reference directories for later reference:
-	current_dir = os.path.realpath(__file__)
-	# current_dir = Path(os.path.realpath(__file__))
-	# ref_dir = Path(*current_dir.parent.parts[:-1])
-
 	ref_dir, tail = os.path.split(os.path.dirname(os.path.abspath(__file__)))
-	#ref_dir = re.sub('\/scripts/SigProfilerMatrixGeneratorFunc.py$', '', current_dir)
 	chrom_path =ref_dir + '/references/chromosomes/tsb/' + genome + "/"
 	transcript_path = ref_dir + '/references/chromosomes/transcripts/' + genome + "/"
-	# chrom_path = ref_dir / 'references/chromosomes/tsb/' / genome
-	# transcript_path = ref_dir / 'references/chromosomes/transcripts/' / genome
 
 
-	#print(ref_dir, chrom_path, transcript_path)
+
 	# Terminates the code if the genome reference files have not been created/installed
 	if not os.path.exists(chrom_path):
 		print("The specified genome: " + genome + " has not been installed\nRun the following command to install the genome:\n\tpython sigProfilerMatrixGenerator/install.py -g " + genome)
@@ -214,8 +197,7 @@ def SigProfilerMatrixGeneratorFunc (project, genome, vcfFiles, exome=False, bed_
 	if vcfFiles[-1] != "/":
 		vcfFiles += "/"
 	vcf_path = vcfFiles + "input/"
-	# vcfFiles = Path(vcfFiles)
-	# vcf_path = vcfFiles / "input"
+
 
 	vcf_path_original = vcf_path
 	if not os.path.exists(vcf_path) or len(os.listdir(vcf_path)) < 1:
@@ -234,10 +216,8 @@ def SigProfilerMatrixGeneratorFunc (project, genome, vcfFiles, exome=False, bed_
 		for files in input_files:
 			shutil.copy(vcfFiles + files, vcf_path + files)
 	output_matrix = vcfFiles + "output/"
-	#output_matrix = vcfFiles / "output"
 
 	if not os.path.exists(output_matrix):
-		#os.system("mkdir " + output_matrix)
 		os.makedirs(output_matrix)
 
 
@@ -257,7 +237,7 @@ def SigProfilerMatrixGeneratorFunc (project, genome, vcfFiles, exome=False, bed_
 	log_out = open(log_file, 'w')
 	log_out.write("THIS FILE CONTAINS THE METADATA ABOUT SYSTEM AND RUNTIME\n\n\n")
 	log_out.write("-------System Info-------\n")
-	log_out.write("Operating System Name: "+ os.uname()[0]+"\n"+"Nodename: "+os.uname()[1]+"\n"+"Release: "+os.uname()[2]+"\n"+"Version: "+os.uname()[3]+"\n")
+	log_out.write("Operating System Name: "+ platform.uname()[0]+"\n"+"Nodename: "+ platform.uname()[1]+"\n"+"Release: "+ platform.uname()[2]+"\n"+"Version: "+ platform.uname()[3]+"\n")
 	log_out.write("\n-------Python and Package Versions------- \n")
 	log_out.write("Python Version: "+str(platform.sys.version_info.major)+"."+str(platform.sys.version_info.minor)+"."+str(platform.sys.version_info.micro)+"\n")
 	log_out.write("SigProfilerMatrixGenerator Version: "+sig.__version__+"\n")
@@ -296,8 +276,6 @@ def SigProfilerMatrixGeneratorFunc (project, genome, vcfFiles, exome=False, bed_
 	unique_folder = project + "_"+ str(uuid.uuid4())
 	output_path = output_matrix + "temp/" + unique_folder + "/"
 	if os.path.exists(output_path):
-		# os.system("rm -r " + output_path)
-		# os.remove(output_path)
 		shutil.rmtree(output_path)
 	os.makedirs(output_path)
 
@@ -355,7 +333,7 @@ def SigProfilerMatrixGeneratorFunc (project, genome, vcfFiles, exome=False, bed_
 
 		# Skips INDELs if none are present and deletes the temp folder
 		elif i ==1 and not indel:
-			os.system("rm -r " + output_matrix + "temp/")
+			shutil.rmtree(output_matrix + "temp/")
 			continue
 
 		# Removes hidden files generated in macos
@@ -372,10 +350,8 @@ def SigProfilerMatrixGeneratorFunc (project, genome, vcfFiles, exome=False, bed_
 			bed_file_path = None
 
 		# Sorts files based on chromosome, sample, and start position
-		#zeros = np.zeros(len(mut_types))
 		first_chrom = True
 		first_dinuc = True
-		#mutation_pd = pd.DataFrame(index=mut_types)
 		if not chrom_based:
 			chrom_start = None
 		if i != 1:
@@ -394,13 +370,11 @@ def SigProfilerMatrixGeneratorFunc (project, genome, vcfFiles, exome=False, bed_
 					dinuc = False
 
 				if first_chrom:
-					#mutation_pd = pd.DataFrame.from_dict(mutation_dict)
 					if dinuc:
 						mutation_dinuc_pd_all = pd.DataFrame.from_dict(all_dinucs)
 						first_dinuc = False
 					first_chrom = False
 				else:
-					#mutation_pd = mutation_pd.add(pd.DataFrame.from_dict(mutation_dict), fill_value=0)
 					if dinuc:
 						if first_dinuc:
 							mutation_dinuc_pd_all = pd.DataFrame.from_dict(all_dinucs)
@@ -408,17 +382,12 @@ def SigProfilerMatrixGeneratorFunc (project, genome, vcfFiles, exome=False, bed_
 						else:
 							mutation_dinuc_pd_all = mutation_dinuc_pd_all.add(pd.DataFrame.from_dict(all_dinucs), fill_value=0)
 
-				#mutation_pd = mutation_pd.fillna(0)
-
-
 				skipped_muts += skipped_mut
 				analyzed_muts[0] += total
 				analyzed_muts[1] += total_DINUC
-			#sample_count_high = len(list(mutation_pd.columns.values))	
 
 			sample_count_high = len(samples)	
 
-		#if i != 1:
 			if exome:
 				with open(vcf_path + "exome_temp.txt") as f:
 					lines = [line.strip().split() for line in f]
@@ -549,9 +518,7 @@ def SigProfilerMatrixGeneratorFunc (project, genome, vcfFiles, exome=False, bed_
 			matGen.matrix_generator_INDEL(output_matrix, samples, indel_types, indel_types_tsb, indel_types_simple, mutation_ID['ID'], mutation_ID['tsb'], mutation_ID['simple'], project, exome, limited_indel, bed, chrom_start, plot)
 
 		if i == 1:
-			# os.system("rm -r " + output_matrix + "temp/")
 			shutil.rmtree(output_matrix + "temp/")
-			#os.remove(output_matrix + "temp/")
 		end = time.time() - start
 		print("Completed! Elapsed time: " + str(round(end, 2)) + " seconds.")
 
