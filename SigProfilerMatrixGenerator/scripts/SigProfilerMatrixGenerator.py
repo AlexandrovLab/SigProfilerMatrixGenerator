@@ -1177,7 +1177,7 @@ def catalogue_generator_INDEL_single (mutation_ID, lines, chrom, vcf_path, vcf_p
 						bed_file_tsb.write(sample + '\t' + chrom + '\t' + str(start) + '\t' + indel_key_tsb + "\t" + ref + "\t" + mut + "\n")
 
 					if seqInfo:
-						print("\t".join([sample, chrom, str(start), indel_key, ref, mut, strand]), file=seqOut)
+						print("\t".join([sample, chrom, str(start), indel_key_tsb, ref, mut, strand]), file=seqOut)
 
 				else:
 					if not functionFlag:
