@@ -4,6 +4,7 @@
 
 #Contact: ebergstr@eng.ucsd.edu
 
+from __future__ import print_function
 from . import SigProfilerMatrixGenerator as matGen
 import os
 import SigProfilerMatrixGenerator as sig
