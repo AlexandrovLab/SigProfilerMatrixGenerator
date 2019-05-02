@@ -5,7 +5,7 @@ import shutil
 
 #remove the dist folder first if exists
 if os.path.exists("dist"):
-    shutil.rmtree("dist")
+	shutil.rmtree("dist")
 
 def readme():
 	with open('README.rst') as f:
@@ -15,15 +15,15 @@ VERSION = '0.1.25'
 
 def write_version_py(filename='SigProfilerMatrixGenerator/version.py'):
 	# Copied from numpy setup.py
-    cnt = """
+	cnt = """
 # THIS FILE IS GENERATED FROM SIGPROFILEMATRIXGENERATOR SETUP.PY
 short_version = '%(version)s'
 version = '%(version)s'
-    
-    """
-    fh = open(filename, 'w')
-    fh.write(cnt % {'version': VERSION,})
-    fh.close()
+	
+	"""
+	fh = open(filename, 'w')
+	fh.write(cnt % {'version': VERSION,})
+	fh.close()
 
 write_version_py()
 
@@ -37,7 +37,7 @@ setup(name='SigProfilerMatrixGenerator',
 		packages=find_packages(),#['SigProfilerMatrixGenerator'],
 		install_requires =[
 			"matplotlib>=2.2.2",
-			"sigProfilerPlotting>=0.1.31",
+			"sigProfilerPlotting>=1.0.1",
 			"statsmodels>=0.9.0",
 			"scipy>=1.1.0",
 			"pandas>=0.23.4",
