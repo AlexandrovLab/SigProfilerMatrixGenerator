@@ -28,7 +28,7 @@ def md5(fname):
     return (hash_md5.hexdigest())
 
 
-def install_chromosomes (genomes, ref_dir, custom, rsync):
+def install_chromosomes (genomes, ref_dir, custom, rsync, bash):
 	if custom:
 		for genome in genomes:
 			os.system("gzip -d references/chromosomes/fasta/" + genome + "/*.gz")
@@ -81,14 +81,28 @@ def install_chromosomes (genomes, ref_dir, custom, rsync):
 						if wget_flag:
 							try:
 								if genome == 'GRCh37':
-									os.system("bash -c '" + 'wget -r -l1 -c -nc --no-parent -A "*.dna.chromosome.*" -nd -P ' + chromosome_fasta_path + ' ftp://ftp.ensembl.org/pub/grch37/current/fasta/homo_sapiens/dna/ 2>> install.log' + "'")
+									if bash:
+										os.system("bash -c '" + 'wget -r -l1 -c -nc --no-parent -A "*.dna.chromosome.*" -nd -P ' + chromosome_fasta_path + ' ftp://ftp.ensembl.org/pub/grch37/current/fasta/homo_sapiens/dna/ 2>> install.log' + "'")
+									else:
+										os.system('wget -r -l1 -c -nc --no-parent -A "*.dna.chromosome.*" -nd -P ' + chromosome_fasta_path + ' ftp://ftp.ensembl.org/pub/grch37/current/fasta/homo_sapiens/dna/ 2>> install.log')										
 									#os.system("wget -r -l1 -c -nc --no-parent -A '*.dna.chromosome.*' -nd -P " + chromosome_fasta_path + " ftp://ftp.ensembl.org/pub/grch37/update/fasta/homo_sapiens/dna/ 2>> install.log")
 								elif genome == 'mm9':
-									os.system("bash -c '" + 'wget -r -l1 -c -nc --no-parent -A "*.dna.chromosome.*" -nd -P ' + chromosome_fasta_path + ' ftp://ftp.ensembl.org/pub/release-67/fasta/mus_musculus/dna/ 2>> install.log' + "'")
+									if bash:
+										os.system("bash -c '" + 'wget -r -l1 -c -nc --no-parent -A "*.dna.chromosome.*" -nd -P ' + chromosome_fasta_path + ' ftp://ftp.ensembl.org/pub/release-67/fasta/mus_musculus/dna/ 2>> install.log' + "'")
+									else:
+										os.system('wget -r -l1 -c -nc --no-parent -A "*.dna.chromosome.*" -nd -P ' + chromosome_fasta_path + ' ftp://ftp.ensembl.org/pub/release-67/fasta/mus_musculus/dna/ 2>> install.log')
+
 								elif genome == 'rn6':
-									os.system("bash -c '" + 'wget -r -l1 -c -nc --no-parent -A "*.dna.chromosome.*"" -nd -P ' + chromosome_fasta_path + ' ftp://ftp.ensembl.org/pub/release-96/fasta/rattus_norvegicus/dna/ 2>> install.log' + "'")									
+									if bash:
+										os.system("bash -c '" + 'wget -r -l1 -c -nc --no-parent -A "*.dna.chromosome.*"" -nd -P ' + chromosome_fasta_path + ' ftp://ftp.ensembl.org/pub/release-96/fasta/rattus_norvegicus/dna/ 2>> install.log' + "'")									
+									else:
+										os.system('wget -r -l1 -c -nc --no-parent -A "*.dna.chromosome.*"" -nd -P ' + chromosome_fasta_path + ' ftp://ftp.ensembl.org/pub/release-96/fasta/rattus_norvegicus/dna/ 2>> install.log')									
 								else:
-									os.system("bash -c '" + 'wget -r -l1 -c -nc --no-parent -A "*.dna.chromosome.*" -nd -P ' + chromosome_fasta_path + ' ftp://ftp.ensembl.org/pub/release-93/fasta/' +species+'/dna/ 2>> install.log' + "'")
+									if bash:
+										os.system("bash -c '" + 'wget -r -l1 -c -nc --no-parent -A "*.dna.chromosome.*" -nd -P ' + chromosome_fasta_path + ' ftp://ftp.ensembl.org/pub/release-93/fasta/' +species+'/dna/ 2>> install.log' + "'")
+									else:
+										os.system('wget -r -l1 -c -nc --no-parent -A "*.dna.chromosome.*" -nd -P ' + chromosome_fasta_path + ' ftp://ftp.ensembl.org/pub/release-93/fasta/' +species+'/dna/ 2>> install.log')
+
 								#os.system("gunzip references/chromosomes/fasta/" + genome + "/*.gz")
 								os.system("gzip -d references/chromosomes/fasta/" + genome + "/*.gz")
 
@@ -98,13 +112,26 @@ def install_chromosomes (genomes, ref_dir, custom, rsync):
 					else:
 						try:
 							if genome == 'GRCh37':
-								os.system("bash -c '" + "rsync -av -m --include='*/' --include='*.dna.chromosome.*' --exclude='*' rsync://ftp.ensembl.org/ensembl/pub/grch37/current/fasta/homo_sapiens/dna/ " + chromosome_fasta_path + " 2>&1>> install.log" + "'")
+								if bash:
+									os.system("bash -c '" + "rsync -av -m --include='*/' --include='*.dna.chromosome.*' --exclude='*' rsync://ftp.ensembl.org/ensembl/pub/grch37/current/fasta/homo_sapiens/dna/ " + chromosome_fasta_path + " 2>&1>> install.log" + "'")
+								else:
+									os.system("rsync -av -m --include='*/' --include='*.dna.chromosome.*' --exclude='*' rsync://ftp.ensembl.org/ensembl/pub/grch37/current/fasta/homo_sapiens/dna/ " + chromosome_fasta_path + " 2>&1>> install.log")
 							elif genome == 'mm9':
-								os.system("bash -c '" + "rsync -av -m --include='*/' --include='*.dna.chromosome.*' --exclude='*' rsync://ftp.ensembl.org/ensembl/pub/release-67/fasta/mus_musculus/dna/ " + chromosome_fasta_path + " 2>&1>> install.log" + "'")
+								if bash:
+									os.system("bash -c '" + "rsync -av -m --include='*/' --include='*.dna.chromosome.*' --exclude='*' rsync://ftp.ensembl.org/ensembl/pub/release-67/fasta/mus_musculus/dna/ " + chromosome_fasta_path + " 2>&1>> install.log" + "'")
+								else:
+									os.system("rsync -av -m --include='*/' --include='*.dna.chromosome.*' --exclude='*' rsync://ftp.ensembl.org/ensembl/pub/release-67/fasta/mus_musculus/dna/ " + chromosome_fasta_path + " 2>&1>> install.log")									
 							elif genome == 'rn6':
-								os.system("bash -c '" + "rsync -av -m --include='*/' --include='*.dna.chromosome.*' --exclude='*' rsync://ftp.ensembl.org/ensembl/pub/release-96/fasta/rattus_norvegicus/dna/ " + chromosome_fasta_path + " 2>> install.log" + "'")									
+								if bash:
+									os.system("bash -c '" + "rsync -av -m --include='*/' --include='*.dna.chromosome.*' --exclude='*' rsync://ftp.ensembl.org/ensembl/pub/release-96/fasta/rattus_norvegicus/dna/ " + chromosome_fasta_path + " 2>> install.log" + "'")									
+								else:
+									os.system("rsync -av -m --include='*/' --include='*.dna.chromosome.*' --exclude='*' rsync://ftp.ensembl.org/ensembl/pub/release-96/fasta/rattus_norvegicus/dna/ " + chromosome_fasta_path + " 2>> install.log")									
 							else:
-								os.system("bash -c '" + "rsync -av -m --include='*/' --include='*.dna.chromosome.*' --exclude='*' rsync://ftp.ensembl.org/ensembl/pub/release-93/fasta/"+species+"/dna/ " + chromosome_fasta_path + " 2>&1>> install.log" + "'")
+								if bash:
+									os.system("bash -c '" + "rsync -av -m --include='*/' --include='*.dna.chromosome.*' --exclude='*' rsync://ftp.ensembl.org/ensembl/pub/release-93/fasta/"+species+"/dna/ " + chromosome_fasta_path + " 2>&1>> install.log" + "'")
+								else:
+									os.system("rsync -av -m --include='*/' --include='*.dna.chromosome.*' --exclude='*' rsync://ftp.ensembl.org/ensembl/pub/release-93/fasta/"+species+"/dna/ " + chromosome_fasta_path + " 2>&1>> install.log")
+
 							#os.system("gunzip references/chromosomes/fasta/" + genome + "/*.gz")
 							os.system("gzip -d references/chromosomes/fasta/" + genome + "/*.gz")
 
@@ -267,7 +294,7 @@ def benchmark (genome, ref_dir):
 	print("Installation was succesful.\nSigProfilerMatrixGenerator took " + str(end_time-start_time) + " seconds to complete.")
 
 
-def install (genome, custom=False, rsync=False):
+def install (genome, custom=False, rsync=False, bash=False):
 	print("Beginning installation. This may take up to 20 minutes to complete.")
 	first_path = os.getcwd()
 	# current_dir = os.path.realpath(__file__)
@@ -295,7 +322,7 @@ def install (genome, custom=False, rsync=False):
 		if not os.path.exists(dirs):
 			os.makedirs(dirs)
 
-	install_chromosomes(genomes, ref_dir, custom, rsync)
+	install_chromosomes(genomes, ref_dir, custom, rsync, bash)
 	install_chromosomes_tsb (genomes, ref_dir, custom)
 
 	if os.path.exists("BRCA_example/"):
