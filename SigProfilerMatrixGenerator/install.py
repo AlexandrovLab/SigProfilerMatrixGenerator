@@ -294,7 +294,7 @@ def benchmark (genome, ref_dir):
 	print("Installation was succesful.\nSigProfilerMatrixGenerator took " + str(end_time-start_time) + " seconds to complete.")
 
 
-def install (genome, custom=False, rsync=False, bash=False):
+def install (genome, custom=False, rsync=False, bash=True):
 	print("Beginning installation. This may take up to 20 minutes to complete.")
 	first_path = os.getcwd()
 	# current_dir = os.path.realpath(__file__)
