@@ -26,9 +26,10 @@ This section will guide you through the minimum steps required to create mutatio
 ```
 $ python
 >> from SigProfilerMatrixGenerator import install as genInstall
->> genInstall.install('GRCh37')
+>> genInstall.install('GRCh37', rsync=False, bash=True)
 ```
-    This will install the human 37 assembly as a reference genome. You may install as many genomes as you wish.
+    This will install the human 37 assembly as a reference genome. You may install as many genomes as you wish. If you have a firewall on your server, you may need to install rsync and use the rsync=True parameter. Similarly, if you do not have bash, 
+    use bash=False.
 
 3. Place your vcf files in your desired output folder. It is recommended that you name this folder based on your project's name
 4. From within a python session, you can now generate the matrices as follows:
