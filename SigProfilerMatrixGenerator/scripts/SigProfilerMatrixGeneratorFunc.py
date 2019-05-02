@@ -214,6 +214,8 @@ def SigProfilerMatrixGeneratorFunc (project, genome, vcfFiles, exome=False, bed_
 			input_files.remove("__init__.py")
 		if "__pycache__" in input_files:
 			input_files.remove("__pycache__")
+		if os.path.exists(vcfFiles + "output/"):
+			input_files.remove("output")
 		for files in input_files:
 			shutil.copy(vcfFiles + files, vcf_path + files)
 	output_matrix = vcfFiles + "output/"
