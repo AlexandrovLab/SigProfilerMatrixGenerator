@@ -10,9 +10,7 @@ The purpose of this document is to provide a guide for using the SigProfilerMatr
 The framework is written in PYTHON, however, it also requires the following software with the given versions (or newer):
 
   * PYTHON          version 3.4 or newer
-  * PANDAS [MODULE]        any version
-  * WGET                   version 1.9
-  * SigProfilerPlotting    newest version (https://github.com/AlexandrovLab/SigProfilerPlotting)
+  * WGET                   version 1.9  or RSYNC if you have a firewall
 
 By default the installation process will save the FASTA files for all chromosomes for the default genome 
 assemblies (GRCh37, GRCH38, mm10, mm9). As a result, ~3 Gb of storage must be available for the downloads for each genome.
