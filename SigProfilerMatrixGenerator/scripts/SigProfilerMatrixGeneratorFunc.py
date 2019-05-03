@@ -519,6 +519,11 @@ def SigProfilerMatrixGeneratorFunc (project, genome, vcfFiles, exome=False, bed_
 			mutation_ID['simple'] = mutation_ID['simple'].to_dict('dict')
 			mutation_ID['tsb'] = mutation_ID['tsb'].to_dict('dict')
 			matGen.matrix_generator_INDEL(output_matrix, samples, indel_types, indel_types_tsb, indel_types_simple, mutation_ID['ID'], mutation_ID['tsb'], mutation_ID['simple'], project, exome, limited_indel, bed, chrom_start, plot)
+			matrices['ID'] = mutation_ID['ID']
+			remove_id = ['2:Ins:M:1','3:Ins:M:1','3:Ins:M:2','4:Ins:M:1','4:Ins:M:2','4:Ins:M:3','5:Ins:M:1','5:Ins:M:2','5:Ins:M:3','5:Ins:M:4','5:Ins:M:5','complex','non_matching']
+			for indel in remove_id:
+				for sample in matrices['ID']:
+					del matrices['ID'][sample][indel]
 
 		if i == 1:
 			shutil.rmtree(output_matrix + "temp/")
