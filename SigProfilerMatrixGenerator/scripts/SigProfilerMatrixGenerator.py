@@ -97,7 +97,7 @@ def reference_paths (genome):
 	ref_dir, tail = os.path.split(os.path.dirname(os.path.abspath(__file__)))
 	chrom_path =ref_dir + '/references/chromosomes/tsb/' + genome + "/"
 
-	return(chrom_path)
+	return(chrom_path, ref_dir)
 
 def BED_filtering (bed_file_path):
 	'''
@@ -270,9 +270,9 @@ def catalogue_generator_single (lines, chrom, mutation_dict, mutation_types_tsb_
 
 	if bed:
 		bed_temp_file = "bed_temp.txt"
-		bed_file = open(vcf_path + bed_temp_file, 'w')
+		bed_file = open(vcf_path + bed_temp_file, 'a')
 		bed_temp_file_context_tsb_DINUC = "bed_temp_context_tsb_DINUC.txt"
-		bed_file_context_tsb_DINUC = open(vcf_path + bed_temp_file_context_tsb_DINUC, 'w')
+		bed_file_context_tsb_DINUC = open(vcf_path + bed_temp_file_context_tsb_DINUC, 'a')
 
 	dinuc_tsb_ref = ['CC', 'CT', 'TC', 'TT', 'AA', 'AG', 'GA', 'GG']
 	chrom_start = chrom
@@ -1124,6 +1124,7 @@ def catalogue_generator_INDEL_single (mutation_ID, lines, chrom, vcf_path, vcf_p
 					else:
 						indel_key_tsb = "Q:" + indel_key
 						mutation_ID['tsb'].at[indel_key_tsb, sample] += 1
+						strand = 0
 
 					# Performs the gene strand bias test if desired
 					if gs:
@@ -1334,12 +1335,12 @@ def exome_check (genome, exome_temp_file, output_matrix, project, context, subco
 	udpate_chrom = False
 	#current_dir = os.path.realpath(__file__)
 	#ref_dir = re.sub('\/scripts/SigProfilerMatrixGenerator.py$', '', current_dir)
-	ref_dir = os.path.dirname(os.path.abspath(__file__))
+	ref_dir, tail = os.path.split(os.path.dirname(os.path.abspath(__file__)))
 
 	exome_file = ref_dir + "/references/chromosomes/exome/" + genome + "/" + genome + "_exome.interval_list"
 
 	exome_output_path = output_matrix + "vcf_files/" + context + "/"
-	if context == 'INDEL':
+	if context == 'ID':
 		context = subcontext
 	exome_output = exome_output_path + project + "_" + context + "_exome.vcf"
 	if not os.path.exists(exome_output_path):
@@ -1493,7 +1494,7 @@ def panel_check (genome, bed_temp_file, output_matrix, bed_file_path, project, c
 	panel_file = bed_file_path
 	panel_output_path = output_matrix + "vcf_files/" + context + "/"
 
-	if context == 'INDEL':
+	if context == 'ID':
 		context = subcontext
 	panel_output = panel_output_path + project + "_" + context + "_panel.vcf"
 	
@@ -1711,17 +1712,14 @@ def matrix_generator (context, output_matrix, project, samples, bias_sort, mut_c
 	types = list(mut_count_all['24'].index)
 	types = sorted(types, key=lambda val: (bias_sort[val[0]], val[2:]))
 	mut_count_all['24'] = mut_count_all['24'].reindex(types)
-	#gc.collect()
-	#mut_6144.to_csv(output_file_matrix, header=True, sep='\t', chunksize=100000, compression='gzip')
 	df2csv(mut_count_all['6144'], output_file_matrix)
+
 	# TSB test:
 	if tsb_stat:
-
 		types_7pN = list(mut_count_all['24'].index)
 		types.append('T:T>CpN')
 		types.append('U:T>CpN')
 		types_7pN = list(mut_count_all['384'].index)
-
 
 		mut_count_all['6_pvalue_temp'] = mut_count_all['24']
 		mut_count_all['7_pvalue_temp'] = mut_count_all['384']
@@ -1831,28 +1829,28 @@ def matrix_generator (context, output_matrix, project, samples, bias_sort, mut_c
 					pvals_24.append(stats.binom_test([tsb_24[sample][i], tsb_24_U[sample][i]]))
 
 				qvals = sm.fdrcorrection(pvals)[1]
-				qvals_384 = sm.fdrcorrection(pvals)[1]
-				qvals_24 = sm.fdrcorrection(pvals)[1]
+				qvals_384 = sm.fdrcorrection(pvals_384)[1]
+				qvals_24 = sm.fdrcorrection(pvals_24)[1]
 				p_index = 0
 				for mut in tsb_index:
 					print(sample + "\t" + mut + "\t" + str(enrichment[p_index]) + "\t" + str(pvals[p_index]) + "\t" + str(qvals[p_index]), file=out2)
 					if qvals[p_index] < 0.01:
 						 print(sample + "\t" + mut + "\t" + str(enrichment[p_index]) + "\t" + str(pvals[p_index]) + "\t" + str(qvals[p_index]), file=significant_tsb)
-				p_index += 1
+					p_index += 1
 
 				p_index = 0
 				for mut in tsb_index384:
 					print(sample + "\t" + mut + "\t" + str(enrichment_384[p_index]) + "\t" + str(pvals_384[p_index]) + "\t" + str(qvals_384[p_index]), file=out384)
 					if qvals_384[p_index] < 0.01:
 						 print(sample + "\t" + mut + "\t" + str(enrichment_384[p_index]) + "\t" + str(pvals_384[p_index]) + "\t" + str(qvals_384[p_index]), file=significant_tsb)
-				p_index += 1
+					p_index += 1
 
 				p_index = 0
 				for mut in tsb_index24:
 					print(sample + "\t" + mut + "\t" + str(enrichment_24[p_index]) + "\t" + str(pvals_24[p_index]) + "\t" + str(qvals_24[p_index]), file=out24)
 					if qvals_24[p_index] < 0.01:
 						 print(sample + "\t" + mut + "\t" + str(enrichment_24[p_index]) + "\t" + str(pvals_24[p_index]) + "\t" + str(qvals_24[p_index]), file=significant_tsb)
-				p_index += 1
+					p_index += 1
 		significant_tsb.close()
 
 
@@ -1901,6 +1899,11 @@ def matrix_generator (context, output_matrix, project, samples, bias_sort, mut_c
 					sigPlt.plotSBS(output_file_matrix, output_path, project, '24', False)
 				except:
 					pass
+			elif cont == '1536':
+				try:
+					sigPlt.plotSBS(output_file_matrix, output_path, project, '1536', False)
+				except:
+					pass				
 
 
 	# If this code is run as an imported function, delete the physcial matrix.
@@ -2052,7 +2055,10 @@ def matrix_generator_INDEL (output_matrix, samples, indel_types, indel_types_tsb
 			sigPlt.plotID(output_file_matrix_tsb, output_path, project, '96ID', False)
 		except:
 			pass
-
+		try:
+			sigPlt.plotID(output_file_matrix_simple, output_path, project, 'ID_simple', False)
+		except:
+			pass
 
 def matrix_generator_DINUC (output_matrix, samples, bias_sort, all_dinucs, all_mut_types, project, exome, bed, chrom_start=None, plot=False):
 	'''
@@ -2163,8 +2169,9 @@ def matrix_generator_DINUC (output_matrix, samples, bias_sort, all_dinucs, all_m
 			if not os.path.exists(output_path):
 				os.mkdir(output_path)
 			try:
-				if cont == '78' or cont == '188':
+				if cont == '78' or cont == '186':
 					sigPlt.plotDBS(output_file_matrix, output_path, project, cont, False)
 			except:
 				pass
+
 	return(mut_count_all['78'])
