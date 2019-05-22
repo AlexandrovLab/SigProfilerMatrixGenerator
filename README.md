@@ -3,7 +3,7 @@ SigProfilerMatrixGenerator creates mutational matrices for all types of somatic 
 
 **INTRODUCTION**
 
-The purpose of this document is to provide a guide for using the SigProfilerMatrixGenerator framework to generate mutational matrices for a set of samples with associated mutational catalogues. 
+The purpose of this document is to provide a guide for using the SigProfilerMatrixGenerator framework to generate mutational matrices for a set of samples with associated mutational catalogues. An extensive Wiki page detailing the usage of this tool can be found at https://osf.io/s93d5/?view_only=3aebf64a8abd4da4acc04dee14622924
 
 **PREREQUISITES**
 
@@ -13,7 +13,7 @@ The framework is written in PYTHON, however, it also requires the following soft
   * WGET                   version 1.9  or RSYNC if you have a firewall
 
 By default the installation process will save the FASTA files for all chromosomes for the default genome 
-assemblies (GRCh37, GRCH38, mm10, mm9). As a result, ~3 Gb of storage must be available for the downloads for each genome.
+assemblies (GRCh37, GRCH38, mm10, mm9, rn6). As a result, ~3 Gb of storage must be available for the downloads for each genome.
 
 **QUICK START GUIDE**
 
@@ -36,13 +36,21 @@ $ python
 ```
 $ python3
 >>from SigProfilerMatrixGenerator.scripts import SigProfilerMatrixGeneratorFunc as matGen
->>matrices = matGen.SigProfilerMatrixGeneratorFunc("test", "GRCh37", "/Users/ebergstr/Desktop/test",plot=True)
+>>matrices = matGen.SigProfilerMatrixGeneratorFunc("test", "GRCh37", "/Users/ebergstr/Desktop/test",plot=True, exome=False, bed_file=None, chrom_based=False, tsb_stat=False, seqInfo=False)
 ```
-  The layout of the parameters are as follows:
+  The layout of the required parameters are as follows:
   
-      SigProfilerMatrixGeneratorFunc(project, reference_genome, path_to_input_files, plot)
+      SigProfilerMatrixGeneratorFunc(project, reference_genome, path_to_input_files)
       
-  where project, reference_genome, and path_to_input_files must be strings (surrounded by quotation marks, ex: "test") and plot is a boolean argument (True or False)
+  where project, reference_genome, and path_to_input_files must be strings (surrounded by quotation marks, ex: "test"). Optional parameters include:
+      
+      exome=False:       [boolean] Downsamples mutational matrices to the exome regions of the genome
+      bed_file=None      [string path to bed_file] Downsamples mutational matrices to custom regions of the genome. Requires the full path to the BED file. 
+      chrom_based=False  [boolean] Outputs chromosome-based matrices
+      plot=False         [boolean] Integrates with SigProfilerPlotting to output all available visualizations for each matrix. 
+      tsb_stat=False     [boolean] Outputs the results of a transcriptional strand bias test for the respective matrices. 
+      seqInfo=False      [boolean] Ouputs original mutations into a text file that contains the SigProfilerMatrixGenerator classificaiton for each mutation. 
+  
 
 
 **INPUT FILE FORMAT**
@@ -53,8 +61,7 @@ This tool currently supports maf, vcf, simple text file, and ICGC formats. The u
 **Output File Structure**
 
 The output structure is divided into three folders: input, output, and logs. The input folder contains copies of the user-provided input files. The outputfolder contains
-a DINUC, SBS, INDEL, and TSB folder (there will also be a plots folder if this parameter is chosen). The matrices will be saved into the appropriate folders. The logs 
-folder contains the error and log files for the submitted job.
+a DBS, SBS, ID, and TSB folder (there will also be a plots folder if this parameter is chosen). The matrices are saved into the appropriate folders. The logs folder contains the error and log files for the submitted job.
 
 
 **SUPPORTED GENOMES**
@@ -73,6 +80,8 @@ Assembly GCA_000001635.8, Jan 2012. Released July 2012. Last updated March 2018.
 GRCm37 [mm9] (Release 67, NCBIM37), INDSDC Assembly GCA_000001635.18.
 Released Jan 2011. Last updated March 2012. This genome was downloaded from ENSEMBL database version release 67.
 
+rn6 (Rnor_6.0) INSDC Assembly GCA_000001895.4, Jul 2014. Released Jun 2015. Last updated Jan 2017. 
+This genome was downloaded from ENSEMBL database version 96.6.
 
 **LOG FILES**
 
@@ -81,7 +90,15 @@ For all errors, please email the error and progress log files to the primary con
 
 **COPYRIGHT**
 
-This software and its documentation are copyright 2018 as a part of the sigProfiler project. The sigProfilerMatrixGenerator framework is free software and is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+Copyright (c) 2019, Erik Bergstrom [Alexandrov Lab] All rights reserved.
+
+Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
+
+Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
+
+Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. 
 
 **CONTACT INFORMATION**
 
