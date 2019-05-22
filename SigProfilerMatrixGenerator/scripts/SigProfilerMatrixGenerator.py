@@ -1460,7 +1460,7 @@ def exome_check (genome, exome_temp_file, output_matrix, project, context, subco
 
 	return(mutation_dict, samples)
 
-def panel_check (genome, bed_temp_file, output_matrix, bed_file_path, project, context, subcontext=None):
+def panel_check (genome, mutation_dict, bed_temp_file, output_matrix, bed_file_path, project, context, subcontext=None):
 	'''
 	Filters the variants for those present within the exome. 
 
@@ -1480,7 +1480,7 @@ def panel_check (genome, bed_temp_file, output_matrix, bed_file_path, project, c
 
 	# Instantiates the relevant variables/data structures
 	base_cushion = 200
-	mutation_dict = {}
+	#mutation_dict = {}
 	samples = []
 
 	# current_dir = os.getcwd()

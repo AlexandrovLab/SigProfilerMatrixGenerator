@@ -409,9 +409,19 @@ def SigProfilerMatrixGeneratorFunc (project, genome, vcfFiles, exome=False, bed_
 				for line in sorted(lines, key = lambda x: (['X','Y','1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', 'MT', 'M'].index(x[1]), int(x[2]))):
 					print('\t'.join(line), file=output)
 				output.close()
-				mutation_mat, samples2 = matGen.panel_check(genome, vcf_path + "bed_temp.txt", output_matrix, bed_file_path, project, "SNV")
+				mutation_dict = pd.DataFrame(0, index=mut_types, columns=samples)
+				mutation_dict = mutation_dict.to_dict('dict')
+				# mutation_mat, samples2 = matGen.panel_check(genome, vcf_path + "bed_temp.txt", output_matrix, bed_file_path, project, "SNV")
+				mutation_mat, samples2 = matGen.panel_check(genome, mutation_dict, vcf_path + "bed_temp.txt", output_matrix, bed_file_path, project, "SNV")
 				mutation_pd['6144'] = pd.DataFrame.from_dict(mutation_mat)
 				mutation_pd['6144'] = mutation_pd['6144'].fillna(0)
+				# if not mutation_pd['6144'].empty:
+				# 	for muts in mut_types:
+				# 		if muts not in mutation_pd['6144']:
+				# 			new = pd.DataFrame(0, index=[muts], columns=samples)
+				# 			mutation_pd['6144'] = pd.concat([mutation_pd['6144'], new]).reset_index(drop=True)
+
+				# 	mutation_pd['6144'] = mutation_pd['6144'].reindex(mut_types)
 
 			if not mutation_pd['6144'].empty:
 				matrices = matGen.matrix_generator (context, output_matrix, project, samples, bias_sort, mutation_pd, exome, mut_types, bed, chrom_start, functionFlag, plot, tsb_stat)
@@ -436,7 +446,8 @@ def SigProfilerMatrixGeneratorFunc (project, genome, vcfFiles, exome=False, bed_
 						print('\t'.join(line), file=output)
 					output.close()
 
-					all_dinucs, samples2 = matGen.panel_check(genome, vcf_path + "bed_temp_context_tsb_DINUC.txt", output_matrix, bed_file_path, project, "DBS")
+
+					all_dinucs, samples2 = matGen.panel_check(genome, all_dinucs, vcf_path + "bed_temp_context_tsb_DINUC.txt", output_matrix, bed_file_path, project, "DBS")
 					mutation_dinuc_pd_all = pd.DataFrame.from_dict(all_dinucs)
 
 				if not mutation_dinuc_pd_all.empty:
@@ -493,17 +504,25 @@ def SigProfilerMatrixGeneratorFunc (project, genome, vcfFiles, exome=False, bed_
 				for line in sorted(lines, key = lambda x: (['X','Y','1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', 'MT', 'M'].index(x[1]), int(x[2]))):
 					print('\t'.join(line), file=output)
 				output.close()
-				indel_dict, samples2 = matGen.panel_check(genome, vcf_path + "bed_temp.txt", output_matrix, bed_file_path, project, "ID", '83')
+				mutation_dict['ID'] = pd.DataFrame(0, index=indel_types, columns=samples)
+				mutation_dict = mutation_dict.to_dict('dict')
+				indel_dict, samples2 = matGen.panel_check(genome, mutation_dict, vcf_path + "bed_temp.txt", output_matrix, bed_file_path, project, "ID", '83')
 				mutation_ID['ID'] = pd.DataFrame.from_dict(indel_dict)
-
+				mutation_ID['ID'] = mutation_ID['ID'].fillna(0)
+				
 				with open(vcf_path + "bed_temp_simple.txt") as f:
 					lines = [line.strip().split() for line in f]
 				output = open(vcf_path + "bed_temp_simple.txt", 'w')
 				for line in sorted(lines, key = lambda x: (['X','Y','1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', 'MT', 'M'].index(x[1]), int(x[2]))):
 					print('\t'.join(line), file=output)
 				output.close()
-				indel_dict, samples2 = matGen.panel_check(genome, vcf_path + "bed_temp_simple.txt", output_matrix, bed_file_path, project, "ID", 'simple')
+
+				mutation_dict['simple'] = pd.DataFrame(0, index=indel_types_simple, columns=samples)
+				mutation_dict = mutation_dict.to_dict('dict')
+
+				indel_dict, samples2 = matGen.panel_check(genome, mutation_dict, vcf_path + "bed_temp_simple.txt", output_matrix, bed_file_path, project, "ID", 'simple')
 				mutation_ID['simple'] = pd.DataFrame.from_dict(indel_dict)
+				mutation_ID['simple'] = mutation_ID['simple'].fillna(0)
 
 				with open(vcf_path + "bed_temp_tsb.txt") as f:
 					lines = [line.strip().split() for line in f]
@@ -511,8 +530,13 @@ def SigProfilerMatrixGeneratorFunc (project, genome, vcfFiles, exome=False, bed_
 				for line in sorted(lines, key = lambda x: (['X','Y','1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', 'MT', 'M'].index(x[1]), int(x[2]))):
 					print('\t'.join(line), file=output)
 				output.close()
-				indel_dict, samples2 = matGen.panel_check(genome, vcf_path + "bed_temp_tsb.txt", output_matrix, bed_file_path, project, "ID", 'tsb')
+
+				mutation_dict['tsb'] = pd.DataFrame(0, index=indel_types_tsb, columns=samples)
+				mutation_dict = mutation_dict.to_dict('dict')
+
+				indel_dict, samples2 = matGen.panel_check(genome, mutation_dict, vcf_path + "bed_temp_tsb.txt", output_matrix, bed_file_path, project, "ID", 'tsb')
 				mutation_ID['tsb'] = pd.DataFrame.from_dict(indel_dict)
+				mutation_ID['tsb'] = mutation_ID['tsb'].fillna(0)
 
 
 			mutation_ID['ID'] = mutation_ID['ID'].to_dict('dict')
