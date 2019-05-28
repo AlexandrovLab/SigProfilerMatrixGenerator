@@ -158,7 +158,7 @@ def convertVCF (project, vcf_path, genome, output_path, ncbi_chrom, log_file):
 						ref_2 = ref[1]
 						mut_1 = mut[0]
 						mut_2 = mut[1]
-
+						snv = True
 						# Check first base combination
 						if ref_1 not in 'ACGT-':
 							print("The ref base is not recognized. Skipping this mutation: " + chrom + " " + str(start) + " " + ref + " " + mut, file=out)
@@ -471,7 +471,7 @@ def convertTxt (project, vcf_path, genome, output_path, ncbi_chrom, log_file):
 					ref_2 = ref[1]
 					mut_1 = mut[0]
 					mut_2 = mut[1]
-
+					snv = True
 					# Check first base combination
 					if ref_1 not in 'ACGT-':
 						print("The ref base is not recognized. Skipping this mutation: " + chrom + " " + str(start) + " " + ref + " " + mut, file=out)
@@ -675,6 +675,8 @@ def convertMAF (project, vcf_path, genome, output_path, ncbi_chrom, log_file):
 		name = file.split(".")
 		with open (vcf_path + file) as f:
 			for lines in f:
+				if lines[0] == "#":
+					continue
 				next(f)
 				try:
 					line = lines.strip().split('\t')
@@ -779,7 +781,7 @@ def convertMAF (project, vcf_path, genome, output_path, ncbi_chrom, log_file):
 					ref_2 = ref[1]
 					mut_1 = mut[0]
 					mut_2 = mut[1]
-
+					snv = True
 					# Check first base combination
 					if ref_1 not in 'ACGT-':
 						print("The ref base is not recognized. Skipping this mutation: " + chrom + " " + str(start) + " " + ref + " " + mut, file=out)
@@ -1093,7 +1095,7 @@ def convertICGC (project, vcf_path, genome, output_path, ncbi_chrom, log_file):
 					ref_2 = ref[1]
 					mut_1 = mut[0]
 					mut_2 = mut[1]
-
+					snv = True
 					# Check first base combination
 					if ref_1 not in 'ACGT-':
 						print("The ref base is not recognized. Skipping this mutation: " + chrom + " " + str(start) + " " + ref + " " + mut, file=out)
