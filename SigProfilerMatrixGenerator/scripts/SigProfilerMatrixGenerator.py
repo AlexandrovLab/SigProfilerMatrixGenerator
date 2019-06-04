@@ -195,7 +195,7 @@ def gene_range (files_path, indel=False):
 
 
 
-def catalogue_generator_single (lines, chrom, mutation_dict, mutation_types_tsb_context, vcf_path, vcf_path_original, vcf_files, bed_file_path, chrom_path, project, output_matrix, context, exome, genome, ncbi_chrom, functionFlag, bed, bed_ranges, chrom_based, plot, tsb_ref, transcript_path, tsb_stat, seqInfo, gs, log_file):
+def catalogue_generator_single (lines, chrom, mutation_dict, mutation_dinuc_pd_all, mutation_types_tsb_context, vcf_path, vcf_path_original, vcf_files, bed_file_path, chrom_path, project, output_matrix, context, exome, genome, ncbi_chrom, functionFlag, bed, bed_ranges, chrom_based, plot, tsb_ref, transcript_path, tsb_stat, seqInfo, gs, log_file):
 	'''
 	Generates the mutational matrix for 96, 1536, 384, and 6144 context using a single vcf file with all samples of interest.
 
@@ -256,11 +256,6 @@ def catalogue_generator_single (lines, chrom, mutation_dict, mutation_types_tsb_
 	sequence = ''
 
 	# Instantiates the necessary variables/data structures for DINUCs
-	dinucs = {}
-	dinucs_context = {}
-	dinucs_context_tsb = {}
-	dinucs_tsb = {}
-
 	if exome:
 		exome_temp_file = "exome_temp.txt"
 		exome_file = open(vcf_path + exome_temp_file, 'a')
@@ -412,37 +407,25 @@ def catalogue_generator_single (lines, chrom, mutation_dict, mutation_types_tsb_
 				continue
 
 			dinuc_seq_tsb = bias + ":" + dinuc_seq
-
-			if sample not in dinucs:
-				dinucs[sample] = {}
-				dinucs_context[sample] = {}
-				dinucs_context_tsb[sample] = {}
-				dinucs_tsb[sample] = {}
-
-				for dinucl in  mutation_types_tsb_context:
-					dinucs_context_tsb[sample][dinucl]=0
-
 			if dinuc[:2] not in dinuc_tsb_ref:
 				dinuc_seq_tsb = 'Q' + dinuc_seq_tsb[1:]
 				strand = '0'
 
 				if dinuc_seq_tsb in mutation_types_tsb_context:
-					dinucs_context_tsb[sample][dinuc_seq_tsb] += 1
+					mutation_dinuc_pd_all.at[dinuc_seq_tsb, sample] +=1
 
 				else:
 					dinuc_seq_tsb = "".join(["Q:",revcompl(dinuc_seq_tsb[-1]),"[",revcompl(dinuc_seq_tsb[4:6]),">",revcompl(dinuc_seq_tsb[7:9]),"]",revcompl(dinuc_seq_tsb[2])])
-					dinucs_context_tsb[sample][dinuc_seq_tsb] += 1
+					mutation_dinuc_pd_all.at[dinuc_seq_tsb, sample] +=1
 
 			else:
 				if dinuc_seq_tsb in mutation_types_tsb_context:
-					dinucs_context_tsb[sample][dinuc_seq_tsb] += 1
+					mutation_dinuc_pd_all.at[dinuc_seq_tsb, sample] +=1
 
 				else:
 					strand = '-1'
 					dinuc_seq_tsb = "".join([revbias(dinuc_seq_tsb[0]),":",revcompl(dinuc_seq_tsb[-1]),"[",revcompl(dinuc_seq_tsb[4:6]),">",revcompl(dinuc_seq_tsb[7:9]),"]",revcompl(dinuc_seq_tsb[2])])
-					dinucs_context_tsb[sample][dinuc_seq_tsb] += 1
-
-				
+					mutation_dinuc_pd_all.at[dinuc_seq_tsb, sample] +=1
 		
 
 			if seqInfo:
@@ -667,7 +650,6 @@ def catalogue_generator_single (lines, chrom, mutation_dict, mutation_types_tsb_
 
 
 	# Organizes the required dictionaries for the final matrix generation.
-	all_dinucs = dinucs_context_tsb
 	print("Chromosome " + chrom_start + " done", file=out)
 	out.flush()
 
@@ -686,7 +668,7 @@ def catalogue_generator_single (lines, chrom, mutation_dict, mutation_types_tsb_
 		chrom_start=None
 		out.close()
 
-		return(mutation_dict, skipped_count, total_analyzed, total_analyzed_DINUC, all_dinucs)
+		return(mutation_dict, skipped_count, total_analyzed, total_analyzed_DINUC, mutation_dinuc_pd_all)
 	else:
 		if not chrom_based:
 			chrom_start=None
@@ -1286,7 +1268,6 @@ def catalogue_generator_INDEL_single (mutation_ID, lines, chrom, vcf_path, vcf_p
 			output.close()
 
 	# Prints the total number of complex mutations
-	#print("Non-matching mutations: " + str(non_matching), file=out)
 	if chrom_based:
 		matrix_generator_INDEL(output_matrix, samples, indel_types, indel_types_tsb, indel_dict, indel_tsb_dict, indel_simple_dict, project, exome, limited_indel, bed, initial_chrom, plot)
 
@@ -1306,11 +1287,10 @@ def catalogue_generator_INDEL_single (mutation_ID, lines, chrom, vcf_path, vcf_p
 	# Calls the function to generate the final mutational matrix
 	if not chrom_based:
 		initial_chrom=None
-		#matrix_generator_INDEL(output_matrix, samples, indel_types, indel_types_tsb, indel_types_simple, indel_dict, indel_tsb_dict, indel_simple_dict, project, exome, limited_indel, bed, initial_chrom, plot)
 		if functionFlag:
 			return(mutation_ID, skipped_count, total_analyzed)
 
-def exome_check (genome, exome_temp_file, output_matrix, project, context, subcontext=None):
+def exome_check (mutation_pd, genome, exome_temp_file, output_matrix, project, context, cushion, subcontext=None):
 	'''
 	Filters the variants for those present within the exome. 
 
@@ -1327,14 +1307,12 @@ def exome_check (genome, exome_temp_file, output_matrix, project, context, subco
 	''' 
 
 	# Instantiates the relevant variables/data structures
-	base_cushion = 200
+	base_cushion = cushion
 	mutation_dict = {}
 	samples = []
 
 	initial = True
 	udpate_chrom = False
-	#current_dir = os.path.realpath(__file__)
-	#ref_dir = re.sub('\/scripts/SigProfilerMatrixGenerator.py$', '', current_dir)
 	ref_dir, tail = os.path.split(os.path.dirname(os.path.abspath(__file__)))
 
 	exome_file = ref_dir + "/references/chromosomes/exome/" + genome + "/" + genome + "_exome.interval_list"
@@ -1386,16 +1364,11 @@ def exome_check (genome, exome_temp_file, output_matrix, project, context, subco
 			while not stop:
 				if chrom == previous_chrom_ref:
 					if start >= previous_chrom_start - base_cushion and start <= previous_chrom_end + base_cushion:
-						if sample not in mutation_dict.keys():
-							samples.append(sample)
-							mutation_dict[sample] = {}
-						if mut_type not in mutation_dict[sample].keys():
-							mutation_dict[sample][mut_type] = 1
-						else:
-							mutation_dict[sample][mut_type] += 1
+						mutation_pd.at[mut_type, sample] += 1
 						read = True
 						print('\t'.join([chrom, str(start), ".", ref, mut]), file=out)
 						break
+
 
 				if read:
 					lines2 = exome.readline()
@@ -1427,13 +1400,7 @@ def exome_check (genome, exome_temp_file, output_matrix, project, context, subco
 							read = True
 							continue
 						elif start >= start_ref - base_cushion and start <= end_ref + base_cushion: 
-							if sample not in mutation_dict.keys():
-								samples.append(sample)
-								mutation_dict[sample] = {}
-							if mut_type not in mutation_dict[sample].keys():
-								mutation_dict[sample][mut_type] = 1
-							else:
-								mutation_dict[sample][mut_type] += 1
+							mutation_pd.at[mut_type, sample] += 1
 							read = True
 							print('\t'.join([chrom, str(start), ".", ref, mut]), file=out)
 							break
@@ -1458,9 +1425,9 @@ def exome_check (genome, exome_temp_file, output_matrix, project, context, subco
 			previous_chrom_end = end_ref
 
 
-	return(mutation_dict, samples)
+	return(mutation_pd, samples)
 
-def panel_check (genome, mutation_dict, bed_temp_file, output_matrix, bed_file_path, project, context, subcontext=None):
+def panel_check (mutation_pd, genome, bed_temp_file, output_matrix, bed_file_path, project, context, cushion, subcontext=None):
 	'''
 	Filters the variants for those present within the exome. 
 
@@ -1479,18 +1446,13 @@ def panel_check (genome, mutation_dict, bed_temp_file, output_matrix, bed_file_p
 	''' 
 
 	# Instantiates the relevant variables/data structures
-	base_cushion = 200
-	#mutation_dict = {}
+	base_cushion = cushion
 	samples = []
-
-	# current_dir = os.getcwd()
-	# ref_dir = re.sub('\/scripts$', '', current_dir)
 	ref_dir = os.path.dirname(os.path.abspath(__file__))
 
 
 	initial = True
 	udpate_chrom = False
-	#current_dir = os.path.realpath(__file__)
 	panel_file = bed_file_path
 	panel_output_path = output_matrix + "vcf_files/" + context + "/"
 
@@ -1542,13 +1504,7 @@ def panel_check (genome, mutation_dict, bed_temp_file, output_matrix, bed_file_p
 			while not stop:
 				if chrom == previous_chrom_ref:
 					if start >= previous_chrom_start - base_cushion and start <= previous_chrom_end + base_cushion:
-						if sample not in mutation_dict:
-							samples.append(sample)
-							mutation_dict[sample] = {}
-						if mut_type not in mutation_dict[sample]:
-							mutation_dict[sample][mut_type] = 1
-						else:
-							mutation_dict[sample][mut_type] += 1
+						mutation_pd.at[mut_type, sample] += 1
 						read = True
 						print('\t'.join([chrom, str(start), ".", ref, mut ]), file=out)
 						break
@@ -1581,13 +1537,7 @@ def panel_check (genome, mutation_dict, bed_temp_file, output_matrix, bed_file_p
 							read = True
 							continue
 						elif start >= start_ref - base_cushion and start <= end_ref + base_cushion: 
-							if sample not in mutation_dict:
-								samples.append(sample)
-								mutation_dict[sample] = {}
-							if mut_type not in mutation_dict[sample].keys():
-								mutation_dict[sample][mut_type] = 1
-							else:
-								mutation_dict[sample][mut_type] += 1
+							mutation_pd.at[mut_type, sample] += 1
 							read = True
 							print('\t'.join([chrom, str(start), ".", ref, mut ]), file=out)
 							break
@@ -1613,7 +1563,7 @@ def panel_check (genome, mutation_dict, bed_temp_file, output_matrix, bed_file_p
 
 	# logging.info("Panel filtering is complete. Proceeding with the final catalogue generation...")
 	# print("Panel filtering is complete. Proceeding with the final catalogue generation...")
-	return(mutation_dict, samples)
+	return(mutation_pd, samples)
 
 
 

@@ -1,9 +1,11 @@
+[![Docs](https://img.shields.io/badge/docs-latest-blue.svg)](https://osf.io/s93d5/wiki/home/) [![License](https://img.shields.io/badge/License-BSD\%202--Clause-orange.svg)](https://opensource.org/licenses/BSD-2-Clause)
+
 # SigProfilerMatrixGenerator
 SigProfilerMatrixGenerator creates mutational matrices for all types of somatic mutations. It allows downsizing the generated mutations only to parts for the genome (e.g., exome or a custom BED file). The tool seamlessly integrates with other SigProfiler tools. 
 
 **INTRODUCTION**
 
-The purpose of this document is to provide a guide for using the SigProfilerMatrixGenerator framework to generate mutational matrices for a set of samples with associated mutational catalogues. An extensive Wiki page detailing the usage of this tool can be found at https://osf.io/s93d5/?view_only=3aebf64a8abd4da4acc04dee14622924
+The purpose of this document is to provide a guide for using the SigProfilerMatrixGenerator framework to generate mutational matrices for a set of samples with associated mutational catalogues. An extensive Wiki page detailing the usage of this tool can be found at https://osf.io/s93d5/wiki/home/.
 
 **PREREQUISITES**
 
@@ -36,7 +38,7 @@ $ python
 ```
 $ python3
 >>from SigProfilerMatrixGenerator.scripts import SigProfilerMatrixGeneratorFunc as matGen
->>matrices = matGen.SigProfilerMatrixGeneratorFunc("test", "GRCh37", "/Users/ebergstr/Desktop/test",plot=True, exome=False, bed_file=None, chrom_based=False, tsb_stat=False, seqInfo=False)
+>>matrices = matGen.SigProfilerMatrixGeneratorFunc("test", "GRCh37", "/Users/ebergstr/Desktop/test",plot=True, exome=False, bed_file=None, chrom_based=False, tsb_stat=False, seqInfo=False, cushion=100)
 ```
   The layout of the required parameters are as follows:
   
@@ -50,6 +52,7 @@ $ python3
       plot=False         [boolean] Integrates with SigProfilerPlotting to output all available visualizations for each matrix. 
       tsb_stat=False     [boolean] Outputs the results of a transcriptional strand bias test for the respective matrices. 
       seqInfo=False      [boolean] Ouputs original mutations into a text file that contains the SigProfilerMatrixGenerator classificaiton for each mutation. 
+      cushion=100	[integer] Adds an Xbp cushion to the exome/bed_file ranges for downsampling the mutations.
   
 
 
@@ -87,6 +90,11 @@ This genome was downloaded from ENSEMBL database version 96.6.
 
 All errors and progress checkpoints are saved into *sigProfilerMatrixGenerator_[project]_[genome].err* and *sigProfilerMatrixGenerator_[project]_[genome].out*, respectively. 
 For all errors, please email the error and progress log files to the primary contact under CONTACT INFORMATION.
+
+**CITATION**
+
+E.N. Bergstrom, M.N. Huang, U. Mahto, M. Barnes, M.R. Stratton, S.G. Rozen, and L.B. Alexandrov (2019) SigProfilerMatrixGenerator: a tool for visualizing and exploring patterns of small mutational events. https://www.biorxiv.org/content/10.1101/653097v1
+
 
 **COPYRIGHT**
 
