@@ -1905,92 +1905,42 @@ def matrix_generator_INDEL (output_matrix, samples, indel_types, indel_types_tsb
 		file_prefix = project + ".ID83"
 		file_prefix_tsb = project + ".ID415"
 		file_prefix_simple = project + ".ID28"
+		file_prefix_complete = project + ".ID96"
 	else:
 		file_prefix = project + ".ID94"
 		file_prefix_tsb = project + ".ID415"
 		file_prefix_simple = project + ".ID28"
+		file_prefix_complete = project + ".ID96"
 	
 	if exome:
 		output_file_matrix = output_matrix_INDEL + file_prefix + ".exome"
 		output_file_matrix_tsb = output_matrix_INDEL + file_prefix_tsb + ".exome"
 		output_file_matrix_simple = output_matrix_INDEL + file_prefix_simple + ".exome"
+		output_file_matrix_complete = output_matrix_INDEL + file_prefix_complete + ".exome"
 	else:
 		if bed:
 			output_file_matrix = output_matrix_INDEL + file_prefix + ".region"
 			output_file_matrix_tsb = output_matrix_INDEL + file_prefix_tsb + ".region"
 			output_file_matrix_simple = output_matrix_INDEL + file_prefix_simple + ".region"
+			output_file_matrix_complete = output_matrix_INDEL + file_prefix_complete + ".region"
 		else:
 			output_file_matrix = output_matrix_INDEL + file_prefix + ".all"
 			output_file_matrix_tsb = output_matrix_INDEL + file_prefix_tsb + ".all"
 			output_file_matrix_simple = output_matrix_INDEL + file_prefix_simple + ".all"
+			output_file_matrix_complete = output_matrix_INDEL + file_prefix_complete + ".all"
 
 	if initial_chrom != None:
 		output_file_matrix += ".chr" + initial_chrom
 		output_file_matrix_tsb += ".chr" + initial_chrom
 		output_file_matrix_simple += ".chr" + initial_chrom
+		output_file_matrix_complete += ".chr" + initial_chrom
 
 
-	with open (output_file_matrix, 'w') as out:
-		# Prints all of the sample names into the first line of the file
-		print ('MutationType\t', end='', flush=False, file=out)  
-		samples.sort()
-		for sample in samples:
-			print (sample + '\t', end='', flush=False, file=out)
-		print(file=out)
-		
-		# Prints the mutation count for each INDEL type across every sample
-		for indel in indel_types:
-			print (indel + '\t', end='', flush =False, file=out)
-			for sample in samples:
-				if sample not in indel_dict.keys():
-					indel_dict[sample] = {}
-				if indel in indel_dict[sample].keys():
-					print (str(indel_dict[sample][indel]) + '\t', end='', file=out)
-				else:
-					print ('0\t', end='', file=out)
-			print(file=out)
-
-
-	with open (output_file_matrix_tsb, 'w') as out:
-		# Prints all of the sample names into the first line of the file
-		print ('MutationType\t', end='', flush=False, file=out)  
-		samples.sort()
-		for sample in samples:
-			print (sample + '\t', end='', flush=False, file=out)
-		print(file=out)
-
-		types = sorted(indel_types_tsb, key=lambda val: (bias_sort[val[0]], val[4:7], col_sort[val[8]] , val[2], val[10]))
-		# Prints the mutation count for each INDEL type across every sample
-		for indel in types:
-			print (indel + '\t', end='', flush =False, file=out)
-			for sample in samples:
-				if sample not in indel_tsb_dict.keys():
-					indel_tsb_dict[sample] = {}
-				if indel in indel_tsb_dict[sample].keys():
-					print (str(indel_tsb_dict[sample][indel]) + '\t', end='', file=out)
-				else:
-					print ('0\t', end='', file=out)
-			print(file=out)
-
-	with open (output_file_matrix_simple, 'w') as out:
-		# Prints all of the sample names into the first line of the file
-		print ('MutationType\t', end='', flush=False, file=out)  
-		samples.sort()
-		for sample in samples:
-			print (sample + '\t', end='', flush=False, file=out)
-		print(file=out)
-
-		# Prints the mutation count for each INDEL type across every sample
-		for indel in indel_types_simple:
-			print (indel + '\t', end='', flush =False, file=out)
-			for sample in samples:
-				if sample not in indel_simple_dict.keys():
-					indel_simple_dict[sample] = {}
-				if indel in indel_simple_dict[sample].keys():
-					print (str(indel_simple_dict[sample][indel]) + '\t', end='', file=out)
-				else:
-					print ('0\t', end='', file=out)
-			print(file=out)
+	short_id = pd.DataFrame(indel_dict).iloc[:83,:]
+	df2csv(short_id, output_file_matrix)
+	df2csv(indel_dict, output_file_matrix_complete)
+	df2csv(indel_tsb_dict, output_file_matrix_tsb)
+	df2csv(indel_simple_dict, output_file_matrix_simple)
 
 
 	if plot:
