@@ -49,7 +49,8 @@ def convertVCF (project, vcf_path, genome, output_path, ncbi_chrom, log_file):
 	for file in files:
 		file_name = file.split(".")
 		sample = file_name[0]
-		samples.append(sample)
+		if sample not in samples:
+			samples.append(sample)
 		if file == '.DS_Store':
 			continue
 		with open (vcf_path + file) as f:
