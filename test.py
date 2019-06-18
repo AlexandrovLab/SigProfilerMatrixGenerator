@@ -1,0 +1,2 @@
+from SigProfilerMatrixGenerator import install as genInstall
+from SigProfilerMatrixGenerator.scripts import SigProfilerMatrixGeneratorFunc as matGen
