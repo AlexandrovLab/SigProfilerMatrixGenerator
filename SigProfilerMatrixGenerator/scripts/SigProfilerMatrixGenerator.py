@@ -1268,8 +1268,8 @@ def catalogue_generator_INDEL_single (mutation_ID, lines, chrom, vcf_path, vcf_p
 			output.close()
 
 	# Prints the total number of complex mutations
-	if chrom_based:
-		matrix_generator_INDEL(output_matrix, samples, indel_types, indel_types_tsb, indel_dict, indel_tsb_dict, indel_simple_dict, project, exome, limited_indel, bed, initial_chrom, plot)
+	# if chrom_based:
+	# 	matrix_generator_INDEL(output_matrix, samples, indel_types, indel_types_tsb, indel_dict, indel_tsb_dict, indel_simple_dict, project, exome, limited_indel, bed, initial_chrom, plot)
 
 	if seqInfo:
 		seqOut.close()
@@ -1287,8 +1287,8 @@ def catalogue_generator_INDEL_single (mutation_ID, lines, chrom, vcf_path, vcf_p
 	# Calls the function to generate the final mutational matrix
 	if not chrom_based:
 		initial_chrom=None
-		if functionFlag:
-			return(mutation_ID, skipped_count, total_analyzed)
+	if functionFlag:
+		return(mutation_ID, skipped_count, total_analyzed)
 
 def exome_check (mutation_pd, genome, exome_temp_file, output_matrix, project, context, cushion, subcontext=None):
 	'''
