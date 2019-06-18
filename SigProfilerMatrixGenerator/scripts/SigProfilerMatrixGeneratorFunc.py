@@ -410,7 +410,7 @@ def SigProfilerMatrixGeneratorFunc (project, genome, vcfFiles, exome=False, bed_
 
 
 			if not mutation_pd['6144'].empty:
-				matrices = matGen.matrix_generator (context, output_matrix, project, samples, bias_sort, mutation_pd, exome, mut_types, bed, chrom, functionFlag, plot, tsb_stat)
+				matrices = matGen.matrix_generator (context, output_matrix, project, samples, bias_sort, mutation_pd, exome, mut_types, bed, chrom_start, functionFlag, plot, tsb_stat)
 			
 			if analyzed_muts[1] > 0:
 				if exome:
@@ -534,7 +534,7 @@ def SigProfilerMatrixGeneratorFunc (project, genome, vcfFiles, exome=False, bed_
 			# mutation_ID['ID'] = mutation_ID['ID'].to_dict('dict')
 			# mutation_ID['simple'] = mutation_ID['simple'].to_dict('dict')
 			# mutation_ID['tsb'] = mutation_ID['tsb'].to_dict('dict')
-			matGen.matrix_generator_INDEL(output_matrix, samples, indel_types, indel_types_tsb, indel_types_simple, mutation_ID['ID'], mutation_ID['tsb'], mutation_ID['simple'], project, exome, limited_indel, bed, chrom, plot)
+			matGen.matrix_generator_INDEL(output_matrix, samples, indel_types, indel_types_tsb, indel_types_simple, mutation_ID['ID'], mutation_ID['tsb'], mutation_ID['simple'], project, exome, limited_indel, bed, chrom_start, plot)
 			# matrices['ID'] = pd.DataFrame(mutation_ID['ID'])
 			matrices['ID'] = mutation_ID['ID'].iloc[0:83,:]
 			#remove_id = ['2:Ins:M:1','3:Ins:M:1','3:Ins:M:2','4:Ins:M:1','4:Ins:M:2','4:Ins:M:3','5:Ins:M:1','5:Ins:M:2','5:Ins:M:3','5:Ins:M:4','5:Ins:M:5','complex','non_matching']
