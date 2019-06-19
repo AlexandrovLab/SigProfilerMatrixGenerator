@@ -408,9 +408,9 @@ def SigProfilerMatrixGeneratorFunc (project, genome, vcfFiles, exome=False, bed_
 				
 
 
-
-			if not mutation_pd['6144'].empty:
-				matrices = matGen.matrix_generator (context, output_matrix, project, samples, bias_sort, mutation_pd, exome, mut_types, bed, chrom_start, functionFlag, plot, tsb_stat)
+			if not chrom_based:
+				if not mutation_pd['6144'].empty:
+					matrices = matGen.matrix_generator (context, output_matrix, project, samples, bias_sort, mutation_pd, exome, mut_types, bed, chrom_start, functionFlag, plot, tsb_stat)
 			
 			if analyzed_muts[1] > 0:
 				if exome:
@@ -435,9 +435,10 @@ def SigProfilerMatrixGeneratorFunc (project, genome, vcfFiles, exome=False, bed_
 					mutation_dinuc_pd_all = pd.DataFrame(0, index=mutation_types_tsb_context, columns=samples)
 					mutation_dinuc_pd_all, samples2 = matGen.panel_check(mutation_dinuc_pd_all, genome, vcf_path + "bed_temp_context_tsb_DINUC.txt", output_matrix, bed_file_path, project, "DBS", cushion)
 
-				if not mutation_dinuc_pd_all.empty:
-					dinuc_mat = matGen.matrix_generator_DINUC (output_matrix, samples, bias_sort, mutation_dinuc_pd_all, mutation_types_tsb_context, project, exome, bed, chrom, plot)
-					matrices['DINUC'] = dinuc_mat
+				if not chrom_based:
+					if not mutation_dinuc_pd_all.empty:
+						dinuc_mat = matGen.matrix_generator_DINUC (output_matrix, samples, bias_sort, mutation_dinuc_pd_all, mutation_types_tsb_context, project, exome, bed, chrom_start, plot)
+						matrices['DINUC'] = dinuc_mat
 
 		else:
 			for file in vcf_files:
@@ -534,9 +535,10 @@ def SigProfilerMatrixGeneratorFunc (project, genome, vcfFiles, exome=False, bed_
 			# mutation_ID['ID'] = mutation_ID['ID'].to_dict('dict')
 			# mutation_ID['simple'] = mutation_ID['simple'].to_dict('dict')
 			# mutation_ID['tsb'] = mutation_ID['tsb'].to_dict('dict')
-			matGen.matrix_generator_INDEL(output_matrix, samples, indel_types, indel_types_tsb, indel_types_simple, mutation_ID['ID'], mutation_ID['tsb'], mutation_ID['simple'], project, exome, limited_indel, bed, chrom_start, plot)
-			# matrices['ID'] = pd.DataFrame(mutation_ID['ID'])
-			matrices['ID'] = mutation_ID['ID'].iloc[0:83,:]
+			if not chrom_based:
+				matGen.matrix_generator_INDEL(output_matrix, samples, indel_types, indel_types_tsb, indel_types_simple, mutation_ID['ID'], mutation_ID['tsb'], mutation_ID['simple'], project, exome, limited_indel, bed, chrom_start, plot)
+				# matrices['ID'] = pd.DataFrame(mutation_ID['ID'])
+				matrices['ID'] = mutation_ID['ID'].iloc[0:83,:]
 			#remove_id = ['2:Ins:M:1','3:Ins:M:1','3:Ins:M:2','4:Ins:M:1','4:Ins:M:2','4:Ins:M:3','5:Ins:M:1','5:Ins:M:2','5:Ins:M:3','5:Ins:M:4','5:Ins:M:5','complex','non_matching']
 			#for indel in remove_id:
 			#	for sample in matrices['ID']:
