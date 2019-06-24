@@ -60,7 +60,9 @@ def install_chromosomes (genomes, ref_dir, custom, rsync, bash):
 				break
 			wget_flag = True
 			if os.path.exists(chromosome_string_path) == False or len(os.listdir(chromosome_string_path)) <= chrom_number:
+				print("[DEBUG] Chromosome string files found at: " + ref_dir + chromosome_string_path)
 				if os.path.exists(chromosome_fasta_path) == False or len(os.listdir(chromosome_fasta_path)) <= chrom_number:
+					print("[DEBUG] Chromosome fasta files found at: " + ref_dir + chromosome_fasta_path)
 					print("Chromosomes are not currently saved as individual text files for " + genome + ". Downloading the files now...")
 					if not rsync:
 					#os.system("rsync -av -m --include='*/' --include='*.dna.chromosome.*' --exclude='*' rsync://ftp.ensembl.org/ensembl/pub/grch37/update/fasta/homo_sapiens/dna/ " + chromosome_fasta_path + " 2>&1>> install.log")
@@ -214,6 +216,8 @@ def install_chromosomes_tsb (genomes, ref_dir, custom):
 
 		chromosome_TSB_path = "references/chromosomes/tsb/" + genome + "/"
 		transcript_files = "references/chromosomes/transcripts/" + genome + "/"
+		print("[DEBUG] Chromosome tsb files found at: " + ref_dir +  chromosome_TSB_path)
+
 
 		if os.path.exists(transcript_files) == False or len(os.listdir(transcript_files)) < 1:
 			print("Please download the transcript files before proceeding. You can download the files from 'http://www.ensembl.org/biomart/martview'.")
@@ -227,12 +231,15 @@ def install_chromosomes_tsb (genomes, ref_dir, custom):
 		for files in os.listdir(chromosome_TSB_path):
 			if "proportions" in files:
 				continue
+			if ".DS_Store" in files:
+				continue
 			chrom = files.split(".")
 			chrom = chrom[0]
 			check = md5(chromosome_TSB_path + files)
 			if check_sum[genome][chrom] != check:
 				corrupt = True
 				os.remove(chromosome_TSB_path + files)
+				print("[DEBUG] Chromosome " + chrom + " md5sum did not match => reference md5sum: " + str(check_sum[genome][chrom]) + "    new file md5sum: " + str(check))
 		if corrupt:
 			print("The transcriptional reference data appears to be corrupted. Please reinstall the " + genome + " genome.")
 			sys.exit()
@@ -302,13 +309,15 @@ def install (genome, custom=False, rsync=False, bash=True):
 	ref_dir = os.path.dirname(os.path.abspath(__file__))
 	os.chdir(ref_dir)
 
+	print("[DEBUG] Path to SigProfilerMatrixGenerator used for the install: ", ref_dir)
+
 	genomes = [genome]
 
 	if os.path.exists("install.log"):
 		# os.system("rm install.log")
 		os.remove("install.log")
 
-	ref_dir = "references/"
+	ref_dir += "references/"
 	chrom_string_dir = ref_dir + "chromosomes/chrom_string/"
 	chrom_fasta_dir = ref_dir + "chromosomes/fasta/"
 	chrom_tsb_dir = ref_dir + "chromosomes/tsb/"
