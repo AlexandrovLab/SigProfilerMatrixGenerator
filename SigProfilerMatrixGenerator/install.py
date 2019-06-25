@@ -96,9 +96,9 @@ def install_chromosomes (genomes, ref_dir, custom, rsync, bash):
 
 								elif genome == 'rn6':
 									if bash:
-										os.system("bash -c '" + 'wget -r -l1 -c -nc --no-parent -A "*.dna.chromosome.*"" -nd -P ' + chromosome_fasta_path + ' ftp://ftp.ensembl.org/pub/release-96/fasta/rattus_norvegicus/dna/ 2>> install.log' + "'")									
+										os.system("bash -c '" + 'wget -r -l1 -c -nc --no-parent -A "*.dna.chromosome.*" -nd -P ' + chromosome_fasta_path + ' ftp://ftp.ensembl.org/pub/release-96/fasta/rattus_norvegicus/dna/ 2>> install.log' + "'")									
 									else:
-										os.system('wget -r -l1 -c -nc --no-parent -A "*.dna.chromosome.*"" -nd -P ' + chromosome_fasta_path + ' ftp://ftp.ensembl.org/pub/release-96/fasta/rattus_norvegicus/dna/ 2>> install.log')									
+										os.system('wget -r -l1 -c -nc --no-parent -A "*.dna.chromosome.*" -nd -P ' + chromosome_fasta_path + ' ftp://ftp.ensembl.org/pub/release-96/fasta/rattus_norvegicus/dna/ 2>> install.log')									
 								else:
 									if bash:
 										os.system("bash -c '" + 'wget -r -l1 -c -nc --no-parent -A "*.dna.chromosome.*" -nd -P ' + chromosome_fasta_path + ' ftp://ftp.ensembl.org/pub/release-93/fasta/' +species+'/dna/ 2>> install.log' + "'")
@@ -201,8 +201,8 @@ def install_chromosomes_tsb (genomes, ref_dir, custom):
 							'10':'9c1af453a5facc9bfa821457bcfc4d30','11':'ef0480a905c55d76a3c58e295a85bc75','12':'643b6fe4a3a6363ffe64a6c316fa3e1a',
 							'13':'102bb3fb420a4104c216bcdf99870374','14':'e26b8b63fba0ea7ced4f0330e93a8cdc','15':'da747616a1362d374d4786102fab6f9f',
 							'16':'54e4f932eb0eda4cbf31156f96ef7235','17':'46c2facf5415e4eff8b0804161db722d', '18':'f1cb84f002967854b83bf266ec59a7a3',
-							'19':'b85ca155fd1780fe5c327a4589c212a6','20':'53e52c5facc7f05462be533845f37425','Y':'6a7a3539c329dc540dfa6db006003bb1',
-							'X':'7a06bafab97c59a819f03633f0a6b7a2'}
+							'19':'b85ca155fd1780fe5c327a4589c212a6','20':'899d3511352d78b9b9dc63f063d91b31','Y':'6a7a3539c329dc540dfa6db006003bb1',
+							'X':'7a06bafab97c59a819f03633f0a6b7a2'} # '20':'53e52c5facc7f05462be533845f37425',
 	}
 	for genome in genomes:
 		chrom_number = None

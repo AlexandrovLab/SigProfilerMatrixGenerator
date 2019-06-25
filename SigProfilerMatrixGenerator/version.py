@@ -1,6 +1,6 @@
 
 # THIS FILE IS GENERATED FROM SIGPROFILEMATRIXGENERATOR SETUP.PY
-short_version = '1.0.10'
-version = '1.0.10'
+short_version = '1.0.12'
+version = '1.0.12'
 	
 	
