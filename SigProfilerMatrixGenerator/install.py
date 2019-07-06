@@ -301,38 +301,141 @@ def benchmark (genome, ref_dir):
 	print("Installation was succesful.\nSigProfilerMatrixGenerator took " + str(end_time-start_time) + " seconds to complete.")
 
 
-def install (genome, custom=False, rsync=False, bash=True):
-	print("Beginning installation. This may take up to 20 minutes to complete.")
-	first_path = os.getcwd()
-	# current_dir = os.path.realpath(__file__)
-	# ref_dir = re.sub('\/install.py$', '', current_dir)
+def install (genome, custom=False, rsync=False, bash=True, ftp=True):
 	ref_dir = os.path.dirname(os.path.abspath(__file__))
 	os.chdir(ref_dir)
 
-	print("[DEBUG] Path to SigProfilerMatrixGenerator used for the install: ", ref_dir)
+	if ftp:
+		check_sum = {'GRCh37':
+								{'1':'a7d51305e943cf06ff2029146bd91bca','2':'d24d0185af89356d44614ab0d6fd6a68','3':'ea5e033147dcaf77bfd4c70f50688d37',
+								 '4':'00d7797c7184f1802367e33f6e2bc3da','5':'f74b1eeb329088242a9f22a16322b325','6':'b353cc4c4abc90340e7747509fe7b457',
+								 '7':'bbadde91b3ef958c7d20e2b1088c8cd2','8':'0ff695692e3efebaf00c7905d0d536d7','9':'40b75a18acb66748a37888c53a76dcdb',
+								 '10':'557881b744a932b4ceee8a06d6de85a4','11':'f8b8f118101d7cb04164b29a7acadca4','12':'52c18e9fefc3ed3e35c1d8771d1247de',
+								 '13':'a241d1cdcadccfd94db792300ab000bf','14':'ed3907128336795669bc19d77c0aa409','15':'bfc66ad087c4e9025076d7571cffa30e',
+								 '16':'bd251fddc42400bb54ef95d5e1002ece','17':'fcd36b1bf5c4bd74328dc4caaae244ae','18':'e015d4324c36374827582c5b1214a736',
+								 '19':'5cfa7d47e2d73dbdbf8d68f97c8e8b23','20':'2fa0717bf4e8dddac64cd393f4134ff5','21':'ba5559776d4601b80ca42c82f02102a4',
+								 '22':'ba762b6ae493df40d04d1ff63d9b2933','Y':'0303100be91874b966a998273cd7c8eb','X':'14e331d82736f6cfc177ff8c90f7bd78',
+								 'MT':'dfd6db5743d399516d5c8dadee5bee78'},
 
-	genomes = [genome]
+					'GRCh38':
+								{'1':'ebe083105e7703a49581a36d73732a96','2':'cd65e36dbdf12a8ac3d2c70ebac8cad4','3':'6c20a7008394f2fa9c304d231a1f391b',
+								 '4':'5c7443e1678868adadeac0e57558f6e8','5':'45573232c8097c679503a6598f61e60b','6':'cfc137c7434d3a9a872332d405b5c553',
+								 '7':'9d8210c22c1962db837e7b62a578975c','8':'665134fd44f21915cbeef955addf89ba','9':'758d0c0c71d8bafbe1ede86587191730',
+								 '10':'397bb21acff1ca3052ac802f2aee06e0','11':'07707ff8a2a964656469a7be7bb3e576','12':'506d02539075e080ee12ebdf63908080',
+								 '13':'03ed22f01ab43145733c0b6a647e0560','14':'8b93447086549e476c65699ed813a567','15':'cd0dfe9fa78cae2fc7becf8f8ec6c693',
+								 '16':'e17bbb66eb4d6b62b7b0e2fbf062b6a6','17':'8fc95bb3101d024d890aa3543eb454c5','18':'a4870628045bb033a90e8c89f818e24d',
+								 '19':'6a9d0c8298f0ba2fa13180e02b969f16','20':'aa75d35969cf3956bb4ace7bdc57b34e','21':'5d55f5ad6271d6a0d8806876924990f7',
+								 '22':'efdb4e1d23ab7964302b828062a33447','Y':'3b38c639ad164d60f1a055b46fcd2748','X':'d5edbea3cf5d1716765dd4a7b41b7656',
+								 'MT':'dfd6db5743d399516d5c8dadee5bee78'},
 
-	if os.path.exists("install.log"):
-		# os.system("rm install.log")
-		os.remove("install.log")
+					'mm9':
+								{'1':'c5afc4b3f7f2119696214511d7a04341','2':'a7b467475a1b032d2c893dac1c419a28','3':'f922bc529a17324f1cd858f9a8723d65',
+								'4':'f3d6b74e3c04dbd229e2f1e363607506','5':'5fee4f1889c9fe20f7f8562c62bbeb0a','6':'481d47b87da45f3a20181c780fd796c2',
+								'7':'454ef2bf49a5ba8cfea3d16dfcfc7f25','8':'2f4162d4c824db78a2a2a820cb4fec81','9':'0649e6aec61af1ab8ab4797ea8e54119',
+								'10':'38296256bcfe886c8ae771418e4fd824','11':'b31cb0ce693e35eaa77031d44b12e474','12':'d2b3e4b015742b6aea30ceec5a972968',
+								'13':'df77b6d0ed1b133224b128c189736372','14':'0ec3c0e6b3fa2cdb957541f19792e130','15':'44fcaf2ec9b82dae910f85ce41c3cfad',
+								'16':'ad7a8dbdf46fa7077e0982a54eab70b7','17':'71aee1dee3cd2078e4619c485d88817e','18':'727ec4ed3128ecacd6cd2f7558083553',
+								'19':'461a7119781ab7f4b654fdd9ef76e0ec','Y':'471ff3bbb4520c020cfaa7ca8371c543','X':'9ccadf96cd3aa0ed9d299894a3d7fde0',
+								'MT':'a1d56043ed8308908965dd080a4d0c8d'},
 
-	ref_dir += "references/"
-	chrom_string_dir = ref_dir + "chromosomes/chrom_string/"
-	chrom_fasta_dir = ref_dir + "chromosomes/fasta/"
-	chrom_tsb_dir = ref_dir + "chromosomes/tsb/"
-	matrix_dir = ref_dir + "matrix/"
-	vcf_dir = ref_dir + "vcf_files/"
-	bed_dir = ref_dir + "vcf_files/BED/"
-	log_dir = "logs/"
-	new_dirs = [ref_dir, chrom_string_dir, chrom_fasta_dir, chrom_tsb_dir, matrix_dir, vcf_dir, bed_dir, log_dir]
+					'mm10':
+								{'1':'ef88c5ac276a32a2865c0408f92acd55','2':'ced7325ef9e2dfedea3fbe26428a6059','3':'9cd1794eeea27553077a018038303908',
+								'4':'da616d7ed6c67f824487eb2ed09cd33b','5':'b327b82da6986bf947105d07c0ad6d2e','6':'fb9a8fa0b85561f8d4de633c22d5157a',
+								'7':'12457fd80f6806779fc0d4cc8d36fbad','8':'5d98d86bd22bee1cb226406f49ee7caf','9':'b2f26613fcc622a4003e4c945ae55e25',
+								'10':'e9f3589529e258ede66d2e77bb87d21d','11':'76bcd285c3c66471ad6fccfabe42294c','12':'ac34fc3616c9609d8e75a59069e9007a',
+								'13':'f81b976e4e4617b25945d06f9aa30846','14':'95dc042eb2aa7d4cc0abe071d4d7966e','15':'fbf2477833aff73ae085537cd7ee0f85',
+								'16':'77cbcd009ba50891571f785595717ec1','17':'cd9e4dfdd168ed3de05dac4d44c6e692', '18':'945e83694c7c8f69d6186e1a2abc9771',
+								'19':'e57b25f8869de31a9dbce06510711db6','Y':'c2146ba4ab1ec262f5e38b2a1ebc5f5b','X':'9af543088be046fdc63976c2d41de94c',
+								'MT':'a1d56043ed8308908965dd080a4d0c8d'},
+					'rn6':
+								{'1':'003723513cbdb3708fcc5d737c05199c','2':'53e52c5facc7f05462be533845f37425','3':'8d157a9b71fe9770cf783ea5459b19d7',
+								'4':'a66dc1999bcc960ff11fe0b24c0d7b14','5':'601cf83411234adbdd9f911b89509564','6':'03b1f4af58fffdf213466ea85b570b3d',
+								'7':'4ed05ddf9502ef79e121c02e391660e6','8':'3e2458daaf1b3e8ab4d0e0a9e60c067b','9':'8f83caeccec7ea6e35e404737138ee67',
+								'10':'9c1af453a5facc9bfa821457bcfc4d30','11':'ef0480a905c55d76a3c58e295a85bc75','12':'643b6fe4a3a6363ffe64a6c316fa3e1a',
+								'13':'102bb3fb420a4104c216bcdf99870374','14':'e26b8b63fba0ea7ced4f0330e93a8cdc','15':'da747616a1362d374d4786102fab6f9f',
+								'16':'54e4f932eb0eda4cbf31156f96ef7235','17':'46c2facf5415e4eff8b0804161db722d', '18':'f1cb84f002967854b83bf266ec59a7a3',
+								'19':'b85ca155fd1780fe5c327a4589c212a6','20':'899d3511352d78b9b9dc63f063d91b31','Y':'6a7a3539c329dc540dfa6db006003bb1',
+								'X':'7a06bafab97c59a819f03633f0a6b7a2'}}
 
-	for dirs in new_dirs:
-		if not os.path.exists(dirs):
-			os.makedirs(dirs)
+		chromosome_fasta_path = ref_dir + "/references/chromosomes/tsb/"
+		print("Beginning installation. This may take up to 40 minutes to complete.")
+		if not rsync:
+			try:
+				if bash:
+					os.system("bash -c '" + 'wget -r -l1 -c -nc --no-parent -nd -P ' + chromosome_fasta_path + ' ftp://ngs.sanger.ac.uk/scratch/project/mutographs/SigProf/' + genome + '.tar.gz 2>> install.log' + "'")
+				else:
+					os.system('wget -r -l1 -c -nc --no-parent -nd -P ' + chromosome_fasta_path + ' ftp://ngs.sanger.ac.uk/scratch/project/mutographs/SigProf/' + genome + '.tar.gz 2>> install.log')										
+				os.system("tar -xzf " + ref_dir + "/references/chromosomes/tsb/" + genome + ".tar.gz -C " + ref_dir + "/references/chromosomes/tsb/")
+				os.remove(ref_dir + "/references/chromosomes/tsb/" + genome + ".tar.gz")
+			except:
+				print("The ensembl ftp site is not currently responding.")
+				sys.exit()
+		else:
+			print("Direct download for RSYNC is not yet supported")
+			sys.exit()
+			# try:
+			# 	if bash:
+			# 		os.system("bash -c '" + "rsync -av -m --include='*/' rsync://ftp.ngs.sanger.ac.uk/scratch/project/mutographs/SigProf/" + genome + ".tar.gz " + chromosome_fasta_path + " 2>&1>> install.log" + "'")
+			# 	else:
+			# 		os.system("rsync -av -m rsync://ftp://ngs.sanger.ac.uk/scratch/project/mutographs/SigProf/" + genome + ".tar.gz " + chromosome_fasta_path + " 2>&1>> install.log")
+			# 	os.system("tar -xzf " + ref_dir + "/references/chromosomes/tsb/" + genome + ".tar.gz -C " + ref_dir + "/references/chromosomes/tsb/")
+			# 	os.remove(ref_dir + "/references/chromosomes/tsb/" + genome + ".tar.gz")
+			# except:
+			# 	print("The ensembl ftp site is not currently responding.")
+			# 	sys.exit()
 
-	install_chromosomes(genomes, ref_dir, custom, rsync, bash)
-	install_chromosomes_tsb (genomes, ref_dir, custom)
+		chromosome_TSB_path = chromosome_fasta_path + genome + "/"
+		corrupt = False
+		for files in os.listdir(chromosome_TSB_path):
+			if "proportions" in files:
+				continue
+			if ".DS_Store" in files:
+				continue
+			chrom = files.split(".")
+			chrom = chrom[0]
+			check = md5(chromosome_TSB_path + files)
+			if check_sum[genome][chrom] != check:
+				corrupt = True
+				os.remove(chromosome_TSB_path + files)
+				print("[DEBUG] Chromosome " + chrom + " md5sum did not match => reference md5sum: " + str(check_sum[genome][chrom]) + "    new file md5sum: " + str(check))
+		if corrupt:
+			print("The transcriptional reference data appears to be corrupted. Please reinstall the " + genome + " genome.")
+			sys.exit()
+		print("The transcriptional reference data for " + genome + " has been saved.")
+
+
+	else:
+		print("Beginning installation. This may take up to 20 minutes to complete.")
+		first_path = os.getcwd()
+		# current_dir = os.path.realpath(__file__)
+		# ref_dir = re.sub('\/install.py$', '', current_dir)
+		ref_dir = os.path.dirname(os.path.abspath(__file__))
+		os.chdir(ref_dir)
+
+		print("[DEBUG] Path to SigProfilerMatrixGenerator used for the install: ", ref_dir)
+
+		genomes = [genome]
+
+		if os.path.exists("install.log"):
+			# os.system("rm install.log")
+			os.remove("install.log")
+
+		ref_dir += "/references/"
+		chrom_string_dir = ref_dir + "chromosomes/chrom_string/"
+		chrom_fasta_dir = ref_dir + "chromosomes/fasta/"
+		chrom_tsb_dir = ref_dir + "chromosomes/tsb/"
+		matrix_dir = ref_dir + "matrix/"
+		vcf_dir = ref_dir + "vcf_files/"
+		bed_dir = ref_dir + "vcf_files/BED/"
+		log_dir = "logs/"
+		new_dirs = [ref_dir, chrom_string_dir, chrom_fasta_dir, chrom_tsb_dir, matrix_dir, vcf_dir, bed_dir, log_dir]
+
+		for dirs in new_dirs:
+			if not os.path.exists(dirs):
+				os.makedirs(dirs)
+
+		install_chromosomes(genomes, ref_dir, custom, rsync, bash)
+		install_chromosomes_tsb (genomes, ref_dir, custom)
 
 	if os.path.exists("BRCA_example/"):
 		#os.system("mv BRCA_example/ references/vcf_files/")
