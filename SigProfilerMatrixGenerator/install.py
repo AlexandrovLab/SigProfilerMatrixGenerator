@@ -302,8 +302,25 @@ def benchmark (genome, ref_dir):
 
 
 def install (genome, custom=False, rsync=False, bash=True, ftp=True):
+	first_path= os.getcwd()
 	ref_dir = os.path.dirname(os.path.abspath(__file__))
 	os.chdir(ref_dir)
+	if os.path.exists("install.log"):
+		os.remove("install.log")
+
+	#ref_dir += "/references/"
+	chrom_string_dir = ref_dir + "/references/chromosomes/chrom_string/"
+	chrom_fasta_dir = ref_dir + "/references/chromosomes/fasta/"
+	chrom_tsb_dir = ref_dir + "/references/chromosomes/tsb/"
+	matrix_dir = ref_dir + "/references/matrix/"
+	vcf_dir = ref_dir + "/references/vcf_files/"
+	bed_dir = ref_dir + "/references/vcf_files/BED/"
+	log_dir = "logs/"
+	new_dirs = [ref_dir, chrom_string_dir, chrom_fasta_dir, chrom_tsb_dir, matrix_dir, vcf_dir, bed_dir, log_dir]
+
+	for dirs in new_dirs:
+		if not os.path.exists(dirs):
+			os.makedirs(dirs)
 
 	if ftp:
 		check_sum = {'GRCh37':
@@ -407,8 +424,6 @@ def install (genome, custom=False, rsync=False, bash=True, ftp=True):
 	else:
 		print("Beginning installation. This may take up to 20 minutes to complete.")
 		first_path = os.getcwd()
-		# current_dir = os.path.realpath(__file__)
-		# ref_dir = re.sub('\/install.py$', '', current_dir)
 		ref_dir = os.path.dirname(os.path.abspath(__file__))
 		os.chdir(ref_dir)
 
@@ -417,34 +432,30 @@ def install (genome, custom=False, rsync=False, bash=True, ftp=True):
 		genomes = [genome]
 
 		if os.path.exists("install.log"):
-			# os.system("rm install.log")
 			os.remove("install.log")
 
-		ref_dir += "/references/"
-		chrom_string_dir = ref_dir + "chromosomes/chrom_string/"
-		chrom_fasta_dir = ref_dir + "chromosomes/fasta/"
-		chrom_tsb_dir = ref_dir + "chromosomes/tsb/"
-		matrix_dir = ref_dir + "matrix/"
-		vcf_dir = ref_dir + "vcf_files/"
-		bed_dir = ref_dir + "vcf_files/BED/"
-		log_dir = "logs/"
-		new_dirs = [ref_dir, chrom_string_dir, chrom_fasta_dir, chrom_tsb_dir, matrix_dir, vcf_dir, bed_dir, log_dir]
+		# ref_dir += "/references/"
+		# chrom_string_dir = ref_dir + "chromosomes/chrom_string/"
+		# chrom_fasta_dir = ref_dir + "chromosomes/fasta/"
+		# chrom_tsb_dir = ref_dir + "chromosomes/tsb/"
+		# matrix_dir = ref_dir + "matrix/"
+		# vcf_dir = ref_dir + "vcf_files/"
+		# bed_dir = ref_dir + "vcf_files/BED/"
+		# log_dir = "logs/"
+		# new_dirs = [ref_dir, chrom_string_dir, chrom_fasta_dir, chrom_tsb_dir, matrix_dir, vcf_dir, bed_dir, log_dir]
 
-		for dirs in new_dirs:
-			if not os.path.exists(dirs):
-				os.makedirs(dirs)
+		# for dirs in new_dirs:
+		# 	if not os.path.exists(dirs):
+		# 		os.makedirs(dirs)
 
 		install_chromosomes(genomes, ref_dir, custom, rsync, bash)
 		install_chromosomes_tsb (genomes, ref_dir, custom)
 
 	if os.path.exists("BRCA_example/"):
-		#os.system("mv BRCA_example/ references/vcf_files/")
 		shutil.copy("BRCA_example/", "references/vcf_files/")
 	if os.path.exists("example_test"):
-		#os.system("mv example_test/ references/vcf_files/")
 		shutil.copy("example_test/", "references/vcf_files/")
 	if os.path.exists("context_distributions/"):
-		#os.system("mv context_distributions/ references/chromosomes/")
 		shutil.copy("context_distributions/", "references/chromosomes/")
 
 	print("All reference files have been created.")
@@ -453,8 +464,6 @@ def install (genome, custom=False, rsync=False, bash=True, ftp=True):
 		benchmark(genome, ref_dir)
 
 	print ("To proceed with matrix_generation, please provide the path to your vcf files and an appropriate output path.")
-	# os.system("rm -r " + chrom_string_dir)
-	# os.remove(chrom_string_dir)
 	shutil.rmtree(chrom_string_dir)
 	print("Installation complete.")
 	os.chdir(first_path)
