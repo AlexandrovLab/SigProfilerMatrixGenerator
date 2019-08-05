@@ -5,7 +5,9 @@ SigProfilerMatrixGenerator creates mutational matrices for all types of somatic 
 
 **INTRODUCTION**
 
-The purpose of this document is to provide a guide for using the SigProfilerMatrixGenerator framework to generate mutational matrices for a set of samples with associated mutational catalogues. An extensive Wiki page detailing the usage of this tool can be found at https://osf.io/s93d5/wiki/home/. For users that prefer working in an R environment , wrapper packages are provided that can be found and installed from: https://github.com/AlexandrovLab/SigProfilerMatrixGeneratorR
+The purpose of this document is to provide a guide for using the SigProfilerMatrixGenerator framework to generate mutational matrices for a set of samples with associated mutational catalogues. An extensive Wiki page detailing the usage of this tool can be found at https://osf.io/s93d5/wiki/home/.
+
+For users that prefer working in an R environment, a wrapper package is provided and can be found and installed from: https://github.com/AlexandrovLab/SigProfilerMatrixGeneratorR
 
 **PREREQUISITES**
 
