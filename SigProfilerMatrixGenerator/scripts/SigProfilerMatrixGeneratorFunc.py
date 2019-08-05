@@ -120,6 +120,60 @@ def SigProfilerMatrixGeneratorFunc (project, genome, vcfFiles, exome=False, bed_
 					  'TA>AT','TA>CG','TA>CT','TA>GC','TA>GG','TA>GT',
 					  'TG>AA','TG>AC','TG>AT','TG>CA','TG>CC','TG>CT','TG>GA','TG>GC','TG>GT']
 
+	indels_seq_types = [ # Single-sequences
+						'C', 'T',
+
+						# Di-sequences
+						'AC','AT','CA','CC','CG','CT','GC','TA','TC','TT',
+
+						# Tri-sequences
+						'ACC', 'ACT', 'ATC', 'ATT', 'CAC', 'CAT', 'CCA', 'CCC', 'CCG', 'CCT', 'CGC', 'CGT', 'CTA', 'CTC', 'CTG', 'CTT', 
+						'GCC', 'GCT', 'GTC', 'GTT', 'TAC', 'TAT', 'TCA', 'TCC', 'TCG', 'TCT', 'TGC', 'TGT', 'TTA', 'TTC', 'TTG', 'TTT',
+
+						# Tetra-sequences
+						'AACC', 'AACT', 'AATC', 'AATT', 'ACAC', 'ACAT', 'ACCA', 'ACCC', 'ACCG', 'ACCT', 'ACGC', 'ACGT', 'ACTA', 'ACTC', 'ACTG', 'ACTT', 'AGCC', 'AGCT', 'AGTC', 
+						 'AGTT', 'ATAC', 'ATAT', 'ATCA', 'ATCC', 'ATCG', 'ATCT', 'ATGC', 'ATGT', 'ATTA', 'ATTC', 'ATTG', 'ATTT', 'CAAC', 'CAAT', 'CACA', 'CACC', 'CACG', 'CACT', 
+						 'CAGC', 'CAGT', 'CATA', 'CATC', 'CATG', 'CATT', 'CCAA', 'CCAC', 'CCAG', 'CCAT', 'CCCA', 'CCCC', 'CCCG', 'CCCT', 'CCGA', 'CCGC', 'CCGG', 'CCGT', 'CCTA', 
+						 'CCTC', 'CCTG', 'CCTT', 'CGAC', 'CGAT', 'CGCA', 'CGCC', 'CGCG', 'CGCT', 'CGGC', 'CGTA', 'CGTC', 'CGTG', 'CGTT', 'CTAA', 'CTAC', 'CTAG', 'CTAT', 'CTCA', 
+						 'CTCC', 'CTCG', 'CTCT', 'CTGA', 'CTGC', 'CTGG', 'CTGT', 'CTTA', 'CTTC', 'CTTG', 'CTTT', 'GACC', 'GATC', 'GCAC', 'GCCA', 'GCCC', 'GCCG', 'GCCT', 'GCGC', 
+						 'GCTA', 'GCTC', 'GCTG', 'GCTT', 'GGCC', 'GGTC', 'GTAC', 'GTCA', 'GTCC', 'GTCG', 'GTCT', 'GTGC', 'GTTA', 'GTTC', 'GTTG', 'GTTT', 'TAAC', 'TACA', 'TACC', 
+						 'TACG', 'TACT', 'TAGC', 'TATA', 'TATC', 'TATG', 'TATT', 'TCAA', 'TCAC', 'TCAG', 'TCAT', 'TCCA', 'TCCC', 'TCCG', 'TCCT', 'TCGA', 'TCGC', 'TCGG', 'TCGT', 
+						 'TCTA', 'TCTC', 'TCTG', 'TCTT', 'TGAC', 'TGCA', 'TGCC', 'TGCG', 'TGCT', 'TGTA', 'TGTC', 'TGTG', 'TGTT', 'TTAA', 'TTAC', 'TTAG', 'TTAT', 'TTCA', 'TTCC', 
+						 'TTCG', 'TTCT', 'TTGA', 'TTGC', 'TTGG', 'TTGT', 'TTTA', 'TTTC', 'TTTG', 'TTTT',
+
+						# Penta-sequences
+						'AACCC', 'AACCT', 'AACTC', 'AACTT', 'AATCC', 'AATCT', 'AATTC', 'AATTT', 'ACACC', 'ACACT', 'ACATC', 'ACATT', 'ACCAC', 'ACCAT', 'ACCCA', 'ACCCC', 'ACCCG', 
+						'ACCCT', 'ACCGC', 'ACCGT', 'ACCTA', 'ACCTC', 'ACCTG', 'ACCTT', 'ACGCC', 'ACGCT', 'ACGTC', 'ACGTT', 'ACTAC', 'ACTAT', 'ACTCA', 'ACTCC', 'ACTCG', 'ACTCT', 
+						'ACTGC', 'ACTGT', 'ACTTA', 'ACTTC', 'ACTTG', 'ACTTT', 'AGCCC', 'AGCCT', 'AGCTC', 'AGCTT', 'AGTCC', 'AGTCT', 'AGTTC', 'AGTTT', 'ATACC', 'ATACT', 'ATATC', 
+						'ATATT', 'ATCAC', 'ATCAT', 'ATCCA', 'ATCCC', 'ATCCG', 'ATCCT', 'ATCGC', 'ATCGT', 'ATCTA', 'ATCTC', 'ATCTG', 'ATCTT', 'ATGCC', 'ATGCT', 'ATGTC', 'ATGTT', 
+						'ATTAC', 'ATTAT', 'ATTCA', 'ATTCC', 'ATTCG', 'ATTCT', 'ATTGC', 'ATTGT', 'ATTTA', 'ATTTC', 'ATTTG', 'ATTTT', 'CAACC', 'CAACT', 'CAATC', 'CAATT', 'CACAC', 
+						'CACAT', 'CACCA', 'CACCC', 'CACCG', 'CACCT', 'CACGC', 'CACGT', 'CACTA', 'CACTC', 'CACTG', 'CACTT', 'CAGCC', 'CAGCT', 'CAGTC', 'CAGTT', 'CATAC', 'CATAT', 
+						'CATCA', 'CATCC', 'CATCG', 'CATCT', 'CATGC', 'CATGT', 'CATTA', 'CATTC', 'CATTG', 'CATTT', 'CCAAC', 'CCAAT', 'CCACA', 'CCACC', 'CCACG', 'CCACT', 'CCAGC', 
+						'CCAGT', 'CCATA', 'CCATC', 'CCATG', 'CCATT', 'CCCAA', 'CCCAC', 'CCCAG', 'CCCAT', 'CCCCA', 'CCCCC', 'CCCCG', 'CCCCT', 'CCCGA', 'CCCGC', 'CCCGG', 'CCCGT', 
+						'CCCTA', 'CCCTC', 'CCCTG', 'CCCTT', 'CCGAC', 'CCGAT', 'CCGCA', 'CCGCC', 'CCGCG', 'CCGCT', 'CCGGC', 'CCGGT', 'CCGTA', 'CCGTC', 'CCGTG', 'CCGTT', 'CCTAA', 
+						'CCTAC', 'CCTAG', 'CCTAT', 'CCTCA', 'CCTCC', 'CCTCG', 'CCTCT', 'CCTGA', 'CCTGC', 'CCTGG', 'CCTGT', 'CCTTA', 'CCTTC', 'CCTTG', 'CCTTT', 'CGACC', 'CGACT', 
+						'CGATC', 'CGATT', 'CGCAC', 'CGCAT', 'CGCCA', 'CGCCC', 'CGCCG', 'CGCCT', 'CGCGC', 'CGCGT', 'CGCTA', 'CGCTC', 'CGCTG', 'CGCTT', 'CGGCC', 'CGGCT', 'CGGTC', 
+						'CGGTT', 'CGTAC', 'CGTAT', 'CGTCA', 'CGTCC', 'CGTCG', 'CGTCT', 'CGTGC', 'CGTGT', 'CGTTA', 'CGTTC', 'CGTTG', 'CGTTT', 'CTAAC', 'CTAAT', 'CTACA', 'CTACC', 
+						'CTACG', 'CTACT', 'CTAGC', 'CTAGT', 'CTATA', 'CTATC', 'CTATG', 'CTATT', 'CTCAA', 'CTCAC', 'CTCAG', 'CTCAT', 'CTCCA', 'CTCCC', 'CTCCG', 'CTCCT', 'CTCGA', 
+						'CTCGC', 'CTCGG', 'CTCGT', 'CTCTA', 'CTCTC', 'CTCTG', 'CTCTT', 'CTGAC', 'CTGAT', 'CTGCA', 'CTGCC', 'CTGCG', 'CTGCT', 'CTGGC', 'CTGGT', 'CTGTA', 'CTGTC', 
+						'CTGTG', 'CTGTT', 'CTTAA', 'CTTAC', 'CTTAG', 'CTTAT', 'CTTCA', 'CTTCC', 'CTTCG', 'CTTCT', 'CTTGA', 'CTTGC', 'CTTGG', 'CTTGT', 'CTTTA', 'CTTTC', 'CTTTG', 
+						'CTTTT', 'GACCC', 'GACCT', 'GACTC', 'GACTT', 'GATCC', 'GATCT', 'GATTC', 'GATTT', 'GCACC', 'GCACT', 'GCATC', 'GCATT', 'GCCAC', 'GCCAT', 'GCCCA', 'GCCCC', 
+						'GCCCG', 'GCCCT', 'GCCGC', 'GCCGT', 'GCCTA', 'GCCTC', 'GCCTG', 'GCCTT', 'GCGCC', 'GCGCT', 'GCGTC', 'GCGTT', 'GCTAC', 'GCTAT', 'GCTCA', 'GCTCC', 'GCTCG', 
+						'GCTCT', 'GCTGC', 'GCTGT', 'GCTTA', 'GCTTC', 'GCTTG', 'GCTTT', 'GGCCC', 'GGCCT', 'GGCTC', 'GGCTT', 'GGTCC', 'GGTCT', 'GGTTC', 'GGTTT', 'GTACC', 'GTACT', 
+						'GTATC', 'GTATT', 'GTCAC', 'GTCAT', 'GTCCA', 'GTCCC', 'GTCCG', 'GTCCT', 'GTCGC', 'GTCGT', 'GTCTA', 'GTCTC', 'GTCTG', 'GTCTT', 'GTGCC', 'GTGCT', 'GTGTC', 
+						'GTGTT', 'GTTAC', 'GTTAT', 'GTTCA', 'GTTCC', 'GTTCG', 'GTTCT', 'GTTGC', 'GTTGT', 'GTTTA', 'GTTTC', 'GTTTG', 'GTTTT', 'TAACC', 'TAACT', 'TAATC', 'TAATT', 
+						'TACAC', 'TACAT', 'TACCA', 'TACCC', 'TACCG', 'TACCT', 'TACGC', 'TACGT', 'TACTA', 'TACTC', 'TACTG', 'TACTT', 'TAGCC', 'TAGCT', 'TAGTC', 'TAGTT', 'TATAC', 
+						'TATAT', 'TATCA', 'TATCC', 'TATCG', 'TATCT', 'TATGC', 'TATGT', 'TATTA', 'TATTC', 'TATTG', 'TATTT', 'TCAAC', 'TCAAT', 'TCACA', 'TCACC', 'TCACG', 'TCACT', 
+						'TCAGC', 'TCAGT', 'TCATA', 'TCATC', 'TCATG', 'TCATT', 'TCCAA', 'TCCAC', 'TCCAG', 'TCCAT', 'TCCCA', 'TCCCC', 'TCCCG', 'TCCCT', 'TCCGA', 'TCCGC', 'TCCGG', 
+						'TCCGT', 'TCCTA', 'TCCTC', 'TCCTG', 'TCCTT', 'TCGAC', 'TCGAT', 'TCGCA', 'TCGCC', 'TCGCG', 'TCGCT', 'TCGGC', 'TCGGT', 'TCGTA', 'TCGTC', 'TCGTG', 'TCGTT', 
+						'TCTAA', 'TCTAC', 'TCTAG', 'TCTAT', 'TCTCA', 'TCTCC', 'TCTCG', 'TCTCT', 'TCTGA', 'TCTGC', 'TCTGG', 'TCTGT', 'TCTTA', 'TCTTC', 'TCTTG', 'TCTTT', 'TGACC', 
+						'TGACT', 'TGATC', 'TGATT', 'TGCAC', 'TGCAT', 'TGCCA', 'TGCCC', 'TGCCG', 'TGCCT', 'TGCGC', 'TGCGT', 'TGCTA', 'TGCTC', 'TGCTG', 'TGCTT', 'TGGCC', 'TGGCT', 
+						'TGGTC', 'TGGTT', 'TGTAC', 'TGTAT', 'TGTCA', 'TGTCC', 'TGTCG', 'TGTCT', 'TGTGC', 'TGTGT', 'TGTTA', 'TGTTC', 'TGTTG', 'TGTTT', 'TTAAC', 'TTAAT', 'TTACA', 
+						'TTACC', 'TTACG', 'TTACT', 'TTAGC', 'TTAGT', 'TTATA', 'TTATC', 'TTATG', 'TTATT', 'TTCAA', 'TTCAC', 'TTCAG', 'TTCAT', 'TTCCA', 'TTCCC', 'TTCCG', 'TTCCT', 
+						'TTCGA', 'TTCGC', 'TTCGG', 'TTCGT', 'TTCTA', 'TTCTC', 'TTCTG', 'TTCTT', 'TTGAC', 'TTGAT', 'TTGCA', 'TTGCC', 'TTGCG', 'TTGCT', 'TTGGC', 'TTGGT', 'TTGTA', 
+						'TTGTC', 'TTGTG', 'TTGTT', 'TTTAA', 'TTTAC', 'TTTAG', 'TTTAT', 'TTTCA', 'TTTCC', 'TTTCG', 'TTTCT', 'TTTGA', 'TTTGC', 'TTTGG', 'TTTGT', 'TTTTA', 'TTTTC', 
+						'TTTTG', 'TTTTT']
+
 	# Pre-fills the mutation types variable
 	size = 5
 	mut_types_initial = perm(size, "ACGT")
@@ -149,6 +203,9 @@ def SigProfilerMatrixGeneratorFunc (project, genome, vcfFiles, exome=False, bed_
 
 	indel_types_tsb = []
 	indel_types_simple = []
+	indel_complete = []
+
+	indel_cat = ['Del', 'Ins']
 
 	indel_types = ['1:Del:C:0', '1:Del:C:1', '1:Del:C:2', '1:Del:C:3', '1:Del:C:4', '1:Del:C:5',
 				   '1:Del:T:0', '1:Del:T:1', '1:Del:T:2', '1:Del:T:3', '1:Del:T:4', '1:Del:T:5',
@@ -173,6 +230,14 @@ def SigProfilerMatrixGeneratorFunc (project, genome, vcfFiles, exome=False, bed_
 		for tsbs in tsb_I:
 			indel_types_tsb.append(tsbs + ":" + indels)
 
+	for indels in indels_seq_types:
+		repeat = str(len(indels))
+		for id_cat in indel_cat:
+			for l in range(0, 6, 1):
+				indel_complete.append(":".join([repeat, id_cat, indels, str(l)]))
+	for id_cat in indel_cat:
+		for i in range(0, 6, 1):
+			indel_complete.append(":".join(['5',id_cat, '5',str(i)]))
 
 	indel_types_simple = indel_types[:24]
 	indel_types_simple.append('long_Del')
@@ -327,6 +392,7 @@ def SigProfilerMatrixGeneratorFunc (project, genome, vcfFiles, exome=False, bed_
 			mutation_ID['ID'] = pd.DataFrame(0, index=indel_types, columns=samples)
 			mutation_ID['simple'] = pd.DataFrame(0, index=indel_types_simple, columns=samples)
 			mutation_ID['tsb'] = pd.DataFrame(0, index=indel_types_tsb, columns=samples)
+			mutation_ID['complete'] = pd.DataFrame(0, index=indel_complete, columns=samples)
 
 			contexts = ['INDEL']
 			output_path_indel = output_path + "INDEL/"
@@ -385,7 +451,9 @@ def SigProfilerMatrixGeneratorFunc (project, genome, vcfFiles, exome=False, bed_
 				with open(vcf_path + "exome_temp.txt") as f:
 					lines = [line.strip().split() for line in f]
 				output = open(vcf_path + "exome_temp.txt", 'w')
-				for line in sorted(lines, key = lambda x: (['X','Y','1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', 'MT', 'M'].index(x[1]), int(x[2]))):
+				for line in sorted(lines, key = lambda x: (['I','II','III','IV','V','chrI','chrII','chrIII','chrIV','chrV','X','Y','1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23','24',
+                                                            '25','26','27','28','29','30','31','32','33','34','35','36','37','38','39', 'MT', 'M', 'MtDNA'].index(x[1]), int(x[2]))):
+				# for line in sorted(lines, key = lambda x: (['X','Y','1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', 'MT', 'M'].index(x[1]), int(x[2]))):
 					print('\t'.join(line), file=output)
 				output.close()
 				mutation_pd = {}
@@ -397,7 +465,9 @@ def SigProfilerMatrixGeneratorFunc (project, genome, vcfFiles, exome=False, bed_
 				with open(vcf_path + "bed_temp.txt") as f:
 					lines = [line.strip().split() for line in f]
 				output = open(vcf_path + "bed_temp.txt", 'w')
-				for line in sorted(lines, key = lambda x: (['X','Y','1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', 'MT', 'M'].index(x[1]), int(x[2]))):
+				for line in sorted(lines, key = lambda x: (['I','II','III','IV','V','chrI','chrII','chrIII','chrIV','chrV','X','Y','1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23','24',
+                                                            '25','26','27','28','29','30','31','32','33','34','35','36','37','38','39', 'MT', 'M', 'MtDNA'].index(x[1]), int(x[2]))):
+				# for line in sorted(lines, key = lambda x: (['X','Y','1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', 'MT', 'M'].index(x[1]), int(x[2]))):
 					print('\t'.join(line), file=output)
 				output.close()
 
@@ -417,8 +487,10 @@ def SigProfilerMatrixGeneratorFunc (project, genome, vcfFiles, exome=False, bed_
 					with open(vcf_path + "exome_temp_context_tsb_DINUC.txt") as f:
 						lines = [line.strip().split() for line in f]
 					output = open(vcf_path + "exome_temp_context_tsb_DINUC.txt", 'w')
-					for line in sorted(lines, key = lambda x: (['X','Y','1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', 'MT', 'M'].index(x[1]), int(x[2]))):
-						print('\t'.join(line), file=output)
+					for line in sorted(lines, key = lambda x: (['I','II','III','IV','V','chrI','chrII','chrIII','chrIV','chrV','X','Y','1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23','24',
+                                                            '25','26','27','28','29','30','31','32','33','34','35','36','37','38','39', 'MT', 'M', 'MtDNA'].index(x[1]), int(x[2]))):
+					# for line in sorted(lines, key = lambda x: (['X','Y','1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', 'MT', 'M'].index(x[1]), int(x[2]))):
+							print('\t'.join(line), file=output)
 					output.close()
 
 					mutation_dinuc_pd_all = pd.DataFrame(0, index=mutation_types_tsb_context, columns=samples)
@@ -428,7 +500,9 @@ def SigProfilerMatrixGeneratorFunc (project, genome, vcfFiles, exome=False, bed_
 					with open(vcf_path + "bed_temp_context_tsb_DINUC.txt") as f:
 						lines = [line.strip().split() for line in f]
 					output = open(vcf_path + "bed_temp_context_tsb_DINUC.txt", 'w')
-					for line in sorted(lines, key = lambda x: (['X','Y','1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', 'MT', 'M'].index(x[1]), int(x[2]))):
+					for line in sorted(lines, key = lambda x: (['I','II','III','IV','V','chrI','chrII','chrIII','chrIV','chrV','X','Y','1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23','24',
+                                                            '25','26','27','28','29','30','31','32','33','34','35','36','37','38','39', 'MT', 'M', 'MtDNA'].index(x[1]), int(x[2]))):
+					# for line in sorted(lines, key = lambda x: (['X','Y','1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', 'MT', 'M'].index(x[1]), int(x[2]))):
 						print('\t'.join(line), file=output)
 					output.close()
 
@@ -449,10 +523,11 @@ def SigProfilerMatrixGeneratorFunc (project, genome, vcfFiles, exome=False, bed_
 				mutation_ID, skipped_mut, total = matGen.catalogue_generator_INDEL_single (mutation_ID, lines, chrom, vcf_path, vcf_path_original, vcf_files, bed_file_path, chrom_path, project, output_matrix, exome, genome, ncbi_chrom, limited_indel, functionFlag, bed, bed_ranges, chrom_based, plot, tsb_ref, transcript_path, seqInfo, gs, log_file)
 
 				if chrom_based:
-					matGen.matrix_generator_INDEL(output_matrix, samples, indel_types, indel_types_tsb, indel_types_simple, mutation_ID['ID'], mutation_ID['tsb'], mutation_ID['simple'], project, exome, limited_indel, bed, chrom, plot)
+					matGen.matrix_generator_INDEL(output_matrix, samples, indel_types, indel_types_tsb, indel_types_simple, mutation_ID['ID'], mutation_ID['tsb'], mutation_ID['simple'], mutation_ID['complete'], project, exome, limited_indel, bed, chrom, plot)
 					mutation_ID['ID'] = pd.DataFrame(0, index=indel_types, columns=samples)
 					mutation_ID['simple'] = pd.DataFrame(0, index=indel_types_simple, columns=samples)
 					mutation_ID['tsb'] = pd.DataFrame(0, index=indel_types_tsb, columns=samples)
+					mutation_ID['complete'] = pd.DataFrame(0, index=indel_complete, columns=samples)
 
 
 
@@ -464,7 +539,9 @@ def SigProfilerMatrixGeneratorFunc (project, genome, vcfFiles, exome=False, bed_
 				with open(vcf_path + "exome_temp.txt") as f:
 					lines = [line.strip().split() for line in f]
 				output = open(vcf_path + "exome_temp.txt", 'w')
-				for line in sorted(lines, key = lambda x: (['X','Y','1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', 'MT', 'M'].index(x[1]), int(x[2]))):
+				for line in sorted(lines, key = lambda x: (['I','II','III','IV','V','chrI','chrII','chrIII','chrIV','chrV','X','Y','1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23','24',
+                                                            '25','26','27','28','29','30','31','32','33','34','35','36','37','38','39', 'MT', 'M', 'MtDNA'].index(x[1]), int(x[2]))):
+				# for line in sorted(lines, key = lambda x: (['X','Y','1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', 'MT', 'M'].index(x[1]), int(x[2]))):
 					print('\t'.join(line), file=output)
 				output.close()
 
@@ -476,7 +553,9 @@ def SigProfilerMatrixGeneratorFunc (project, genome, vcfFiles, exome=False, bed_
 				with open(vcf_path + "exome_temp_simple.txt") as f:
 					lines = [line.strip().split() for line in f]
 				output = open(vcf_path + "exome_temp_simple.txt", 'w')
-				for line in sorted(lines, key = lambda x: (['X','Y','1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', 'MT', 'M'].index(x[1]), int(x[2]))):
+				for line in sorted(lines, key = lambda x: (['I','II','III','IV','V','chrI','chrII','chrIII','chrIV','chrV','X','Y','1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23','24',
+                                                            '25','26','27','28','29','30','31','32','33','34','35','36','37','38','39', 'MT', 'M', 'MtDNA'].index(x[1]), int(x[2]))):
+				# for line in sorted(lines, key = lambda x: (['X','Y','1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', 'MT', 'M'].index(x[1]), int(x[2]))):
 					print('\t'.join(line), file=output)
 				output.close()
 
@@ -487,7 +566,9 @@ def SigProfilerMatrixGeneratorFunc (project, genome, vcfFiles, exome=False, bed_
 				with open(vcf_path + "exome_temp_tsb.txt") as f:
 					lines = [line.strip().split() for line in f]
 				output = open(vcf_path + "exome_temp_tsb.txt", 'w')
-				for line in sorted(lines, key = lambda x: (['X','Y','1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', 'MT', 'M'].index(x[1]), int(x[2]))):
+				for line in sorted(lines, key = lambda x: (['I','II','III','IV','V','chrI','chrII','chrIII','chrIV','chrV','X','Y','1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23','24',
+                                                            '25','26','27','28','29','30','31','32','33','34','35','36','37','38','39', 'MT', 'M', 'MtDNA'].index(x[1]), int(x[2]))):
+				# for line in sorted(lines, key = lambda x: (['X','Y','1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', 'MT', 'M'].index(x[1]), int(x[2]))):
 					print('\t'.join(line), file=output)
 				output.close()
 
@@ -499,7 +580,9 @@ def SigProfilerMatrixGeneratorFunc (project, genome, vcfFiles, exome=False, bed_
 				with open(vcf_path + "bed_temp.txt") as f:
 					lines = [line.strip().split() for line in f]
 				output = open(vcf_path + "bed_temp.txt", 'w')
-				for line in sorted(lines, key = lambda x: (['X','Y','1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', 'MT', 'M'].index(x[1]), int(x[2]))):
+				for line in sorted(lines, key = lambda x: (['I','II','III','IV','V','chrI','chrII','chrIII','chrIV','chrV','X','Y','1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23','24',
+                                                            '25','26','27','28','29','30','31','32','33','34','35','36','37','38','39', 'MT', 'M', 'MtDNA'].index(x[1]), int(x[2]))):
+				# for line in sorted(lines, key = lambda x: (['X','Y','1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', 'MT', 'M'].index(x[1]), int(x[2]))):
 					print('\t'.join(line), file=output)
 				output.close()
 
@@ -511,7 +594,9 @@ def SigProfilerMatrixGeneratorFunc (project, genome, vcfFiles, exome=False, bed_
 				with open(vcf_path + "bed_temp_simple.txt") as f:
 					lines = [line.strip().split() for line in f]
 				output = open(vcf_path + "bed_temp_simple.txt", 'w')
-				for line in sorted(lines, key = lambda x: (['X','Y','1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', 'MT', 'M'].index(x[1]), int(x[2]))):
+				for line in sorted(lines, key = lambda x: (['I','II','III','IV','V','chrI','chrII','chrIII','chrIV','chrV','X','Y','1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23','24',
+                                                            '25','26','27','28','29','30','31','32','33','34','35','36','37','38','39', 'MT', 'M', 'MtDNA'].index(x[1]), int(x[2]))):
+				# for line in sorted(lines, key = lambda x: (['X','Y','1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', 'MT', 'M'].index(x[1]), int(x[2]))):
 					print('\t'.join(line), file=output)
 				output.close()
 
@@ -522,7 +607,9 @@ def SigProfilerMatrixGeneratorFunc (project, genome, vcfFiles, exome=False, bed_
 				with open(vcf_path + "bed_temp_tsb.txt") as f:
 					lines = [line.strip().split() for line in f]
 				output = open(vcf_path + "bed_temp_tsb.txt", 'w')
-				for line in sorted(lines, key = lambda x: (['X','Y','1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', 'MT', 'M'].index(x[1]), int(x[2]))):
+				for line in sorted(lines, key = lambda x: (['I','II','III','IV','V','chrI','chrII','chrIII','chrIV','chrV','X','Y','1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23','24',
+                                                            '25','26','27','28','29','30','31','32','33','34','35','36','37','38','39', 'MT', 'M', 'MtDNA'].index(x[1]), int(x[2]))):
+				# for line in sorted(lines, key = lambda x: (['X','Y','1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', 'MT', 'M'].index(x[1]), int(x[2]))):
 					print('\t'.join(line), file=output)
 				output.close()
 
@@ -536,7 +623,7 @@ def SigProfilerMatrixGeneratorFunc (project, genome, vcfFiles, exome=False, bed_
 			# mutation_ID['simple'] = mutation_ID['simple'].to_dict('dict')
 			# mutation_ID['tsb'] = mutation_ID['tsb'].to_dict('dict')
 			if not chrom_based:
-				matGen.matrix_generator_INDEL(output_matrix, samples, indel_types, indel_types_tsb, indel_types_simple, mutation_ID['ID'], mutation_ID['tsb'], mutation_ID['simple'], project, exome, limited_indel, bed, chrom_start, plot)
+				matGen.matrix_generator_INDEL(output_matrix, samples, indel_types, indel_types_tsb, indel_types_simple, mutation_ID['ID'], mutation_ID['tsb'], mutation_ID['simple'], mutation_ID['complete'], project, exome, limited_indel, bed, chrom_start, plot)
 				# matrices['ID'] = pd.DataFrame(mutation_ID['ID'])
 				matrices['ID'] = mutation_ID['ID'].iloc[0:83,:]
 			#remove_id = ['2:Ins:M:1','3:Ins:M:1','3:Ins:M:2','4:Ins:M:1','4:Ins:M:2','4:Ins:M:3','5:Ins:M:1','5:Ins:M:2','5:Ins:M:3','5:Ins:M:4','5:Ins:M:5','complex','non_matching']

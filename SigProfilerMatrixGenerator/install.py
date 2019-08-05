@@ -202,8 +202,25 @@ def install_chromosomes_tsb (genomes, ref_dir, custom):
 							'13':'102bb3fb420a4104c216bcdf99870374','14':'e26b8b63fba0ea7ced4f0330e93a8cdc','15':'da747616a1362d374d4786102fab6f9f',
 							'16':'54e4f932eb0eda4cbf31156f96ef7235','17':'46c2facf5415e4eff8b0804161db722d', '18':'f1cb84f002967854b83bf266ec59a7a3',
 							'19':'b85ca155fd1780fe5c327a4589c212a6','20':'899d3511352d78b9b9dc63f063d91b31','Y':'6a7a3539c329dc540dfa6db006003bb1',
-							'X':'7a06bafab97c59a819f03633f0a6b7a2'} # '20':'53e52c5facc7f05462be533845f37425',
-	}
+							'X':'7a06bafab97c59a819f03633f0a6b7a2'},
+				'c_elegans':
+							{'I':'5a3ea8cf3dfbc641716b7bc805edcaae','II':'bf82edaa92809dd2fea2b791c38c9728','III':'d2df34b6743f41d3964549fc76c5f1a2',
+							'IV':'23396bb57145d3acde2888947b5b8c3a','V':'09df3c53b12e5fd7d9035cc98ca221a3','X':'988046456f1409dfdb5e26444d84d238',
+							'MtDNA':'48983f530959780de0125f74a87d4fc1'},
+				'dog':
+							{'1':'bef8283c1a36f9aef0e407de2ff6af00','2':'9cc961192bb5e58b3847060c3e9c1cfc','3':'d33263fa2de6666b41e140cb7a8da66c',
+							 '4':'cd4ed39ebac1c04800ccf30466ec69f5','5':'c0f48a4a764e58388b48835aca2ec0a4','6':'4b472a2f8d0a53ac75cce04e7dc9279a',
+							 '7':'12a61573a0da2c9306fff705bb1c39c1','8':'e22cf22a27560aa8523dc959ddcf6e25','9':'c079a73d719145cdd5c7c93969a1c392',
+							 '10':'45805a518147f7846bd0457ca038c8df','11':'f38cda8508463a7607dff14a581ee7b0','12':'adb5de197f58bb827fa01fe924eb3a1d',
+							 '13':'055a845ba97baad3b13d4d3359f88290','14':'27f0ba8e47996a058807a3827cf8e4a8','15':'2e9565c687a593eb0acbdd0962bb9255',
+							 '16':'89b2225bb78d88b0fd1d38d9514ab0cb','17':'f0378253e2f083e42b665ea202fde3b0','18':'04d124e273f3b54a685ad6526223cd03',
+							 '19':'67bae093919e6bb5ab6b9806c739d539','20':'5588387165a2e19c4533012cfb4998f3','21':'371cdf18a545728f7964b9db2fc72d5e',
+							 '22':'fbf76865f88a018d93506e036f6a68bc','23':'085145e01d9fd9f0f999fb9e8e8d4400','24':'69b75a9962fb766b447e7d1252cb31ac',
+							 '25':'12d5c6677b3e17170c317c1f5532d2a8','26':'13937d18e56b2b93d12fa5fcba48a138','27':'1d03d8ca5f201f4d156f5e1b38f7a67c',
+							 '28':'c33395dec7fdc13e9d8f10afaa946f8c','29':'174f2db104ecaa5efef770f44241e3b0','30':'047d420ef9aecb933a7d83b6af820b23',
+							 '31':'5be61f0c9944a5f2d7d1a5b2e75fb000','32':'212dcb867e95a642277a243fed8d8e41','33':'08a217b02cdd778cfdb0005dff4828b1',
+							 '34':'4245d6fc370d9049ef4c25314fbef239','35':'1344aba8755b8a4e304629180fc0591a','36':'e4fff6ed84777905dc999ca6d6bc2557',
+							 '37':'60d51ea6ae9e3f2fa316e3d03aff96b2','38':'4090ff76d94e6b38920916ae3ff2441c','X':'bce1372df64037d79b0995311d8ff971'}}
 	for genome in genomes:
 		chrom_number = None
 		if genome == 'GRCh37' or genome == 'GRCh38': 
@@ -372,7 +389,25 @@ def install (genome, custom=False, rsync=False, bash=True, ftp=True):
 								'13':'102bb3fb420a4104c216bcdf99870374','14':'e26b8b63fba0ea7ced4f0330e93a8cdc','15':'da747616a1362d374d4786102fab6f9f',
 								'16':'54e4f932eb0eda4cbf31156f96ef7235','17':'46c2facf5415e4eff8b0804161db722d', '18':'f1cb84f002967854b83bf266ec59a7a3',
 								'19':'b85ca155fd1780fe5c327a4589c212a6','20':'899d3511352d78b9b9dc63f063d91b31','Y':'6a7a3539c329dc540dfa6db006003bb1',
-								'X':'7a06bafab97c59a819f03633f0a6b7a2'}}
+								'X':'7a06bafab97c59a819f03633f0a6b7a2'},
+					'c_elegans':
+								{'I':'5a3ea8cf3dfbc641716b7bc805edcaae','II':'bf82edaa92809dd2fea2b791c38c9728','III':'d2df34b6743f41d3964549fc76c5f1a2',
+								'IV':'23396bb57145d3acde2888947b5b8c3a','V':'09df3c53b12e5fd7d9035cc98ca221a3','X':'988046456f1409dfdb5e26444d84d238',
+								'MtDNA':'48983f530959780de0125f74a87d4fc1'},
+					'dog':
+								{'1':'bef8283c1a36f9aef0e407de2ff6af00','2':'9cc961192bb5e58b3847060c3e9c1cfc','3':'d33263fa2de6666b41e140cb7a8da66c',
+								 '4':'cd4ed39ebac1c04800ccf30466ec69f5','5':'c0f48a4a764e58388b48835aca2ec0a4','6':'4b472a2f8d0a53ac75cce04e7dc9279a',
+								 '7':'12a61573a0da2c9306fff705bb1c39c1','8':'e22cf22a27560aa8523dc959ddcf6e25','9':'c079a73d719145cdd5c7c93969a1c392',
+								 '10':'45805a518147f7846bd0457ca038c8df','11':'f38cda8508463a7607dff14a581ee7b0','12':'adb5de197f58bb827fa01fe924eb3a1d',
+								 '13':'055a845ba97baad3b13d4d3359f88290','14':'27f0ba8e47996a058807a3827cf8e4a8','15':'2e9565c687a593eb0acbdd0962bb9255',
+								 '16':'89b2225bb78d88b0fd1d38d9514ab0cb','17':'f0378253e2f083e42b665ea202fde3b0','18':'04d124e273f3b54a685ad6526223cd03',
+								 '19':'67bae093919e6bb5ab6b9806c739d539','20':'5588387165a2e19c4533012cfb4998f3','21':'371cdf18a545728f7964b9db2fc72d5e',
+								 '22':'fbf76865f88a018d93506e036f6a68bc','23':'085145e01d9fd9f0f999fb9e8e8d4400','24':'69b75a9962fb766b447e7d1252cb31ac',
+								 '25':'12d5c6677b3e17170c317c1f5532d2a8','26':'13937d18e56b2b93d12fa5fcba48a138','27':'1d03d8ca5f201f4d156f5e1b38f7a67c',
+								 '28':'c33395dec7fdc13e9d8f10afaa946f8c','29':'174f2db104ecaa5efef770f44241e3b0','30':'047d420ef9aecb933a7d83b6af820b23',
+								 '31':'5be61f0c9944a5f2d7d1a5b2e75fb000','32':'212dcb867e95a642277a243fed8d8e41','33':'08a217b02cdd778cfdb0005dff4828b1',
+								 '34':'4245d6fc370d9049ef4c25314fbef239','35':'1344aba8755b8a4e304629180fc0591a','36':'e4fff6ed84777905dc999ca6d6bc2557',
+								 '37':'60d51ea6ae9e3f2fa316e3d03aff96b2','38':'4090ff76d94e6b38920916ae3ff2441c','X':'bce1372df64037d79b0995311d8ff971'}}
 
 		chromosome_fasta_path = ref_dir + "/references/chromosomes/tsb/"
 		print("Beginning installation. This may take up to 40 minutes to complete.")
@@ -459,7 +494,7 @@ def install (genome, custom=False, rsync=False, bash=True, ftp=True):
 		shutil.copy("context_distributions/", "references/chromosomes/")
 
 	print("All reference files have been created.")
-	if genome != "rn6":
+	if genome != "rn6" and genome != 'dog' and genome != 'c_elegans':
 		print("Verifying and benchmarking installation now...")
 		benchmark(genome, ref_dir)
 

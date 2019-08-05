@@ -57,7 +57,8 @@ def save_tsb (chromosome_string_path, transcript_path, output_path):
                 with open(transcript_path + file) as f:
                     lines = [line.strip().split() for line in f]
                 output = open(transcript_path + file, 'w')
-                for line in sorted(lines, key = lambda x: (['X','Y','1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', 'MT', 'M'].index(x[2]), int(x[4]), int(x[5]))):
+                for line in sorted(lines, key = lambda x: (['I','II','III','IV','V','chrI','chrII','chrIII','chrIV','chrV','X','Y','1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23','24',
+                                                            '25','26','27','28','29','30','31','32','33','34','35','36','37','38','39', 'MT', 'M', 'MtDNA'].index(x[2]), int(x[4]), int(x[5]))):
                     print('\t'.join(line), file=output)
 
                 with open (transcript_path + file) as f:
@@ -114,7 +115,8 @@ def save_tsb (chromosome_string_path, transcript_path, output_path):
         if chrom == '.DS':
             pass
         else:
-            try:
+            # try:
+            if True:
                 if os.path.exists(output_path + chrom + ".txt"):
                     continue
 
@@ -215,7 +217,7 @@ def save_tsb (chromosome_string_path, transcript_path, output_path):
                                 # Saves Non-transcribed data up until
                                 # the first transcript.
                                 for i in range(0, location, 1):
-                                    nuc = chrom_string[i]
+                                    nuc = chrom_string[i].upper()
                                     outFile.write(byte_ref['N_' + nuc])
                                     l += 1
                                 pointer = 1
@@ -232,7 +234,7 @@ def save_tsb (chromosome_string_path, transcript_path, output_path):
                                 # next transcript.
                                 if I_T_start > location:
                                     for i in range(location, I_T_start, 1):
-                                        nuc = chrom_string[i]
+                                        nuc = chrom_string[i].upper()
                                         outFile.write(byte_ref['N_' + nuc])
                                         l += 1
                                     location = I_T_start
@@ -266,11 +268,11 @@ def save_tsb (chromosome_string_path, transcript_path, output_path):
                                     if bi_start != 0 and bi_start > location:
                                         for i in range (location, bi_start, 1):
                                             if I_strand == '-1':
-                                                nuc = chrom_string[i]
+                                                nuc = chrom_string[i].upper()
                                                 outFile.write(byte_ref['T_' + nuc])
                                                 l += 1
                                             else:
-                                                nuc = chrom_string[i]
+                                                nuc = chrom_string[i].upper()
                                                 outFile.write(byte_ref['U_' + nuc])
                                                 l += 1
                                         location = bi_start
@@ -278,7 +280,7 @@ def save_tsb (chromosome_string_path, transcript_path, output_path):
                                         # Saves Bi-directional data for the length
                                         # of the opposing transcripts overlap
                                         for i in range (location, bi_end, 1):
-                                            nuc = chrom_string[i]
+                                            nuc = chrom_string[i].upper()
                                             outFile.write(byte_ref['B_' + nuc])
                                             l += 1
                                         location = bi_end
@@ -290,11 +292,11 @@ def save_tsb (chromosome_string_path, transcript_path, output_path):
                             if I_T_end > location:
                                 for i in range(location, I_T_end, 1):
                                     if I_strand == '-1':
-                                        nuc = chrom_string[i]
+                                        nuc = chrom_string[i].upper()
                                         outFile.write(byte_ref['T_' + nuc])
                                         l += 1
                                     else:
-                                        nuc = chrom_string[i]
+                                        nuc = chrom_string[i].upper()
                                         outFile.write(byte_ref['U_' + nuc])
                                         l +=1
                                 location = I_T_end
@@ -304,7 +306,7 @@ def save_tsb (chromosome_string_path, transcript_path, output_path):
                     # the final transcript is analyzed         
                     if location < chrom_length:
                         for i in range(location, chrom_length,1):
-                            nuc = chrom_string[i]
+                            nuc = chrom_string[i].upper()
                             outFile.write(byte_ref['N_' + nuc]) 
                             l += 1        
                         
@@ -315,8 +317,8 @@ def save_tsb (chromosome_string_path, transcript_path, output_path):
                     else:
                         print("                                                               " +chrom + " (" + str(z) + "/" + str(chrom_total) + ")")
                     z += 1
-            except:
-                print(chrom + " has been skipped. This chromosome is not supported.")
+            #except:
+             #   print(chrom + " has been skipped. This chromosome is not supported.")
 
     end_time = time.time()
     print("Transcript files created.\n Job took: ", end_time-start_time, " seconds")
