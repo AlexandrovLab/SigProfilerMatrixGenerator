@@ -1,0 +1,6 @@
+WBGene00010958	MTCE.4.1	MtDNA	1	549	783	ndfl-4	protein_coding
+WBGene00010959	MTCE.11.1	MtDNA	1	1763	2635	nduo-1	protein_coding
+WBGene00010960	MTCE.12.1	MtDNA	1	2634	3235	atp-6	protein_coding
+WBGene00010961	MTCE.16.1	MtDNA	1	3389	4269	nduo-2	protein_coding
+WBGene00000829	MTCE.21.1	MtDNA	1	4504	5621	ctb-1	protein_coding
+WBGene00010962	MTCE.23.1	MtDNA	1	5678	6449	ctc-3	protein_coding

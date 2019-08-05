@@ -838,10 +838,7 @@ def catalogue_generator_INDEL_single (mutation_ID, lines, chrom, vcf_path, vcf_p
 							ref_base = revcompl(ref_base)
 							strand = '-1'
 							bias = revbias(bias)
-						#if ref_base == tsb_ref[chrom_string[start-1]][1]:
-						#	strand = '1'
-						#else:
-						#	strand = '-1'
+
 					elif len(mut) - len(ref) == len(mut)-1:
 						strand = '1'
 						mut_type = 'Ins'
@@ -850,10 +847,7 @@ def catalogue_generator_INDEL_single (mutation_ID, lines, chrom, vcf_path, vcf_p
 							mut_base = revcompl(mut_base)
 							strand = '-1'
 							bias = revbias(bias)
-						# if mut_base == tsb_ref[chrom_string[start-1]][1]:
-						# 	strand = '1'
-						# else:
-						# 	strand = '-1'
+
 
 					else:
 						mutation_ID['ID'].at['complex', sample] += 1
@@ -1085,10 +1079,17 @@ def catalogue_generator_INDEL_single (mutation_ID, lines, chrom, vcf_path, vcf_p
 
 					# Creates the final INDEl key and saves it into the data structure
 					indel_key_simple = ''
+					if len(type_sequence) < 6:
+						indel_key_complete = str(indel_key_1) +':' + indel_key_2 + ':' + type_sequence +':'+str(indel_key_4)
+						indel_key_complete_rev = str(indel_key_1) +':'+ indel_key_2 + ':' + revcompl(type_sequence) +':'+str(indel_key_4)
+					else:
+						indel_key_complete = str(indel_key_1) +':'+indel_key_2+':5:'+str(indel_key_4)
+
 					if limited_indel and indel_key_2 == 'Ins' and indel_key_3 == 'M':
 							indel_key = str(indel_key_1) + ':' + indel_key_2 + ':' + 'R' + ':' + '0'
 					else:        
 						indel_key = str(indel_key_1) +':'+indel_key_2+':'+indel_key_3+':'+str(indel_key_4)
+
 
 					if int(indel_key_1) > 1:
 						if indel_key_3 == 'M':
@@ -1146,7 +1147,11 @@ def catalogue_generator_INDEL_single (mutation_ID, lines, chrom, vcf_path, vcf_p
 
 
 					mutation_ID['ID'].at[indel_key, sample] += 1
-					
+					try:
+						mutation_ID['complete'].at[indel_key_complete, sample] += 1
+					except:
+						mutation_ID['complete'].at[indel_key_complete_rev, sample] += 1
+
 					mutation_ID['simple'].at[indel_key_simple, sample] += 1
 					total_analyzed += 1
 
@@ -1860,7 +1865,7 @@ def matrix_generator (context, output_matrix, project, samples, bias_sort, mut_c
 	if functionFlag:		
 		return(mut_count_all)
 
-def matrix_generator_INDEL (output_matrix, samples, indel_types, indel_types_tsb, indel_types_simple, indel_dict, indel_tsb_dict, indel_simple_dict, project, exome, limited_indel, bed, initial_chrom=None, plot=False):
+def matrix_generator_INDEL (output_matrix, samples, indel_types, indel_types_tsb, indel_types_simple, indel_dict, indel_tsb_dict, indel_simple_dict, indel_dict_complete, project, exome, limited_indel, bed, initial_chrom=None, plot=False):
 	'''
 	Writes the final mutational matrix for INDELS given a dictionary of samples, INDEL types, and counts
 
@@ -1906,34 +1911,43 @@ def matrix_generator_INDEL (output_matrix, samples, indel_types, indel_types_tsb
 		file_prefix_tsb = project + ".ID415"
 		file_prefix_simple = project + ".ID28"
 		file_prefix_complete = project + ".ID96"
+		file_prefix_complete_seq = project + ".ID8628"
 	else:
 		file_prefix = project + ".ID94"
 		file_prefix_tsb = project + ".ID415"
 		file_prefix_simple = project + ".ID28"
 		file_prefix_complete = project + ".ID96"
+		file_prefix_complete_seq = project + ".ID8628"
 	
 	if exome:
 		output_file_matrix = output_matrix_INDEL + file_prefix + ".exome"
 		output_file_matrix_tsb = output_matrix_INDEL + file_prefix_tsb + ".exome"
 		output_file_matrix_simple = output_matrix_INDEL + file_prefix_simple + ".exome"
 		output_file_matrix_complete = output_matrix_INDEL + file_prefix_complete + ".exome"
+		output_file_matrix_complete_seq = output_matrix_INDEL + file_prefix_complete_seq + ".exome"
+
 	else:
 		if bed:
 			output_file_matrix = output_matrix_INDEL + file_prefix + ".region"
 			output_file_matrix_tsb = output_matrix_INDEL + file_prefix_tsb + ".region"
 			output_file_matrix_simple = output_matrix_INDEL + file_prefix_simple + ".region"
 			output_file_matrix_complete = output_matrix_INDEL + file_prefix_complete + ".region"
+			output_file_matrix_complete_seq = output_matrix_INDEL + file_prefix_complete_seq + ".region"
+
 		else:
 			output_file_matrix = output_matrix_INDEL + file_prefix + ".all"
 			output_file_matrix_tsb = output_matrix_INDEL + file_prefix_tsb + ".all"
 			output_file_matrix_simple = output_matrix_INDEL + file_prefix_simple + ".all"
 			output_file_matrix_complete = output_matrix_INDEL + file_prefix_complete + ".all"
+			output_file_matrix_complete_seq = output_matrix_INDEL + file_prefix_complete_seq + ".all"
+
 
 	if initial_chrom != None:
 		output_file_matrix += ".chr" + initial_chrom
 		output_file_matrix_tsb += ".chr" + initial_chrom
 		output_file_matrix_simple += ".chr" + initial_chrom
 		output_file_matrix_complete += ".chr" + initial_chrom
+		output_file_matrix_complete_seq += ".chr" + initial_chrom
 
 
 	short_id = pd.DataFrame(indel_dict).iloc[:83,:]
@@ -1941,6 +1955,7 @@ def matrix_generator_INDEL (output_matrix, samples, indel_types, indel_types_tsb
 	df2csv(indel_dict, output_file_matrix_complete)
 	df2csv(indel_tsb_dict, output_file_matrix_tsb)
 	df2csv(indel_simple_dict, output_file_matrix_simple)
+	df2csv(indel_dict_complete, output_file_matrix_complete_seq)
 
 
 	if plot:
