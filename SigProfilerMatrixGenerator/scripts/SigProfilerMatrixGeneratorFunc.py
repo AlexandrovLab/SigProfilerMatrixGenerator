@@ -574,7 +574,7 @@ def SigProfilerMatrixGeneratorFunc (project, genome, vcfFiles, exome=False, bed_
 
 				mutation_ID['tsb'] = pd.DataFrame(0, index=indel_types_tsb, columns=samples)
 				mutation_ID['tsb'], samples2 = matGen.exome_check(mutation_ID['tsb'], genome, vcf_path + "exome_temp_tsb.txt", output_matrix, project, "ID", cushion, 'tsb')
-
+				mutation_ID['complete'] = pd.DataFrame(0, index=indel_complete, columns=samples)
 
 			if bed:
 				with open(vcf_path + "bed_temp.txt") as f:
@@ -617,7 +617,7 @@ def SigProfilerMatrixGeneratorFunc (project, genome, vcfFiles, exome=False, bed_
 
 				mutation_ID['tsb'] = pd.DataFrame(0, index=indel_types_tsb, columns=samples)
 				mutation_ID['tsb'], samples2 = matGen.panel_check(mutation_ID['tsb'], genome, vcf_path + "bed_temp_tsb.txt", output_matrix, bed_file_path, project, "ID", cushion, 'tsb')
-
+				mutation_ID['complete'] = pd.DataFrame(0, index=indel_complete, columns=samples)
 
 			# mutation_ID['ID'] = mutation_ID['ID'].to_dict('dict')
 			# mutation_ID['simple'] = mutation_ID['simple'].to_dict('dict')

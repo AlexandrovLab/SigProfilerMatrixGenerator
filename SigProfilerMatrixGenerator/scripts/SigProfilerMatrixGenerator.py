@@ -280,7 +280,6 @@ def catalogue_generator_single (lines, chrom, mutation_dict, mutation_dinuc_pd_a
 		dinuc_index_temp = [i for i, x in enumerate(dinuc_sub) if x == 1]
 		mnv_index_temp = [i for i, x in enumerate(dinuc_sub) if x <= mnv and x>0]
 
-
 		if seqInfo:
 			seqOut_path = output_matrix + "vcf_files/SNV/"
 			seqOut_path_dinuc = output_matrix + "vcf_files/DBS/"
@@ -307,6 +306,7 @@ def catalogue_generator_single (lines, chrom, mutation_dict, mutation_dinuc_pd_a
 				for i in range (1, len(mnv_index_temp)-1, 1):
 					if mnv_index_temp[i] + 1 == mnv_index_temp[i+1]: 
 						if lines[mnv_index_temp[i]][0] == lines[mnv_index_temp[i+1]][0]:
+
 							mnv_index.append(mnv_index_temp[i])	
 					elif mnv_index_temp[i]-1 == mnv_index_temp[i-1]:
 						if lines[mnv_index_temp[i]][0] == lines[mnv_index_temp[i-1]][0]:
