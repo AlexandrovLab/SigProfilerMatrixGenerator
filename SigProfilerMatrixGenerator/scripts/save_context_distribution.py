@@ -96,7 +96,7 @@ def context_distribution (context_input, output_file, chromosome_path, chromosom
 
 
 						# Adjust the nucleotide representaiton if TSB is desired
-						if context_input == '192' or context_input == '3072':
+						if context_input == '192' or context_input == '3072' or context_input == '384' or context_input == '6144':
 							bias = tsb_ref[chromosome[i+int(context/2)]][0]
 							nuc = bias + ":" + nuc
 							# if bias == 0:
@@ -153,6 +153,11 @@ def context_distribution (context_input, output_file, chromosome_path, chromosom
 			print(probs[nuc][chromosomes[-1]]/nuc_sum, file=out)
 
 
+	chromosomes.remove("Y")
+	chromosomes.remove("MT")
+	chromosomes.remove("M")
+
+	
 	# Sort the file so that the nucleotides are in alphabetical order
 	sort_command_1 = "sort -t ',' -k 1,1 "
 	sort_command_2 = " -o "
@@ -192,11 +197,11 @@ def context_distribution_BED (context_input, output_file, chromosome_path, chrom
 	dinuc_types = ['AA', 'AC', 'AG', 'AT', 'CA', 'CC', 'CG', 'GA', 'GC', 'TA']
 
 	# Set the context parameter based upon the user input
-	if context_input == '96' or context_input == '192':
+	if context_input == '96' or context_input == '192' or context_input == '384':
 		context = 3
-	elif context_input == '1536' or context_input == '3072':
+	elif context_input == '1536' or context_input == '3072' or context_input == '6144':
 		context = 5
-	elif context_input == 'DINUC':
+	elif context_input == 'DINUC' or context_input == 'DBS':
 		context = 2
 	else:
 		print('Not a valid context')
@@ -207,9 +212,26 @@ def context_distribution_BED (context_input, output_file, chromosome_path, chrom
 	first_line = True
 	chrom_length = 0
 	if exome:
-		file_to_open = ref_dir + "/references/chromosomes/exome/" + genome + "/" + exome_file
+		# file_to_open = ref_dir + "/references/chromosomes/exome/" + genome + "/" + exome_file
+		file_to_open = exome_file
 	else:
-		file_to_open = ref_dir + "/references/vcf_files/BED/" + bed_file
+		# file_to_open = ref_dir + "/references/vcf_files/BED/" + bed_file
+		file_to_open = bed_file
+
+	if "Y" not in chromosomes:
+		chromosomes.append("Y")
+	if "MT" not in chromosomes:
+		chromosomes.append("MT")
+	if "M" not in chromosomes:
+		chromosomes.append("M")
+
+	with open(file_to_open) as f:
+		lines = [line.strip().split() for line in f]
+	output = open(file_to_open, 'w')
+	for line in sorted(lines, key = lambda x: (chromosomes.index(x[0]), int(x[1]), int(x[2]))):
+		print('\t'.join(line), file=output)
+	output.close()
+
 	with open(file_to_open) as b_file:
 		next(b_file)
 		for lines in b_file:
@@ -225,9 +247,6 @@ def context_distribution_BED (context_input, output_file, chromosome_path, chrom
 				first_line = False 
 				f = open (chromosome_path + chrom + ".txt", "rb")
 				chromosome = f.read()
-				# if context_input == '192' or context_input == '3072':
-				# 	tsb = open (chromosome_TSB_path + chrom + "_192.txt", 'rb')
-				# 	chromosome_tsb = tsb.read()
 
 			if chrom == chrom_initial:
 				chrom_length += end-start
@@ -237,10 +256,6 @@ def context_distribution_BED (context_input, output_file, chromosome_path, chrom
 						nuc += tsb_ref[chromosome[l]][1]
 					base = nuc[int(context/2)]
 
-					count += 1
-					if count == 100000:
-						#print(i)
-						count = 0
 					# Skip the base if unknown 
 					if "N" in nuc:
 						pass
@@ -252,17 +267,9 @@ def context_distribution_BED (context_input, output_file, chromosome_path, chrom
 								nuc = revcompl(nuc)
 
 							# Adjust the nucleotide representaiton if TSB is desired
-							if context_input == '192' or context_input == '3072':
+							if context_input == '192' or context_input == '3072' or context_input == '384' or context_input == '6144':
 								bias = tsb_ref[chromosome[i+int(context/2)]][0]
 								nuc = bias + ":" + nuc
-								# if bias == 0:
-								# 	nuc = 'N:' + nuc
-								# elif bias == 1:
-								# 	nuc = 'T:' + nuc
-								# elif bias == 2:
-								# 	nuc = 'U:' + nuc
-								# else:
-								# 	nuc = 'B:' + nuc 
 
 							# Update the dictionary for the current nucleotide
 							if nuc not in probs.keys():
@@ -289,18 +296,15 @@ def context_distribution_BED (context_input, output_file, chromosome_path, chrom
 								probs[nuc][chrom] += 1
 			else:
 				f.close()
-				print("yes")
-				print("Chromosome ", chrom_initial, "done")
+				print("          Chromosome ", chrom_initial, "done")
 				chromosome_lengths[chrom_initial] = chrom_length
 				chrom_length = end-start
 				chrom_initial = chrom
-				print(chrom_initial)
-				f = open (chromosome_path + chrom + ".txt", "rb")
-				chromosome = f.read()
-				#chromosome_lengths.append(len(chromosome))
-				# if context_input == '192' or context_input == '3072':
-				# 	tsb = open (chromosome_TSB_path + chrom + "_192.txt", 'rb')
-				# 	chromosome_tsb = tsb.read()
+				try:
+					f = open (chromosome_path + chrom + ".txt", "rb")
+					chromosome = f.read()
+				except:
+					continue
 
 				for i in range(start, end+1-context, 1):
 					nuc = ''
@@ -308,10 +312,6 @@ def context_distribution_BED (context_input, output_file, chromosome_path, chrom
 						nuc += tsb_ref[chromosome[l]][1]
 					base = nuc[int(context/2)]
 
-					count += 1
-					if count == 100000:
-						#print(i)
-						count = 0
 					# Skip the base if unknown 
 					if "N" in nuc:
 						pass
@@ -323,31 +323,17 @@ def context_distribution_BED (context_input, output_file, chromosome_path, chrom
 								nuc = revcompl(nuc)
 
 							# Adjust the nucleotide representaiton if TSB is desired
-							if context_input == '192' or context_input == '3072':
+							if context_input == '192' or context_input == '3072' or context_input == '384' or context_input == '6144':
 								bias = tsb_ref[chromosome[i+int(context/2)]][0]
 								nuc = bias + ":" + nuc
-									# if bias == 0:
-									# 	nuc = 'N:' + nuc
-									# elif bias == 1:
-									# 	nuc = 'T:' + nuc
-									# elif bias == 2:
-									# 	nuc = 'U:' + nuc
-									# else:
-									# 	nuc = 'B:' + nuc 
 
 							# Update the dictionary for the current nucleotide
 							if nuc not in probs.keys():
-								if chrom == '22':
-									print(chrom)
 								probs[nuc] = {chrom:1}
 							else:
 								if chrom not in probs[nuc].keys():
-									if chrom == '22':
-										print(chrom, "first")
 									probs[nuc][chrom] = 1
 								else:
-									if chrom == '22':
-										print(chrom, "multiple")
 									probs[nuc][chrom] += 1
 
 						else:
@@ -387,6 +373,10 @@ def context_distribution_BED (context_input, output_file, chromosome_path, chrom
 			except:
 				print(str(0),file=out)
 
+
+	chromosomes.remove("Y")
+	chromosomes.remove("MT")
+	chromosomes.remove("M")
 
 	# Sort the file so that the nucleotides are in alphabetical order
 	sort_command_1 = "sort -t ',' -k 1,1 "
