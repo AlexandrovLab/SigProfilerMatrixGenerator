@@ -13,6 +13,7 @@ import re
 import argparse
 
 revcompl = lambda x: ''.join([{'A':'T','C':'G','G':'C','T':'A','N':'N'}[B] for B in x][::-1])
+revbias = lambda x: ''.join([{'0':'0', '3':'3', '1':'2','2':'1','U':'T','T':'U','B':'B','N':'N', 'Q':'Q'}[B] for B in x][::-1])
 
 
 def context_distribution (context_input, output_file, chromosome_path, chromosomes, tsb_ref):
@@ -44,14 +45,16 @@ def context_distribution (context_input, output_file, chromosome_path, chromosom
 
 
 	dinuc_types = ['AA', 'AC', 'AG', 'AT', 'CA', 'CC', 'CG', 'GA', 'GC', 'TA']
-
+	dinuc_tsb = ['AA', 'AG', 'CC', 'GA',]
+	dinuc_non_tsb = ['Q:AC', 'Q:AT', 'Q:CA', 'Q:CG', 'Q:GC', 'Q:TA']
+	tsb_bias = ['T','U','B','N']
 
 	# Set the context parameter based upon the user input
 	if context_input == '96' or context_input == '192':
 		context = 3
 	elif context_input == '1536' or context_input == '3072':
 		context = 5
-	elif context_input == 'DINUC':
+	elif context_input == 'DINUC' or context_input == 'DBS186':
 		context = 2
 	else:
 		print('Not a valid context')
@@ -60,6 +63,21 @@ def context_distribution (context_input, output_file, chromosome_path, chromosom
 	count = 0 
 	probs = {}
 	chromosome_lengths = []
+
+
+	# Populate the dictionary if desired context is DINUC
+	if context_input == 'DBS' or context_input == 'DINUC': 
+		for dinuc in dinuc_types:
+			probs[dinuc] = {}
+
+	if context_input == 'DBS186':
+		for dinuc in dinuc_tsb:
+			for bias in tsb_bias:
+				dinuc_t = bias + ":" + dinuc
+				probs[dinuc_t] = {}
+		for dinuc in dinuc_non_tsb:
+			probs[dinuc] = {}
+
 
 	# Iterate through each chromosome and open the associated file
 	for chrom in chromosomes:
@@ -81,7 +99,7 @@ def context_distribution (context_input, output_file, chromosome_path, chromosom
 				base = nuc[int(context/2)]
 
 				count += 1
-				if count == 100000:
+				if count == 1000000:
 					print(i)
 					count = 0
 				# Skip the base if unknown 
@@ -89,7 +107,7 @@ def context_distribution (context_input, output_file, chromosome_path, chromosom
 					pass
 
 				else:
-					if context_input != "DINUC":
+					if context_input != "DINUC" and context_input != "DBS186":
 						# Only save the pyrimidine context (canonical)
 						if base == 'A' or base == 'G':
 							nuc = revcompl(nuc)
@@ -99,38 +117,52 @@ def context_distribution (context_input, output_file, chromosome_path, chromosom
 						if context_input == '192' or context_input == '3072' or context_input == '384' or context_input == '6144':
 							bias = tsb_ref[chromosome[i+int(context/2)]][0]
 							nuc = bias + ":" + nuc
-							# if bias == 0:
-							# 	nuc = 'N:' + nuc
-							# elif bias == 1:
-							# 	nuc = 'T:' + nuc
-							# elif bias == 2:
-							# 	nuc = 'U:' + nuc
-							# else:
-							# 	nuc = 'B:' + nuc 
 
 						# Update the dictionary for the current nucleotide
-						if nuc not in probs.keys():
+						if nuc not in probs:
 							probs[nuc] = {chrom:1}
 						else:
-							if chrom not in probs[nuc].keys():
+							if chrom not in probs[nuc]:
 								probs[nuc][chrom] = 1
 							else:
 								probs[nuc][chrom] += 1
 
 					else:
-						# Populate the dictionary if desired context is DINUC
-						for dinuc in dinuc_types:
-							if dinuc not in probs.keys():
-								probs[dinuc] = {}
+						if context_input == 'DBS186':
+							bias = tsb_ref[chromosome[i+int(context/2)]][0]
+							if nuc not in dinuc_types:
+								nuc = revcompl(nuc)
+								bias = revbias(bias)
+							if nuc not in dinuc_tsb:
+								bias = 'Q'
+							nuc = bias + ":" + nuc
 
+						else:
+							if nuc not in dinuc_types:
+								nuc = revcompl(nuc)
 						# Update the dictionary for the current nucleotide
-						if nuc not in probs.keys():
-							nuc = revcompl(nuc)
-							
 						if chrom not in probs[nuc]:
 							probs[nuc][chrom] = 1
 						else:
 							probs[nuc][chrom] += 1
+
+
+						# if context_input == 'DBS186':
+						# 	bias = tsb_ref[chromosome[i+int(context/2)]][0]
+						# 	nuc = bias + ":" + nuc
+						# # Populate the dictionary if desired context is DINUC
+						# for dinuc in dinuc_types:
+						# 	if dinuc not in probs:
+						# 		probs[dinuc] = {}
+
+						# # Update the dictionary for the current nucleotide
+						# if nuc not in probs:
+						# 	nuc = revcompl(nuc)
+							
+						# if chrom not in probs[nuc]:
+						# 	probs[nuc][chrom] = 1
+						# else:
+						# 	probs[nuc][chrom] += 1
 
 
 		print("chrom ", chrom, "done")
@@ -153,9 +185,9 @@ def context_distribution (context_input, output_file, chromosome_path, chromosom
 			print(probs[nuc][chromosomes[-1]]/nuc_sum, file=out)
 
 
-	chromosomes.remove("Y")
-	chromosomes.remove("MT")
-	chromosomes.remove("M")
+	# chromosomes.remove("Y")
+	# chromosomes.remove("MT")
+	# chromosomes.remove("M")
 
 	
 	# Sort the file so that the nucleotides are in alphabetical order
@@ -195,13 +227,16 @@ def context_distribution_BED (context_input, output_file, chromosome_path, chrom
 
 
 	dinuc_types = ['AA', 'AC', 'AG', 'AT', 'CA', 'CC', 'CG', 'GA', 'GC', 'TA']
+	dinuc_tsb = ['AA', 'AG', 'CC', 'GA',]
+	dinuc_non_tsb = ['Q:AC', 'Q:AT', 'Q:CA', 'Q:CG', 'Q:GC', 'Q:TA']
+	tsb_bias = ['T','U','B','N']
 
 	# Set the context parameter based upon the user input
 	if context_input == '96' or context_input == '192' or context_input == '384':
 		context = 3
 	elif context_input == '1536' or context_input == '3072' or context_input == '6144':
 		context = 5
-	elif context_input == 'DINUC' or context_input == 'DBS':
+	elif context_input == 'DINUC' or context_input == 'DBS' or context_input == 'DBS186':
 		context = 2
 	else:
 		print('Not a valid context')
@@ -225,11 +260,30 @@ def context_distribution_BED (context_input, output_file, chromosome_path, chrom
 	if "M" not in chromosomes:
 		chromosomes.append("M")
 
+	# Populate the dictionary if desired context is DINUC
+	if context_input == 'DBS' or context_input == 'DINUC': 
+		for dinuc in dinuc_types:
+			probs[dinuc] = {}
+
+	if context_input == 'DBS186':
+		for dinuc in dinuc_tsb:
+			for bias in tsb_bias:
+				dinuc_t = bias + ":" + dinuc
+				probs[dinuc_t] = {}
+		for dinuc in dinuc_non_tsb:
+			probs[dinuc] = {}
+
+
 	with open(file_to_open) as f:
 		lines = [line.strip().split() for line in f]
 	output = open(file_to_open, 'w')
-	for line in sorted(lines, key = lambda x: (chromosomes.index(x[0]), int(x[1]), int(x[2]))):
-		print('\t'.join(line), file=output)
+	print('\t'.join(lines[0]), file=output)
+	if len(lines[0][0]) > 2:
+		for line in sorted(lines[1:], key = lambda x: (chromosomes.index(x[0][3:]), int(x[1]), int(x[2]))):
+			print('\t'.join(line), file=output)
+	else:
+		for line in sorted(lines[1:], key = lambda x: (chromosomes.index(x[0]), int(x[1]), int(x[2]))):
+			print('\t'.join(line), file=output)
 	output.close()
 
 	with open(file_to_open) as b_file:
@@ -261,7 +315,7 @@ def context_distribution_BED (context_input, output_file, chromosome_path, chrom
 						pass
 
 					else:
-						if context_input != "DINUC":
+						if context_input != "DINUC" and context_input != 'DBS186':
 							# Only save the pyrimidine context (canonical)
 							if base == 'A' or base == 'G':
 								nuc = revcompl(nuc)
@@ -272,24 +326,28 @@ def context_distribution_BED (context_input, output_file, chromosome_path, chrom
 								nuc = bias + ":" + nuc
 
 							# Update the dictionary for the current nucleotide
-							if nuc not in probs.keys():
+							if nuc not in probs:
 								probs[nuc] = {chrom:1}
 							else:
-								if chrom not in probs[nuc].keys():
+								if chrom not in probs[nuc]:
 									probs[nuc][chrom] = 1
 								else:
 									probs[nuc][chrom] += 1
 
 						else:
-							# Populate the dictionary if desired context is DINUC
-							for dinuc in dinuc_types:
-								if dinuc not in probs.keys():
-									probs[dinuc] = {}
+							if context_input == 'DBS186':
+								bias = tsb_ref[chromosome[i+int(context/2)]][0]
+								if nuc not in dinuc_types:
+									nuc = revcompl(nuc)
+									bias = revbias(bias)
+								if nuc not in dinuc_tsb:
+									bias = 'Q'
+								nuc = bias + ":" + nuc
 
+							else:
+								if nuc not in dinuc_types:
+									nuc = revcompl(nuc)
 							# Update the dictionary for the current nucleotide
-							if nuc not in probs.keys():
-								nuc = revcompl(nuc)
-								
 							if chrom not in probs[nuc]:
 								probs[nuc][chrom] = 1
 							else:
@@ -317,7 +375,7 @@ def context_distribution_BED (context_input, output_file, chromosome_path, chrom
 						pass
 
 					else:
-						if context_input != "DINUC":
+						if context_input != "DINUC" and context_input != 'DBS186':
 							# Only save the pyrimidine context (canonical)
 							if base == 'A' or base == 'G':
 								nuc = revcompl(nuc)
@@ -328,29 +386,31 @@ def context_distribution_BED (context_input, output_file, chromosome_path, chrom
 								nuc = bias + ":" + nuc
 
 							# Update the dictionary for the current nucleotide
-							if nuc not in probs.keys():
+							if nuc not in probs:
 								probs[nuc] = {chrom:1}
 							else:
-								if chrom not in probs[nuc].keys():
+								if chrom not in probs[nuc]:
 									probs[nuc][chrom] = 1
 								else:
 									probs[nuc][chrom] += 1
-
 						else:
-							# Populate the dictionary if desired context is DINUC
-							for dinuc in dinuc_types:
-								if dinuc not in probs.keys():
-									probs[dinuc] = {}
+							if context_input == 'DBS186':
+								bias = tsb_ref[chromosome[i+int(context/2)]][0]
+								if nuc not in dinuc_types:
+									nuc = revcompl(nuc)
+									bias = revbias(bias)
+								if nuc not in dinuc_tsb:
+									bias = 'Q'
+								nuc = bias + ":" + nuc
 
+							else:
+								if nuc not in dinuc_types:
+									nuc = revcompl(nuc)
 							# Update the dictionary for the current nucleotide
-							if nuc not in probs.keys():
-								nuc = revcompl(nuc)
-								
 							if chrom not in probs[nuc]:
 								probs[nuc][chrom] = 1
 							else:
 								probs[nuc][chrom] += 1
-
 		chromosome_lengths[chrom_initial] = chrom_length
 
 	# Write the resulting dictionary to the csv file
