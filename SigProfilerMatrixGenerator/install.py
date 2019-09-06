@@ -414,7 +414,14 @@ def install (genome, custom=False, rsync=False, bash=True, ftp=True):
 		if not rsync:
 			try:
 				if bash:
-					os.system("bash -c '" + 'wget -r -l1 -c -nc --no-parent -nd -P ' + chromosome_fasta_path + ' ftp://ngs.sanger.ac.uk/scratch/project/mutographs/SigProf/' + genome + '.tar.gz 2>> install.log' + "'")
+					try:
+						os.system("bash -c '" + 'wget -r -l1 -c -nc --no-parent -nd -P ' + chromosome_fasta_path + 'ftp://alexandrovlab-ftp.ucsd.edu/pub/tools/SigProfilerMatrixGenerator/' + genome + '.tar.gz 2>> install.log' + "'")
+					except:
+						print("The UCSD ftp site is not responding...pulling from sanger ftp now.")
+					try:
+						os.system("bash -c '" + 'wget -r -l1 -c -nc --no-parent -nd -P ' + chromosome_fasta_path + ' ftp://ngs.sanger.ac.uk/scratch/project/mutographs/SigProf/' + genome + '.tar.gz 2>> install.log' + "'")
+					except:
+						print("The Sanger ftp site is not responding. Please check your internet connection/try again later.")
 				else:
 					os.system('wget -r -l1 -c -nc --no-parent -nd -P ' + chromosome_fasta_path + ' ftp://ngs.sanger.ac.uk/scratch/project/mutographs/SigProf/' + genome + '.tar.gz 2>> install.log')										
 				os.system("tar -xzf " + ref_dir + "/references/chromosomes/tsb/" + genome + ".tar.gz -C " + ref_dir + "/references/chromosomes/tsb/")
