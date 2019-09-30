@@ -4,22 +4,26 @@ import numpy as np
 def generateCNVMatrix(file_type, input_matrix):
     
     super_class = ['het', 'LOH', "Hom del"]
-    het_sub_class = ['quad', 'amp', 'dup', 'neut']
-    loh_subclass = ['quad', 'amp', 'dup', 'neut', "del"]
+    het_sub_class = ['amp+', 'amp', 'dup', 'neut']
+    loh_subclass = ['amp+', 'amp', 'dup', 'neut', "del"]
     hom_del_class = ['0-100kb', '100kb-1Mb', '>1Mb']
     x_labels = ['>40Mb', '10Mb-40Mb', '1Mb-10Mb', '100kb-1Mb', '0-100kb']
 
     if file_type == 'ASCAT':
         df = pd.read_csv(input_matrix, sep='\t')
         
-        #make sample by feature matrix for nmf with rows as features and samples as columns           
-        features = pd.read_csv('CNV_features.tsv', sep='\t', header=None)
-        features = features.iloc[:, 0]       
+        #make sample by feature matrix for nmf with rows as features and samples as columns
+        features = []
+        with open('CNV_features1.tsv') as f:
+            for line in f:
+                features.append(line.strip())           
+        # features = pd.read_csv('CNV_features1.tsv', sep='\t', header=None) #this file determines the ordering the x-axis for plots
+        # features = features.iloc[:, 0]       
         columns = df['Sample'].unique()
         nmf_matrix = pd.DataFrame(index=features, columns=columns)
         
         # 2 - total copy number {del=0-1; neut=2; gain=3-4; amp=5-8; amp+=9+}.
-        CN_classes = ["del","neut","dup","quad","amp"] # different total CN states
+        CN_classes = ["del","neut","dup","amp","amp+"] # different total CN states
         CN_class = []
         for tcn in df['Tumour TCN']:
             if tcn == 2:
@@ -108,7 +112,7 @@ def generateCNVMatrix(file_type, input_matrix):
                         df3 = df2[df2['size_classification'] == x]
                         for s in df3['Sample'].unique(): 
                             sample_df = df3[df3['Sample'] == s]
-                            for a, b, c in zip(sample_df['CN_class'], sample_df['LOH'], sample_df['size_bin']):
+                            for a, b, c in zip(sample_df['CN_class'], sample_df['LOH'], sample_df['size_classification']):
                                 f = a+":"+b+":"+c
                                 key = (s, f)
                                 value = sample_df.shape[0]
@@ -125,7 +129,7 @@ def generateCNVMatrix(file_type, input_matrix):
                         df3 = df2[df2['size_classification'] == x]
                         for s in df3['Sample'].unique(): 
                             sample_df = df3[df3['Sample'] == s]
-                            for a, b, c in zip(sample_df['CN_class'], sample_df['LOH'], sample_df['size_bin']):
+                            for a, b, c in zip(sample_df['CN_class'], sample_df['LOH'], sample_df['size_classification']):
                                 f = a+":"+b+":"+c
                                 key = (s, f)
                                 value = sample_df.shape[0]
@@ -139,8 +143,8 @@ def generateCNVMatrix(file_type, input_matrix):
                     df3 = df1[df1['size_classification'] == c2]
                     for s in df3['Sample'].unique(): 
                         sample_df = df3[df3['Sample'] == s]
-                        for a, b, c in zip(sample_df['CN_class'], sample_df['LOH'], sample_df['size_bin']):
-                            f = "del:homdel:" + size_bin
+                        for a, b, c in zip(sample_df['CN_class'], sample_df['LOH'], sample_df['size_classification']):
+                            f = "del:homdel:" + c
                             key = (s, f)
                             value = sample_df.shape[0]
                         if f not in set(features):
@@ -149,8 +153,7 @@ def generateCNVMatrix(file_type, input_matrix):
 #                             print (key)
                             counts[key] = value
                         break
-        print (counts)
-        print (counts)
+      
         #use counts dictionary(which maps (sample, CNV feature) to frequency observed) to populate matrix
         for i, row in enumerate(nmf_matrix.index):
             for j, sample in enumerate(nmf_matrix.columns):
