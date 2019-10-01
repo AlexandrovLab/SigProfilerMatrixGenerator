@@ -52,10 +52,12 @@ def context_distribution (context_input, output_file, chromosome_path, chromosom
 	# Set the context parameter based upon the user input
 	if context_input == '96' or context_input == '192':
 		context = 3
-	elif context_input == '1536' or context_input == '3072':
+	elif context_input == '1536' or context_input == '3072' or context_input == '6144':
 		context = 5
 	elif context_input == 'DINUC' or context_input == 'DBS186':
 		context = 2
+	elif context_input == '6' or context_input == '24':
+		context = 1
 	else:
 		print('Not a valid context')
 		sys.exit()
@@ -114,7 +116,7 @@ def context_distribution (context_input, output_file, chromosome_path, chromosom
 
 
 						# Adjust the nucleotide representaiton if TSB is desired
-						if context_input == '192' or context_input == '3072' or context_input == '384' or context_input == '6144':
+						if context_input == '192' or context_input == '3072' or context_input == '384' or context_input == '6144' or context_input == '24':
 							bias = tsb_ref[chromosome[i+int(context/2)]][0]
 							nuc = bias + ":" + nuc
 
@@ -184,7 +186,25 @@ def context_distribution (context_input, output_file, chromosome_path, chromosom
 					print(str(0) + ',', end='', file=out)
 			print(probs[nuc][chromosomes[-1]]/nuc_sum, file=out)
 
-
+	counts_file = os.path.dirname(output_file)	
+	with open (counts_file + "/context_counts_" + genome + "_" + context_input + ".csv", 'w') as out:
+		print(' ,', end='', file=out)
+		for chrom in chromosomes[:-1]:
+			print(chrom + ',', end='',file=out)
+		print(chromosomes[-1],file=out)
+		for nuc in probs.keys():
+			nuc_sum = sum(probs[nuc].values())
+			print (nuc + ',', end='', file=out)
+			for chroms in chromosomes[:-1]:
+				try:
+					print(str(probs[nuc][chroms]) + ',', end='', file=out)
+					out.flush()
+				except:
+					print(str(0) + ',', end='', file=out)
+			try:
+				print(probs[nuc][chromosomes[-1]]/nuc_sum, file=out)
+			except:
+				print(str(0),file=out)
 	# chromosomes.remove("Y")
 	# chromosomes.remove("MT")
 	# chromosomes.remove("M")
@@ -196,7 +216,7 @@ def context_distribution (context_input, output_file, chromosome_path, chromosom
 	os.system (sort_command_1 + output_file + sort_command_2 + output_file)
 
 
-def context_distribution_BED (context_input, output_file, chromosome_path, chromosomes, bed, bed_file, exome, exome_file, genome, ref_dir, tsb_ref):
+def context_distribution_BED (context_input, output_file, chromosome_path, chromosomes, bed, bed_file, exome, exome_file, genome, ref_dir, tsb_ref, gender):
 	'''
 	Creates a csv file for the distribution of nucleotides given a specific context and BED file. 
 	This csv file needs to be created before simulating mutationalsigantures for the given 
@@ -238,6 +258,8 @@ def context_distribution_BED (context_input, output_file, chromosome_path, chrom
 		context = 5
 	elif context_input == 'DINUC' or context_input == 'DBS' or context_input == 'DBS186':
 		context = 2
+	elif context_input == '6' or context_input == '24':
+		context = 1
 	else:
 		print('Not a valid context')
 		sys.exit()
@@ -253,12 +275,13 @@ def context_distribution_BED (context_input, output_file, chromosome_path, chrom
 		# file_to_open = ref_dir + "/references/vcf_files/BED/" + bed_file
 		file_to_open = bed_file
 
+	chromosomes_sort = chromosomes
 	if "Y" not in chromosomes:
-		chromosomes.append("Y")
+		chromosomes_sort.append("Y")
 	if "MT" not in chromosomes:
-		chromosomes.append("MT")
+		chromosomes_sort.append("MT")
 	if "M" not in chromosomes:
-		chromosomes.append("M")
+		chromosomes_sort.append("M")
 
 	# Populate the dictionary if desired context is DINUC
 	if context_input == 'DBS' or context_input == 'DINUC': 
@@ -278,11 +301,11 @@ def context_distribution_BED (context_input, output_file, chromosome_path, chrom
 		lines = [line.strip().split() for line in f]
 	output = open(file_to_open, 'w')
 	print('\t'.join(lines[0]), file=output)
-	if len(lines[0][0]) > 2:
-		for line in sorted(lines[1:], key = lambda x: (chromosomes.index(x[0][3:]), int(x[1]), int(x[2]))):
+	if len(lines[1][0]) > 2:
+		for line in sorted(lines[1:], key = lambda x: (chromosomes_sort.index(x[0][3:]), int(x[1]), int(x[2]))):
 			print('\t'.join(line), file=output)
 	else:
-		for line in sorted(lines[1:], key = lambda x: (chromosomes.index(x[0]), int(x[1]), int(x[2]))):
+		for line in sorted(lines[1:], key = lambda x: (chromosomes_sort.index(x[0]), int(x[1]), int(x[2]))):
 			print('\t'.join(line), file=output)
 	output.close()
 
@@ -293,6 +316,8 @@ def context_distribution_BED (context_input, output_file, chromosome_path, chrom
 			chrom = line[0]
 			if len(chrom) > 1 and chrom[0:3].upper() == 'CHR':
 				chrom = chrom[3:]
+			if gender == 'female' and chrom == 'Y':
+				continue
 			start = int(line[1])
 			end = int(line[2])
 
@@ -321,7 +346,7 @@ def context_distribution_BED (context_input, output_file, chromosome_path, chrom
 								nuc = revcompl(nuc)
 
 							# Adjust the nucleotide representaiton if TSB is desired
-							if context_input == '192' or context_input == '3072' or context_input == '384' or context_input == '6144':
+							if context_input == '192' or context_input == '3072' or context_input == '384' or context_input == '6144' or context_input == '24':
 								bias = tsb_ref[chromosome[i+int(context/2)]][0]
 								nuc = bias + ":" + nuc
 
@@ -381,7 +406,7 @@ def context_distribution_BED (context_input, output_file, chromosome_path, chrom
 								nuc = revcompl(nuc)
 
 							# Adjust the nucleotide representaiton if TSB is desired
-							if context_input == '192' or context_input == '3072' or context_input == '384' or context_input == '6144':
+							if context_input == '192' or context_input == '3072' or context_input == '384' or context_input == '6144' or context_input == '24':
 								bias = tsb_ref[chromosome[i+int(context/2)]][0]
 								nuc = bias + ":" + nuc
 
@@ -433,10 +458,29 @@ def context_distribution_BED (context_input, output_file, chromosome_path, chrom
 			except:
 				print(str(0),file=out)
 
+	counts_file = os.path.dirname(output_file)	
+	with open (counts_file + "/context_counts_" + genome + "_" + context_input + "_exome.csv", 'w') as out:
+		print(' ,', end='', file=out)
+		for chrom in chromosomes[:-1]:
+			print(chrom + ',', end='',file=out)
+		print(chromosomes[-1],file=out)
+		for nuc in probs.keys():
+			nuc_sum = sum(probs[nuc].values())
+			print (nuc + ',', end='', file=out)
+			for chroms in chromosomes[:-1]:
+				try:
+					print(str(probs[nuc][chroms]) + ',', end='', file=out)
+					out.flush()
+				except:
+					print(str(0) + ',', end='', file=out)
+			try:
+				print(probs[nuc][chromosomes[-1]]/nuc_sum, file=out)
+			except:
+				print(str(0),file=out)
 
-	chromosomes.remove("Y")
-	chromosomes.remove("MT")
-	chromosomes.remove("M")
+	# chromosomes.remove("Y")
+	# chromosomes.remove("MT")
+	# chromosomes.remove("M")
 
 	# Sort the file so that the nucleotides are in alphabetical order
 	sort_command_1 = "sort -t ',' -k 1,1 "

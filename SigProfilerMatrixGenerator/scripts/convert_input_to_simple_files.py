@@ -1014,7 +1014,7 @@ def convertMAF (project, vcf_path, genome, output_path, ncbi_chrom, log_file):
 			continue
 		name = file.split(".")
 		with open (vcf_path + file) as f:
-			next(f)
+			# next(f)
 			for lines in f:
 				if lines[0] == "#":
 					continue

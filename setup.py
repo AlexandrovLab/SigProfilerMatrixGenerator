@@ -11,7 +11,7 @@ def readme():
 	with open('README.rst') as f:
 		return(f.read())
 
-VERSION = '1.0.20'
+VERSION = '1.0.21'
 
 def write_version_py(filename='SigProfilerMatrixGenerator/version.py'):
 	# Copied from numpy setup.py
