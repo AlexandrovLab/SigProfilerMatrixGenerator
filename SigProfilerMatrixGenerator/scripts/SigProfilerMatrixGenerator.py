@@ -1101,7 +1101,7 @@ def catalogue_generator_INDEL_single (mutation_ID, lines, chrom, vcf_path, vcf_p
 
 
 					
-					if bool(re.match("^[CT]*$", sequence)) or bool(re.match("^[GA]*$", sequence)):
+					if bool(re.match("^[CT]*$", sequence)) or bool(re.match("^[GA]*$", sequence)) or bias == 'N':
 						indel_key_tsb = bias + ":" + indel_key
 						mutation_ID['tsb'].at[indel_key_tsb, sample] += 1
 					else:
@@ -1517,7 +1517,7 @@ def panel_check (mutation_pd, genome, bed_temp_file, output_matrix, bed_file_pat
 				if read:
 					lines2 = exome.readline()
 				try:
-					if lines2[0] == "@":
+					if lines2[0] == "@" or lines2[0] == "#":
 						continue
 				except:
 					break
@@ -1544,7 +1544,7 @@ def panel_check (mutation_pd, genome, bed_temp_file, output_matrix, bed_file_pat
 						elif start >= start_ref - base_cushion and start <= end_ref + base_cushion: 
 							mutation_pd.at[mut_type, sample] += 1
 							read = True
-							print('\t'.join([chrom, str(start), ".", ref, mut ]), file=out)
+							print('\t'.join([chrom, str(start), ".", ref, mut]), file=out)
 							break
 						elif start < (start_ref - base_cushion):
 							read = False
