@@ -52,11 +52,11 @@ def generateCNVMatrix(file_type, input_matrix):
                 
         for t, a in zip(df['Tumour TCN'], df['loh']):
             if t == 0:
-                LOH_status.append("Hom del") 
+                LOH_status.append("homdel") 
             elif a == 0:
                 LOH_status.append("LOH")
             else:
-                LOH_status.append("Het")
+                LOH_status.append("het")
                               
         df['LOH'] = LOH_status
         
@@ -71,7 +71,7 @@ def generateCNVMatrix(file_type, input_matrix):
         hom_del_class = ['0-100kb', '100kb-1Mb', '>1Mb']
 
         for l, s in zip(lengths, df['LOH']): #keep in mind the lengths are in megabases
-            if s == 'Hom del':
+            if s == 'homdel':
                 if l > -0.01 and l <= 0.1:
                     size = "0-100kb"
                     size_bin = "(-0.01,0.1]"
@@ -105,7 +105,7 @@ def generateCNVMatrix(file_type, input_matrix):
         counts = {} #dictionary that maps (sample, feature) to frequency     
         for a, c1 in enumerate(super_class):
             df1 = df[df['LOH'] == c1]
-            if c1 == 'Het':
+            if c1 == 'het':
                 for b, c2 in enumerate(het_sub_class): #amp+, amp, etc.
                     df2 = df1[df1['CN_class'] == c2]                   
                     for c, x in enumerate(x_labels):
@@ -137,7 +137,7 @@ def generateCNVMatrix(file_type, input_matrix):
                                     print (f)
                                 else:
                                     counts[key] = value
-                                break                   
+                                                  
             else: #Hom del
                 for b, c2 in enumerate(hom_del_class):
                     df3 = df1[df1['size_classification'] == c2]
@@ -152,7 +152,7 @@ def generateCNVMatrix(file_type, input_matrix):
                         else:
 #                             print (key)
                             counts[key] = value
-                        break
+                        
       
         #use counts dictionary(which maps (sample, CNV feature) to frequency observed) to populate matrix
         for i, row in enumerate(nmf_matrix.index):
@@ -163,7 +163,7 @@ def generateCNVMatrix(file_type, input_matrix):
                     nmf_matrix.iat[i, j] = 0
                     
                     
-                
+        nmf_matrix.index.name = 'classification'     
         nmf_matrix.to_csv('CNV.matrix.tsv', sep='\t')
         
 
