@@ -3,9 +3,9 @@ import numpy as np
 
 def generateCNVMatrix(file_type, input_matrix):
     
-    super_class = ['het', 'LOH', "Hom del"]
-    het_sub_class = ['amp+', 'amp', 'dup', 'neut']
-    loh_subclass = ['amp+', 'amp', 'dup', 'neut', "del"]
+    super_class = ['het', 'LOH', "homdel"]
+    het_sub_class = ['amp+', 'amp', 'gain', 'neut']
+    loh_subclass = ['amp+', 'amp', 'gain', 'neut', "del"]
     hom_del_class = ['0-100kb', '100kb-1Mb', '>1Mb']
     x_labels = ['>40Mb', '10Mb-40Mb', '1Mb-10Mb', '100kb-1Mb', '0-100kb']
 
@@ -16,9 +16,8 @@ def generateCNVMatrix(file_type, input_matrix):
         features = []
         with open('CNV_features1.tsv') as f:
             for line in f:
-                features.append(line.strip())           
-        # features = pd.read_csv('CNV_features1.tsv', sep='\t', header=None) #this file determines the ordering the x-axis for plots
-        # features = features.iloc[:, 0]       
+                features.append(line.strip())
+        assert(len(features) == 48)                
         columns = df['Sample'].unique()
         nmf_matrix = pd.DataFrame(index=features, columns=columns)
         
@@ -102,13 +101,13 @@ def generateCNVMatrix(file_type, input_matrix):
         df['size_classification'] = sizes
         df['size_bin'] = size_bins
         
-        counts = {} #dictionary that maps (sample, feature) to frequency     
+        counts = {} #dictionary that maps (sample, feature) to frequency, will be used to populate each cell of matrix    
         for a, c1 in enumerate(super_class):
             df1 = df[df['LOH'] == c1]
             if c1 == 'het':
                 for b, c2 in enumerate(het_sub_class): #amp+, amp, etc.
                     df2 = df1[df1['CN_class'] == c2]                   
-                    for c, x in enumerate(x_labels):
+                    for j, x in enumerate(x_labels):
                         df3 = df2[df2['size_classification'] == x]
                         for s in df3['Sample'].unique(): 
                             sample_df = df3[df3['Sample'] == s]
@@ -120,12 +119,12 @@ def generateCNVMatrix(file_type, input_matrix):
                                     print (f)
                                 else:
                                     counts[key] = value
-                                break
+                                
                                 
             elif c1 == 'LOH':
                 for b, c2 in enumerate(loh_subclass): #amp+, amp, etc.
                     df2 = df1[df1['CN_class'] == c2]
-                    for c, x in enumerate(x_labels):
+                    for j, x in enumerate(x_labels):
                         df3 = df2[df2['size_classification'] == x]
                         for s in df3['Sample'].unique(): 
                             sample_df = df3[df3['Sample'] == s]
@@ -139,8 +138,8 @@ def generateCNVMatrix(file_type, input_matrix):
                                     counts[key] = value
                                                   
             else: #Hom del
-                for b, c2 in enumerate(hom_del_class):
-                    df3 = df1[df1['size_classification'] == c2]
+                for b, c3 in enumerate(hom_del_class):
+                    df3 = df1[df1['size_classification'] == c3]
                     for s in df3['Sample'].unique(): 
                         sample_df = df3[df3['Sample'] == s]
                         for a, b, c in zip(sample_df['CN_class'], sample_df['LOH'], sample_df['size_classification']):
@@ -152,8 +151,7 @@ def generateCNVMatrix(file_type, input_matrix):
                         else:
 #                             print (key)
                             counts[key] = value
-                        
-      
+                              
         #use counts dictionary(which maps (sample, CNV feature) to frequency observed) to populate matrix
         for i, row in enumerate(nmf_matrix.index):
             for j, sample in enumerate(nmf_matrix.columns):
