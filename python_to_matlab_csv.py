@@ -13,9 +13,9 @@ if __name__ == "__main__":
         for line in ifi:
             if "MutationType" in line:
                 header = line.strip().split("\t")
-                header[0] = "Mutation Type"
+                header[0] = "Mutation type"
                 header.insert(1, "Trinucleotide")
-                header = [project + ":" + header[i] if i > 1 else header[i] for i in range(0, len(header))]
+                header = [project + "::" + header[i] if i > 1 else header[i] for i in range(0, len(header))]
                 header = ["\"" + i + "\"" for i in header]
                 print(",".join(header))
             else:
