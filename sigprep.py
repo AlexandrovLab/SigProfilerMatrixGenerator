@@ -78,6 +78,8 @@ def parse_args():
     parser.add_argument("-m", "--maf", required=True, dest="maf", help="MAF file from which to extract matrix.")
     parser.add_argument("-i", "--indels", action="store_true", dest="indels", help="Extract indel matrix, as well as SBS", default=False)
     parser.add_argument("-s", "--sigprofiler", help = "Output in sigprofiler format", action = "store_true")
+    parser.add_argument("-u", "--untrim", help = "Untrim indels before counting features or producing output.", action = "store_true", dest="untrim")
+    parser.add_argument("-R", "--addref", help = "Attach a reference base to the indel call, but don't untrim.", action = "store_true", dest="addref")
     parser.add_argument("-e", "--exome", dest="exome", help="Exome data - restrict genome to exome regions", default=False)
     parser.add_argument("-p", "--project", dest="project", default="PROJECT", help="Project name for output.")
     parser.add_argument("-d", "--directory", dest="directory", default="input", help="Input/Output directory")
@@ -160,8 +162,8 @@ if __name__ == "__main__":
                     fasta_allele = ref[chrom][int(start_pos)-1:int(end_pos)]
                     #print(start_pos, fasta_allele, ref[chrom][int(start_pos) - 1: int(end_pos)], ref_allele, alt_allele)
                     #assert fasta_allele == ref_allele
-
-                    chrom, start_pos, end_pos, ref_allele, alt_allele = untrim_indel(chrom, start_pos, end_pos, ref_allele, alt_allele, ref)
+                    if args.untrim:
+                        chrom, start_pos, end_pos, ref_allele, alt_allele = untrim_indel(chrom, start_pos, end_pos, ref_allele, alt_allele, ref)
                     if args.sigprofiler:
                         print(make_minimal_record(args.project, sample, "WGS", "GRCh37", vtype, chrom, str(start_pos), str(end_pos), ref_allele, alt_allele, "SOMATIC"))
 
