@@ -2,7 +2,7 @@ from sys import argv
 
 if __name__ == "__main__":
 
-    with open(sys.argv[1], "r") as ifi:
+    with open(argv[1], "r") as ifi:
         for line in ifi:
             if not "Mut" in line:
                 tokens = line.strip().split("\t")
