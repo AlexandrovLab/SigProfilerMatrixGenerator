@@ -31,21 +31,21 @@ and prepending the reference base to the non-dash allele.
 """
 def untrim_indel(chrom, start, end, ref, alt, fa_ref):
     ## Get the REF allele
-    real_ref = str(fa_ref[chrom][int(start)-1:int(start)])
+    real_ref = str(fa_ref[chrom][int(start)-1-1:int(start)-1])
     if alt == "-":
         ref = real_ref + ref
         alt = real_ref
-        start = int(start)
+        start = int(start) - 1
     elif ref == "-":
         ref = real_ref
         alt = real_ref + alt
-        start = int(start)
+        start = int(start) - 1
     else:
         write_err(["Invalid allele: ", ref, "->", alt, "."])
         raise Exception("Exiting.")
     return chrom, start, end, ref, alt
 
-def write_matlab_csv(dict, features):
+def write_matlab_csv(d, features):
     return
 
 def write_python_tsv(dict, features):
@@ -70,7 +70,6 @@ Creates a minimal representation of a variant that is compatible with the SigPro
 def make_minimal_record(cancer_type, sample, assay, genome, variant_type, chrom, pos, end, ref, alt, mutation_type):
     vals = [cancer_type, sample, assay, genome, variant_type, chrom, pos, end, ref, alt, mutation_type]
     return "\t".join(vals)
-
 
 
 
@@ -157,12 +156,16 @@ if __name__ == "__main__":
                     end_pos = tokens[header_d["End_position"]]
                     ref_allele = tokens[header_d["Reference_Allele"]]
                     alt_allele = tokens[header_d["Tumor_Seq_Allele2"]]
+
+                    fasta_allele = ref[chrom][int(start_pos)-1:int(end_pos)]
+                    #print(start_pos, fasta_allele, ref[chrom][int(start_pos) - 1: int(end_pos)], ref_allele, alt_allele)
+                    #assert fasta_allele == ref_allele
+
                     chrom, start_pos, end_pos, ref_allele, alt_allele = untrim_indel(chrom, start_pos, end_pos, ref_allele, alt_allele, ref)
                     if args.sigprofiler:
-                        pass
-                    fasta_allele = ref[chrom][int(start_pos)-1:int(end_pos)]
+                        print(make_minimal_record(args.project, sample, "WGS", "GRCh37", vtype, chrom, str(start_pos), str(end_pos), ref_allele, alt_allele, "SOMATIC"))
+
                     #print(chrom, start_pos, end_pos, ref_allele, alt_allele)
-                    print(make_minimal_record(args.project, sample, "WGS", "GRCh37", vtype, chrom, str(start_pos), str(end_pos), ref_allele, alt_allele, "SOMATIC"))
 
                 else:
                     write_err(["Invalid mutation type", vtype])
