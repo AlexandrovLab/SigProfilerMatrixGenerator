@@ -890,29 +890,59 @@ def catalogue_generator_INDEL_single (mutation_ID, lines, chrom, vcf_path, vcf_p
 							reverse_homology = ref[2:]
 
 							
-							for_hom = False
+							# for_hom = False
+							# pos = start + type_length
+							# for i in range (len(forward_homology), 0, -1):
+							# 	seq = ''
+							# 	for l in range (pos, pos + i, 1):
+							# 		seq += tsb_ref[chrom_string[l]][1]
+							# 	if seq == forward_homology[:i]:
+							# 		sequence += forward_homology[:i]
+							# 		mut_type += '_Micro_for'
+							# 		for_hom = True
+							# 		break
+
+							# if for_hom != True:
+							# 	pos = start
+							# 	for i in range (len(reverse_homology), 0, -1):
+							# 		seq = ''
+							# 		for l in range (pos-i, pos, 1):
+							# 			seq += tsb_ref[chrom_string[l]][1]
+							# 		if seq == reverse_homology[-i:]:
+							# 			sequence = reverse_homology[-i:] + sequence
+							# 			mut_type += '_Micro_rev'
+							# 			break
+
+							for_hom = 0
 							pos = start + type_length
 							for i in range (len(forward_homology), 0, -1):
 								seq = ''
 								for l in range (pos, pos + i, 1):
 									seq += tsb_ref[chrom_string[l]][1]
 								if seq == forward_homology[:i]:
-									sequence += forward_homology[:i]
-									mut_type += '_Micro_for'
-									for_hom = True
+									for_seq = forward_homology[:i]
+									for_hom = len(for_seq)
 									break
 
-							if for_hom != True:
-								pos = start
-								for i in range (len(reverse_homology), 0, -1):
-									seq = ''
-									for l in range (pos-i, pos, 1):
-										seq += tsb_ref[chrom_string[l]][1]
+							rev_hom  = 0
+							pos = start
+							for i in range (len(reverse_homology), 0, -1):
+								seq = ''
+								for l in range (pos-i, pos, 1):
+									seq += tsb_ref[chrom_string[l]][1]
+								if seq == reverse_homology[-i:]:
+									rev_seq = reverse_homology[-i:]
+									rev_hom = len(rev_seq)
+									break			 
 
-									if seq == reverse_homology[-i:]:
-										sequence = reverse_homology[-i:] + sequence
-										mut_type += '_Micro_rev'
-										break
+							if for_hom > 0 or rev_hom > 0:
+								if for_hom > rev_hom or for_hom == rev_hom:
+									sequence += for_seq
+									mut_type += '_Micro_for'
+								else:
+									sequence =  rev_seq + sequence
+									mut_type += '_Micro_rev'
+
 					
 					# Pulls out the mutation subtype for insertions
 					elif mut_type == 'Ins':        
@@ -947,29 +977,60 @@ def catalogue_generator_INDEL_single (mutation_ID, lines, chrom, vcf_path, vcf_p
 							forward_homology = mut[1:-1]
 							reverse_homology = mut[2:]
 							
-							for_hom = False
+							# for_hom = False
+							# pos = start
+							# for i in range (len(forward_homology), 0, -1):
+							# 	seq = ''
+							# 	for i in range (pos, pos + i, 1):
+							# 		seq += tsb_ref[chrom_string[i]][1]
+							# 	if seq == forward_homology[:i]:
+							# 		sequence += forward_homology[:i]
+							# 		mut_type += '_Micro_for'
+							# 		for_hom = True
+							# 		break
+
+							# if for_hom != True:
+							# 	pos = start
+							# 	for i in range (len(reverse_homology), 0, -1):
+							# 		seq = ''
+							# 		for i in range (pos-i, pos, 1):
+							# 			seq += tsb_ref[chrom_string[i]][1]
+							# 		if seq == reverse_homology[-i:]:
+							# 			sequence = reverse_homology[-i:] + sequence
+							# 			mut_type += '_Micro_rev'
+							# 			break
+
+
+
+							for_hom = 0
 							pos = start
 							for i in range (len(forward_homology), 0, -1):
 								seq = ''
-								for i in range (pos, pos + i, 1):
-									seq += tsb_ref[chrom_string[i]][1]
+								for l in range (pos, pos + i, 1):
+									seq += tsb_ref[chrom_string[l]][1]
 								if seq == forward_homology[:i]:
-									sequence += forward_homology[:i]
-									mut_type += '_Micro_for'
-									for_hom = True
+									for_seq = forward_homology[:i]
+									for_hom = len(for_seq)
 									break
 
-							if for_hom != True:
-								pos = start
-								for i in range (len(reverse_homology), 0, -1):
-									seq = ''
-									for i in range (pos-i, pos, 1):
-										seq += tsb_ref[chrom_string[i]][1]
-									if seq == reverse_homology[-i:]:
-										sequence = reverse_homology[-i:] + sequence
-										mut_type += '_Micro_rev'
-										break
+							rev_hom  = 0
+							pos = start
+							for i in range (len(reverse_homology), 0, -1):
+								seq = ''
+								for l in range (pos-i, pos, 1):
+									seq += tsb_ref[chrom_string[l]][1]
+								if seq == reverse_homology[-i:]:
+									rev_seq = reverse_homology[-i:]
+									rev_hom = len(rev_seq)
+									break			 
 
+							if for_hom > 0 or rev_hom > 0:
+								if for_hom > rev_hom or for_hom == rev_hom:
+									sequence += for_seq
+									mut_type += '_Micro_for'
+								else:
+									sequence =  rev_seq + sequence
+									mut_type += '_Micro_rev'
 
 					# Instantiates variables used to create the unique INDEL keys
 					indel_key_1 = None

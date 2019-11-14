@@ -44,6 +44,7 @@ def convertVCF (project, vcf_path, genome, output_path, ncbi_chrom, log_file):
 	first_chrom = ''
 	skipped_count = 0
 	samples = []
+	# files = []
 	
 	# Iterates through each file 
 	for file in files:
@@ -114,6 +115,7 @@ def convertVCF (project, vcf_path, genome, output_path, ncbi_chrom, log_file):
 								outputFile_X = open(output_path + "SNV/X_" + project + ".genome", "w", 10000000)
 								if genome != 'dog':
 									outputFile_Y = open(output_path + "SNV/Y_" + project + ".genome", "w", 10000000)
+									# files.extend(outputFile_Y, outputFile_X)
 								outputFile_1 = open(output_path + "SNV/1_" + project + ".genome", "w", 10000000)
 								outputFile_2 = open(output_path + "SNV/2_" + project + ".genome", "w", 10000000)
 								outputFile_3 = open(output_path + "SNV/3_" + project + ".genome", "w", 10000000)
@@ -133,6 +135,9 @@ def convertVCF (project, vcf_path, genome, output_path, ncbi_chrom, log_file):
 								outputFile_17 = open(output_path + "SNV/17_" + project + ".genome", "w", 10000000)
 								outputFile_18 = open(output_path + "SNV/18_" + project + ".genome", "w", 10000000)
 								outputFile_19 = open(output_path + "SNV/19_" + project + ".genome", "w", 10000000)
+								# files.extend([outputFile_1, outputFile_2, outputFile_3, outputFile_4, outputFile_5, outputFile_6, outputFile_7, outputFile_8, outputFile_9,
+								# 			  outputFile_10, outputFile_11, outputFile_12, outputFile_13, outputFile_14, outputFile_15, outputFile_16, outputFile_17, outputFile_18,
+								# 			  outputFile_19])
 
 								outFiles = {'X': outputFile_X, '1':outputFile_1, '2':outputFile_2, '3':outputFile_3, '4':outputFile_4,
 											'5':outputFile_5, '6':outputFile_6, '7':outputFile_7, '8':outputFile_8, '9':outputFile_9, '10':outputFile_10,
@@ -144,6 +149,7 @@ def convertVCF (project, vcf_path, genome, output_path, ncbi_chrom, log_file):
 								if genome != 'mm10' and genome != 'mm9':
 									outputFile_20 = open(output_path + "SNV/20_" + project + ".genome", "w", 10000000)
 									outFiles['20'] = outputFile_20
+									# files.append(outputFile_20)
 								if genome != 'rn6' and genome != 'mm10' and genome != 'mm9':
 									outputFile_21 = open(output_path + "SNV/21_" + project + ".genome", "w", 10000000)
 									outputFile_22 = open(output_path + "SNV/22_" + project + ".genome", "w", 10000000)
@@ -169,6 +175,9 @@ def convertVCF (project, vcf_path, genome, output_path, ncbi_chrom, log_file):
 										outputFile_37 = open(output_path + "SNV/37_" + project + ".genome", "w", 10000000)
 										outputFile_38 = open(output_path + "SNV/38_" + project + ".genome", "w", 10000000)
 
+										# files.extend([outputFile_21, outputFile_22, outputFile_23, outputFile_24, outputFile_25, outputFile_26, outputFile_27, outputFile_28, outputFile_29,
+										# 	  outputFile_30, outputFile_1, outputFile_32, outputFile_33, outputFile_34, outputFile_35, outputFile_36, outputFile_37, outputFile_38])
+
 										outFiles = {'X': outputFile_X, '1':outputFile_1, '2':outputFile_2, '3':outputFile_3, '4':outputFile_4,
 											'5':outputFile_5, '6':outputFile_6, '7':outputFile_7, '8':outputFile_8, '9':outputFile_9, '10':outputFile_10,
 											'11':outputFile_11, '12':outputFile_12, '13':outputFile_13, '14':outputFile_14, '15':outputFile_15, '16':outputFile_16,
@@ -184,6 +193,7 @@ def convertVCF (project, vcf_path, genome, output_path, ncbi_chrom, log_file):
 								outputFile_IV = open(output_path + "SNV/IV_" + project + ".genome", "w", 10000000)
 								outputFile_V = open(output_path + "SNV/V_" + project + ".genome", "w", 10000000)
 								outputFile_X = open(output_path + "SNV/X_" + project + ".genome", "w", 10000000)
+								# files.extend(outputFile_I, outputFile_II, outputFile_III, outputFile_IV, outputFile_V, outputFile_X)
 
 							first_SNV = False
 
