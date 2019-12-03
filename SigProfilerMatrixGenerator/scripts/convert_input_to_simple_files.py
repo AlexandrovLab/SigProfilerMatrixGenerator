@@ -52,7 +52,7 @@ def convertVCF (project, vcf_path, genome, output_path, ncbi_chrom, log_file):
 		sample = file_name[0]
 		if sample not in samples:
 			samples.append(sample)
-		if file == '.DS_Store':
+		if file[0] == '.':
 			continue
 		with open (vcf_path + file) as f:
 			for lines in f:
@@ -75,10 +75,11 @@ def convertVCF (project, vcf_path, genome, output_path, ncbi_chrom, log_file):
 
 
 					except:
-						if first_incorrect_file:
-							print("The given input files do not appear to be in the correct vcf format. Skipping this file: ", file)
-							first_incorrect_file = False
-						continue
+						# if first_incorrect_file:
+						print("The given input files do not appear to be in the correct vcf format. Skipping this file: ", file)
+						first_incorrect_file = False
+						break
+						# continue
 
 					# Saves SNV mutations into an SNV simple text file
 					if len(ref) == 1 and len(mut) == 1 and ref != "-" and mut != "-":
@@ -489,7 +490,7 @@ def convertTxt (project, vcf_path, genome, output_path, ncbi_chrom, log_file):
 
 	# Iterates through each file 
 	for file in files:
-		if file == '.DS_Store':
+		if file[0] == '.':
 			continue
 		with open (vcf_path + file) as f:
 			next(f)
@@ -516,10 +517,11 @@ def convertTxt (project, vcf_path, genome, output_path, ncbi_chrom, log_file):
 
 
 				except:
-					if first_incorrect_file:
-						print("The given input files do not appear to be in the correct simple text format. Skipping this file: ", file)
-						first_incorrect_file = False
-					continue
+					# if first_incorrect_file:
+					print("The given input files do not appear to be in the correct simple text format. Skipping this file: ", file)
+					first_incorrect_file = False
+					break
+					# continue
 
 				# Saves SNV mutations into an SNV simple text file
 				if len(ref) == 1 and len(mut) == 1 and ref != "-" and mut != "-":
@@ -1020,7 +1022,7 @@ def convertMAF (project, vcf_path, genome, output_path, ncbi_chrom, log_file):
 
 	# Iterates through each file 
 	for file in files:
-		if file == '.DS_Store':
+		if file[0] == '.':
 			continue
 		name = file.split(".")
 		with open (vcf_path + file) as f:
@@ -1050,10 +1052,11 @@ def convertMAF (project, vcf_path, genome, output_path, ncbi_chrom, log_file):
 
 
 				except:
-					if first_incorrect_file:
-						print("The given input files do not appear to be in the correct MAF format. Skipping this file: ", file)
-						first_incorrect_file = False
-					continue
+					# if first_incorrect_file:
+					print("The given input files do not appear to be in the correct MAF format. Skipping this file: ", file)
+					first_incorrect_file = False
+					break
+					#continue
 
 				# Saves SNV mutations into an SNV simple text file
 				if len(ref) == 1 and len(mut) == 1 and ref != "-" and mut != "-":
@@ -1556,7 +1559,7 @@ def convertICGC (project, vcf_path, genome, output_path, ncbi_chrom, log_file):
 
 	# Iterates through each file 
 	for file in files:
-		if file == '.DS_Store':
+		if file[0] == '.':
 			continue
 		with open (vcf_path + file) as f:
 			for lines in f:
@@ -1588,10 +1591,11 @@ def convertICGC (project, vcf_path, genome, output_path, ncbi_chrom, log_file):
 
 
 				except:
-					if first_incorrect_file:
-						print("The given input files do not appear to be in the correct ICGC format.")
-						first_incorrect_file = False
-					continue
+					# if first_incorrect_file:
+					print("The given input files do not appear to be in the correct ICGC format.")
+					first_incorrect_file = False
+					break
+					#continue
 
 				# Saves SNV mutations into an SNV simple text file
 				if len(ref) == 1 and len(mut) == 1 and ref != "-" and mut != "-":
