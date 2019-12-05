@@ -535,7 +535,6 @@ def catalogue_generator_single (lines, chrom, mutation_dict, mutation_dinuc_pd_a
 							exome_file.write(sample + '\t' + chrom + '\t' + str(start) + '\t' + mut_key + "\t" + ref + "\t" + mut + "\n")
 						if bed:
 							bed_file.write(sample + '\t' + chrom + '\t' + str(start) + '\t' + mut_key + "\t" + ref + "\t" + mut + "\n")
-
 						if seqInfo:
 							print("\t".join([sample, chrom, str(start), mut_key, strand]), file=seqOut)
 
@@ -1356,7 +1355,8 @@ def catalogue_generator_INDEL_single (mutation_ID, lines, chrom, vcf_path, vcf_p
 	if functionFlag:
 		return(mutation_ID, skipped_count, total_analyzed)
 
-def exome_check (mutation_pd, genome, exome_temp_file, output_matrix, project, context, cushion, subcontext=None):
+#def exome_check (mutation_pd, genome, exome_temp_file, output_matrix, project, context, cushion, subcontext=None):
+def exome_check (chrom_based, samples, bias_sort, exome, mut_types, bed, chrom, functionFlag, plot, tsb_stat, mutation_pd, genome, exome_temp_file, output_matrix, project, context, cushion, subcontext=None):	
 	'''
 	Filters the variants for those present within the exome. 
 
@@ -1375,7 +1375,7 @@ def exome_check (mutation_pd, genome, exome_temp_file, output_matrix, project, c
 	# Instantiates the relevant variables/data structures
 	base_cushion = cushion
 	mutation_dict = {}
-	samples = []
+	# samples = []
 
 	initial = True
 	udpate_chrom = False
@@ -1390,11 +1390,14 @@ def exome_check (mutation_pd, genome, exome_temp_file, output_matrix, project, c
 	if not os.path.exists(exome_output_path):
 		os.makedirs(exome_output_path)
 
+	save_chrom = None
+
 	with open(exome_temp_file) as f, open(exome_file) as exome, open(exome_output, "w") as out:
 		previous_chrom_ref = None
 		previous_chrom_start = None
 		previous_chrom_end = None
 
+		save_mat = True
 		chrom_ref = None
 		start_ref = None
 		end_ref = None
@@ -1424,7 +1427,32 @@ def exome_check (mutation_pd, genome, exome_temp_file, output_matrix, project, c
 
 			if initial:
 				chrom_start = chrom
+				save_chrom = chrom
 				initial = False
+
+			if chrom != save_chrom:
+				if chrom_based:
+					if save_mat:
+						mut_count_all = {}
+						mut_count_all['6144'] = mutation_pd
+						if context == '83':
+							mut_count_all['ID'] = mutation_pd
+							matrix_generator_INDEL(output_matrix, samples, mut_types, None, None, mut_count_all['ID'], None, None, None, project, exome, None, bed, save_chrom, plot)
+						elif context == 'simple':
+							mut_count_all['simple'] = mutation_pd
+							matrix_generator_INDEL(output_matrix, samples, None, None, mut_types, None, None, mut_count_all['simple'], None, project, exome, None, bed, save_chrom, plot)
+						elif context == 'tsb':
+							mut_count_all['tsb'] = mutation_pd
+							matrix_generator_INDEL(output_matrix, samples, None, mut_types, None, None, mut_count_all['tsb'], None, None, project, exome, None, bed, save_chrom, plot)
+						elif context == 'SNV':
+							mut_count_all['6144'] = mutation_pd
+							matrices = matrix_generator ('6144', output_matrix, project, samples, bias_sort, mut_count_all, exome, mut_types, bed, save_chrom, functionFlag, plot, tsb_stat)
+						elif context == 'DBS':
+							dinuc_mat = matrix_generator_DINUC (output_matrix, samples, bias_sort, mutation_pd, mut_types, project, exome, bed, save_chrom, plot)
+						
+						mutation_pd = {}
+						mutation_pd = pd.DataFrame(0, index=mut_types, columns=samples)
+				save_chrom = chrom
 
 			stop = False
 			while not stop:
@@ -1461,7 +1489,7 @@ def exome_check (mutation_pd, genome, exome_temp_file, output_matrix, project, c
 						ref_chrom_value = int(chrom_ref)
 
 					if chrom == chrom_ref:
-
+						save_mat = True
 						if start > (start_ref - base_cushion and end_ref + base_cushion):
 							read = True
 							continue
@@ -1490,10 +1518,27 @@ def exome_check (mutation_pd, genome, exome_temp_file, output_matrix, project, c
 			previous_chrom_start = start_ref
 			previous_chrom_end = end_ref
 
+	if chrom_based:
+		mut_count_all = {}
+		if context == '83': #or context == 'simple' or context == 'tsb':
+			mut_count_all['ID'] = mutation_pd
+			matrix_generator_INDEL(output_matrix, samples, mut_types, None, None, mut_count_all['ID'], None, None, None, project, exome, None, bed, save_chrom, plot)
+		elif context == 'simple':
+			mut_count_all['simple'] = mutation_pd
+			matrix_generator_INDEL(output_matrix, samples, None, None, mut_types, None, None, mut_count_all['simple'], None, project, exome, None, bed, save_chrom, plot)
+		elif context == 'tsb':
+			mut_count_all['tsb'] = mutation_pd
+			matrix_generator_INDEL(output_matrix, samples, None, mut_types, None, None, mut_count_all['tsb'], None, None, project, exome, None, bed, save_chrom, plot)
+		elif context == 'SNV':
+			mut_count_all['6144'] = mutation_pd
+			matrices = matrix_generator ('6144', output_matrix, project, samples, bias_sort, mut_count_all, exome, mut_types, bed, save_chrom, functionFlag, plot, tsb_stat)
+		elif context == 'DBS':
+			dinuc_mat = matrix_generator_DINUC (output_matrix, samples, bias_sort, mutation_pd, mut_types, project, exome, bed, save_chrom, plot)
+
 
 	return(mutation_pd, samples)
 
-def panel_check (mutation_pd, genome, bed_temp_file, output_matrix, bed_file_path, project, context, cushion, subcontext=None):
+def panel_check (chrom_based, samples, bias_sort, exome, mut_types, bed, chrom, functionFlag, plot, tsb_stat, mutation_pd, genome, bed_temp_file, output_matrix, bed_file_path, project, context, cushion, subcontext=None):
 	'''
 	Filters the variants for those present within the exome. 
 
@@ -1513,7 +1558,7 @@ def panel_check (mutation_pd, genome, bed_temp_file, output_matrix, bed_file_pat
 
 	# Instantiates the relevant variables/data structures
 	base_cushion = cushion
-	samples = []
+	# samples = []
 	ref_dir = os.path.dirname(os.path.abspath(__file__))
 
 
@@ -1534,6 +1579,8 @@ def panel_check (mutation_pd, genome, bed_temp_file, output_matrix, bed_file_pat
 		previous_chrom_ref = None
 		previous_chrom_start = None
 		previous_chrom_end = None
+		save_mat = True
+
 
 		chrom_ref = None
 		start_ref = None
@@ -1564,14 +1611,37 @@ def panel_check (mutation_pd, genome, bed_temp_file, output_matrix, bed_file_pat
 
 			if initial:
 				chrom_start = chrom
+				save_chrom = chrom
 				initial = False
+			if chrom != save_chrom:
+				if chrom_based:
+					if save_mat:
+						mut_count_all = {}
+						if context == '83':
+							mut_count_all['ID'] = mutation_pd
+							matrix_generator_INDEL(output_matrix, samples, mut_types, None, None, mut_count_all['ID'], None, None, None, project, None, None, bed, save_chrom, plot)
+						elif context == 'simple':
+							mut_count_all['simple'] = mutation_pd
+							matrix_generator_INDEL(output_matrix, samples, None, None, mut_types, None, None, mut_count_all['simple'], None, project, None, None, bed, save_chrom, plot)
+						elif context == 'tsb':
+							mut_count_all['tsb'] = mutation_pd
+							matrix_generator_INDEL(output_matrix, samples, None, mut_types, None, None, mut_count_all['tsb'], None, None, project, None, None, bed, save_chrom, plot)
+						elif context == 'SNV':
+							mut_count_all['6144'] = mutation_pd
+							matrices = matrix_generator ('6144', output_matrix, project, samples, bias_sort, mut_count_all, None, mut_types, bed, save_chrom, functionFlag, plot, tsb_stat)
+						elif context == 'DBS':
+							dinuc_mat = matrix_generator_DINUC (output_matrix, samples, bias_sort, mutation_pd, mut_types, project, None, bed, save_chrom, plot)
+						mutation_pd = {}
+						mutation_pd = pd.DataFrame(0, index=mut_types, columns=samples)
+						save_mat = False
+				save_chrom = chrom
 
 			stop = False
 			while not stop:
 				if chrom == previous_chrom_ref:
 					if start >= previous_chrom_start - base_cushion and start <= previous_chrom_end + base_cushion:
 						mutation_pd.at[mut_type, sample] += 1
-						read = True
+						#read = True
 						print('\t'.join([chrom, str(start), ".", ref, mut ]), file=out)
 						break
 
@@ -1598,13 +1668,13 @@ def panel_check (mutation_pd, genome, bed_temp_file, output_matrix, bed_file_pat
 						ref_chrom_value = int(chrom_ref)
 
 					if chrom == chrom_ref:
-
+						save_mat = True
 						if start > (start_ref - base_cushion and end_ref + base_cushion):
 							read = True
 							continue
 						elif start >= start_ref - base_cushion and start <= end_ref + base_cushion: 
 							mutation_pd.at[mut_type, sample] += 1
-							read = True
+							#read = True
 							print('\t'.join([chrom, str(start), ".", ref, mut]), file=out)
 							break
 						elif start < (start_ref - base_cushion):
@@ -1627,8 +1697,23 @@ def panel_check (mutation_pd, genome, bed_temp_file, output_matrix, bed_file_pat
 			previous_chrom_start = start_ref
 			previous_chrom_end = end_ref
 
-	# logging.info("Panel filtering is complete. Proceeding with the final catalogue generation...")
-	# print("Panel filtering is complete. Proceeding with the final catalogue generation...")
+	if chrom_based:
+		mut_count_all = {}
+		if context == '83':
+			mut_count_all['ID'] = mutation_pd
+			matrix_generator_INDEL(output_matrix, samples, mut_types, None, None, mut_count_all['ID'], None, None, None, project, None, None, bed, save_chrom, plot)
+		elif context == 'simple':
+			mut_count_all['simple'] = mutation_pd
+			matrix_generator_INDEL(output_matrix, samples, None, None, mut_types, None, None, mut_count_all['simple'], None, project, None, None, bed, save_chrom, plot)
+		elif context == 'tsb':
+			mut_count_all['tsb'] = mutation_pd
+			matrix_generator_INDEL(output_matrix, samples, None, mut_types, None, None, mut_count_all['tsb'], None, None, project, None, None, bed, save_chrom, plot)
+		elif context == 'SNV':
+			mut_count_all['6144'] = mutation_pd
+			matrices = matrix_generator ('6144', output_matrix, project, samples, bias_sort, mut_count_all, None, mut_types, bed, save_chrom, functionFlag, plot, tsb_stat)
+		elif context == 'DBS':
+			dinuc_mat = matrix_generator_DINUC (output_matrix, samples, bias_sort, mutation_pd, mut_types, project, None, bed, save_chrom, plot)
+
 	return(mutation_pd, samples)
 
 
@@ -1664,33 +1749,17 @@ def matrix_generator (context, output_matrix, project, samples, bias_sort, mut_c
 	'''
 
 	# Prepares all of the required data structures and files
-	# current_dir = os.getcwd()
-	# ref_dir = re.sub('\/scripts$', '', current_dir)
 	ref_dir = os.path.dirname(os.path.abspath(__file__))
 
 	contexts = ['96', '384', '1536', '6', '24']
-	#mut_types_all = {'96':[], '384':[], '1536':[], '6':[], '24':[], '6_pvalue':[], '7_pvalue':[]}
-	#mut_count_all = {'96':{}, '384':{}, '1536':{}, '6':{}, '24':{}, '6_pvalue':{}, '7_pvalue':{}, '6_pvalue_temp':{}, '7_pvalue_temp':{}}
-
-	#mut_6144 = pd.DataFrame.from_dict(mutation_dict)
-	#mut_6144 = mut_6144.fillna(0)
 	mut_count_all['6144'].index.name = 'MutationType'
 
 
 	mut_count_all['6144'] = mut_count_all['6144'].astype(int)
-	#mut_count_all['6144'] = mut_6144
 	mut_count_all['384'] = mut_count_all['6144'].groupby(mut_count_all['6144'].index.str[0:2] + mut_count_all['6144'].index.str[3:10]).sum()
-
 	mut_count_all['1536'] = mut_count_all['6144'].groupby(mut_count_all['6144'].index.str[2:]).sum()
-
-	#mut_count_all['96'] = mut_6144.groupby(mut_6144.index.str[3:10]).sum()
 	mut_count_all['96'] = mut_count_all['1536'].groupby(mut_count_all['1536'].index.str[1:8]).sum()
-
-	#mut_count_all['6'] = mut_6144.groupby(mut_6144.index.str[5:8]).sum()
 	mut_count_all['6'] = mut_count_all['96'].groupby(mut_count_all['96'].index.str[2:5]).sum()
-
-
-#	mut_count_all['24'] = mut_6144.groupby(mut_6144.index.str[0:2] + mut_6144.index.str[5:8]).sum()
 	mut_count_all['24'] = mut_count_all['384'].groupby(mut_count_all['384'].index.str[0:2] + mut_count_all['384'].index.str[4:7]).sum()
 
 	mut_count_all['1536'].index.name = 'MutationType'
@@ -1873,8 +1942,6 @@ def matrix_generator (context, output_matrix, project, samples, bias_sort, mut_c
 	# Generates the matrices for the remaining matrices (1536, 384, 96, 24, 6) by 
 	# summing the counts from the 6144 matrix
 	for cont in contexts:
-		#mutation_dict = mut_count_all[cont]
-
 		file_prefix = project + ".SBS" + cont
 		if exome:
 			output_file_matrix = output_matrix_SBS + file_prefix + ".exome"
@@ -1886,8 +1953,6 @@ def matrix_generator (context, output_matrix, project, samples, bias_sort, mut_c
 
 		if chrom_start != None:
 			output_file_matrix += ".chr" + chrom_start
-
-		#mutation_dict.to_csv(output_file_matrix, header=True, sep='\t')
 		df2csv(mut_count_all[cont], output_file_matrix)		
 
 
@@ -1895,29 +1960,36 @@ def matrix_generator (context, output_matrix, project, samples, bias_sort, mut_c
 			output_path = output_matrix + "plots/"
 			if not os.path.exists(output_path):
 				os.makedirs(output_path)
+			file_name = project
+			if exome:
+				file_name += "_exome"
+			if bed:
+				file_name += "_region"
+			if chrom_start != None:
+				file_name += "_chr" + chrom_start
 			if cont == '96':
 				try:
-					sigPlt.plotSBS(output_file_matrix, output_path, project, '96', False)
+					sigPlt.plotSBS(output_file_matrix, output_path, file_name, '96', False)
 				except:
 					pass
 			elif cont == '384':
 				try:
-					sigPlt.plotSBS(output_file_matrix, output_path, project, '384', False)
+					sigPlt.plotSBS(output_file_matrix, output_path, file_name, '384', False)
 				except:
 					pass
 			elif cont == '6':
 				try:
-					sigPlt.plotSBS(output_file_matrix, output_path, project, '6', False)
+					sigPlt.plotSBS(output_file_matrix, output_path, file_name, '6', False)
 				except:
 					pass
 			elif cont == '24':
 				try:
-					sigPlt.plotSBS(output_file_matrix, output_path, project, '24', False)
+					sigPlt.plotSBS(output_file_matrix, output_path, file_name, '24', False)
 				except:
 					pass
 			elif cont == '1536':
 				try:
-					sigPlt.plotSBS(output_file_matrix, output_path, project, '1536', False)
+					sigPlt.plotSBS(output_file_matrix, output_path, file_name, '1536', False)
 				except:
 					pass				
 
@@ -2012,27 +2084,44 @@ def matrix_generator_INDEL (output_matrix, samples, indel_types, indel_types_tsb
 
 
 	short_id = pd.DataFrame(indel_dict).iloc[:83,:]
-	df2csv(short_id, output_file_matrix)
-	df2csv(indel_dict, output_file_matrix_complete)
-	df2csv(indel_tsb_dict, output_file_matrix_tsb)
-	df2csv(indel_simple_dict, output_file_matrix_simple)
-	df2csv(indel_dict_complete, output_file_matrix_complete_seq)
+
+	if initial_chrom != None and (exome or bed):
+		if indel_tsb_dict is None and indel_simple_dict is None:
+			df2csv(indel_dict, output_file_matrix_complete)
+		elif indel_dict is None and indel_simple_dict is None:
+			df2csv(indel_tsb_dict, output_file_matrix_tsb)
+		elif indel_dict is None and indel_tsb_dict is None:
+			df2csv(indel_simple_dict, output_file_matrix_simple)	
+	else:
+		df2csv(short_id, output_file_matrix)
+		df2csv(indel_dict, output_file_matrix_complete)
+		df2csv(indel_tsb_dict, output_file_matrix_tsb)
+		df2csv(indel_simple_dict, output_file_matrix_simple)
+		df2csv(indel_dict_complete, output_file_matrix_complete_seq)
 
 
 	if plot:
 		output_path = output_matrix + "plots/"
 		if not os.path.exists(output_path):
 			os.mkdir(output_path)
+		file_name = project
+		if exome:
+			file_name += "_exome"
+		if bed:
+			file_name += "_region"
+		if initial_chrom != None:
+			file_name += "_chr" + initial_chrom
+
 		try:
-			sigPlt.plotID(output_file_matrix, output_path, project, '94', False)
+			sigPlt.plotID(output_file_matrix, output_path, file_name, '94', False)
 		except:
 			pass
 		try:
-			sigPlt.plotID(output_file_matrix_tsb, output_path, project, '96ID', False)
+			sigPlt.plotID(output_file_matrix_tsb, output_path, file_name, '96ID', False)
 		except:
 			pass
 		try:
-			sigPlt.plotID(output_file_matrix_simple, output_path, project, 'ID_simple', False)
+			sigPlt.plotID(output_file_matrix_simple, output_path, file_name, 'ID_simple', False)
 		except:
 			pass
 
@@ -2084,10 +2173,10 @@ def matrix_generator_DINUC (output_matrix, samples, bias_sort, all_dinucs, all_m
 	mut_4992 = mut_4992.fillna(0)
 	mut_4992 = mut_4992.astype(int)
 
+
 	mut_count_all['78'] = mut_4992.groupby(mut_4992.index.str[4:9]).sum()
 	mut_count_all['186'] = mut_4992.groupby(mut_4992.index.str[0:2] + mut_4992.index.str[4:9]).sum()
 	mut_count_all['1248'] = mut_4992.groupby(mut_4992.index.str[2:]).sum()
-
 
 	mut_count_all['78'].index.name = 'MutationType'
 	mut_count_all['186'].index.name = 'MutationType'
@@ -2097,8 +2186,7 @@ def matrix_generator_DINUC (output_matrix, samples, bias_sort, all_dinucs, all_m
 	if not os.path.exists(output_matrix_DINUC):
 		os.mkdir(output_matrix_DINUC)
 
-	# current_dir = os.getcwd()
-	# ref_dir = re.sub('\/scripts$', '', current_dir)
+
 	ref_dir = os.path.dirname(os.path.abspath(__file__))
 	file_prefix = project + ".DBS2976" 
 	if exome:
@@ -2141,12 +2229,19 @@ def matrix_generator_DINUC (output_matrix, samples, bias_sort, all_dinucs, all_m
 		mutation_dict.to_csv(output_file_matrix, header=True, sep='\t')
 	
 		if plot:
+			file_name = project
+			if exome:
+				file_name += "_exome"
+			if bed:
+				file_name += "_region"
+			if chrom_start != None:
+				file_name += "_chr" + chrom_start
 			output_path = output_matrix + "plots/"
 			if not os.path.exists(output_path):
 				os.mkdir(output_path)
 			try:
 				if cont == '78' or cont == '186':
-					sigPlt.plotDBS(output_file_matrix, output_path, project, cont, False)
+					sigPlt.plotDBS(output_file_matrix, output_path, file_name, cont, False)
 			except:
 				pass
 
