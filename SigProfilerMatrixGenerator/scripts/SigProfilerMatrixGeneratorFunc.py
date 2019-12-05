@@ -433,7 +433,7 @@ def SigProfilerMatrixGeneratorFunc (project, genome, vcfFiles, exome=False, bed_
 				context = '6144'
 				mutation_pd, skipped_mut, total, total_DINUC, mutation_dinuc_pd_all = matGen.catalogue_generator_single (lines, chrom, mutation_pd, mutation_dinuc_pd_all, mutation_types_tsb_context, vcf_path, vcf_path_original, vcf_files, bed_file_path, chrom_path, project, output_matrix, context, exome, genome, ncbi_chrom, functionFlag, bed, bed_ranges, chrom_based, plot, tsb_ref, transcript_path, tsb_stat, seqInfo, gs, log_file)
 				
-				if chrom_based:
+				if chrom_based and not exome and not bed:
 					matrices = matGen.matrix_generator (context, output_matrix, project, samples, bias_sort, mutation_pd, exome, mut_types, bed, chrom, functionFlag, plot, tsb_stat)
 					mutation_pd = {}
 					mutation_pd['6144'] = pd.DataFrame(0, index=mut_types, columns=samples)
@@ -453,12 +453,12 @@ def SigProfilerMatrixGeneratorFunc (project, genome, vcfFiles, exome=False, bed_
 				output = open(vcf_path + "exome_temp.txt", 'w')
 				for line in sorted(lines, key = lambda x: (['I','II','III','IV','V','chrI','chrII','chrIII','chrIV','chrV','X','Y','1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23','24',
                                                             '25','26','27','28','29','30','31','32','33','34','35','36','37','38','39', 'MT', 'M', 'MtDNA'].index(x[1]), int(x[2]))):
-				# for line in sorted(lines, key = lambda x: (['X','Y','1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', 'MT', 'M'].index(x[1]), int(x[2]))):
 					print('\t'.join(line), file=output)
 				output.close()
 				mutation_pd = {}
 				mutation_pd['6144'] = pd.DataFrame(0, index=mut_types, columns=samples)
-				mutation_pd['6144'], samples2 = matGen.exome_check(mutation_pd['6144'], genome, vcf_path + "exome_temp.txt", output_matrix, project, "SNV", cushion)
+				# mutation_pd['6144'], samples2 = matGen.exome_check(mutation_pd['6144'], genome, vcf_path + "exome_temp.txt", output_matrix, project, "SNV", cushion)
+				mutation_pd['6144'], samples2 = matGen.exome_check(chrom_based, samples, bias_sort, exome, mut_types, bed, chrom, functionFlag, plot, tsb_stat, mutation_pd['6144'], genome, vcf_path + "exome_temp.txt", output_matrix, project, "SNV", cushion)
 
 
 			if bed:
@@ -467,14 +467,13 @@ def SigProfilerMatrixGeneratorFunc (project, genome, vcfFiles, exome=False, bed_
 				output = open(vcf_path + "bed_temp.txt", 'w')
 				for line in sorted(lines, key = lambda x: (['I','II','III','IV','V','chrI','chrII','chrIII','chrIV','chrV','X','Y','1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23','24',
                                                             '25','26','27','28','29','30','31','32','33','34','35','36','37','38','39', 'MT', 'M', 'MtDNA'].index(x[1]), int(x[2]))):
-				# for line in sorted(lines, key = lambda x: (['X','Y','1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', 'MT', 'M'].index(x[1]), int(x[2]))):
 					print('\t'.join(line), file=output)
 				output.close()
 
 
 				mutation_pd = {}
 				mutation_pd['6144'] = pd.DataFrame(0, index=mut_types, columns=samples)
-				mutation_pd['6144'], samples2 = matGen.panel_check(mutation_pd['6144'], genome, vcf_path + "bed_temp.txt", output_matrix, bed_file_path, project, "SNV", cushion)
+				mutation_pd['6144'], samples2 = matGen.panel_check(chrom_based, samples, bias_sort, exome, mut_types, bed, chrom, functionFlag, plot, tsb_stat, mutation_pd['6144'], genome, vcf_path + "bed_temp.txt", output_matrix, bed_file_path, project, "SNV", cushion)
 				
 
 
@@ -489,12 +488,11 @@ def SigProfilerMatrixGeneratorFunc (project, genome, vcfFiles, exome=False, bed_
 					output = open(vcf_path + "exome_temp_context_tsb_DINUC.txt", 'w')
 					for line in sorted(lines, key = lambda x: (['I','II','III','IV','V','chrI','chrII','chrIII','chrIV','chrV','X','Y','1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23','24',
                                                             '25','26','27','28','29','30','31','32','33','34','35','36','37','38','39', 'MT', 'M', 'MtDNA'].index(x[1]), int(x[2]))):
-					# for line in sorted(lines, key = lambda x: (['X','Y','1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', 'MT', 'M'].index(x[1]), int(x[2]))):
 							print('\t'.join(line), file=output)
 					output.close()
 
 					mutation_dinuc_pd_all = pd.DataFrame(0, index=mutation_types_tsb_context, columns=samples)
-					mutation_dinuc_pd_all, samples2 = matGen.exome_check(mutation_dinuc_pd_all, genome, vcf_path + "exome_temp_context_tsb_DINUC.txt", output_matrix, project, "DBS", cushion)
+					mutation_dinuc_pd_all, samples2 = matGen.exome_check(chrom_based, samples, bias_sort, exome, mutation_types_tsb_context, bed, chrom, functionFlag, plot, tsb_stat, mutation_dinuc_pd_all, genome, vcf_path + "exome_temp_context_tsb_DINUC.txt", output_matrix, project, "DBS", cushion)
 			
 				if bed:
 					with open(vcf_path + "bed_temp_context_tsb_DINUC.txt") as f:
@@ -502,12 +500,11 @@ def SigProfilerMatrixGeneratorFunc (project, genome, vcfFiles, exome=False, bed_
 					output = open(vcf_path + "bed_temp_context_tsb_DINUC.txt", 'w')
 					for line in sorted(lines, key = lambda x: (['I','II','III','IV','V','chrI','chrII','chrIII','chrIV','chrV','X','Y','1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23','24',
                                                             '25','26','27','28','29','30','31','32','33','34','35','36','37','38','39', 'MT', 'M', 'MtDNA'].index(x[1]), int(x[2]))):
-					# for line in sorted(lines, key = lambda x: (['X','Y','1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', 'MT', 'M'].index(x[1]), int(x[2]))):
 						print('\t'.join(line), file=output)
 					output.close()
 
 					mutation_dinuc_pd_all = pd.DataFrame(0, index=mutation_types_tsb_context, columns=samples)
-					mutation_dinuc_pd_all, samples2 = matGen.panel_check(mutation_dinuc_pd_all, genome, vcf_path + "bed_temp_context_tsb_DINUC.txt", output_matrix, bed_file_path, project, "DBS", cushion)
+					mutation_dinuc_pd_all, samples2 = matGen.panel_check(chrom_based, samples, bias_sort, exome, mutation_types_tsb_context, bed, chrom, functionFlag, plot, tsb_stat, mutation_dinuc_pd_all, genome, vcf_path + "bed_temp_context_tsb_DINUC.txt", output_matrix, bed_file_path, project, "DBS", cushion)
 
 				if not chrom_based:
 					if not mutation_dinuc_pd_all.empty:
@@ -522,7 +519,7 @@ def SigProfilerMatrixGeneratorFunc (project, genome, vcfFiles, exome=False, bed_
 				lines = sorted(lines, key = lambda x: (x[0], int(x[2])))			
 				mutation_ID, skipped_mut, total = matGen.catalogue_generator_INDEL_single (mutation_ID, lines, chrom, vcf_path, vcf_path_original, vcf_files, bed_file_path, chrom_path, project, output_matrix, exome, genome, ncbi_chrom, limited_indel, functionFlag, bed, bed_ranges, chrom_based, plot, tsb_ref, transcript_path, seqInfo, gs, log_file)
 
-				if chrom_based:
+				if chrom_based and not exome and not bed:
 					matGen.matrix_generator_INDEL(output_matrix, samples, indel_types, indel_types_tsb, indel_types_simple, mutation_ID['ID'], mutation_ID['tsb'], mutation_ID['simple'], mutation_ID['complete'], project, exome, limited_indel, bed, chrom, plot)
 					mutation_ID['ID'] = pd.DataFrame(0, index=indel_types, columns=samples)
 					mutation_ID['simple'] = pd.DataFrame(0, index=indel_types_simple, columns=samples)
@@ -541,13 +538,12 @@ def SigProfilerMatrixGeneratorFunc (project, genome, vcfFiles, exome=False, bed_
 				output = open(vcf_path + "exome_temp.txt", 'w')
 				for line in sorted(lines, key = lambda x: (['I','II','III','IV','V','chrI','chrII','chrIII','chrIV','chrV','X','Y','1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23','24',
                                                             '25','26','27','28','29','30','31','32','33','34','35','36','37','38','39', 'MT', 'M', 'MtDNA'].index(x[1]), int(x[2]))):
-				# for line in sorted(lines, key = lambda x: (['X','Y','1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', 'MT', 'M'].index(x[1]), int(x[2]))):
 					print('\t'.join(line), file=output)
 				output.close()
 
 				mutation_ID = {}
 				mutation_ID['ID'] = pd.DataFrame(0, index=indel_types, columns=samples)
-				mutation_ID['ID'], samples2 = matGen.exome_check(mutation_ID['ID'], genome, vcf_path + "exome_temp.txt", output_matrix, project, "ID", cushion, '83')
+				mutation_ID['ID'], samples2 = matGen.exome_check(chrom_based, samples, bias_sort, exome, indel_types, bed, chrom, functionFlag, plot, tsb_stat, mutation_ID['ID'], genome, vcf_path + "exome_temp.txt", output_matrix, project, "ID", cushion, '83')
 
 
 				with open(vcf_path + "exome_temp_simple.txt") as f:
@@ -555,12 +551,11 @@ def SigProfilerMatrixGeneratorFunc (project, genome, vcfFiles, exome=False, bed_
 				output = open(vcf_path + "exome_temp_simple.txt", 'w')
 				for line in sorted(lines, key = lambda x: (['I','II','III','IV','V','chrI','chrII','chrIII','chrIV','chrV','X','Y','1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23','24',
                                                             '25','26','27','28','29','30','31','32','33','34','35','36','37','38','39', 'MT', 'M', 'MtDNA'].index(x[1]), int(x[2]))):
-				# for line in sorted(lines, key = lambda x: (['X','Y','1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', 'MT', 'M'].index(x[1]), int(x[2]))):
 					print('\t'.join(line), file=output)
 				output.close()
 
 				mutation_ID['simple'] = pd.DataFrame(0, index=indel_types_simple, columns=samples)
-				mutation_ID['simple'], samples2 = matGen.exome_check(mutation_ID['simple'], genome, vcf_path + "exome_temp_simple.txt", output_matrix, project, "ID", cushion, 'simple')
+				mutation_ID['simple'], samples2 = matGen.exome_check(chrom_based, samples, bias_sort, exome, indel_types_simple, bed, chrom, functionFlag, plot, tsb_stat, mutation_ID['simple'], genome, vcf_path + "exome_temp_simple.txt", output_matrix, project, "ID", cushion, 'simple')
 
 
 				with open(vcf_path + "exome_temp_tsb.txt") as f:
@@ -568,12 +563,11 @@ def SigProfilerMatrixGeneratorFunc (project, genome, vcfFiles, exome=False, bed_
 				output = open(vcf_path + "exome_temp_tsb.txt", 'w')
 				for line in sorted(lines, key = lambda x: (['I','II','III','IV','V','chrI','chrII','chrIII','chrIV','chrV','X','Y','1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23','24',
                                                             '25','26','27','28','29','30','31','32','33','34','35','36','37','38','39', 'MT', 'M', 'MtDNA'].index(x[1]), int(x[2]))):
-				# for line in sorted(lines, key = lambda x: (['X','Y','1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', 'MT', 'M'].index(x[1]), int(x[2]))):
 					print('\t'.join(line), file=output)
 				output.close()
 
 				mutation_ID['tsb'] = pd.DataFrame(0, index=indel_types_tsb, columns=samples)
-				mutation_ID['tsb'], samples2 = matGen.exome_check(mutation_ID['tsb'], genome, vcf_path + "exome_temp_tsb.txt", output_matrix, project, "ID", cushion, 'tsb')
+				mutation_ID['tsb'], samples2 = matGen.exome_check(chrom_based, samples, bias_sort, exome, indel_types_tsb, bed, chrom, functionFlag, plot, tsb_stat, mutation_ID['tsb'], genome, vcf_path + "exome_temp_tsb.txt", output_matrix, project, "ID", cushion, 'tsb')
 				mutation_ID['complete'] = pd.DataFrame(0, index=indel_complete, columns=samples)
 
 			if bed:
@@ -582,13 +576,12 @@ def SigProfilerMatrixGeneratorFunc (project, genome, vcfFiles, exome=False, bed_
 				output = open(vcf_path + "bed_temp.txt", 'w')
 				for line in sorted(lines, key = lambda x: (['I','II','III','IV','V','chrI','chrII','chrIII','chrIV','chrV','X','Y','1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23','24',
                                                             '25','26','27','28','29','30','31','32','33','34','35','36','37','38','39', 'MT', 'M', 'MtDNA'].index(x[1]), int(x[2]))):
-				# for line in sorted(lines, key = lambda x: (['X','Y','1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', 'MT', 'M'].index(x[1]), int(x[2]))):
 					print('\t'.join(line), file=output)
 				output.close()
 
 				mutation_ID = {}
 				mutation_ID['ID'] = pd.DataFrame(0, index=indel_types, columns=samples)
-				mutation_ID['ID'], samples2 = matGen.panel_check(mutation_ID['ID'], genome, vcf_path + "bed_temp.txt", output_matrix, bed_file_path, project, "ID", cushion, '83')
+				mutation_ID['ID'], samples2 = matGen.panel_check(chrom_based, samples, bias_sort, exome, indel_types, bed, chrom, functionFlag, plot, tsb_stat, mutation_ID['ID'], genome, vcf_path + "bed_temp.txt", output_matrix, bed_file_path, project, "ID", cushion, '83')
 
 				
 				with open(vcf_path + "bed_temp_simple.txt") as f:
@@ -596,12 +589,11 @@ def SigProfilerMatrixGeneratorFunc (project, genome, vcfFiles, exome=False, bed_
 				output = open(vcf_path + "bed_temp_simple.txt", 'w')
 				for line in sorted(lines, key = lambda x: (['I','II','III','IV','V','chrI','chrII','chrIII','chrIV','chrV','X','Y','1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23','24',
                                                             '25','26','27','28','29','30','31','32','33','34','35','36','37','38','39', 'MT', 'M', 'MtDNA'].index(x[1]), int(x[2]))):
-				# for line in sorted(lines, key = lambda x: (['X','Y','1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', 'MT', 'M'].index(x[1]), int(x[2]))):
 					print('\t'.join(line), file=output)
 				output.close()
 
 				mutation_ID['simple'] = pd.DataFrame(0, index=indel_types_simple, columns=samples)
-				mutation_ID['simple'], samples2 = matGen.panel_check(mutation_ID['simple'], genome, vcf_path + "bed_temp_simple.txt", output_matrix, bed_file_path, project, "ID", cushion, 'simple')
+				mutation_ID['simple'], samples2 = matGen.panel_check(chrom_based, samples, bias_sort, exome, indel_types_simple, bed, chrom, functionFlag, plot, tsb_stat, mutation_ID['simple'], genome, vcf_path + "bed_temp_simple.txt", output_matrix, bed_file_path, project, "ID", cushion, 'simple')
 
 
 				with open(vcf_path + "bed_temp_tsb.txt") as f:
@@ -609,27 +601,19 @@ def SigProfilerMatrixGeneratorFunc (project, genome, vcfFiles, exome=False, bed_
 				output = open(vcf_path + "bed_temp_tsb.txt", 'w')
 				for line in sorted(lines, key = lambda x: (['I','II','III','IV','V','chrI','chrII','chrIII','chrIV','chrV','X','Y','1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23','24',
                                                             '25','26','27','28','29','30','31','32','33','34','35','36','37','38','39', 'MT', 'M', 'MtDNA'].index(x[1]), int(x[2]))):
-				# for line in sorted(lines, key = lambda x: (['X','Y','1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', 'MT', 'M'].index(x[1]), int(x[2]))):
 					print('\t'.join(line), file=output)
 				output.close()
 
 
 
 				mutation_ID['tsb'] = pd.DataFrame(0, index=indel_types_tsb, columns=samples)
-				mutation_ID['tsb'], samples2 = matGen.panel_check(mutation_ID['tsb'], genome, vcf_path + "bed_temp_tsb.txt", output_matrix, bed_file_path, project, "ID", cushion, 'tsb')
+				mutation_ID['tsb'], samples2 = matGen.panel_check(chrom_based, samples, bias_sort, exome, indel_types_tsb, bed, chrom, functionFlag, plot, tsb_stat, mutation_ID['tsb'], genome, vcf_path + "bed_temp_tsb.txt", output_matrix, bed_file_path, project, "ID", cushion, 'tsb')
 				mutation_ID['complete'] = pd.DataFrame(0, index=indel_complete, columns=samples)
 
-			# mutation_ID['ID'] = mutation_ID['ID'].to_dict('dict')
-			# mutation_ID['simple'] = mutation_ID['simple'].to_dict('dict')
-			# mutation_ID['tsb'] = mutation_ID['tsb'].to_dict('dict')
 			if not chrom_based:
 				matGen.matrix_generator_INDEL(output_matrix, samples, indel_types, indel_types_tsb, indel_types_simple, mutation_ID['ID'], mutation_ID['tsb'], mutation_ID['simple'], mutation_ID['complete'], project, exome, limited_indel, bed, chrom_start, plot)
-				# matrices['ID'] = pd.DataFrame(mutation_ID['ID'])
 				matrices['ID'] = mutation_ID['ID'].iloc[0:83,:]
-			#remove_id = ['2:Ins:M:1','3:Ins:M:1','3:Ins:M:2','4:Ins:M:1','4:Ins:M:2','4:Ins:M:3','5:Ins:M:1','5:Ins:M:2','5:Ins:M:3','5:Ins:M:4','5:Ins:M:5','complex','non_matching']
-			#for indel in remove_id:
-			#	for sample in matrices['ID']:
-			#		del matrices['ID'][sample][indel]
+
 
 		if i == 1:
 			shutil.rmtree(output_matrix + "temp/")
