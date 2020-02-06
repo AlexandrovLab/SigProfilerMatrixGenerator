@@ -61,7 +61,7 @@ def convertVCF (project, vcf_path, genome, output_path, ncbi_chrom, log_file):
 					continue
 				else:
 					try:
-						line = lines.strip().split('\t')
+						line = lines.strip().split()
 						chrom = line[0]
 						if len(chrom) > 2:
 							chrom = chrom[3:]
@@ -496,7 +496,7 @@ def convertTxt (project, vcf_path, genome, output_path, ncbi_chrom, log_file):
 			next(f)
 			for lines in f:
 				try:
-					line = lines.strip().split('\t')
+					line = lines.strip().split()
 					sample = line[1]
 					if sample not in samples:
 						samples.append(sample)
@@ -1032,7 +1032,7 @@ def convertMAF (project, vcf_path, genome, output_path, ncbi_chrom, log_file):
 					continue
 				
 				try:
-					line = lines.strip().split('\t')
+					line = lines.strip().split()
 					genome = line[3]
 					chrom = line[4]
 					if len(chrom) > 2:
@@ -1564,7 +1564,7 @@ def convertICGC (project, vcf_path, genome, output_path, ncbi_chrom, log_file):
 		with open (vcf_path + file) as f:
 			for lines in f:
 				try:
-					line = lines.strip().split('\t')
+					line = lines.strip().split()
 					sample = line[1]
 					if sample not in samples:
 						samples.append(sample)
