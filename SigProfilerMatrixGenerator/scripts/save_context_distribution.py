@@ -301,12 +301,13 @@ def context_distribution_BED (context_input, output_file, chromosome_path, chrom
 		lines = [line.strip().split() for line in f]
 	output = open(file_to_open, 'w')
 	print('\t'.join(lines[0]), file=output)
-	if len(lines[1][0]) > 2:
-		for line in sorted(lines[1:], key = lambda x: (chromosomes_sort.index(x[0][3:]), int(x[1]), int(x[2]))):
-			print('\t'.join(line), file=output)
-	else:
-		for line in sorted(lines[1:], key = lambda x: (chromosomes_sort.index(x[0]), int(x[1]), int(x[2]))):
-			print('\t'.join(line), file=output)
+	if len(lines) > 1:
+		if len(lines[1][0]) > 2:
+			for line in sorted(lines[1:], key = lambda x: (chromosomes_sort.index(x[0][3:]), int(x[1]), int(x[2]))):
+				print('\t'.join(line), file=output)
+		else:
+			for line in sorted(lines[1:], key = lambda x: (chromosomes_sort.index(x[0]), int(x[1]), int(x[2]))):
+				print('\t'.join(line), file=output)
 	output.close()
 
 	with open(file_to_open) as b_file:
