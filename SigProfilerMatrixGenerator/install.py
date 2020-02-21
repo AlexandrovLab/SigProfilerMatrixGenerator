@@ -322,6 +322,15 @@ def install (genome, custom=False, rsync=False, bash=True, ftp=True):
 	first_path= os.getcwd()
 	ref_dir = os.path.dirname(os.path.abspath(__file__))
 	os.chdir(ref_dir)
+
+	wget_install = shutil.which("wget") is not None
+	rsync_install = shutil.which("rsync") is not None
+	if not wget_install and not rsync_install:
+		print("You do not have wget nor rsync installed. Please install wget or rsync and then reattempt to install your desired genome")
+	elif not wget_install and rsync_install:
+		print("You do not have wget installed. Please install wget and then reattempt to install your desired genome")
+
+
 	if os.path.exists("install.log"):
 		os.remove("install.log")
 
