@@ -256,7 +256,7 @@ def SigProfilerMatrixGeneratorFunc (project, genome, vcfFiles, exome=False, bed_
 
 	# Terminates the code if the genome reference files have not been created/installed
 	if not os.path.exists(chrom_path):
-		print("The specified genome: " + genome + " has not been installed\nRun the following command to install the genome:\n\tpython sigProfilerMatrixGenerator/install.py -g " + genome)
+		print("The specified genome " + genome + " has not been installed\nPlease refer to the SigProfilerMatrixGenerator README for installation instructions:\n\thttps://github.com/AlexandrovLab/SigProfilerMatrixGenerator")
 		sys.exit()
 
 	# Organizes all of the input and output directories:
