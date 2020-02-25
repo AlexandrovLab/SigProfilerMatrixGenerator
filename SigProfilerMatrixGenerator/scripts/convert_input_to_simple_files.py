@@ -1032,7 +1032,7 @@ def convertMAF (project, vcf_path, genome, output_path, ncbi_chrom, log_file):
 					continue
 				
 				try:
-					line = lines.strip().split()
+					line = lines.strip().split("\t")
 					genome = line[3]
 					chrom = line[4]
 					if len(chrom) > 2:
