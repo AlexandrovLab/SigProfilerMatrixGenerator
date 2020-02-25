@@ -1019,6 +1019,7 @@ def convertMAF (project, vcf_path, genome, output_path, ncbi_chrom, log_file):
 	prev_line = None
 	skipped_count = 0
 	samples = []
+	header = True
 
 	# Iterates through each file 
 	for file in files:
@@ -1026,15 +1027,14 @@ def convertMAF (project, vcf_path, genome, output_path, ncbi_chrom, log_file):
 			continue
 		name = file.split(".")
 		with open (vcf_path + file) as f:
-			next(f)
 			for lines in f:
 				if lines[0] == "#":
 					continue
-				
+				elif header:
+					header=False
+					continue
 				try:
 					line = lines.strip().split("\t")
-					if line[0] == 'HUGO':
-						continue
 					genome = line[3]
 					chrom = line[4]
 					if len(chrom) > 2:
