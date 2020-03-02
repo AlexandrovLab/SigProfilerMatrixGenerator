@@ -363,6 +363,7 @@ def SigProfilerMatrixGeneratorFunc (project, genome, vcfFiles, exome=False, bed_
 		else:
 			print("File format not supported")
 
+	samples = sorted(samples)
 	skipped_muts += skipped
 	
 	# Instantiates variables for final output statistics
@@ -620,6 +621,7 @@ def SigProfilerMatrixGeneratorFunc (project, genome, vcfFiles, exome=False, bed_
 		end = time.time() - start
 		print("Completed! Elapsed time: " + str(round(end, 2)) + " seconds.")
 
+	sys.stderr.close()
 	# Prints a summary for the given run (total samples, skipped mutations, etc.)
 	if not chrom_based:
 		print("Matrices generated for " + str(sample_count_high) + " samples with " + str(skipped_muts) + " errors. Total of " + str(analyzed_muts[0]) + " SNVs, " + str(analyzed_muts[1]) + " DINUCs, and " + str(analyzed_muts[2]) + " INDELs were successfully analyzed.")
