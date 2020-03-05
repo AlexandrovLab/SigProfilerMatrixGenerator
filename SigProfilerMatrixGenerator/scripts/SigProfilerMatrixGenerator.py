@@ -1421,6 +1421,8 @@ def exome_check (chrom_based, samples, bias_sort, exome, mut_types, bed, chrom, 
 				chrom_value = 0
 			elif chrom == 'MT' or chrom == 'M':
 				chrom_value = 100
+			elif chrom == 'gi_82503188_ref_NC_007605':
+				chrom_value = -1
 			else:
 				chrom_value = int(chrom)
 
@@ -1485,6 +1487,8 @@ def exome_check (chrom_based, samples, bias_sort, exome, mut_types, bed, chrom, 
 						ref_chrom_value = 0
 					elif chrom_ref == 'MT' or chrom_ref == 'M':
 						chrom_value = 100
+					elif chrom == 'gi_82503188_ref_NC_007605':
+						ref_chrom_value = -1
 					else:
 						ref_chrom_value = int(chrom_ref)
 
@@ -1605,6 +1609,8 @@ def panel_check (chrom_based, samples, bias_sort, exome, mut_types, bed, chrom, 
 				chrom_value = 0
 			elif chrom == 'MT' or chrom == 'M':
 				chrom_value = 100
+			elif chrom == 'gi_82503188_ref_NC_007605':
+				chrom_value = -1
 			else:
 				chrom_value = int(chrom)
 
@@ -1664,6 +1670,8 @@ def panel_check (chrom_based, samples, bias_sort, exome, mut_types, bed, chrom, 
 						ref_chrom_value = -1
 					elif chrom_ref == 'Y':
 						ref_chrom_value = 0
+					elif chrom == 'gi_82503188_ref_NC_007605':
+						ref_chrom_value = -1
 					else:
 						ref_chrom_value = int(chrom_ref)
 

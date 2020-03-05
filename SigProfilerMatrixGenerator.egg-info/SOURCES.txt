@@ -213,6 +213,7 @@ SigProfilerMatrixGenerator/references/chromosomes/exome/GRCh38/.DS_Store
 SigProfilerMatrixGenerator/references/chromosomes/exome/GRCh38/GRCh38_exome.interval_list
 SigProfilerMatrixGenerator/references/chromosomes/exome/c_elegans/c_elegans_exome.interval_list
 SigProfilerMatrixGenerator/references/chromosomes/exome/dog/dog_exome.interval_list
+SigProfilerMatrixGenerator/references/chromosomes/exome/ebv/ebv_exome.interval_list
 SigProfilerMatrixGenerator/references/chromosomes/exome/mm10/.DS_Store
 SigProfilerMatrixGenerator/references/chromosomes/exome/mm10/mm10_exome.interval_list
 SigProfilerMatrixGenerator/references/chromosomes/exome/mm9/.DS_Store
@@ -317,6 +318,7 @@ SigProfilerMatrixGenerator/references/chromosomes/transcripts/dog/7_transcripts.
 SigProfilerMatrixGenerator/references/chromosomes/transcripts/dog/8_transcripts.txt
 SigProfilerMatrixGenerator/references/chromosomes/transcripts/dog/9_transcripts.txt
 SigProfilerMatrixGenerator/references/chromosomes/transcripts/dog/X_transcripts.txt
+SigProfilerMatrixGenerator/references/chromosomes/transcripts/ebv/gi_82503188_ref_NC_007605_transcripts.txt
 SigProfilerMatrixGenerator/references/chromosomes/transcripts/mm10/.DS_Store
 SigProfilerMatrixGenerator/references/chromosomes/transcripts/mm10/10_transcripts.txt
 SigProfilerMatrixGenerator/references/chromosomes/transcripts/mm10/11_transcripts.txt

@@ -220,7 +220,12 @@ def install_chromosomes_tsb (genomes, ref_dir, custom):
 							 '28':'c33395dec7fdc13e9d8f10afaa946f8c','29':'174f2db104ecaa5efef770f44241e3b0','30':'047d420ef9aecb933a7d83b6af820b23',
 							 '31':'5be61f0c9944a5f2d7d1a5b2e75fb000','32':'212dcb867e95a642277a243fed8d8e41','33':'08a217b02cdd778cfdb0005dff4828b1',
 							 '34':'4245d6fc370d9049ef4c25314fbef239','35':'1344aba8755b8a4e304629180fc0591a','36':'e4fff6ed84777905dc999ca6d6bc2557',
-							 '37':'60d51ea6ae9e3f2fa316e3d03aff96b2','38':'4090ff76d94e6b38920916ae3ff2441c','X':'bce1372df64037d79b0995311d8ff971'}}
+							 '37':'60d51ea6ae9e3f2fa316e3d03aff96b2','38':'4090ff76d94e6b38920916ae3ff2441c','X':'bce1372df64037d79b0995311d8ff971'},
+				
+				'ebv':
+							{'gi_82503188_ref_NC_007605':'7f8894e52b0cac1f968c0402838bea07'}}
+
+
 	for genome in genomes:
 		chrom_number = None
 		if genome == 'GRCh37' or genome == 'GRCh38': 
@@ -416,7 +421,9 @@ def install (genome, custom=False, rsync=False, bash=True, ftp=True):
 								 '28':'c33395dec7fdc13e9d8f10afaa946f8c','29':'174f2db104ecaa5efef770f44241e3b0','30':'047d420ef9aecb933a7d83b6af820b23',
 								 '31':'5be61f0c9944a5f2d7d1a5b2e75fb000','32':'212dcb867e95a642277a243fed8d8e41','33':'08a217b02cdd778cfdb0005dff4828b1',
 								 '34':'4245d6fc370d9049ef4c25314fbef239','35':'1344aba8755b8a4e304629180fc0591a','36':'e4fff6ed84777905dc999ca6d6bc2557',
-								 '37':'60d51ea6ae9e3f2fa316e3d03aff96b2','38':'4090ff76d94e6b38920916ae3ff2441c','X':'bce1372df64037d79b0995311d8ff971'}}
+								 '37':'60d51ea6ae9e3f2fa316e3d03aff96b2','38':'4090ff76d94e6b38920916ae3ff2441c','X':'bce1372df64037d79b0995311d8ff971'},
+				'ebv':
+							{'gi_82503188_ref_NC_007605':'7f8894e52b0cac1f968c0402838bea07'}}
 
 		chromosome_fasta_path = ref_dir + "/references/chromosomes/tsb/"
 		print("Beginning installation. This may take up to 40 minutes to complete.")
