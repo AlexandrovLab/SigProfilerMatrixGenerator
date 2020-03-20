@@ -1115,7 +1115,7 @@ def convertMAF (project, vcf_path, genome, output_path, ncbi_chrom, log_file):
 					if first_SNV:
 						if not os.path.exists(output_path + "SNV/"):
 							os.mkdir(output_path + 'SNV/')
-							if genome != 'c_elegans' and genome == 'ebv':
+							if genome != 'c_elegans' and genome != 'ebv':
 								outputFile_X = open(output_path + "SNV/X_" + project + ".genome", "w", 10000000)
 								if genome != 'dog':
 									outputFile_Y = open(output_path + "SNV/Y_" + project + ".genome", "w", 10000000)
