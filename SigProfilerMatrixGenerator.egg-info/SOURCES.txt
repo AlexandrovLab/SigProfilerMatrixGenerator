@@ -214,6 +214,8 @@ SigProfilerMatrixGenerator/references/chromosomes/exome/GRCh38/GRCh38_exome.inte
 SigProfilerMatrixGenerator/references/chromosomes/exome/c_elegans/c_elegans_exome.interval_list
 SigProfilerMatrixGenerator/references/chromosomes/exome/dog/dog_exome.interval_list
 SigProfilerMatrixGenerator/references/chromosomes/exome/ebv/ebv_exome.interval_list
+SigProfilerMatrixGenerator/references/chromosomes/exome/ebv/multipleVariableTesting_mar12_2020.txt
+SigProfilerMatrixGenerator/references/chromosomes/exome/ebv/tcga_cyclic_regions(AutoRecovered).csv
 SigProfilerMatrixGenerator/references/chromosomes/exome/mm10/.DS_Store
 SigProfilerMatrixGenerator/references/chromosomes/exome/mm10/mm10_exome.interval_list
 SigProfilerMatrixGenerator/references/chromosomes/exome/mm9/.DS_Store

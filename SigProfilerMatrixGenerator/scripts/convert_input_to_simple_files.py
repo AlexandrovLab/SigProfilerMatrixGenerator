@@ -431,7 +431,7 @@ def convertVCF (project, vcf_path, genome, output_path, ncbi_chrom, log_file):
 							else:
 								if genome == 'ebv':
 									outFile = open(output_path + "INDEL/" + chrom + "_" + project + ".genome", "w",10000000)
-									outFiles = {chrom: outFile}
+									outFilesI = {chrom: outFile}
 								else:
 									outputFileI_I = open(output_path + "INDEL/I_" + project + ".genome", "w", 10000000)
 									outputFileI_II = open(output_path + "INDEL/II_" + project + ".genome", "w", 10000000)
@@ -942,7 +942,7 @@ def convertTxt (project, vcf_path, genome, output_path, ncbi_chrom, log_file):
 							else:
 								if genome == 'ebv':
 									outFile = open(output_path + "SNV/" + chrom + "_" + project + ".genome", "w",10000000)
-									outFiles = {chrom: outFile}
+									outFilesI = {chrom: outFile}
 								else:
 									outputFileI_I = open(output_path + "INDEL/I_" + project + ".genome", "w", 10000000)
 									outputFileI_II = open(output_path + "INDEL/II_" + project + ".genome", "w", 10000000)
@@ -1492,7 +1492,7 @@ def convertMAF (project, vcf_path, genome, output_path, ncbi_chrom, log_file):
 							else:
 								if genome == 'ebv':
 									outFile = open(output_path + "INDEL/" + chrom + "_" + project + ".genome", "w",10000000)
-									outFiles = {chrom: outFile}
+									outFilesI = {chrom: outFile}
 								else:
 									outputFileI_I = open(output_path + "INDEL/I_" + project + ".genome", "w", 10000000)
 									outputFileI_II = open(output_path + "INDEL/II_" + project + ".genome", "w", 10000000)
@@ -2042,7 +2042,7 @@ def convertICGC (project, vcf_path, genome, output_path, ncbi_chrom, log_file):
 							else:
 								if genome == 'ebv':
 									outFile = open(output_path + "INDEL/" + chrom + "_" + project + ".genome", "w",10000000)
-									outFiles = {chrom: outFile}
+									outFilesI = {chrom: outFile}
 								else:
 									outputFileI_I = open(output_path + "INDEL/I_" + project + ".genome", "w", 10000000)
 									outputFileI_II = open(output_path + "INDEL/II_" + project + ".genome", "w", 10000000)

@@ -532,7 +532,7 @@ def SigProfilerMatrixGeneratorFunc (project, genome, vcfFiles, exome=False, bed_
 					mutation_ID['complete'] = pd.DataFrame(0, index=indel_complete, columns=samples)
 
 
-
+				sample_count_high = len(samples)
 				skipped_muts += skipped_mut
 				analyzed_muts[2] += total
 
