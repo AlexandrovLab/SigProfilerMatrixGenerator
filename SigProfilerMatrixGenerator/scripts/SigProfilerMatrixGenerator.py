@@ -1759,7 +1759,7 @@ def matrix_generator (context, output_matrix, project, samples, bias_sort, mut_c
 	# Prepares all of the required data structures and files
 	ref_dir = os.path.dirname(os.path.abspath(__file__))
 
-	contexts = ['96', '384', '1536', '6', '24']
+	contexts = ['96', '384', '1536', '6', '24', '288', '4608', '18']
 	mut_count_all['6144'].index.name = 'MutationType'
 
 
@@ -1770,11 +1770,39 @@ def matrix_generator (context, output_matrix, project, samples, bias_sort, mut_c
 	mut_count_all['6'] = mut_count_all['96'].groupby(mut_count_all['96'].index.str[2:5]).sum()
 	mut_count_all['24'] = mut_count_all['384'].groupby(mut_count_all['384'].index.str[0:2] + mut_count_all['384'].index.str[4:7]).sum()
 
+	# Collapses the Bi-directionally transcribed regions
+	# 6144 to 4608
+	transUntrans = mut_count_all['6144'][mut_count_all['6144'].index.str.contains('U:') | mut_count_all['6144'].index.str.contains('T:')]
+	biTransNonTrans =  mut_count_all['6144'][mut_count_all['6144'].index.str.contains('B:') | mut_count_all['6144'].index.str.contains('N:')]
+	biTransNonTrans = biTransNonTrans.groupby(biTransNonTrans.index.str[2:]).sum()
+	biTransNonTrans = biTransNonTrans.rename(index=lambda s: "N:"+s)
+	mut_count_all['4608'] = pd.concat([transUntrans, biTransNonTrans])
+
+	# 384 to 288
+	transUntrans = mut_count_all['384'][mut_count_all['384'].index.str.contains('U:') | mut_count_all['384'].index.str.contains('T:')]
+	biTransNonTrans =  mut_count_all['384'][mut_count_all['384'].index.str.contains('B:') | mut_count_all['384'].index.str.contains('N:')]
+	biTransNonTrans = biTransNonTrans.groupby(biTransNonTrans.index.str[2:]).sum()
+	biTransNonTrans = biTransNonTrans.rename(index=lambda s: "N:"+s)
+	mut_count_all['288'] = pd.concat([transUntrans, biTransNonTrans])
+
+	# 24 to 18
+	transUntrans = mut_count_all['24'][mut_count_all['24'].index.str.contains('U:') | mut_count_all['24'].index.str.contains('T:')]
+	biTransNonTrans =  mut_count_all['24'][mut_count_all['24'].index.str.contains('B:') | mut_count_all['24'].index.str.contains('N:')]
+	biTransNonTrans = biTransNonTrans.groupby(biTransNonTrans.index.str[2:]).sum()
+	biTransNonTrans = biTransNonTrans.rename(index=lambda s: "N:"+s)
+	mut_count_all['18'] = pd.concat([transUntrans, biTransNonTrans])
+
 	mut_count_all['1536'].index.name = 'MutationType'
 	mut_count_all['96'].index.name = 'MutationType'
 	mut_count_all['6'].index.name = 'MutationType'
 	mut_count_all['384'].index.name = 'MutationType'
 	mut_count_all['24'].index.name = 'MutationType'
+
+	mut_count_all['4608'].index.name = 'MutationType'
+	mut_count_all['288'].index.name = 'MutationType'
+	mut_count_all['18'].index.name = 'MutationType'
+
+
 
 	strandBiasOut = output_matrix + "TSB/"
 	output_matrix_SBS = output_matrix + "SBS/"
@@ -1999,7 +2027,12 @@ def matrix_generator (context, output_matrix, project, samples, bias_sort, mut_c
 				try:
 					sigPlt.plotSBS(output_file_matrix, output_path, file_name, '1536', False)
 				except:
-					pass				
+					pass
+			elif cont == '288':
+				try:
+					sigPlt.plotSBS(output_file_matrix, output_path, file_name, '288', False)
+				except:
+					pass							
 
 
 	# If this code is run as an imported function, delete the physcial matrix.
@@ -2050,12 +2083,14 @@ def matrix_generator_INDEL (output_matrix, samples, indel_types, indel_types_tsb
 	if limited_indel:
 		file_prefix = project + ".ID83"
 		file_prefix_tsb = project + ".ID415"
+		file_prefix_tsb_abbrev = project + ".ID332"
 		file_prefix_simple = project + ".ID28"
 		file_prefix_complete = project + ".ID96"
 		file_prefix_complete_seq = project + ".ID8628"
 	else:
 		file_prefix = project + ".ID94"
 		file_prefix_tsb = project + ".ID415"
+		file_prefix_tsb_abbrev = project + ".ID332"
 		file_prefix_simple = project + ".ID28"
 		file_prefix_complete = project + ".ID96"
 		file_prefix_complete_seq = project + ".ID8628"
@@ -2063,6 +2098,7 @@ def matrix_generator_INDEL (output_matrix, samples, indel_types, indel_types_tsb
 	if exome:
 		output_file_matrix = output_matrix_INDEL + file_prefix + ".exome"
 		output_file_matrix_tsb = output_matrix_INDEL + file_prefix_tsb + ".exome"
+		output_file_matrix_tsb_abbrev = output_matrix_INDEL + file_prefix_tsb_abbrev + ".exome"		
 		output_file_matrix_simple = output_matrix_INDEL + file_prefix_simple + ".exome"
 		output_file_matrix_complete = output_matrix_INDEL + file_prefix_complete + ".exome"
 		output_file_matrix_complete_seq = output_matrix_INDEL + file_prefix_complete_seq + ".exome"
@@ -2071,6 +2107,7 @@ def matrix_generator_INDEL (output_matrix, samples, indel_types, indel_types_tsb
 		if bed:
 			output_file_matrix = output_matrix_INDEL + file_prefix + ".region"
 			output_file_matrix_tsb = output_matrix_INDEL + file_prefix_tsb + ".region"
+			output_file_matrix_tsb_abbrev = output_matrix_INDEL + file_prefix_tsb_abbrev + ".region"
 			output_file_matrix_simple = output_matrix_INDEL + file_prefix_simple + ".region"
 			output_file_matrix_complete = output_matrix_INDEL + file_prefix_complete + ".region"
 			output_file_matrix_complete_seq = output_matrix_INDEL + file_prefix_complete_seq + ".region"
@@ -2078,6 +2115,7 @@ def matrix_generator_INDEL (output_matrix, samples, indel_types, indel_types_tsb
 		else:
 			output_file_matrix = output_matrix_INDEL + file_prefix + ".all"
 			output_file_matrix_tsb = output_matrix_INDEL + file_prefix_tsb + ".all"
+			output_file_matrix_tsb_abbrev = output_matrix_INDEL + file_prefix_tsb_abbrev + ".all"
 			output_file_matrix_simple = output_matrix_INDEL + file_prefix_simple + ".all"
 			output_file_matrix_complete = output_matrix_INDEL + file_prefix_complete + ".all"
 			output_file_matrix_complete_seq = output_matrix_INDEL + file_prefix_complete_seq + ".all"
@@ -2086,9 +2124,26 @@ def matrix_generator_INDEL (output_matrix, samples, indel_types, indel_types_tsb
 	if initial_chrom != None:
 		output_file_matrix += ".chr" + initial_chrom
 		output_file_matrix_tsb += ".chr" + initial_chrom
+		output_file_matrix_tsb_abbrev += ".chr" + initial_chrom
 		output_file_matrix_simple += ".chr" + initial_chrom
 		output_file_matrix_complete += ".chr" + initial_chrom
 		output_file_matrix_complete_seq += ".chr" + initial_chrom
+
+
+	# Sort the TSB types (T,U,B,N)
+	types = list(indel_tsb_dict.index)
+	types = sorted(types, key=lambda val: (bias_sort[val[0]], val[2:]))
+	indel_tsb_dict = indel_tsb_dict.reindex(types)
+
+	# Collapse the Bi-directionally transcribed type to non-transcribed
+	trans = indel_tsb_dict[indel_tsb_dict.index.str[0:2] == 'T:']
+	untrans = indel_tsb_dict[indel_tsb_dict.index.str[0:2] == 'U:']
+	biTransNonTrans =  indel_tsb_dict[indel_tsb_dict.index.str.contains('B:') | indel_tsb_dict.index.str.contains('N:')]
+	questionableTrans = indel_tsb_dict[indel_tsb_dict.index.str.contains('Q:')]
+	biTransNonTrans = biTransNonTrans.groupby(biTransNonTrans.index.str[2:]).sum()
+	biTransNonTrans = biTransNonTrans.rename(index=lambda s: "N:"+s)
+	indel_tsb_dict_abbrev = pd.concat([trans, untrans, biTransNonTrans, questionableTrans])
+
 
 
 	short_id = pd.DataFrame(indel_dict).iloc[:83,:]
@@ -2098,12 +2153,14 @@ def matrix_generator_INDEL (output_matrix, samples, indel_types, indel_types_tsb
 			df2csv(indel_dict, output_file_matrix_complete)
 		elif indel_dict is None and indel_simple_dict is None:
 			df2csv(indel_tsb_dict, output_file_matrix_tsb)
+			df2csv(indel_tsb_dict_abbrev, output_file_matrix_tsb_abbrev)
 		elif indel_dict is None and indel_tsb_dict is None:
 			df2csv(indel_simple_dict, output_file_matrix_simple)	
 	else:
 		df2csv(short_id, output_file_matrix)
 		df2csv(indel_dict, output_file_matrix_complete)
 		df2csv(indel_tsb_dict, output_file_matrix_tsb)
+		df2csv(indel_tsb_dict_abbrev, output_file_matrix_tsb_abbrev)
 		df2csv(indel_simple_dict, output_file_matrix_simple)
 		df2csv(indel_dict_complete, output_file_matrix_complete_seq)
 
@@ -2163,8 +2220,8 @@ def matrix_generator_DINUC (output_matrix, samples, bias_sort, all_dinucs, all_m
 	revcompl = lambda x: ''.join([{'A':'T','C':'G','G':'C','T':'A','N':'N'}[B] for B in x][::-1])
 	revbias = lambda x: ''.join([{'0':'0', '3':'3', '1':'2','2':'1','U':'T','T':'U','B':'B','N':'N'}[B] for B in x][::-1])
 
-	contexts = ['78', '186', '1248']
-	mut_count_all = {'78':{}, '186':{}, '1248':{}}
+	contexts = ['78', '186', '1248', '150', '2400']
+	mut_count_all = {'78':{}, '186':{}, '1248':{}, '150':{}, '2400':{}}
 
 	if not any(mut_4992):
 		return()
@@ -2186,9 +2243,32 @@ def matrix_generator_DINUC (output_matrix, samples, bias_sort, all_dinucs, all_m
 	mut_count_all['186'] = mut_4992.groupby(mut_4992.index.str[0:2] + mut_4992.index.str[4:9]).sum()
 	mut_count_all['1248'] = mut_4992.groupby(mut_4992.index.str[2:]).sum()
 
+	# Collapse the Bi-directionally transcribed type to non-transcribed
+	# 186 to 150
+	trans = mut_count_all['186'][mut_count_all['186'].index.str[0:2] == 'T:']
+	untrans = mut_count_all['186'][mut_count_all['186'].index.str[0:2] == 'U:']
+	biTransNonTrans =  mut_count_all['186'][mut_count_all['186'].index.str.contains('B:') | mut_count_all['186'].index.str.contains('N:')]
+	questionableTrans = mut_count_all['186'][mut_count_all['186'].index.str.contains('Q:')]
+	biTransNonTrans = biTransNonTrans.groupby(biTransNonTrans.index.str[2:]).sum()
+	biTransNonTrans = biTransNonTrans.rename(index=lambda s: "N:"+s)
+	mut_count_all['150'] = pd.concat([trans, untrans, biTransNonTrans, questionableTrans])
+
+	# 2976 to 2400
+	trans = mut_4992[mut_4992.index.str[0:2] == 'T:']
+	untrans = mut_4992[mut_4992.index.str[0:2] == 'U:']
+	biTransNonTrans =  mut_4992[mut_4992.index.str.contains('B:') | mut_4992.index.str.contains('N:')]
+	questionableTrans = mut_4992[mut_4992.index.str.contains('Q:')]
+	biTransNonTrans = biTransNonTrans.groupby(biTransNonTrans.index.str[2:]).sum()
+	biTransNonTrans = biTransNonTrans.rename(index=lambda s: "N:"+s)
+	mut_count_all['2400'] = pd.concat([trans, untrans, biTransNonTrans, questionableTrans])
+
+
+
 	mut_count_all['78'].index.name = 'MutationType'
 	mut_count_all['186'].index.name = 'MutationType'
 	mut_count_all['1248'].index.name = 'MutationType'
+	mut_count_all['150'].index.name = 'MutationType'
+	mut_count_all['2400'].index.name = 'MutationType'
 
 	output_matrix_DINUC = output_matrix + "DBS/"
 	if not os.path.exists(output_matrix_DINUC):
@@ -2218,6 +2298,13 @@ def matrix_generator_DINUC (output_matrix, samples, bias_sort, all_dinucs, all_m
 	types = sorted(types, key=lambda val: (bias_sort[val[0]], val[2:]))
 	mut_count_all['186'] = mut_count_all['186'].reindex(types)
 
+	types = list(mut_count_all['150'].index)
+	types = sorted(types, key=lambda val: (bias_sort[val[0]], val[2:]))
+	mut_count_all['150'] = mut_count_all['150'].reindex(types)
+
+	types = list(mut_count_all['2400'].index)
+	types = sorted(types, key=lambda val: (bias_sort[val[0]], val[2:]))
+	mut_count_all['2400'] = mut_count_all['2400'].reindex(types)
 
 	mut_4992.to_csv(output_file_matrix, header=True, sep='\t')
 
