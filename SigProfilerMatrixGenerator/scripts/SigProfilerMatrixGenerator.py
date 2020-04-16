@@ -1772,25 +1772,54 @@ def matrix_generator (context, output_matrix, project, samples, bias_sort, mut_c
 
 	# Collapses the Bi-directionally transcribed regions
 	# 6144 to 4608
-	transUntrans = mut_count_all['6144'][mut_count_all['6144'].index.str.contains('U:') | mut_count_all['6144'].index.str.contains('T:')]
-	biTransNonTrans =  mut_count_all['6144'][mut_count_all['6144'].index.str.contains('B:') | mut_count_all['6144'].index.str.contains('N:')]
-	biTransNonTrans = biTransNonTrans.groupby(biTransNonTrans.index.str[2:]).sum()
-	biTransNonTrans = biTransNonTrans.rename(index=lambda s: "N:"+s)
-	mut_count_all['4608'] = pd.concat([transUntrans, biTransNonTrans])
+	trans = mut_count_all['6144'][mut_count_all['6144'].index.str.contains('T:')]
+	untrans = mut_count_all['6144'][mut_count_all['6144'].index.str.contains('U:')]
+	bitrans = mut_count_all['6144'][mut_count_all['6144'].index.str.contains('B:')]
+	nontrans = mut_count_all['6144'][mut_count_all['6144'].index.str.contains('N:')]
+	a = bitrans//2
+	b = bitrans%2
+	trans = trans.append(a)
+	trans = trans.append(b)
+	trans  = trans.groupby(trans.index.str[2:]).sum()
+	trans = trans.rename(index=lambda s: "T:"+s)
+	untrans = untrans.append(a)
+	untrans = untrans.groupby(untrans.index.str[2:]).sum()
+	untrans = untrans.rename(index=lambda s:"U:"+s)
+	mut_count_all['4608'] = pd.concat([trans, untrans, nontrans])
 
 	# 384 to 288
-	transUntrans = mut_count_all['384'][mut_count_all['384'].index.str.contains('U:') | mut_count_all['384'].index.str.contains('T:')]
-	biTransNonTrans =  mut_count_all['384'][mut_count_all['384'].index.str.contains('B:') | mut_count_all['384'].index.str.contains('N:')]
-	biTransNonTrans = biTransNonTrans.groupby(biTransNonTrans.index.str[2:]).sum()
-	biTransNonTrans = biTransNonTrans.rename(index=lambda s: "N:"+s)
-	mut_count_all['288'] = pd.concat([transUntrans, biTransNonTrans])
+	trans = mut_count_all['384'][mut_count_all['384'].index.str.contains('T:')]
+	untrans = mut_count_all['384'][mut_count_all['384'].index.str.contains('U:')]
+	bitrans = mut_count_all['384'][mut_count_all['384'].index.str.contains('B:')]
+	nontrans = mut_count_all['384'][mut_count_all['384'].index.str.contains('N:')]
+	a = bitrans//2
+	b = bitrans%2
+	trans = trans.append(a)
+	trans = trans.append(b)
+	trans  = trans.groupby(trans.index.str[2:]).sum()
+	trans = trans.rename(index=lambda s: "T:"+s)
+	untrans = untrans.append(a)
+	untrans = untrans.groupby(untrans.index.str[2:]).sum()
+	untrans = untrans.rename(index=lambda s:"U:"+s)
+	mut_count_all['288'] = pd.concat([trans, untrans, nontrans])
+
 
 	# 24 to 18
-	transUntrans = mut_count_all['24'][mut_count_all['24'].index.str.contains('U:') | mut_count_all['24'].index.str.contains('T:')]
-	biTransNonTrans =  mut_count_all['24'][mut_count_all['24'].index.str.contains('B:') | mut_count_all['24'].index.str.contains('N:')]
-	biTransNonTrans = biTransNonTrans.groupby(biTransNonTrans.index.str[2:]).sum()
-	biTransNonTrans = biTransNonTrans.rename(index=lambda s: "N:"+s)
-	mut_count_all['18'] = pd.concat([transUntrans, biTransNonTrans])
+	trans = mut_count_all['24'][mut_count_all['24'].index.str.contains('T:')]
+	untrans = mut_count_all['24'][mut_count_all['24'].index.str.contains('U:')]
+	bitrans = mut_count_all['24'][mut_count_all['24'].index.str.contains('B:')]
+	nontrans = mut_count_all['24'][mut_count_all['24'].index.str.contains('N:')]
+	a = bitrans//2
+	b = bitrans%2
+	trans = trans.append(a)
+	trans = trans.append(b)
+	trans  = trans.groupby(trans.index.str[2:]).sum()
+	trans = trans.rename(index=lambda s: "T:"+s)
+	untrans = untrans.append(a)
+	untrans = untrans.groupby(untrans.index.str[2:]).sum()
+	untrans = untrans.rename(index=lambda s:"U:"+s)
+	mut_count_all['18'] = pd.concat([trans, untrans, nontrans])
+
 
 	mut_count_all['1536'].index.name = 'MutationType'
 	mut_count_all['96'].index.name = 'MutationType'
@@ -2136,13 +2165,30 @@ def matrix_generator_INDEL (output_matrix, samples, indel_types, indel_types_tsb
 	indel_tsb_dict = indel_tsb_dict.reindex(types)
 
 	# Collapse the Bi-directionally transcribed type to non-transcribed
-	trans = indel_tsb_dict[indel_tsb_dict.index.str[0:2] == 'T:']
-	untrans = indel_tsb_dict[indel_tsb_dict.index.str[0:2] == 'U:']
-	biTransNonTrans =  indel_tsb_dict[indel_tsb_dict.index.str.contains('B:') | indel_tsb_dict.index.str.contains('N:')]
-	questionableTrans = indel_tsb_dict[indel_tsb_dict.index.str.contains('Q:')]
-	biTransNonTrans = biTransNonTrans.groupby(biTransNonTrans.index.str[2:]).sum()
-	biTransNonTrans = biTransNonTrans.rename(index=lambda s: "N:"+s)
-	indel_tsb_dict_abbrev = pd.concat([trans, untrans, biTransNonTrans, questionableTrans])
+	trans = indel_tsb_dict[indel_tsb_dict.index.str.contains('T:')]
+	untrans = indel_tsb_dict[indel_tsb_dict.index.str.contains('U:')]
+	bitrans = indel_tsb_dict[indel_tsb_dict.index.str.contains('B:')]
+	nontrans = indel_tsb_dict[indel_tsb_dict.index.str.contains('N:')]
+	questionable = indel_tsb_dict[indel_tsb_dict.index.str.contains('Q:')]
+	a = bitrans//2
+	b = bitrans%2
+	trans = trans.append(a)
+	trans = trans.append(b)
+	trans  = trans.groupby(trans.index.str[2:]).sum()
+	trans = trans.rename(index=lambda s: "T:"+s)
+	untrans = untrans.append(a)
+	untrans = untrans.groupby(untrans.index.str[2:]).sum()
+	untrans = untrans.rename(index=lambda s:"U:"+s)
+	indel_tsb_dict_abbrev = pd.concat([trans, untrans, nontrans, questionable])
+
+
+	# trans = indel_tsb_dict[indel_tsb_dict.index.str[0:2] == 'T:']
+	# untrans = indel_tsb_dict[indel_tsb_dict.index.str[0:2] == 'U:']
+	# biTransNonTrans =  indel_tsb_dict[indel_tsb_dict.index.str.contains('B:') | indel_tsb_dict.index.str.contains('N:')]
+	# questionableTrans = indel_tsb_dict[indel_tsb_dict.index.str.contains('Q:')]
+	# biTransNonTrans = biTransNonTrans.groupby(biTransNonTrans.index.str[2:]).sum()
+	# biTransNonTrans = biTransNonTrans.rename(index=lambda s: "N:"+s)
+	# indel_tsb_dict_abbrev = pd.concat([trans, untrans, biTransNonTrans, questionableTrans])
 
 
 
@@ -2243,24 +2289,61 @@ def matrix_generator_DINUC (output_matrix, samples, bias_sort, all_dinucs, all_m
 	mut_count_all['186'] = mut_4992.groupby(mut_4992.index.str[0:2] + mut_4992.index.str[4:9]).sum()
 	mut_count_all['1248'] = mut_4992.groupby(mut_4992.index.str[2:]).sum()
 
+
 	# Collapse the Bi-directionally transcribed type to non-transcribed
 	# 186 to 150
-	trans = mut_count_all['186'][mut_count_all['186'].index.str[0:2] == 'T:']
-	untrans = mut_count_all['186'][mut_count_all['186'].index.str[0:2] == 'U:']
-	biTransNonTrans =  mut_count_all['186'][mut_count_all['186'].index.str.contains('B:') | mut_count_all['186'].index.str.contains('N:')]
-	questionableTrans = mut_count_all['186'][mut_count_all['186'].index.str.contains('Q:')]
-	biTransNonTrans = biTransNonTrans.groupby(biTransNonTrans.index.str[2:]).sum()
-	biTransNonTrans = biTransNonTrans.rename(index=lambda s: "N:"+s)
-	mut_count_all['150'] = pd.concat([trans, untrans, biTransNonTrans, questionableTrans])
+	trans = mut_count_all['186'][mut_count_all['186'].index.str.contains('T:')]
+	untrans = mut_count_all['186'][mut_count_all['186'].index.str.contains('U:')]
+	bitrans = mut_count_all['186'][mut_count_all['186'].index.str.contains('B:')]
+	nontrans = mut_count_all['186'][mut_count_all['186'].index.str.contains('N:')]
+	questionable = mut_count_all['186'][mut_count_all['186'].index.str.contains('Q:')]
+	a = bitrans//2
+	b = bitrans%2
+	trans = trans.append(a)
+	trans = trans.append(b)
+	trans  = trans.groupby(trans.index.str[2:]).sum()
+	trans = trans.rename(index=lambda s: "T:"+s)
+	untrans = untrans.append(a)
+	untrans = untrans.groupby(untrans.index.str[2:]).sum()
+	untrans = untrans.rename(index=lambda s:"U:"+s)
+	mut_count_all['150'] = pd.concat([trans, untrans, nontrans, questionable])
 
 	# 2976 to 2400
-	trans = mut_4992[mut_4992.index.str[0:2] == 'T:']
-	untrans = mut_4992[mut_4992.index.str[0:2] == 'U:']
-	biTransNonTrans =  mut_4992[mut_4992.index.str.contains('B:') | mut_4992.index.str.contains('N:')]
-	questionableTrans = mut_4992[mut_4992.index.str.contains('Q:')]
-	biTransNonTrans = biTransNonTrans.groupby(biTransNonTrans.index.str[2:]).sum()
-	biTransNonTrans = biTransNonTrans.rename(index=lambda s: "N:"+s)
-	mut_count_all['2400'] = pd.concat([trans, untrans, biTransNonTrans, questionableTrans])
+	trans = mut_4992[mut_4992.index.str.contains('T:')]
+	untrans = mut_4992[mut_4992.index.str.contains('U:')]
+	bitrans = mut_4992[mut_4992.index.str.contains('B:')]
+	nontrans = mut_4992[mut_4992.index.str.contains('N:')]
+	questionable = mut_4992[mut_4992.index.str.contains('Q:')]
+	a = bitrans//2
+	b = bitrans%2
+	trans = trans.append(a)
+	trans = trans.append(b)
+	trans  = trans.groupby(trans.index.str[2:]).sum()
+	trans = trans.rename(index=lambda s: "T:"+s)
+	untrans = untrans.append(a)
+	untrans = untrans.groupby(untrans.index.str[2:]).sum()
+	untrans = untrans.rename(index=lambda s:"U:"+s)
+	mut_count_all['2400'] = pd.concat([trans, untrans, nontrans, questionable])
+
+	
+	# # Collapse the Bi-directionally transcribed type to non-transcribed
+	# # 186 to 150
+	# trans = mut_count_all['186'][mut_count_all['186'].index.str[0:2] == 'T:']
+	# untrans = mut_count_all['186'][mut_count_all['186'].index.str[0:2] == 'U:']
+	# biTransNonTrans =  mut_count_all['186'][mut_count_all['186'].index.str.contains('B:') | mut_count_all['186'].index.str.contains('N:')]
+	# questionableTrans = mut_count_all['186'][mut_count_all['186'].index.str.contains('Q:')]
+	# biTransNonTrans = biTransNonTrans.groupby(biTransNonTrans.index.str[2:]).sum()
+	# biTransNonTrans = biTransNonTrans.rename(index=lambda s: "N:"+s)
+	# mut_count_all['150'] = pd.concat([trans, untrans, biTransNonTrans, questionableTrans])
+
+	# # 2976 to 2400
+	# trans = mut_4992[mut_4992.index.str[0:2] == 'T:']
+	# untrans = mut_4992[mut_4992.index.str[0:2] == 'U:']
+	# biTransNonTrans =  mut_4992[mut_4992.index.str.contains('B:') | mut_4992.index.str.contains('N:')]
+	# questionableTrans = mut_4992[mut_4992.index.str.contains('Q:')]
+	# biTransNonTrans = biTransNonTrans.groupby(biTransNonTrans.index.str[2:]).sum()
+	# biTransNonTrans = biTransNonTrans.rename(index=lambda s: "N:"+s)
+	# mut_count_all['2400'] = pd.concat([trans, untrans, biTransNonTrans, questionableTrans])
 
 
 
