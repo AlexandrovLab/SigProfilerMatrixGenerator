@@ -1774,72 +1774,6 @@ def matrix_generator (context, output_matrix, project, samples, bias_sort, mut_c
 
 	# Collapse the Bi-directionally transcribed type to transcribed and untranscribed
 	# 6144 to 4608
-	trans = mut_count_all['6144'][mut_count_all['6144'].index.str.contains('T:')]
-	untrans = mut_count_all['6144'][mut_count_all['6144'].index.str.contains('U:')]
-	bitrans = mut_count_all['6144'][mut_count_all['6144'].index.str.contains('B:')]
-	nontrans = mut_count_all['6144'][mut_count_all['6144'].index.str.contains('N:')]
-	a = bitrans//2
-	b = bitrans%2
-	trans = trans.append(a)
-	trans  = trans.groupby(trans.index.str[2:]).sum()
-	trans = trans.rename(index=lambda s: "T:"+s)
-	untrans = untrans.append(a)
-	untrans = untrans.groupby(untrans.index.str[2:]).sum()
-	untrans = untrans.rename(index=lambda s:"U:"+s)
-	mut_count_all['4608'] = pd.concat([trans, untrans, nontrans])
-	for x in list(b.index):
-		mutAbrrev = x.split(":")[1]
-		tempMat = pd.concat([trans.loc["T:"+mutAbrrev],untrans.loc["U:"+mutAbrrev]], axis=1)
-		for z,y in zip(tempMat.idxmax(axis=1), list(tempMat.index)):
-			mut_count_all['4608'].loc[z,y] += b.loc[x,y]
-	mut_count_all['288'] = mut_count_all['4608'].groupby(mut_count_all['4608'].index.str[0:2] + mut_count_all['4608'].index.str[3:10]).sum()
-	mut_count_all['18'] = mut_count_all['288'].groupby(mut_count_all['288'].index.str[0:2] + mut_count_all['288'].index.str[4:7]).sum()
-
-	# 384 to 288
-	trans = mut_count_all['384'][mut_count_all['384'].index.str.contains('T:')]
-	untrans = mut_count_all['384'][mut_count_all['384'].index.str.contains('U:')]
-	bitrans = mut_count_all['384'][mut_count_all['384'].index.str.contains('B:')]
-	nontrans = mut_count_all['384'][mut_count_all['384'].index.str.contains('N:')]
-	a = bitrans//2
-	b = bitrans%2
-	trans = trans.append(a)
-	trans  = trans.groupby(trans.index.str[2:]).sum()
-	trans = trans.rename(index=lambda s: "T:"+s)
-	untrans = untrans.append(a)
-	untrans = untrans.groupby(untrans.index.str[2:]).sum()
-	untrans = untrans.rename(index=lambda s:"U:"+s)
-	mut_count_all['288'] = pd.concat([trans, untrans, nontrans])
-	for x in list(b.index):
-		mutAbrrev = x.split(":")[1]
-		tempMat = pd.concat([trans.loc["T:"+mutAbrrev],untrans.loc["U:"+mutAbrrev]], axis=1)
-		for z,y in zip(tempMat.idxmax(axis=1), list(tempMat.index)):
-			mut_count_all['288'].loc[z,y] += b.loc[x,y]
-
-	# 24 to 18
-	trans = mut_count_all['24'][mut_count_all['24'].index.str.contains('T:')]
-	untrans = mut_count_all['24'][mut_count_all['24'].index.str.contains('U:')]
-	bitrans = mut_count_all['24'][mut_count_all['24'].index.str.contains('B:')]
-	nontrans = mut_count_all['24'][mut_count_all['24'].index.str.contains('N:')]
-	a = bitrans//2
-	b = bitrans%2
-	trans = trans.append(a)
-	trans  = trans.groupby(trans.index.str[2:]).sum()
-	trans = trans.rename(index=lambda s: "T:"+s)
-	untrans = untrans.append(a)
-	untrans = untrans.groupby(untrans.index.str[2:]).sum()
-	untrans = untrans.rename(index=lambda s:"U:"+s)
-	mut_count_all['18'] = pd.concat([trans, untrans, nontrans])
-	for x in list(b.index):
-		mutAbrrev = x.split(":")[1]
-		tempMat = pd.concat([trans.loc["T:"+mutAbrrev],untrans.loc["U:"+mutAbrrev]], axis=1)
-		for z,y in zip(tempMat.idxmax(axis=1), list(tempMat.index)):
-			mut_count_all['18'].loc[z,y] += b.loc[x,y]
-	# mut_count_all['288'] = mut_count_all['4608'].groupby(mut_count_all['4608'].index.str[0:2] + mut_count_all['4608'].index.str[3:10]).sum()
-	# mut_count_all['18'] = mut_count_all['288'].groupby(mut_count_all['288'].index.str[0:2] + mut_count_all['288'].index.str[4:7]).sum()
-
-
-	# # Collapses the Bi-directionally transcribed regions
-	# # 6144 to 4608
 	# trans = mut_count_all['6144'][mut_count_all['6144'].index.str.contains('T:')]
 	# untrans = mut_count_all['6144'][mut_count_all['6144'].index.str.contains('U:')]
 	# bitrans = mut_count_all['6144'][mut_count_all['6144'].index.str.contains('B:')]
@@ -1847,21 +1781,19 @@ def matrix_generator (context, output_matrix, project, samples, bias_sort, mut_c
 	# a = bitrans//2
 	# b = bitrans%2
 	# trans = trans.append(a)
-	# trans = trans.append(b)
 	# trans  = trans.groupby(trans.index.str[2:]).sum()
 	# trans = trans.rename(index=lambda s: "T:"+s)
 	# untrans = untrans.append(a)
 	# untrans = untrans.groupby(untrans.index.str[2:]).sum()
 	# untrans = untrans.rename(index=lambda s:"U:"+s)
 	# mut_count_all['4608'] = pd.concat([trans, untrans, nontrans])
-
 	# for x in list(b.index):
-	# 	mut = x.split(":")[1]
-	# 	if int(trans.loc["T:"+mut]) >= int(untrans.loc[mut]):
-	# 		trans.loc[]
-	# 	print(max(int(trans.loc["T:"+mut]), int(un.loc["U:"+mut])))	
-
-
+	# 	mutAbrrev = x.split(":")[1]
+	# 	tempMat = pd.concat([trans.loc["T:"+mutAbrrev],untrans.loc["U:"+mutAbrrev]], axis=1)
+	# 	for z,y in zip(tempMat.idxmax(axis=1), list(tempMat.index)):
+	# 		mut_count_all['4608'].loc[z,y] += b.loc[x,y]
+	# mut_count_all['288'] = mut_count_all['4608'].groupby(mut_count_all['4608'].index.str[0:2] + mut_count_all['4608'].index.str[3:10]).sum()
+	# mut_count_all['18'] = mut_count_all['288'].groupby(mut_count_all['288'].index.str[0:2] + mut_count_all['288'].index.str[4:7]).sum()
 
 	# # 384 to 288
 	# trans = mut_count_all['384'][mut_count_all['384'].index.str.contains('T:')]
@@ -1871,14 +1803,17 @@ def matrix_generator (context, output_matrix, project, samples, bias_sort, mut_c
 	# a = bitrans//2
 	# b = bitrans%2
 	# trans = trans.append(a)
-	# trans = trans.append(b)
 	# trans  = trans.groupby(trans.index.str[2:]).sum()
 	# trans = trans.rename(index=lambda s: "T:"+s)
 	# untrans = untrans.append(a)
 	# untrans = untrans.groupby(untrans.index.str[2:]).sum()
 	# untrans = untrans.rename(index=lambda s:"U:"+s)
 	# mut_count_all['288'] = pd.concat([trans, untrans, nontrans])
-
+	# for x in list(b.index):
+	# 	mutAbrrev = x.split(":")[1]
+	# 	tempMat = pd.concat([trans.loc["T:"+mutAbrrev],untrans.loc["U:"+mutAbrrev]], axis=1)
+	# 	for z,y in zip(tempMat.idxmax(axis=1), list(tempMat.index)):
+	# 		mut_count_all['288'].loc[z,y] += b.loc[x,y]
 
 	# # 24 to 18
 	# trans = mut_count_all['24'][mut_count_all['24'].index.str.contains('T:')]
@@ -1888,13 +1823,74 @@ def matrix_generator (context, output_matrix, project, samples, bias_sort, mut_c
 	# a = bitrans//2
 	# b = bitrans%2
 	# trans = trans.append(a)
-	# trans = trans.append(b)
 	# trans  = trans.groupby(trans.index.str[2:]).sum()
 	# trans = trans.rename(index=lambda s: "T:"+s)
 	# untrans = untrans.append(a)
 	# untrans = untrans.groupby(untrans.index.str[2:]).sum()
 	# untrans = untrans.rename(index=lambda s:"U:"+s)
 	# mut_count_all['18'] = pd.concat([trans, untrans, nontrans])
+	# for x in list(b.index):
+	# 	mutAbrrev = x.split(":")[1]
+	# 	tempMat = pd.concat([trans.loc["T:"+mutAbrrev],untrans.loc["U:"+mutAbrrev]], axis=1)
+	# 	for z,y in zip(tempMat.idxmax(axis=1), list(tempMat.index)):
+	# 		mut_count_all['18'].loc[z,y] += b.loc[x,y]
+	# mut_count_all['288'] = mut_count_all['4608'].groupby(mut_count_all['4608'].index.str[0:2] + mut_count_all['4608'].index.str[3:10]).sum()
+	# mut_count_all['18'] = mut_count_all['288'].groupby(mut_count_all['288'].index.str[0:2] + mut_count_all['288'].index.str[4:7]).sum()
+
+
+	# Collapses the Bi-directionally transcribed regions
+	# 6144 to 4608
+	trans = mut_count_all['6144'][mut_count_all['6144'].index.str.contains('T:')]
+	untrans = mut_count_all['6144'][mut_count_all['6144'].index.str.contains('U:')]
+	bitrans = mut_count_all['6144'][mut_count_all['6144'].index.str.contains('B:')]
+	nontrans = mut_count_all['6144'][mut_count_all['6144'].index.str.contains('N:')]
+	a = bitrans//2
+	b = bitrans%2
+	trans = trans.append(a)
+	trans = trans.append(b)
+	trans  = trans.groupby(trans.index.str[2:]).sum()
+	trans = trans.rename(index=lambda s: "T:"+s)
+	untrans = untrans.append(a)
+	untrans = untrans.groupby(untrans.index.str[2:]).sum()
+	untrans = untrans.rename(index=lambda s:"U:"+s)
+	mut_count_all['4608'] = pd.concat([trans, untrans, nontrans])
+
+	# mut_count_all['288'] = mut_count_all['4608'].groupby(mut_count_all['4608'].index.str[0:2] + mut_count_all['4608'].index.str[3:10]).sum()
+	# mut_count_all['18'] = mut_count_all['288'].groupby(mut_count_all['288'].index.str[0:2] + mut_count_all['288'].index.str[4:7]).sum()
+
+
+	# 384 to 288
+	trans = mut_count_all['384'][mut_count_all['384'].index.str.contains('T:')]
+	untrans = mut_count_all['384'][mut_count_all['384'].index.str.contains('U:')]
+	bitrans = mut_count_all['384'][mut_count_all['384'].index.str.contains('B:')]
+	nontrans = mut_count_all['384'][mut_count_all['384'].index.str.contains('N:')]
+	a = bitrans//2
+	b = bitrans%2
+	trans = trans.append(a)
+	trans = trans.append(b)
+	trans  = trans.groupby(trans.index.str[2:]).sum()
+	trans = trans.rename(index=lambda s: "T:"+s)
+	untrans = untrans.append(a)
+	untrans = untrans.groupby(untrans.index.str[2:]).sum()
+	untrans = untrans.rename(index=lambda s:"U:"+s)
+	mut_count_all['288'] = pd.concat([trans, untrans, nontrans])
+
+
+	# 24 to 18
+	trans = mut_count_all['24'][mut_count_all['24'].index.str.contains('T:')]
+	untrans = mut_count_all['24'][mut_count_all['24'].index.str.contains('U:')]
+	bitrans = mut_count_all['24'][mut_count_all['24'].index.str.contains('B:')]
+	nontrans = mut_count_all['24'][mut_count_all['24'].index.str.contains('N:')]
+	a = bitrans//2
+	b = bitrans%2
+	trans = trans.append(a)
+	trans = trans.append(b)
+	trans  = trans.groupby(trans.index.str[2:]).sum()
+	trans = trans.rename(index=lambda s: "T:"+s)
+	untrans = untrans.append(a)
+	untrans = untrans.groupby(untrans.index.str[2:]).sum()
+	untrans = untrans.rename(index=lambda s:"U:"+s)
+	mut_count_all['18'] = pd.concat([trans, untrans, nontrans])
 
 
 	mut_count_all['1536'].index.name = 'MutationType'
@@ -2256,42 +2252,42 @@ def matrix_generator_INDEL (output_matrix, samples, indel_types, indel_types_tsb
 
 
 	# Collapse the Bi-directionally transcribed type to transcribed and untranscribed
-	trans = indel_tsb_dict[indel_tsb_dict.index.str[0:2] == 'T:']
-	untrans = indel_tsb_dict[indel_tsb_dict.index.str[0:2] == 'U:']
-	bitrans = indel_tsb_dict[indel_tsb_dict.index.str[0:2] == 'B:']
-	nontrans = indel_tsb_dict[indel_tsb_dict.index.str[0:2] == 'N:']
-	questionable = indel_tsb_dict[indel_tsb_dict.index.str[0:2] == 'Q:']
-	a = bitrans//2
-	b = bitrans%2
-	trans = trans.append(a)
-	trans  = trans.groupby(trans.index.str[2:]).sum()
-	trans = trans.rename(index=lambda s: "T:"+s)
-	untrans = untrans.append(a)
-	untrans = untrans.groupby(untrans.index.str[2:]).sum()
-	untrans = untrans.rename(index=lambda s:"U:"+s)
-	indel_tsb_dict_abbrev = pd.concat([trans, untrans, nontrans, questionable])
-	for x in list(b.index):
-		mutAbrrev = x[2:]
-		tempMat = pd.concat([trans.loc["T:"+mutAbrrev],untrans.loc["U:"+mutAbrrev]], axis=1)
-		for z,y in zip(tempMat.idxmax(axis=1), list(tempMat.index)):
-			indel_tsb_dict_abbrev.loc[z,y] += b.loc[x,y]
-
-	# # Collapse the Bi-directionally transcribed type to non-transcribed
-	# trans = indel_tsb_dict[indel_tsb_dict.index.str.contains('T:')]
-	# untrans = indel_tsb_dict[indel_tsb_dict.index.str.contains('U:')]
-	# bitrans = indel_tsb_dict[indel_tsb_dict.index.str.contains('B:')]
-	# nontrans = indel_tsb_dict[indel_tsb_dict.index.str.contains('N:')]
-	# questionable = indel_tsb_dict[indel_tsb_dict.index.str.contains('Q:')]
+	# trans = indel_tsb_dict[indel_tsb_dict.index.str[0:2] == 'T:']
+	# untrans = indel_tsb_dict[indel_tsb_dict.index.str[0:2] == 'U:']
+	# bitrans = indel_tsb_dict[indel_tsb_dict.index.str[0:2] == 'B:']
+	# nontrans = indel_tsb_dict[indel_tsb_dict.index.str[0:2] == 'N:']
+	# questionable = indel_tsb_dict[indel_tsb_dict.index.str[0:2] == 'Q:']
 	# a = bitrans//2
 	# b = bitrans%2
 	# trans = trans.append(a)
-	# trans = trans.append(b)
 	# trans  = trans.groupby(trans.index.str[2:]).sum()
 	# trans = trans.rename(index=lambda s: "T:"+s)
 	# untrans = untrans.append(a)
 	# untrans = untrans.groupby(untrans.index.str[2:]).sum()
 	# untrans = untrans.rename(index=lambda s:"U:"+s)
 	# indel_tsb_dict_abbrev = pd.concat([trans, untrans, nontrans, questionable])
+	# for x in list(b.index):
+	# 	mutAbrrev = x[2:]
+	# 	tempMat = pd.concat([trans.loc["T:"+mutAbrrev],untrans.loc["U:"+mutAbrrev]], axis=1)
+	# 	for z,y in zip(tempMat.idxmax(axis=1), list(tempMat.index)):
+	# 		indel_tsb_dict_abbrev.loc[z,y] += b.loc[x,y]
+
+	# Collapse the Bi-directionally transcribed type to non-transcribed
+	trans = indel_tsb_dict[indel_tsb_dict.index.str.contains('T:')]
+	untrans = indel_tsb_dict[indel_tsb_dict.index.str.contains('U:')]
+	bitrans = indel_tsb_dict[indel_tsb_dict.index.str.contains('B:')]
+	nontrans = indel_tsb_dict[indel_tsb_dict.index.str.contains('N:')]
+	questionable = indel_tsb_dict[indel_tsb_dict.index.str.contains('Q:')]
+	a = bitrans//2
+	b = bitrans%2
+	trans = trans.append(a)
+	trans = trans.append(b)
+	trans  = trans.groupby(trans.index.str[2:]).sum()
+	trans = trans.rename(index=lambda s: "T:"+s)
+	untrans = untrans.append(a)
+	untrans = untrans.groupby(untrans.index.str[2:]).sum()
+	untrans = untrans.rename(index=lambda s:"U:"+s)
+	indel_tsb_dict_abbrev = pd.concat([trans, untrans, nontrans, questionable])
 
 
 	# trans = indel_tsb_dict[indel_tsb_dict.index.str[0:2] == 'T:']
@@ -2405,48 +2401,26 @@ def matrix_generator_DINUC (output_matrix, samples, bias_sort, all_dinucs, all_m
 
 	# Collapse the Bi-directionally transcribed type to transcribed and untranscribed
 	# 2976 to 2400
-	trans = mut_4992[mut_4992.index.str.contains('T:')]
-	untrans = mut_4992[mut_4992.index.str.contains('U:')]
-	bitrans = mut_4992[mut_4992.index.str.contains('B:')]
-	nontrans = mut_4992[mut_4992.index.str.contains('N:')]
-	questionable = mut_4992[mut_4992.index.str.contains('Q:')]
-	a = bitrans//2
-	b = bitrans%2
-	trans = trans.append(a)
-	trans  = trans.groupby(trans.index.str[2:]).sum()
-	trans = trans.rename(index=lambda s: "T:"+s)
-	untrans = untrans.append(a)
-	untrans = untrans.groupby(untrans.index.str[2:]).sum()
-	untrans = untrans.rename(index=lambda s:"U:"+s)
-	mut_count_all['2400'] = pd.concat([trans, untrans, nontrans, questionable])
-	for x in list(b.index):
-		mutAbrrev = x.split(":")[1]
-		tempMat = pd.concat([trans.loc["T:"+mutAbrrev],untrans.loc["U:"+mutAbrrev]], axis=1)
-		for z,y in zip(tempMat.idxmax(axis=1), list(tempMat.index)):
-			mut_count_all['2400'].loc[z,y] += b.loc[x,y]
+	# trans = mut_4992[mut_4992.index.str.contains('T:')]
+	# untrans = mut_4992[mut_4992.index.str.contains('U:')]
+	# bitrans = mut_4992[mut_4992.index.str.contains('B:')]
+	# nontrans = mut_4992[mut_4992.index.str.contains('N:')]
+	# questionable = mut_4992[mut_4992.index.str.contains('Q:')]
+	# a = bitrans//2
+	# b = bitrans%2
+	# trans = trans.append(a)
+	# trans  = trans.groupby(trans.index.str[2:]).sum()
+	# trans = trans.rename(index=lambda s: "T:"+s)
+	# untrans = untrans.append(a)
+	# untrans = untrans.groupby(untrans.index.str[2:]).sum()
+	# untrans = untrans.rename(index=lambda s:"U:"+s)
+	# mut_count_all['2400'] = pd.concat([trans, untrans, nontrans, questionable])
+	# for x in list(b.index):
+	# 	mutAbrrev = x.split(":")[1]
+	# 	tempMat = pd.concat([trans.loc["T:"+mutAbrrev],untrans.loc["U:"+mutAbrrev]], axis=1)
+	# 	for z,y in zip(tempMat.idxmax(axis=1), list(tempMat.index)):
+	# 		mut_count_all['2400'].loc[z,y] += b.loc[x,y]
 
-	# 186 to 150
-	trans = mut_count_all['186'][mut_count_all['186'].index.str.contains('T:')]
-	untrans = mut_count_all['186'][mut_count_all['186'].index.str.contains('U:')]
-	bitrans = mut_count_all['186'][mut_count_all['186'].index.str.contains('B:')]
-	nontrans = mut_count_all['186'][mut_count_all['186'].index.str.contains('N:')]
-	questionable = mut_count_all['186'][mut_count_all['186'].index.str.contains('Q:')]
-	a = bitrans//2
-	b = bitrans%2
-	trans = trans.append(a)
-	trans  = trans.groupby(trans.index.str[2:]).sum()
-	trans = trans.rename(index=lambda s: "T:"+s)
-	untrans = untrans.append(a)
-	untrans = untrans.groupby(untrans.index.str[2:]).sum()
-	untrans = untrans.rename(index=lambda s:"U:"+s)
-	mut_count_all['150'] = pd.concat([trans, untrans, nontrans, questionable])
-	for x in list(b.index):
-		mutAbrrev = x.split(":")[1]
-		tempMat = pd.concat([trans.loc["T:"+mutAbrrev],untrans.loc["U:"+mutAbrrev]], axis=1)
-		for z,y in zip(tempMat.idxmax(axis=1), list(tempMat.index)):
-			mut_count_all['150'].loc[z,y] += b.loc[x,y]
-
-	# # Collapse the Bi-directionally transcribed type to non-transcribed
 	# # 186 to 150
 	# trans = mut_count_all['186'][mut_count_all['186'].index.str.contains('T:')]
 	# untrans = mut_count_all['186'][mut_count_all['186'].index.str.contains('U:')]
@@ -2456,30 +2430,52 @@ def matrix_generator_DINUC (output_matrix, samples, bias_sort, all_dinucs, all_m
 	# a = bitrans//2
 	# b = bitrans%2
 	# trans = trans.append(a)
-	# trans = trans.append(b)
 	# trans  = trans.groupby(trans.index.str[2:]).sum()
 	# trans = trans.rename(index=lambda s: "T:"+s)
 	# untrans = untrans.append(a)
 	# untrans = untrans.groupby(untrans.index.str[2:]).sum()
 	# untrans = untrans.rename(index=lambda s:"U:"+s)
 	# mut_count_all['150'] = pd.concat([trans, untrans, nontrans, questionable])
+	# for x in list(b.index):
+	# 	mutAbrrev = x.split(":")[1]
+	# 	tempMat = pd.concat([trans.loc["T:"+mutAbrrev],untrans.loc["U:"+mutAbrrev]], axis=1)
+	# 	for z,y in zip(tempMat.idxmax(axis=1), list(tempMat.index)):
+	# 		mut_count_all['150'].loc[z,y] += b.loc[x,y]
 
-	# # 2976 to 2400
-	# trans = mut_4992[mut_4992.index.str.contains('T:')]
-	# untrans = mut_4992[mut_4992.index.str.contains('U:')]
-	# bitrans = mut_4992[mut_4992.index.str.contains('B:')]
-	# nontrans = mut_4992[mut_4992.index.str.contains('N:')]
-	# questionable = mut_4992[mut_4992.index.str.contains('Q:')]
-	# a = bitrans//2
-	# b = bitrans%2
-	# trans = trans.append(a)
-	# trans = trans.append(b)
-	# trans  = trans.groupby(trans.index.str[2:]).sum()
-	# trans = trans.rename(index=lambda s: "T:"+s)
-	# untrans = untrans.append(a)
-	# untrans = untrans.groupby(untrans.index.str[2:]).sum()
-	# untrans = untrans.rename(index=lambda s:"U:"+s)
-	# mut_count_all['2400'] = pd.concat([trans, untrans, nontrans, questionable])
+	# Collapse the Bi-directionally transcribed type to non-transcribed
+	# 186 to 150
+	trans = mut_count_all['186'][mut_count_all['186'].index.str.contains('T:')]
+	untrans = mut_count_all['186'][mut_count_all['186'].index.str.contains('U:')]
+	bitrans = mut_count_all['186'][mut_count_all['186'].index.str.contains('B:')]
+	nontrans = mut_count_all['186'][mut_count_all['186'].index.str.contains('N:')]
+	questionable = mut_count_all['186'][mut_count_all['186'].index.str.contains('Q:')]
+	a = bitrans//2
+	b = bitrans%2
+	trans = trans.append(a)
+	trans = trans.append(b)
+	trans  = trans.groupby(trans.index.str[2:]).sum()
+	trans = trans.rename(index=lambda s: "T:"+s)
+	untrans = untrans.append(a)
+	untrans = untrans.groupby(untrans.index.str[2:]).sum()
+	untrans = untrans.rename(index=lambda s:"U:"+s)
+	mut_count_all['150'] = pd.concat([trans, untrans, nontrans, questionable])
+
+	# 2976 to 2400
+	trans = mut_4992[mut_4992.index.str.contains('T:')]
+	untrans = mut_4992[mut_4992.index.str.contains('U:')]
+	bitrans = mut_4992[mut_4992.index.str.contains('B:')]
+	nontrans = mut_4992[mut_4992.index.str.contains('N:')]
+	questionable = mut_4992[mut_4992.index.str.contains('Q:')]
+	a = bitrans//2
+	b = bitrans%2
+	trans = trans.append(a)
+	trans = trans.append(b)
+	trans  = trans.groupby(trans.index.str[2:]).sum()
+	trans = trans.rename(index=lambda s: "T:"+s)
+	untrans = untrans.append(a)
+	untrans = untrans.groupby(untrans.index.str[2:]).sum()
+	untrans = untrans.rename(index=lambda s:"U:"+s)
+	mut_count_all['2400'] = pd.concat([trans, untrans, nontrans, questionable])
 
 
 	# # Collapse the Bi-directionally transcribed type to non-transcribed
