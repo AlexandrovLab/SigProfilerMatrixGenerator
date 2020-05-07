@@ -16,7 +16,7 @@ revcompl = lambda x: ''.join([{'A':'T','C':'G','G':'C','T':'A','N':'N'}[B] for B
 revbias = lambda x: ''.join([{'0':'0', '3':'3', '1':'2','2':'1','U':'T','T':'U','B':'B','N':'N', 'Q':'Q'}[B] for B in x][::-1])
 
 
-def context_distribution (context_input, output_file, chromosome_path, chromosomes, tsb_ref):
+def context_distribution (context_input, output_file, chromosome_path, chromosomes, tsb_ref, genome):
 	'''
 	Creates a csv file for the distribution of nucleotides given a specific context. 
 	This csv file needs to be created before simulating mutationalsigantures for the 
@@ -202,9 +202,13 @@ def context_distribution (context_input, output_file, chromosome_path, chromosom
 				except:
 					print(str(0) + ',', end='', file=out)
 			try:
-				print(probs[nuc][chromosomes[-1]]/nuc_sum, file=out)
+				print(str(probs[nuc][chroms]), file=out)
 			except:
-				print(str(0),file=out)
+				print(str(0), file=out)
+			# try:
+			# 	print(probs[nuc][chromosomes[-1]]/nuc_sum, file=out)
+			# except:
+			# 	print(str(0),file=out)
 	# chromosomes.remove("Y")
 	# chromosomes.remove("MT")
 	# chromosomes.remove("M")
@@ -474,11 +478,14 @@ def context_distribution_BED (context_input, output_file, chromosome_path, chrom
 					out.flush()
 				except:
 					print(str(0) + ',', end='', file=out)
+			# try:
+			# 	print(probs[nuc][chromosomes[-1]]/nuc_sum, file=out)
+			# except:
+			# 	print(str(0),file=out)
 			try:
-				print(probs[nuc][chromosomes[-1]]/nuc_sum, file=out)
+				print(str(probs[nuc][chroms]), file=out)
 			except:
-				print(str(0),file=out)
-
+				print(str(0), file=out)
 	# chromosomes.remove("Y")
 	# chromosomes.remove("MT")
 	# chromosomes.remove("M")
