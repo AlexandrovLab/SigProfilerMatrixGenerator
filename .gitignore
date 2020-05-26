@@ -9,3 +9,6 @@
 
 # Hidden files and directories
 *.DS_Store
+
+# pypi build folder
+/build/

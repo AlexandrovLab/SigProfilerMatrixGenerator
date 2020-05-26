@@ -18,7 +18,7 @@ import logging
 import hashlib
 from SigProfilerMatrixGenerator.scripts import convert_input_to_simple_files as convertIn
 from SigProfilerMatrixGenerator.scripts import SigProfilerMatrixGeneratorFunc as matGen
-
+import glob
 
 def md5(fname):
     hash_md5 = hashlib.md5()
@@ -33,7 +33,7 @@ def install_chromosomes (genomes, ref_dir, custom, rsync, bash):
 		for genome in genomes:
 			os.system("gzip -d references/chromosomes/fasta/" + genome + "/*.gz")
 			chromosome_fasta_path = "references/chromosomes/fasta/" + genome + "/"
-			os.system("python scripts/save_chrom_strings.py -g " + genome)
+			os.system("python scripts/save_chrom_strings.py -g " + genome + " -c " + str(custom))
 			print("Chromosome string files for " + genome + " have been created. Continuing with installation.")
 			#os.system("rm -r " + chromosome_fasta_path)
 	else:
@@ -235,6 +235,9 @@ def install_chromosomes_tsb (genomes, ref_dir, custom):
 		elif genome == 'rn6':
 			chrom_number = 22
 
+		if custom:
+			chrom_number = len([x for x in os.listdir("references/chromosomes/chrom_string/" + genome + "/") if x != ".DS_Store"])
+
 
 		chromosome_TSB_path = "references/chromosomes/tsb/" + genome + "/"
 		transcript_files = "references/chromosomes/transcripts/" + genome + "/"
@@ -249,22 +252,23 @@ def install_chromosomes_tsb (genomes, ref_dir, custom):
 			print("The transcriptional reference data for " + genome + " has not been saved. Creating these files now")
 			os.system("python scripts/save_tsb_192.py -g " + genome)
 
-		corrupt = False
-		for files in os.listdir(chromosome_TSB_path):
-			if "proportions" in files:
-				continue
-			if ".DS_Store" in files:
-				continue
-			chrom = files.split(".")
-			chrom = chrom[0]
-			check = md5(chromosome_TSB_path + files)
-			if check_sum[genome][chrom] != check:
-				corrupt = True
-				os.remove(chromosome_TSB_path + files)
-				print("[DEBUG] Chromosome " + chrom + " md5sum did not match => reference md5sum: " + str(check_sum[genome][chrom]) + "    new file md5sum: " + str(check))
-		if corrupt:
-			print("The transcriptional reference data appears to be corrupted. Please reinstall the " + genome + " genome.")
-			sys.exit()
+		if not custom:
+			corrupt = False
+			for files in os.listdir(chromosome_TSB_path):
+				if "proportions" in files:
+					continue
+				if ".DS_Store" in files:
+					continue
+				chrom = files.split(".")
+				chrom = chrom[0]
+				check = md5(chromosome_TSB_path + files)
+				if check_sum[genome][chrom] != check:
+					corrupt = True
+					os.remove(chromosome_TSB_path + files)
+					print("[DEBUG] Chromosome " + chrom + " md5sum did not match => reference md5sum: " + str(check_sum[genome][chrom]) + "    new file md5sum: " + str(check))
+			if corrupt:
+				print("The transcriptional reference data appears to be corrupted. Please reinstall the " + genome + " genome.")
+				sys.exit()
 			
 		print("The transcriptional reference data for " + genome + " has been saved.")
 
@@ -323,23 +327,31 @@ def benchmark (genome, ref_dir):
 	print("Installation was succesful.\nSigProfilerMatrixGenerator took " + str(end_time-start_time) + " seconds to complete.")
 
 
-def install (genome, custom=False, rsync=False, bash=True, ftp=True):
+def install (genome, custom=False, rsync=False, bash=True, ftp=True, fastaPath=None, transcriptPath=None, exomePath=None):
+	if custom:
+		ftp=False
 	first_path= os.getcwd()
 	ref_dir = os.path.dirname(os.path.abspath(__file__))
 	os.chdir(ref_dir)
 
-	wget_install = shutil.which("wget") is not None
-	rsync_install = shutil.which("rsync") is not None
-	if not wget_install and not rsync_install:
-		print("You do not have wget nor rsync installed. Please install wget or rsync and then reattempt to install your desired genome")
-	elif not wget_install and rsync_install:
-		print("You do not have wget installed. Please install wget and then reattempt to install your desired genome")
+	if not custom:
+		wget_install = shutil.which("wget") is not None
+		rsync_install = shutil.which("rsync") is not None
+		if not wget_install and not rsync_install:
+			print("You do not have wget nor rsync installed. Please install wget or rsync and then reattempt to install your desired genome.")
+			sys.exit()
+		elif not wget_install and rsync_install:
+			print("You do not have wget installed. Please install wget and then reattempt to install your desired genome.")
+			sys.exit()
+	tar_install = shutil.which("tar") is not None
+	if not tar_install:
+		print("You do not have tar installed. Please install tar and then reattempt to install your desired genome.")
+		sys.exit()
 
 
 	if os.path.exists("install.log"):
 		os.remove("install.log")
 
-	#ref_dir += "/references/"
 	chrom_string_dir = ref_dir + "/references/chromosomes/chrom_string/"
 	chrom_fasta_dir = ref_dir + "/references/chromosomes/fasta/"
 	chrom_tsb_dir = ref_dir + "/references/chromosomes/tsb/"
@@ -349,9 +361,32 @@ def install (genome, custom=False, rsync=False, bash=True, ftp=True):
 	log_dir = "logs/"
 	new_dirs = [ref_dir, chrom_string_dir, chrom_fasta_dir, chrom_tsb_dir, matrix_dir, vcf_dir, bed_dir, log_dir]
 
+
 	for dirs in new_dirs:
 		if not os.path.exists(dirs):
 			os.makedirs(dirs)
+
+
+	if custom:
+		transcript_files = "references/chromosomes/transcripts/" + genome + "/"
+		if os.path.exists(chrom_fasta_dir + genome + "/"):
+			shutil.rmtree(chrom_fasta_dir + genome + "/")
+		os.makedirs(chrom_fasta_dir + genome + "/")
+		fastaFiles = glob.iglob(os.path.join(fastaPath, "*.gz"))
+		for file in fastaFiles:
+			if os.path.isfile(file):
+				shutil.copy(file, chrom_fasta_dir + genome + "/")
+
+		if os.path.exists(ref_dir + "/references/chromosomes/transcripts/" + genome + "/"):
+			shutil.rmtree(ref_dir + "/references/chromosomes/transcripts/" + genome + "/")
+		os.makedirs(ref_dir + "/references/chromosomes/transcripts/" +  genome + "/")
+		shutil.copy(transcriptPath,ref_dir + "/references/chromosomes/transcripts/" +  genome + "/")
+
+		if os.path.exists(ref_dir + "/references/chromosomes/exome/" + genome + "/"):
+			shutil.rmtree(ref_dir + "/references/chromosomes/exome/" + genome + "/")
+		os.makedirs(ref_dir + "/references/chromosomes/exome/" +  genome + "/")
+		shutil.copy(exomePath,ref_dir + "/references/chromosomes/exome/" +  genome + "/")
+
 
 	if ftp:
 		check_sum = {'GRCh37':
@@ -492,20 +527,6 @@ def install (genome, custom=False, rsync=False, bash=True, ftp=True):
 		if os.path.exists("install.log"):
 			os.remove("install.log")
 
-		# ref_dir += "/references/"
-		# chrom_string_dir = ref_dir + "chromosomes/chrom_string/"
-		# chrom_fasta_dir = ref_dir + "chromosomes/fasta/"
-		# chrom_tsb_dir = ref_dir + "chromosomes/tsb/"
-		# matrix_dir = ref_dir + "matrix/"
-		# vcf_dir = ref_dir + "vcf_files/"
-		# bed_dir = ref_dir + "vcf_files/BED/"
-		# log_dir = "logs/"
-		# new_dirs = [ref_dir, chrom_string_dir, chrom_fasta_dir, chrom_tsb_dir, matrix_dir, vcf_dir, bed_dir, log_dir]
-
-		# for dirs in new_dirs:
-		# 	if not os.path.exists(dirs):
-		# 		os.makedirs(dirs)
-
 		install_chromosomes(genomes, ref_dir, custom, rsync, bash)
 		install_chromosomes_tsb (genomes, ref_dir, custom)
 
@@ -517,7 +538,7 @@ def install (genome, custom=False, rsync=False, bash=True, ftp=True):
 		shutil.copy("context_distributions/", "references/chromosomes/")
 
 	print("All reference files have been created.")
-	if genome != "rn6" and genome != 'dog' and genome != 'c_elegans':
+	if genome != "rn6" and genome != 'dog' and genome != 'c_elegans' and not custom:
 		print("Verifying and benchmarking installation now...")
 		benchmark(genome, ref_dir)
 

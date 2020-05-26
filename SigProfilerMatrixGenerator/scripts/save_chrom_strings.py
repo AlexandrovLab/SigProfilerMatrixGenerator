@@ -11,7 +11,7 @@ import sys
 import argparse
 
 
-def save_chrom_strings (genome):
+def save_chrom_strings (genome, custom):
 	'''
 	Saves the fasta files for each chromosome as single strings. This
 	is required to generate the reference files.
@@ -47,9 +47,11 @@ def save_chrom_strings (genome):
 			file_name = files.split(".")
 			try:
 				chromosome = file_name[-2]
+				if len(chromosome) > 2:
+					chromosome = chromosome[3:]
 			except:
 				continue
-			if file_name[-4] == 'dna':
+			if custom:
 				with open(chrom_fasta_path + files) as chrom, open(chrom_string_path + chromosome + ".txt", 'w') as out:
 					next(chrom)
 					for lines in chrom:
@@ -61,15 +63,30 @@ def save_chrom_strings (genome):
 						first = False
 					else:
 						print("                                                 " + chromosome + " (" + str(i) + "/" + str(chrom_total) + ")")
+			else:
+				if file_name[-4] == 'dna':
+					with open(chrom_fasta_path + files) as chrom, open(chrom_string_path + chromosome + ".txt", 'w') as out:
+						next(chrom)
+						for lines in chrom:
+							line = lines.strip()
+							print(line, file=out, end='')
+
+						if first:
+							print("The string file has been created for Chromosome: " + chromosome + " (" + str(i) + "/" + str(chrom_total) + ")")
+							first = False
+						else:
+							print("                                                 " + chromosome + " (" + str(i) + "/" + str(chrom_total) + ")")
 		i += 1
 
 def main():
 	parser = argparse.ArgumentParser(description="Provide the necessary arguments to save the chromosomes as strings for later reference.")
 	parser.add_argument("--genome", "-g",help="Provide a reference genome. (ex: GRCh37, GRCh38, mm10)")
+	parser.add_argument("--custom", "-c",help="custom genome?. (True or False", default=False)
 	args=parser.parse_args()
 	genome = args.genome
+	custom = args.custom
 
-	save_chrom_strings(genome)
+	save_chrom_strings(genome, custom)
 
 
 if __name__ == '__main__':
