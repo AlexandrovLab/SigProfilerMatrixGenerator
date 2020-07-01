@@ -50,11 +50,11 @@ def context_distribution (context_input, output_file, chromosome_path, chromosom
 	tsb_bias = ['T','U','B','N']
 
 	# Set the context parameter based upon the user input
-	if context_input == '96' or context_input == '192':
+	if context_input == '96' or context_input == '192' or context_input == "384":
 		context = 3
 	elif context_input == '1536' or context_input == '3072' or context_input == '6144':
 		context = 5
-	elif context_input == 'DINUC' or context_input == 'DBS186':
+	elif context_input == 'DINUC' or context_input == 'DBS186' or context_input == "DBS":
 		context = 2
 	elif context_input == '6' or context_input == '24':
 		context = 1
@@ -184,7 +184,10 @@ def context_distribution (context_input, output_file, chromosome_path, chromosom
 					out.flush()
 				except:
 					print(str(0) + ',', end='', file=out)
-			print(probs[nuc][chromosomes[-1]]/nuc_sum, file=out)
+			try:
+				print(probs[nuc][chromosomes[-1]]/nuc_sum, file=out)
+			except:
+				print(str(0), file=out)
 
 	counts_file = os.path.dirname(output_file)	
 	with open (counts_file + "/context_counts_" + genome + "_" + context_input + ".csv", 'w') as out:

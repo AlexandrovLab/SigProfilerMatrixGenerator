@@ -114,7 +114,7 @@ def convertVCF (project, vcf_path, genome, output_path, ncbi_chrom, log_file):
 						if first_SNV:
 							if not os.path.exists(output_path + "SNV/"):
 								os.mkdir(output_path + 'SNV/')
-							if genome != 'c_elegans' and genome != 'ebv':
+							if genome != 'c_elegans' and genome != 'ebv' and genome != "yeast":
 								outputFile_X = open(output_path + "SNV/X_" + project + ".genome", "w", 10000000)
 								if genome != 'dog':
 									outputFile_Y = open(output_path + "SNV/Y_" + project + ".genome", "w", 10000000)
@@ -200,6 +200,23 @@ def convertVCF (project, vcf_path, genome, output_path, ncbi_chrom, log_file):
 									outputFile_IV = open(output_path + "SNV/IV_" + project + ".genome", "w", 10000000)
 									outputFile_V = open(output_path + "SNV/V_" + project + ".genome", "w", 10000000)
 									outputFile_X = open(output_path + "SNV/X_" + project + ".genome", "w", 10000000)
+									outFiles = {'I':outputFile_I, 'II':outputFile_II, 'III':outputFile_III, 'IV':outputFile_IV, 'V':outputFile_V, 'X':outputFile_X}
+									if genome == "yeast":
+										outputFile_VI = open(output_path + "SNV/VI_" + project + ".genome", "w", 10000000)
+										outputFile_VII = open(output_path + "SNV/VII_" + project + ".genome", "w", 10000000)
+										outputFile_VIII = open(output_path + "SNV/VIII_" + project + ".genome", "w", 10000000)
+										outputFile_IX = open(output_path + "SNV/IX_" + project + ".genome", "w", 10000000)
+										outputFile_XI = open(output_path + "SNV/XI_" + project + ".genome", "w", 10000000)
+										outputFile_XII = open(output_path + "SNV/XII_" + project + ".genome", "w", 10000000)
+										outputFile_XIII = open(output_path + "SNV/XIII_" + project + ".genome", "w", 10000000)
+										outputFile_XIV = open(output_path + "SNV/XIV_" + project + ".genome", "w", 10000000)
+										outputFile_XV = open(output_path + "SNV/XV_" + project + ".genome", "w", 10000000)
+										outputFile_XVI = open(output_path + "SNV/XVI_" + project + ".genome", "w", 10000000)
+										outFiles = {'I':outputFile_I, 'II':outputFile_II, 'III':outputFile_III, 'IV':outputFile_IV, 'V':outputFile_V,
+													'VI':outputFile_VI,'VII':outputFile_VII,'VIII':outputFile_VIII,'IX':outputFile_IX,'X':outputFile_X, 'XI':outputFile_XI,
+													'XII':outputFile_XII,'XIII':outputFile_XIII,'XIV':outputFile_XIV,'XV':outputFile_XV,'XVI':outputFile_XVI}
+
+
 									# files.extend(outputFile_I, outputFile_II, outputFile_III, outputFile_IV, outputFile_V, outputFile_X)
 
 							first_SNV = False
@@ -268,7 +285,7 @@ def convertVCF (project, vcf_path, genome, output_path, ncbi_chrom, log_file):
 						if first_SNV:
 							if not os.path.exists(output_path + "SNV/"):
 								os.mkdir(output_path + 'SNV/')
-							if genome != 'c_elegans' and genome != 'ebv':
+							if genome != 'c_elegans' and genome != 'ebv' and genome != "yeast":
 								outputFile_X = open(output_path + "SNV/X_" + project + ".genome", "w")
 								if genome != 'dog':
 									outputFile_Y = open(output_path + "SNV/Y_" + project + ".genome", "w", 10000000)
@@ -347,6 +364,20 @@ def convertVCF (project, vcf_path, genome, output_path, ncbi_chrom, log_file):
 									outputFile_V = open(output_path + "SNV/V_" + project + ".genome", "w", 10000000)
 									outputFile_X = open(output_path + "SNV/X_" + project + ".genome", "w", 10000000)
 									outFiles = {'I':outputFile_I, 'II':outputFile_II, 'III':outputFile_III, 'IV':outputFile_IV, 'V':outputFile_V, 'X':outputFile_X}
+									if genome != "yeast":
+										outputFile_VI = open(output_path + "SNV/VI_" + project + ".genome", "w", 10000000)
+										outputFile_VII = open(output_path + "SNV/VII_" + project + ".genome", "w", 10000000)
+										outputFile_VIII = open(output_path + "SNV/VIII_" + project + ".genome", "w", 10000000)
+										outputFile_IX = open(output_path + "SNV/IX_" + project + ".genome", "w", 10000000)
+										outputFile_XI = open(output_path + "SNV/XI_" + project + ".genome", "w", 10000000)
+										outputFile_XII = open(output_path + "SNV/XII_" + project + ".genome", "w", 10000000)
+										outputFile_XIII = open(output_path + "SNV/XIII_" + project + ".genome", "w", 10000000)
+										outputFile_XIV = open(output_path + "SNV/XIV_" + project + ".genome", "w", 10000000)
+										outputFile_XV = open(output_path + "SNV/XV_" + project + ".genome", "w", 10000000)
+										outputFile_XVI = open(output_path + "SNV/XVI_" + project + ".genome", "w", 10000000)
+										outFiles = {'I':outputFile_I, 'II':outputFile_II, 'III':outputFile_III, 'IV':outputFile_IV, 'V':outputFile_V,
+													'VI':outputFile_VI,'VII':outputFile_VII,'VIII':outputFile_VIII,'IX':outputFile_IX,'X':outputFile_X, 'XI':outputFile_XI,
+													'XII':outputFile_XII,'XIII':outputFile_XIII,'XIV':outputFile_XIV,'XV':outputFile_XV,'XVI':outputFile_XVI}
 
 							first_SNV = False
 
@@ -363,7 +394,7 @@ def convertVCF (project, vcf_path, genome, output_path, ncbi_chrom, log_file):
 						if first_indel:
 							if not os.path.exists(output_path + "INDEL/"):
 								os.mkdir(output_path + "INDEL/")
-							if genome != 'c_elegans' and genome != 'ebv':
+							if genome != 'c_elegans' and genome != 'ebv' and genome != "yeast":
 								outputFileI_X = open(output_path + "INDEL/X_" + project + ".genome", "w")
 								if genome != 'dog':
 									outputFileI_Y = open(output_path + "INDEL/Y_" + project + ".genome", "w")
@@ -442,6 +473,21 @@ def convertVCF (project, vcf_path, genome, output_path, ncbi_chrom, log_file):
 									outputFileI_V = open(output_path + "INDEL/V_" + project + ".genome", "w", 10000000)
 									outputFileI_X = open(output_path + "INDEL/X_" + project + ".genome", "w", 10000000)
 									outFilesI = {'X': outputFileI_X,'I': outputFileI_I,'II': outputFileI_II,'III': outputFileI_III,'IV': outputFileI_IV,'V': outputFileI_V}
+									if genome == "yeast":
+										outputFileI_VI = open(output_path + "INDEL/VI_" + project + ".genome", "w", 10000000)
+										outputFileI_VII = open(output_path + "INDEL/VII_" + project + ".genome", "w", 10000000)
+										outputFileI_VIII = open(output_path + "INDEL/VIII_" + project + ".genome", "w", 10000000)
+										outputFileI_IX = open(output_path + "INDEL/IX_" + project + ".genome", "w", 10000000)
+										outputFileI_XI = open(output_path + "INDEL/XI_" + project + ".genome", "w", 10000000)
+										outputFileI_XII = open(output_path + "INDEL/XII_" + project + ".genome", "w", 10000000)
+										outputFileI_XIII = open(output_path + "INDEL/XIII_" + project + ".genome", "w", 10000000)
+										outputFileI_XIV = open(output_path + "INDEL/XIV_" + project + ".genome", "w", 10000000)
+										outputFileI_XV = open(output_path + "INDEL/XV_" + project + ".genome", "w", 10000000)
+										outputFileI_XVI = open(output_path + "INDEL/XVI_" + project + ".genome", "w", 10000000)
+										outFilesI = {'I':outputFileI_I, 'II':outputFileI_II, 'III':outputFileI_III, 'IV':outputFileI_IV, 'V':outputFileI_V,
+													'VI':outputFileI_VI,'VII':outputFileI_VII,'VIII':outputFileI_VIII,'IX':outputFileI_IX,'X':outputFileI_X, 'XI':outputFileI_XI,
+													'XII':outputFileI_XII,'XIII':outputFileI_XIII,'XIV':outputFileI_XIV,'XV':outputFileI_XV,'XVI':outputFileI_XVI}
+
 							# out_indel = open(outputFile, "w") 
 							first_indel = False
 
@@ -570,7 +616,7 @@ def convertTxt (project, vcf_path, genome, output_path, ncbi_chrom, log_file):
 					if first_SNV:
 						if not os.path.exists(output_path + "SNV/"):
 							os.mkdir(output_path + 'SNV/')
-							if genome != 'c_elegans' and genome != 'ebv':
+							if genome != 'c_elegans' and genome != 'ebv' and genome != "yeast":
 								outputFile_X = open(output_path + "SNV/X_" + project + ".genome", "w", 10000000)
 								if genome != 'dog':
 									outputFile_Y = open(output_path + "SNV/Y_" + project + ".genome", "w", 10000000)
@@ -648,6 +694,22 @@ def convertTxt (project, vcf_path, genome, output_path, ncbi_chrom, log_file):
 									outputFile_IV = open(output_path + "SNV/IV_" + project + ".genome", "w", 10000000)
 									outputFile_V = open(output_path + "SNV/V_" + project + ".genome", "w", 10000000)
 									outputFile_X = open(output_path + "SNV/X_" + project + ".genome", "w", 10000000)
+									outFiles = {'I':outputFile_I, 'II':outputFile_II, 'III':outputFile_III, 'IV':outputFile_IV, 'V':outputFile_V, 'X':outputFile_X}
+									if genome == "yeast":
+										outputFile_VI = open(output_path + "SNV/VI_" + project + ".genome", "w", 10000000)
+										outputFile_VII = open(output_path + "SNV/VII_" + project + ".genome", "w", 10000000)
+										outputFile_VIII = open(output_path + "SNV/VIII_" + project + ".genome", "w", 10000000)
+										outputFile_IX = open(output_path + "SNV/IX_" + project + ".genome", "w", 10000000)
+										outputFile_XI = open(output_path + "SNV/XI_" + project + ".genome", "w", 10000000)
+										outputFile_XII = open(output_path + "SNV/XII_" + project + ".genome", "w", 10000000)
+										outputFile_XIII = open(output_path + "SNV/XIII_" + project + ".genome", "w", 10000000)
+										outputFile_XIV = open(output_path + "SNV/XIV_" + project + ".genome", "w", 10000000)
+										outputFile_XV = open(output_path + "SNV/XV_" + project + ".genome", "w", 10000000)
+										outputFile_XVI = open(output_path + "SNV/XVI_" + project + ".genome", "w", 10000000)
+										outFiles = {'I':outputFile_I, 'II':outputFile_II, 'III':outputFile_III, 'IV':outputFile_IV, 'V':outputFile_V,
+													'VI':outputFile_VI,'VII':outputFile_VII,'VIII':outputFile_VIII,'IX':outputFile_IX,'X':outputFile_X, 'XI':outputFile_XI,
+													'XII':outputFile_XII,'XIII':outputFile_XIII,'XIV':outputFile_XIV,'XV':outputFile_XV,'XVI':outputFile_XVI}
+
 						# outputFile_X = open(output_path + "SNV/X_" + project + ".genome", "w")
 						# outputFile_Y = open(output_path + "SNV/Y_" + project + ".genome", "w")
 						# outputFile_1 = open(output_path + "SNV/1_" + project + ".genome", "w")
@@ -747,7 +809,7 @@ def convertTxt (project, vcf_path, genome, output_path, ncbi_chrom, log_file):
 					if first_SNV:
 						if not os.path.exists(output_path + "SNV/"):
 							os.mkdir(output_path + 'SNV/')
-							if genome != 'c_elegans' and genome != 'ebv':
+							if genome != 'c_elegans' and genome != 'ebv' and genome != "yeast":
 								outputFile_X = open(output_path + "SNV/X_" + project + ".genome", "w", 10000000)
 								if genome != 'dog':
 									outputFile_Y = open(output_path + "SNV/Y_" + project + ".genome", "w", 10000000)
@@ -825,6 +887,22 @@ def convertTxt (project, vcf_path, genome, output_path, ncbi_chrom, log_file):
 									outputFile_IV = open(output_path + "SNV/IV_" + project + ".genome", "w", 10000000)
 									outputFile_V = open(output_path + "SNV/V_" + project + ".genome", "w", 10000000)
 									outputFile_X = open(output_path + "SNV/X_" + project + ".genome", "w", 10000000)
+									outFiles = {'I':outputFile_I, 'II':outputFile_II, 'III':outputFile_III, 'IV':outputFile_IV, 'V':outputFile_V, 'X':outputFile_X}
+									if genome == "yeast":
+										outputFile_VI = open(output_path + "SNV/VI_" + project + ".genome", "w", 10000000)
+										outputFile_VII = open(output_path + "SNV/VII_" + project + ".genome", "w", 10000000)
+										outputFile_VIII = open(output_path + "SNV/VIII_" + project + ".genome", "w", 10000000)
+										outputFile_IX = open(output_path + "SNV/IX_" + project + ".genome", "w", 10000000)
+										outputFile_XI = open(output_path + "SNV/XI_" + project + ".genome", "w", 10000000)
+										outputFile_XII = open(output_path + "SNV/XII_" + project + ".genome", "w", 10000000)
+										outputFile_XIII = open(output_path + "SNV/XIII_" + project + ".genome", "w", 10000000)
+										outputFile_XIV = open(output_path + "SNV/XIV_" + project + ".genome", "w", 10000000)
+										outputFile_XV = open(output_path + "SNV/XV_" + project + ".genome", "w", 10000000)
+										outputFile_XVI = open(output_path + "SNV/XVI_" + project + ".genome", "w", 10000000)
+										outFiles = {'I':outputFile_I, 'II':outputFile_II, 'III':outputFile_III, 'IV':outputFile_IV, 'V':outputFile_V,
+													'VI':outputFile_VI,'VII':outputFile_VII,'VIII':outputFile_VIII,'IX':outputFile_IX,'X':outputFile_X, 'XI':outputFile_XI,
+													'XII':outputFile_XII,'XIII':outputFile_XIII,'XIV':outputFile_XIV,'XV':outputFile_XV,'XVI':outputFile_XVI}
+
 						# outputFile_X = open(output_path + "SNV/X_" + project + ".genome", "w")
 						# outputFile_Y = open(output_path + "SNV/Y_" + project + ".genome", "w")
 						# outputFile_1 = open(output_path + "SNV/1_" + project + ".genome", "w")
@@ -876,7 +954,7 @@ def convertTxt (project, vcf_path, genome, output_path, ncbi_chrom, log_file):
 						# os.system("rm -f " + outputFile)
 						if not os.path.exists(output_path + "INDEL/"):
 							os.mkdir(output_path + "INDEL/")
-							if genome != 'c_elegans' and genome != 'ebv':
+							if genome != 'c_elegans' and genome != 'ebv' and genome != "yeast":
 								outputFileI_X = open(output_path + "INDEL/X_" + project + ".genome", "w")
 								if genome != 'dog':
 									outputFileI_Y = open(output_path + "INDEL/Y_" + project + ".genome", "w")
@@ -955,6 +1033,20 @@ def convertTxt (project, vcf_path, genome, output_path, ncbi_chrom, log_file):
 									outputFileI_V = open(output_path + "INDEL/V_" + project + ".genome", "w", 10000000)
 									outputFileI_X = open(output_path + "INDEL/X_" + project + ".genome", "w", 10000000)
 									outFilesI = {'X': outputFileI_X,'I': outputFileI_I,'II': outputFileI_II,'III': outputFileI_III,'IV': outputFileI_IV,'V': outputFileI_V}
+									if genome == "yeast":
+										outputFileI_VI = open(output_path + "INDEL/VI_" + project + ".genome", "w", 10000000)
+										outputFileI_VII = open(output_path + "INDEL/VII_" + project + ".genome", "w", 10000000)
+										outputFileI_VIII = open(output_path + "INDEL/VIII_" + project + ".genome", "w", 10000000)
+										outputFileI_IX = open(output_path + "INDEL/IX_" + project + ".genome", "w", 10000000)
+										outputFileI_XI = open(output_path + "INDEL/XI_" + project + ".genome", "w", 10000000)
+										outputFileI_XII = open(output_path + "INDEL/XII_" + project + ".genome", "w", 10000000)
+										outputFileI_XIII = open(output_path + "INDEL/XIII_" + project + ".genome", "w", 10000000)
+										outputFileI_XIV = open(output_path + "INDEL/XIV_" + project + ".genome", "w", 10000000)
+										outputFileI_XV = open(output_path + "INDEL/XV_" + project + ".genome", "w", 10000000)
+										outputFileI_XVI = open(output_path + "INDEL/XVI_" + project + ".genome", "w", 10000000)
+										outFilesI = {'I':outputFileI_I, 'II':outputFileI_II, 'III':outputFileI_III, 'IV':outputFileI_IV, 'V':outputFileI_V,
+													'VI':outputFileI_VI,'VII':outputFileI_VII,'VIII':outputFileI_VIII,'IX':outputFileI_IX,'X':outputFileI_X, 'XI':outputFileI_XI,
+													'XII':outputFileI_XII,'XIII':outputFileI_XIII,'XIV':outputFileI_XIV,'XV':outputFileI_XV,'XVI':outputFileI_XVI}
 
 						# outputFileI_X = open(output_path + "INDEL/X_" + project + ".genome", "w")
 						# outputFileI_Y = open(output_path + "INDEL/Y_" + project + ".genome", "w")
@@ -1121,7 +1213,7 @@ def convertMAF (project, vcf_path, genome, output_path, ncbi_chrom, log_file):
 					if first_SNV:
 						if not os.path.exists(output_path + "SNV/"):
 							os.mkdir(output_path + 'SNV/')
-							if genome != 'c_elegans' and genome != 'ebv':
+							if genome != 'c_elegans' and genome != 'ebv' and genome != "yeast":
 								outputFile_X = open(output_path + "SNV/X_" + project + ".genome", "w", 10000000)
 								if genome != 'dog':
 									outputFile_Y = open(output_path + "SNV/Y_" + project + ".genome", "w", 10000000)
@@ -1199,6 +1291,22 @@ def convertMAF (project, vcf_path, genome, output_path, ncbi_chrom, log_file):
 									outputFile_IV = open(output_path + "SNV/IV_" + project + ".genome", "w", 10000000)
 									outputFile_V = open(output_path + "SNV/V_" + project + ".genome", "w", 10000000)
 									outputFile_X = open(output_path + "SNV/X_" + project + ".genome", "w", 10000000)
+									outFiles = {'I':outputFile_I, 'II':outputFile_II, 'III':outputFile_III, 'IV':outputFile_IV, 'V':outputFile_V, 'X':outputFile_X}
+									if genome == "yeast":
+										outputFile_VI = open(output_path + "SNV/VI_" + project + ".genome", "w", 10000000)
+										outputFile_VII = open(output_path + "SNV/VII_" + project + ".genome", "w", 10000000)
+										outputFile_VIII = open(output_path + "SNV/VIII_" + project + ".genome", "w", 10000000)
+										outputFile_IX = open(output_path + "SNV/IX_" + project + ".genome", "w", 10000000)
+										outputFile_XI = open(output_path + "SNV/XI_" + project + ".genome", "w", 10000000)
+										outputFile_XII = open(output_path + "SNV/XII_" + project + ".genome", "w", 10000000)
+										outputFile_XIII = open(output_path + "SNV/XIII_" + project + ".genome", "w", 10000000)
+										outputFile_XIV = open(output_path + "SNV/XIV_" + project + ".genome", "w", 10000000)
+										outputFile_XV = open(output_path + "SNV/XV_" + project + ".genome", "w", 10000000)
+										outputFile_XVI = open(output_path + "SNV/XVI_" + project + ".genome", "w", 10000000)
+										outFiles = {'I':outputFile_I, 'II':outputFile_II, 'III':outputFile_III, 'IV':outputFile_IV, 'V':outputFile_V,
+													'VI':outputFile_VI,'VII':outputFile_VII,'VIII':outputFile_VIII,'IX':outputFile_IX,'X':outputFile_X, 'XI':outputFile_XI,
+													'XII':outputFile_XII,'XIII':outputFile_XIII,'XIV':outputFile_XIV,'XV':outputFile_XV,'XVI':outputFile_XVI}
+
 						# outputFile_X = open(output_path + "SNV/X_" + project + ".genome", "w")
 						# outputFile_Y = open(output_path + "SNV/Y_" + project + ".genome", "w")
 						# outputFile_1 = open(output_path + "SNV/1_" + project + ".genome", "w")
@@ -1299,7 +1407,7 @@ def convertMAF (project, vcf_path, genome, output_path, ncbi_chrom, log_file):
 					if first_SNV:
 						if not os.path.exists(output_path + "SNV/"):
 							os.mkdir(output_path + 'SNV/')
-							if genome != 'c_elegans' and genome != 'ebv':
+							if genome != 'c_elegans' and genome != 'ebv' and genome != "yeast":
 								outputFile_X = open(output_path + "SNV/X_" + project + ".genome", "w", 10000000)
 								if genome != 'dog':
 									outputFile_Y = open(output_path + "SNV/Y_" + project + ".genome", "w", 10000000)
@@ -1377,6 +1485,22 @@ def convertMAF (project, vcf_path, genome, output_path, ncbi_chrom, log_file):
 									outputFile_IV = open(output_path + "SNV/IV_" + project + ".genome", "w", 10000000)
 									outputFile_V = open(output_path + "SNV/V_" + project + ".genome", "w", 10000000)
 									outputFile_X = open(output_path + "SNV/X_" + project + ".genome", "w", 10000000)
+									outFiles = {'I':outputFile_I, 'II':outputFile_II, 'III':outputFile_III, 'IV':outputFile_IV, 'V':outputFile_V, 'X':outputFile_X}
+									if genome == "yeast":
+										outputFile_VI = open(output_path + "SNV/VI_" + project + ".genome", "w", 10000000)
+										outputFile_VII = open(output_path + "SNV/VII_" + project + ".genome", "w", 10000000)
+										outputFile_VIII = open(output_path + "SNV/VIII_" + project + ".genome", "w", 10000000)
+										outputFile_IX = open(output_path + "SNV/IX_" + project + ".genome", "w", 10000000)
+										outputFile_XI = open(output_path + "SNV/XI_" + project + ".genome", "w", 10000000)
+										outputFile_XII = open(output_path + "SNV/XII_" + project + ".genome", "w", 10000000)
+										outputFile_XIII = open(output_path + "SNV/XIII_" + project + ".genome", "w", 10000000)
+										outputFile_XIV = open(output_path + "SNV/XIV_" + project + ".genome", "w", 10000000)
+										outputFile_XV = open(output_path + "SNV/XV_" + project + ".genome", "w", 10000000)
+										outputFile_XVI = open(output_path + "SNV/XVI_" + project + ".genome", "w", 10000000)
+										outFiles = {'I':outputFile_I, 'II':outputFile_II, 'III':outputFile_III, 'IV':outputFile_IV, 'V':outputFile_V,
+													'VI':outputFile_VI,'VII':outputFile_VII,'VIII':outputFile_VIII,'IX':outputFile_IX,'X':outputFile_X, 'XI':outputFile_XI,
+													'XII':outputFile_XII,'XIII':outputFile_XIII,'XIV':outputFile_XIV,'XV':outputFile_XV,'XVI':outputFile_XVI}
+
 						# outputFile_X = open(output_path + "SNV/X_" + project + ".genome", "w")
 						# outputFile_Y = open(output_path + "SNV/Y_" + project + ".genome", "w")
 						# outputFile_1 = open(output_path + "SNV/1_" + project + ".genome", "w")
@@ -1428,7 +1552,7 @@ def convertMAF (project, vcf_path, genome, output_path, ncbi_chrom, log_file):
 					if first_indel:
 						if not os.path.exists(output_path + "INDEL/"):
 							os.mkdir(output_path + "INDEL/")
-							if genome != 'c_elegans' and genome != 'ebv':
+							if genome != 'c_elegans' and genome != 'ebv' and genome != "yeast":
 								outputFileI_X = open(output_path + "INDEL/X_" + project + ".genome", "w")
 								if genome != 'dog':
 									outputFileI_Y = open(output_path + "INDEL/Y_" + project + ".genome", "w")
@@ -1507,6 +1631,20 @@ def convertMAF (project, vcf_path, genome, output_path, ncbi_chrom, log_file):
 									outputFileI_V = open(output_path + "INDEL/V_" + project + ".genome", "w", 10000000)
 									outputFileI_X = open(output_path + "INDEL/X_" + project + ".genome", "w", 10000000)
 									outFilesI = {'X': outputFileI_X,'I': outputFileI_I,'II': outputFileI_II,'III': outputFileI_III,'IV': outputFileI_IV,'V': outputFileI_V}
+									if genome == "yeast":
+										outputFileI_VI = open(output_path + "INDEL/VI_" + project + ".genome", "w", 10000000)
+										outputFileI_VII = open(output_path + "INDEL/VII_" + project + ".genome", "w", 10000000)
+										outputFileI_VIII = open(output_path + "INDEL/VIII_" + project + ".genome", "w", 10000000)
+										outputFileI_IX = open(output_path + "INDEL/IX_" + project + ".genome", "w", 10000000)
+										outputFileI_XI = open(output_path + "INDEL/XI_" + project + ".genome", "w", 10000000)
+										outputFileI_XII = open(output_path + "INDEL/XII_" + project + ".genome", "w", 10000000)
+										outputFileI_XIII = open(output_path + "INDEL/XIII_" + project + ".genome", "w", 10000000)
+										outputFileI_XIV = open(output_path + "INDEL/XIV_" + project + ".genome", "w", 10000000)
+										outputFileI_XV = open(output_path + "INDEL/XV_" + project + ".genome", "w", 10000000)
+										outputFileI_XVI = open(output_path + "INDEL/XVI_" + project + ".genome", "w", 10000000)
+										outFilesI = {'I':outputFileI_I, 'II':outputFileI_II, 'III':outputFileI_III, 'IV':outputFileI_IV, 'V':outputFileI_V,
+													'VI':outputFileI_VI,'VII':outputFileI_VII,'VIII':outputFileI_VIII,'IX':outputFileI_IX,'X':outputFileI_X, 'XI':outputFileI_XI,
+													'XII':outputFileI_XII,'XIII':outputFileI_XIII,'XIV':outputFileI_XIV,'XV':outputFileI_XV,'XVI':outputFileI_XVI}
 
 						# outputFileI_X = open(output_path + "INDEL/X_" + project + ".genome", "w")
 						# outputFileI_Y = open(output_path + "INDEL/Y_" + project + ".genome", "w")
@@ -1675,7 +1813,7 @@ def convertICGC (project, vcf_path, genome, output_path, ncbi_chrom, log_file):
 					if first_SNV:
 						if not os.path.exists(output_path + "SNV/"):
 							os.mkdir(output_path + 'SNV/')
-							if genome != 'c_elegans' and genome != 'ebv':
+							if genome != 'c_elegans' and genome != 'ebv' and genome != "yeast":
 								outputFile_X = open(output_path + "SNV/X_" + project + ".genome", "w", 10000000)
 								if genome != 'dog':
 									outputFile_Y = open(output_path + "SNV/Y_" + project + ".genome", "w", 10000000)
@@ -1753,6 +1891,22 @@ def convertICGC (project, vcf_path, genome, output_path, ncbi_chrom, log_file):
 									outputFile_IV = open(output_path + "SNV/IV_" + project + ".genome", "w", 10000000)
 									outputFile_V = open(output_path + "SNV/V_" + project + ".genome", "w", 10000000)
 									outputFile_X = open(output_path + "SNV/X_" + project + ".genome", "w", 10000000)
+									outFiles = {'I':outputFile_I, 'II':outputFile_II, 'III':outputFile_III, 'IV':outputFile_IV, 'V':outputFile_V, 'X':outputFile_X}
+									if genome == "yeast":
+										outputFile_VI = open(output_path + "SNV/VI_" + project + ".genome", "w", 10000000)
+										outputFile_VII = open(output_path + "SNV/VII_" + project + ".genome", "w", 10000000)
+										outputFile_VIII = open(output_path + "SNV/VIII_" + project + ".genome", "w", 10000000)
+										outputFile_IX = open(output_path + "SNV/IX_" + project + ".genome", "w", 10000000)
+										outputFile_XI = open(output_path + "SNV/XI_" + project + ".genome", "w", 10000000)
+										outputFile_XII = open(output_path + "SNV/XII_" + project + ".genome", "w", 10000000)
+										outputFile_XIII = open(output_path + "SNV/XIII_" + project + ".genome", "w", 10000000)
+										outputFile_XIV = open(output_path + "SNV/XIV_" + project + ".genome", "w", 10000000)
+										outputFile_XV = open(output_path + "SNV/XV_" + project + ".genome", "w", 10000000)
+										outputFile_XVI = open(output_path + "SNV/XVI_" + project + ".genome", "w", 10000000)
+										outFiles = {'I':outputFile_I, 'II':outputFile_II, 'III':outputFile_III, 'IV':outputFile_IV, 'V':outputFile_V,
+													'VI':outputFile_VI,'VII':outputFile_VII,'VIII':outputFile_VIII,'IX':outputFile_IX,'X':outputFile_X, 'XI':outputFile_XI,
+													'XII':outputFile_XII,'XIII':outputFile_XIII,'XIV':outputFile_XIV,'XV':outputFile_XV,'XVI':outputFile_XVI}
+
 						# outputFile_X = open(output_path + "SNV/X_" + project + ".genome", "w")
 						# outputFile_Y = open(output_path + "SNV/Y_" + project + ".genome", "w")
 						# outputFile_1 = open(output_path + "SNV/1_" + project + ".genome", "w")
@@ -1853,7 +2007,7 @@ def convertICGC (project, vcf_path, genome, output_path, ncbi_chrom, log_file):
 					if first_SNV:
 						if not os.path.exists(output_path + "SNV/"):
 							os.mkdir(output_path + 'SNV/')
-							if genome != 'c_elegans' and genome != 'ebv':
+							if genome != 'c_elegans' and genome != 'ebv' and genome != "yeast":
 								outputFile_X = open(output_path + "SNV/X_" + project + ".genome", "w", 10000000)
 								if genome != 'dog':
 									outputFile_Y = open(output_path + "SNV/Y_" + project + ".genome", "w", 10000000)
@@ -1931,6 +2085,22 @@ def convertICGC (project, vcf_path, genome, output_path, ncbi_chrom, log_file):
 									outputFile_IV = open(output_path + "SNV/IV_" + project + ".genome", "w", 10000000)
 									outputFile_V = open(output_path + "SNV/V_" + project + ".genome", "w", 10000000)
 									outputFile_X = open(output_path + "SNV/X_" + project + ".genome", "w", 10000000)
+									outFiles = {'I':outputFile_I, 'II':outputFile_II, 'III':outputFile_III, 'IV':outputFile_IV, 'V':outputFile_V, 'X':outputFile_X}
+									if genome == "yeast":
+										outputFile_VI = open(output_path + "SNV/VI_" + project + ".genome", "w", 10000000)
+										outputFile_VII = open(output_path + "SNV/VII_" + project + ".genome", "w", 10000000)
+										outputFile_VIII = open(output_path + "SNV/VIII_" + project + ".genome", "w", 10000000)
+										outputFile_IX = open(output_path + "SNV/IX_" + project + ".genome", "w", 10000000)
+										outputFile_XI = open(output_path + "SNV/XI_" + project + ".genome", "w", 10000000)
+										outputFile_XII = open(output_path + "SNV/XII_" + project + ".genome", "w", 10000000)
+										outputFile_XIII = open(output_path + "SNV/XIII_" + project + ".genome", "w", 10000000)
+										outputFile_XIV = open(output_path + "SNV/XIV_" + project + ".genome", "w", 10000000)
+										outputFile_XV = open(output_path + "SNV/XV_" + project + ".genome", "w", 10000000)
+										outputFile_XVI = open(output_path + "SNV/XVI_" + project + ".genome", "w", 10000000)
+										outFiles = {'I':outputFile_I, 'II':outputFile_II, 'III':outputFile_III, 'IV':outputFile_IV, 'V':outputFile_V,
+													'VI':outputFile_VI,'VII':outputFile_VII,'VIII':outputFile_VIII,'IX':outputFile_IX,'X':outputFile_X, 'XI':outputFile_XI,
+													'XII':outputFile_XII,'XIII':outputFile_XIII,'XIV':outputFile_XIV,'XV':outputFile_XV,'XVI':outputFile_XVI}
+
 						# outputFile_X = open(output_path + "SNV/X_" + project + ".genome", "w")
 						# outputFile_Y = open(output_path + "SNV/Y_" + project + ".genome", "w")
 						# outputFile_1 = open(output_path + "SNV/1_" + project + ".genome", "w")
@@ -1980,7 +2150,7 @@ def convertICGC (project, vcf_path, genome, output_path, ncbi_chrom, log_file):
 					if first_indel:
 						if not os.path.exists(output_path + "INDEL/"):
 							os.mkdir(output_path + "INDEL/")
-							if genome != 'c_elegans' and genome != 'ebv':
+							if genome != 'c_elegans' and genome != 'ebv' and genome != "yeast":
 								outputFileI_X = open(output_path + "INDEL/X_" + project + ".genome", "w")
 								if genome != 'dog':
 									outputFileI_Y = open(output_path + "INDEL/Y_" + project + ".genome", "w")
@@ -2059,6 +2229,21 @@ def convertICGC (project, vcf_path, genome, output_path, ncbi_chrom, log_file):
 									outputFileI_V = open(output_path + "INDEL/V_" + project + ".genome", "w", 10000000)
 									outputFileI_X = open(output_path + "INDEL/X_" + project + ".genome", "w", 10000000)
 									outFilesI = {'X': outputFileI_X,'I': outputFileI_I,'II': outputFileI_II,'III': outputFileI_III,'IV': outputFileI_IV,'V': outputFileI_V}
+
+									if genome == "yeast":
+										outputFileI_VI = open(output_path + "INDEL/VI_" + project + ".genome", "w", 10000000)
+										outputFileI_VII = open(output_path + "INDEL/VII_" + project + ".genome", "w", 10000000)
+										outputFileI_VIII = open(output_path + "INDEL/VIII_" + project + ".genome", "w", 10000000)
+										outputFileI_IX = open(output_path + "INDEL/IX_" + project + ".genome", "w", 10000000)
+										outputFileI_XI = open(output_path + "INDEL/XI_" + project + ".genome", "w", 10000000)
+										outputFileI_XII = open(output_path + "INDEL/XII_" + project + ".genome", "w", 10000000)
+										outputFileI_XIII = open(output_path + "INDEL/XIII_" + project + ".genome", "w", 10000000)
+										outputFileI_XIV = open(output_path + "INDEL/XIV_" + project + ".genome", "w", 10000000)
+										outputFileI_XV = open(output_path + "INDEL/XV_" + project + ".genome", "w", 10000000)
+										outputFileI_XVI = open(output_path + "INDEL/XVI_" + project + ".genome", "w", 10000000)
+										outFilesI = {'I':outputFileI_I, 'II':outputFileI_II, 'III':outputFileI_III, 'IV':outputFileI_IV, 'V':outputFileI_V,
+													'VI':outputFileI_VI,'VII':outputFileI_VII,'VIII':outputFileI_VIII,'IX':outputFileI_IX,'X':outputFileI_X, 'XI':outputFileI_XI,
+													'XII':outputFileI_XII,'XIII':outputFileI_XIII,'XIV':outputFileI_XIV,'XV':outputFileI_XV,'XVI':outputFileI_XVI}
 
 						# outputFileI_X = open(output_path + "INDEL/X_" + project + ".genome", "w")
 						# outputFileI_Y = open(output_path + "INDEL/Y_" + project + ".genome", "w")

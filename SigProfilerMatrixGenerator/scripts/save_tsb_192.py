@@ -57,8 +57,8 @@ def save_tsb (chromosome_string_path, transcript_path, output_path):
 				with open(transcript_path + file) as f:
 					lines = [line.strip().split() for line in f]
 				output = open(transcript_path + file, 'w')
-				for line in sorted(lines, key = lambda x: (['I','II','III','IV','V','chrI','chrII','chrIII','chrIV','chrV','X','Y','1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23','24',
-															'25','26','27','28','29','30','31','32','33','34','35','36','37','38','39', 'MT', 'M', 'MtDNA'].index(x[2]), int(x[4]), int(x[5]))):
+				for line in sorted(lines, key = lambda x: (['I','II','III','IV','V','chrI','chrII','chrIII','chrIV','chrV','chrVI','chrVII','chrVIII','chrIX','chrX','chrXI','chrXII','chrXIII','chrXIV','chrXV','chrXVI','X','Y','1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23','24',
+															'25','26','27','28','29','30','31','32','33','34','35','36','37','38','39', 'MT', 'M', 'MtDNA', 'chrM'].index(x[2]), int(x[4]), int(x[5]))):
 					print('\t'.join(line), file=output)
 
 				with open (transcript_path + file) as f:
@@ -111,6 +111,8 @@ def save_tsb (chromosome_string_path, transcript_path, output_path):
 	for files in transcript_files:
 		file_name = files.split("_")
 		chrom = file_name[0]
+		if "chr" in chrom:
+			chrom = chrom[3:]
 		
 		if chrom == '.DS':
 			pass

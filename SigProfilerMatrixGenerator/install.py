@@ -458,7 +458,14 @@ def install (genome, custom=False, rsync=False, bash=True, ftp=True, fastaPath=N
 								 '34':'4245d6fc370d9049ef4c25314fbef239','35':'1344aba8755b8a4e304629180fc0591a','36':'e4fff6ed84777905dc999ca6d6bc2557',
 								 '37':'60d51ea6ae9e3f2fa316e3d03aff96b2','38':'4090ff76d94e6b38920916ae3ff2441c','X':'bce1372df64037d79b0995311d8ff971'},
 				'ebv':
-							{'gi_82503188_ref_NC_007605':'7f8894e52b0cac1f968c0402838bea07'}}
+							{'gi_82503188_ref_NC_007605':'7f8894e52b0cac1f968c0402838bea07'},
+					'yeast':
+							{'I':'c7cd4d6148ff54d1d003d7fe3c39bfdf', 'II':'3303648ecf106df7c6c1449cb55980e8', 'III':'12f784db9c1cd2bc632fbefdb5329504',
+							 'IV':'e5bbd701bae1ab3965da90e1131f5b5c', 'V':'b4447ed088b10a404925c153ca3055d4', 'VI':'3285962c283977064340b62a7f843601', 
+							 'VII':'72e1438a61fde52bd66cef12c53ae4db', 'VIII':'0e00648307fd4d64f50d0feb7e428e13', 'IX':'43466267caa5ae7aec23df022b583564',
+							 'X':'dac706139aeb5cd3d75f24d0e405131e', 'XI':'5d4b415e1e313918bba6cd061d416d58', 'XII':'e26e59a4b4944ab96b819a92b60c9868',
+							 'XIII':'a12878f65ed7464e2824cb0c291d359e', 'XIV':'807431901ba993e6ba87861401da1cb2', 'XV':'44fd7223d9d30bdcf94cf627e5a172ca',
+							 'XVI':'670d7aad863043ea7a125f004e281483'}}
 
 		chromosome_fasta_path = ref_dir + "/references/chromosomes/tsb/"
 		print("Beginning installation. This may take up to 40 minutes to complete.")
@@ -466,7 +473,7 @@ def install (genome, custom=False, rsync=False, bash=True, ftp=True, fastaPath=N
 			try:
 				if bash:
 					try:
-						os.system("bash -c '" + 'wget -r -l1 -c -nc --no-parent -nd -P ' + chromosome_fasta_path + 'ftp://alexandrovlab-ftp.ucsd.edu/pub/tools/SigProfilerMatrixGenerator/' + genome + '.tar.gz 2>> install.log' + "'")
+						os.system("bash -c '" + 'wget -r -l1 -c -nc --no-parent -nd -P ' + chromosome_fasta_path + ' ftp://alexandrovlab-ftp.ucsd.edu/pub/tools/SigProfilerMatrixGenerator/' + genome + '.tar.gz 2>> install.log' + "'")
 					except:
 						print("The UCSD ftp site is not responding...pulling from sanger ftp now.")
 					try:

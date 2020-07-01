@@ -35,6 +35,7 @@ def save_chrom_tsb_separate (genome, ref_dir):
 	chromosomes_dog = ['X', 'Y', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', 
 				   	   '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23','24','25',
 				   	   '26','27','28','29','30','31','32','33','34','35','36','37','38','M']
+	chromosomes_yeast = ['I','II','III','IV','V','VI','VII','VIII','IX','X','XI','XII','XIII','XIV','XV','XVI']
 
 	tsb_ref = {0:['N','A'], 1:['N','C'], 2:['N','G'], 3:['N','T'],
 			   4:['T','A'], 5:['T','C'], 6:['T','G'], 7:['T','T'],
@@ -53,6 +54,9 @@ def save_chrom_tsb_separate (genome, ref_dir):
 
 	if genome == 'dog':
 		chromosomes = chromosomes_dog
+
+	if genome == 'yeast':
+		chromosomes = chromosomes_yeast
 
 	# Creates the output path if it does not exist
 	if not os.path.exists(chromosome_BED_path):

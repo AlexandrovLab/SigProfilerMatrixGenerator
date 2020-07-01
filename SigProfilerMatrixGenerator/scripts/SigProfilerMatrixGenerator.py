@@ -1377,6 +1377,10 @@ def exome_check (chrom_based, samples, bias_sort, exome, mut_types, bed, chrom, 
 	mutation_dict = {}
 	# samples = []
 
+	romanNumeralConversion = {'I':1, 'II':2, 'III':3, 'IV':4, 'V':5, 'VI':6, 'VII':7, 'VIII':8, 
+							  'IX':9, 'X':10, 'XI':11, 'XII':12, 'XIII':13, 'XIV':14, 'XV':15,
+							  'XVI':16}
+
 	initial = True
 	udpate_chrom = False
 	ref_dir, tail = os.path.split(os.path.dirname(os.path.abspath(__file__)))
@@ -1424,8 +1428,10 @@ def exome_check (chrom_based, samples, bias_sort, exome, mut_types, bed, chrom, 
 			elif chrom == 'gi_82503188_ref_NC_007605':
 				chrom_value = -1
 			else:
-				chrom_value = int(chrom)
-
+				try:
+					chrom_value = int(chrom)
+				except:
+					chrom_value = romanNumeralConversion[chrom]
 
 			if initial:
 				chrom_start = chrom
@@ -1486,11 +1492,14 @@ def exome_check (chrom_based, samples, bias_sort, exome, mut_types, bed, chrom, 
 					elif chrom_ref == 'Y':
 						ref_chrom_value = 0
 					elif chrom_ref == 'MT' or chrom_ref == 'M':
-						chrom_value = 100
-					elif chrom == 'gi_82503188_ref_NC_007605':
+						ref_chrom_value = 100
+					elif chrom_ref == 'gi_82503188_ref_NC_007605':
 						ref_chrom_value = -1
 					else:
-						ref_chrom_value = int(chrom_ref)
+						try:
+							ref_chrom_value = int(chrom_ref)
+						except:
+							ref_chrom_value = romanNumeralConversion[chrom_ref]
 
 					if chrom == chrom_ref:
 						save_mat = True
@@ -1565,6 +1574,9 @@ def panel_check (chrom_based, samples, bias_sort, exome, mut_types, bed, chrom, 
 	# samples = []
 	ref_dir = os.path.dirname(os.path.abspath(__file__))
 
+	romanNumeralConversion = {'I':1, 'II':2, 'III':3, 'IV':4, 'V':5, 'VI':6, 'VII':7, 'VIII':8, 
+							  'IX':9, 'X':10, 'XI':11, 'XII':12, 'XIII':13, 'XIV':14, 'XV':15,
+							  'XVI':16}
 
 	initial = True
 	udpate_chrom = False
@@ -1612,7 +1624,10 @@ def panel_check (chrom_based, samples, bias_sort, exome, mut_types, bed, chrom, 
 			elif chrom == 'gi_82503188_ref_NC_007605':
 				chrom_value = -1
 			else:
-				chrom_value = int(chrom)
+				try:
+					chrom_value = int(chrom)
+				except:
+					chrom_value = romanNumeralConversion[chrom]
 
 
 			if initial:
@@ -1670,10 +1685,13 @@ def panel_check (chrom_based, samples, bias_sort, exome, mut_types, bed, chrom, 
 						ref_chrom_value = -1
 					elif chrom_ref == 'Y':
 						ref_chrom_value = 0
-					elif chrom == 'gi_82503188_ref_NC_007605':
+					elif chrom_ref == 'gi_82503188_ref_NC_007605':
 						ref_chrom_value = -1
 					else:
-						ref_chrom_value = int(chrom_ref)
+						try:
+							ref_chrom_value = int(chrom_ref)
+						except:
+							ref_chrom_value = romanNumeralConversion[chrom_ref]
 
 					if chrom == chrom_ref:
 						save_mat = True
