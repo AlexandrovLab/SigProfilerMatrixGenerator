@@ -68,6 +68,26 @@ This tool currently supports maf, vcf, simple text file, and ICGC formats. The u
 The output structure is divided into three folders: input, output, and logs. The input folder contains copies of the user-provided input files. The outputfolder contains
 a DBS, SBS, ID, and TSB folder (there will also be a plots folder if this parameter is chosen). The matrices are saved into the appropriate folders. The logs folder contains the error and log files for the submitted job.
 
+**COPY NUMBER MATRIX GENERATION**
+
+In order to generate a copy number matrix, provide the an absolute path to a multi-sample segmentation file obtained from one of the following copy number calling tools (if you have individual sample files, please combine them into one file with the first column corresponding to the sample name):
+
+1. ASCAT
+2. ASCAT_NGS
+3. SEQUENZA
+4. ABSOLUTE
+
+In addition, provide the name of the project and the output directory for the resulting matrix. The final matrix will be placed in a folder with the name of the project in the directory specified by the output path.
+
+An example command to generate the CNV matrix is as follows:
+
+$ python3
+>>from SigProfilerMatrixGenerator.scripts import CNVMatrixGenerator as scna
+>>file_type = "ASCAT"
+>>input_file = "~/data/ASCAT-seg.tsv"
+>>output_path = "~/data/CNV/"
+>>project = "Breast_Cancer
+>>scna.generateCNVMatrix(file_type, input_file, project, output_path)
 
 **SUPPORTED GENOMES**
 
