@@ -14,12 +14,13 @@ def generateCNVMatrix(file_type, input_file, project, output_path):
 
     #make sample by feature matrix for nmf with rows as features and samples as columns
     features = []
-    with open('./SigProfilerMatrixGenerator/scripts/CNV_features.tsv') as f:
+    with open('.SigProfilerMatrixGenerator/references/CNV/CNV_features.tsv/') as f:
         for line in f:
             features.append(line.strip())
     assert(len(features) == 48)
     columns = df[df.columns[0]].unique()
     nmf_matrix = pd.DataFrame(index=features, columns=columns)
+
 
     # 2 - total copy number {del=0-1; neut=2; gain=3-4; amp=5-8; amp+=9+}.
     CN_classes = ["del","neut","dup","amp","amp+"] # different total CN states
