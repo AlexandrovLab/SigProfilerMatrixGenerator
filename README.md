@@ -79,9 +79,10 @@ In order to generate a copy number matrix, provide the an absolute path to a mul
 
 In addition, provide the name of the project and the output directory for the resulting matrix. The final matrix will be placed in a folder with the name of the project in the directory specified by the output path.
 
-An example command to generate the CNV matrix is as follows:
+An example to generate the CNV matrix is as follows:
 
 $ python3
+```
 >>from SigProfilerMatrixGenerator.scripts import CNVMatrixGenerator as scna
 >>file_type = "ASCAT"
 >>input_file = "~/data/ASCAT-seg.tsv"
@@ -89,6 +90,7 @@ $ python3
 >>project = "Breast_Cancer
 >>scna.generateCNVMatrix(file_type, input_file, project, output_path)
 
+```
 **SUPPORTED GENOMES**
 
 This tool currently supports the following genomes:
