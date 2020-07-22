@@ -115,7 +115,7 @@ def generateCNVMatrix(file_type, input_file, project, output_path):
         B_CN = np.asarray(df['Tumour BCN']) #copy number of B allele in tumor
         loh = np.minimum(A_CN, B_CN) #minimum copy number when considering both A and B alleles
         df['loh'] = list(loh)
-        for t, a in zip(df['Copy Number'], df['loh']):
+        for t, a in zip(df['Tumour TCN'], df['loh']):
             if t == 0:
                 LOH_status.append("homdel")
             elif a == 0:
