@@ -84,10 +84,10 @@ An example to generate the CNV matrix is as follows:
 $ python3
 ```
 >>from SigProfilerMatrixGenerator.scripts import CNVMatrixGenerator as scna
->>file_type = "ASCAT"
->>input_file = "~/data/ASCAT-seg.tsv"
->>output_path = "~/data/CNV/"
->>project = "Breast_Cancer
+>>file_type = "ASCAT_NGS"
+>>input_file = "./SigProfilerMatrixGenerator/references/CNV/all.breast.ascat.summary.sample.tsv" #example input file for testing
+>>output_path = "./SigProfilerMatrixGenerator/references/CNV/"
+>>project = "Breast_Cancer"
 >>scna.generateCNVMatrix(file_type, input_file, project, output_path)
 
 ```

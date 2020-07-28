@@ -6,8 +6,8 @@ import shutil
 def generateCNVMatrix(file_type, input_file, project, output_path):
 
     super_class = ['het', 'LOH', "homdel"]
-    het_sub_class = ['amp+', 'amp', 'gain', 'neut']
-    loh_subclass = ['amp+', 'amp', 'gain', 'neut', "del"]
+    # het_sub_class = ['amp+', 'amp', 'gain', 'neut']
+    # loh_subclass = ['amp+', 'amp', 'gain', 'neut', "del"]
     hom_del_class = ['0-100kb', '100kb-1Mb', '>1Mb']
     x_labels = ['>40Mb', '10Mb-40Mb', '1Mb-10Mb', '100kb-1Mb', '0-100kb']
 
@@ -17,72 +17,72 @@ def generateCNVMatrix(file_type, input_file, project, output_path):
     features = []
     with open('SigProfilerMatrixGenerator/references/CNV/CNV_features.tsv') as f:
         for line in f:
-            features.append(line.strip())
+            features.append(str(line.strip()))
     assert(len(features) == 48)
-    columns = df[df.columns[0]].unique()
-    nmf_matrix = pd.DataFrame(index=features, columns=columns)
+    columns = list(df[df.columns[0]].unique())
+    arr = np.zeros((48, len(columns)), dtype='int')
+    nmf_matrix = pd.DataFrame(arr, index=features, columns=columns)
 
 
-    # 2 - total copy number {del=0-1; neut=2; gain=3-4; amp=5-8; amp+=9+}.
-    CN_classes = ["del","neut","dup","amp","amp+"] # different total CN states
+    # 2 - total copy number {del=0-1; neut=2; gain=3-4; amp=5-8; amp+=9+}
+    CN_classes = ["1","2","3-4","5-8","9+"] # different total CN states
     CN_class = []
     if file_type == 'ASCAT_NGS':
         for tcn in df['Tumour TCN']:
             if tcn == 2:
-                CN_class.append("neut")
+                CN_class.append("2")
             elif tcn == 0 or tcn == 1:
-                CN_class.append("del")
+                CN_class.append("1")
             elif tcn == 3 or tcn == 4:
-                CN_class.append("gain")
+                CN_class.append("3-4")
             elif tcn >= 5 and tcn <= 8:
-                CN_class.append("amp")
+                CN_class.append("5-8")
             else:
-                CN_class.append("amp+")
+                CN_class.append("9+")
 
     elif file_type == 'SEQUENZA':
         for tcn in df['CNt']:
             if tcn == 2:
-                CN_class.append("neut")
+                CN_class.append("2")
             elif tcn == 0 or tcn == 1:
-                CN_class.append("del")
+                CN_class.append("1")
             elif tcn == 3 or tcn == 4:
-                CN_class.append("gain")
+                CN_class.append("3-4")
             elif tcn >= 5 and tcn <= 8:
-                CN_class.append("amp")
+                CN_class.append("5-8")
             else:
-                CN_class.append("amp+")
+                CN_class.append("9+")
     elif file_type == "ASCAT":
         for acn, bcn in zip(df['nMajor'], df['nMinor']):
             tcn = acn + bcn
             if tcn == 2:
-                CN_class.append("neut")
+                CN_class.append("2")
             elif tcn == 0 or tcn == 1:
-                CN_class.append("del")
+                CN_class.append("1")
             elif tcn == 3 or tcn == 4:
-                CN_class.append("gain")
+                CN_class.append("3-4")
             elif tcn >= 5 and tcn <= 8:
-                CN_class.append("amp")
+                CN_class.append("5-8")
             else:
-                CN_class.append("amp+")
+                CN_class.append("9+")
     elif file_type == 'ABSOLUTE':
         for acn, bcn in zip(df['Modal_HSCN_1'], df['Modal_HSCN_2']):
             tcn = acn + bcn
             if tcn == 2:
-                CN_class.append("neut")
+                CN_class.append("2")
             elif tcn == 0 or tcn == 1:
-                CN_class.append("del")
+                CN_class.append("1")
             elif tcn == 3 or tcn == 4:
-                CN_class.append("gain")
+                CN_class.append("3-4")
             elif tcn >= 5 and tcn <= 8:
-                CN_class.append("amp")
+                CN_class.append("5-8")
             else:
-                CN_class.append("amp+")
+                CN_class.append("9+")
 
     else:
         pass
 
     df['CN_class'] = CN_class
-
 
     # 1 - LOH status {hom del; heterozygous; LOH}.
     LOH_status = []
@@ -193,66 +193,15 @@ def generateCNVMatrix(file_type, input_file, project, output_path):
         sizes.append(size)
         size_bins.append(size_bin)
     df['size_classification'] = sizes
-    df['size_bin'] = size_bins
-
-    counts = {} #dictionary that maps (sample, feature) to frequency, will be used to populate each cell of matrix
-    for a, c1 in enumerate(super_class):
-        df1 = df[df['LOH'] == c1]
-        if c1 == 'het':
-            for b, c2 in enumerate(het_sub_class): #amp+, amp, etc.
-                df2 = df1[df1['CN_class'] == c2]
-                for j, x in enumerate(x_labels):
-                    df3 = df2[df2['size_classification'] == x]
-                    for s in df3[df3.columns[0]].unique():
-                        sample_df = df[df[df.columns[0]] == s]
-                        for a, b, c in zip(sample_df['CN_class'], sample_df['LOH'], sample_df['size_classification']):
-                            f = a+":"+b+":"+c
-                            key = (s, f)
-                            value = sample_df.shape[0]
-                            if f not in set(features):
-                                print (f)
-                            else:
-                                counts[key] = value
 
 
-        elif c1 == 'LOH':
-            for b, c2 in enumerate(loh_subclass): #amp+, amp, etc.
-                df2 = df1[df1['CN_class'] == c2]
-                for j, x in enumerate(x_labels):
-                    df3 = df2[df2['size_classification'] == x]
-                    for s in df3[df3.columns[0]].unique():
-                        sample_df = df3[df3[df3.columns[0]] == s]
-                        for a, b, c in zip(sample_df['CN_class'], sample_df['LOH'], sample_df['size_classification']):
-                            f = a+":"+b+":"+c
-                            key = (s, f)
-                            value = sample_df.shape[0]
-                            if f not in set(features):
-                                print (f)
-                            else:
-                                counts[key] = value
-
-        else: #Hom del
-            for b, c3 in enumerate(hom_del_class):
-                df3 = df1[df1['size_classification'] == c3]
-                for s in df3[df3.columns[0]].unique():
-                    sample_df = df3[df3[df3.columns[0]] == s]
-                    for a, b, c in zip(sample_df['CN_class'], sample_df['LOH'], sample_df['size_classification']):
-                        f = "del:homdel:" + c
-                        key = (s, f)
-                        value = sample_df.shape[0]
-                    if f not in set(features):
-                        print (f)
-                    else:
-                        counts[key] = value
-
-    #use counts dictionary(which maps (sample, CNV feature) to frequency observed) to populate matrix
-    for i, row in enumerate(nmf_matrix.index):
-        for j, sample in enumerate(nmf_matrix.columns):
-            if (sample, row) in counts:
-                nmf_matrix.iat[i, j] = counts[(sample, row)]
-            else:
-                nmf_matrix.iat[i, j] = 0
-
+    for sample, tcn, loh, size in zip(df[df.columns[0]], df['CN_class'], df['LOH'], df['size_classification']):
+        if loh == "homdel":
+            channel = "0" + ":" + loh + ":" + size
+        else:
+            channel = tcn + ":" + loh + ":" + size
+        nmf_matrix.at[channel, sample] += 1
+ 
     nmf_matrix.index.name = 'classification'
     output_path = output_path + project + "/"
     if os.path.exists(output_path):
