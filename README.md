@@ -9,8 +9,6 @@ The purpose of this document is to provide a guide for using the SigProfilerMatr
 
 For users that prefer working in an R environment, a wrapper package is provided and can be found and installed from: https://github.com/AlexandrovLab/SigProfilerMatrixGeneratorR
 
-![schematic](schematic.png)
-
 **PREREQUISITES**
 
 The framework is written in PYTHON, however, it also requires the following software with the given versions (or newer):
@@ -70,7 +68,29 @@ This tool currently supports maf, vcf, simple text file, and ICGC formats. The u
 The output structure is divided into three folders: input, output, and logs. The input folder contains copies of the user-provided input files. The outputfolder contains
 a DBS, SBS, ID, and TSB folder (there will also be a plots folder if this parameter is chosen). The matrices are saved into the appropriate folders. The logs folder contains the error and log files for the submitted job.
 
+**COPY NUMBER MATRIX GENERATION**
 
+In order to generate a copy number matrix, provide the an absolute path to a multi-sample segmentation file obtained from one of the following copy number calling tools (if you have individual sample files, please combine them into one file with the first column corresponding to the sample name):
+
+1. ASCAT
+2. ASCAT_NGS
+3. SEQUENZA
+4. ABSOLUTE
+
+In addition, provide the name of the project and the output directory for the resulting matrix. The final matrix will be placed in a folder with the name of the project in the directory specified by the output path.
+
+An example to generate the CNV matrix is as follows:
+
+$ python3
+```
+>>from SigProfilerMatrixGenerator.scripts import CNVMatrixGenerator as scna
+>>file_type = "ASCAT_NGS"
+>>input_file = "./SigProfilerMatrixGenerator/references/CNV/all.breast.ascat.summary.sample.tsv" #example input file for testing
+>>output_path = "./SigProfilerMatrixGenerator/references/CNV/"
+>>project = "Breast_Cancer"
+>>scna.generateCNVMatrix(file_type, input_file, project, output_path)
+
+```
 **SUPPORTED GENOMES**
 
 This tool currently supports the following genomes:
@@ -97,13 +117,13 @@ For all errors, please email the error and progress log files to the primary con
 
 **CITATION**
 
-Bergstrom EN, Huang MN, Mahto U, Barnes M, Stratton MR, Rozen SG, Alexandrov LB: SigProfilerMatrixGenerator: a tool for visualizing and exploring patterns of small mutational events. BMC Genomics 2019, 20:685
+Bergstrom EN, Huang MN, Mahto U, Barnes M, Stratton MR, Rozen SG, and Alexandrov LB (2019) SigProfilerMatrixGenerator: a tool for visualizing and exploring patterns of small mutational events. **BMC Genomics** 20, Article number: 685.
 https://bmcgenomics.biomedcentral.com/articles/10.1186/s12864-019-6041-2
 
 
 **COPYRIGHT**
 
-Copyright (c) 2020, Erik Bergstrom [Alexandrov Lab] All rights reserved.
+Copyright (c) 2019, Erik Bergstrom [Alexandrov Lab] All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
 
