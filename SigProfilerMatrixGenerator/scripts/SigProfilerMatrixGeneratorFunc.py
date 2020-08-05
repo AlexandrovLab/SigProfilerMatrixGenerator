@@ -301,6 +301,7 @@ def SigProfilerMatrixGeneratorFunc (project, genome, vcfFiles, exome=False, bed_
 		os.remove(error_file)
 	if os.path.exists(log_file):
 		 os.remove(log_file)
+	tempErr = sys.stderr
 	sys.stderr = open(error_file, 'w')
 	log_out = open(log_file, 'w')
 	log_out.write("THIS FILE CONTAINS THE METADATA ABOUT SYSTEM AND RUNTIME\n\n\n")
@@ -626,6 +627,7 @@ def SigProfilerMatrixGeneratorFunc (project, genome, vcfFiles, exome=False, bed_
 		print("Completed! Elapsed time: " + str(round(end, 2)) + " seconds.")
 
 	sys.stderr.close()
+	sys.stderr = tempErr
 	# Prints a summary for the given run (total samples, skipped mutations, etc.)
 	if not chrom_based:
 		print("Matrices generated for " + str(sample_count_high) + " samples with " + str(skipped_muts) + " errors. Total of " + str(analyzed_muts[0]) + " SNVs, " + str(analyzed_muts[1]) + " DINUCs, and " + str(analyzed_muts[2]) + " INDELs were successfully analyzed.")
