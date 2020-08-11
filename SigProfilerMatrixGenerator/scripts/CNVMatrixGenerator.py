@@ -78,7 +78,18 @@ def generateCNVMatrix(file_type, input_file, project, output_path):
                 CN_class.append("5-8")
             else:
                 CN_class.append("9+")
-
+    elif file_type == 'PCAWG':
+        for tcn in df["copy_number"]:
+            if tcn == 2:
+                CN_class.append("2")
+            elif tcn == 0 or tcn == 1:
+                CN_class.append("1")
+            elif tcn == 3 or tcn == 4:
+                CN_class.append("3-4")
+            elif tcn >= 5 and tcn <= 8:
+                CN_class.append("5-8")
+            else:
+                CN_class.append("9+")
     else:
         pass
 
@@ -132,6 +143,19 @@ def generateCNVMatrix(file_type, input_file, project, output_path):
                 LOH_status.append("LOH")
             else:
                 LOH_status.append("het")
+    elif file_type == 'PCAWG':
+        for tcn, m in zip(df['copy_number'], df['mutation_type']):
+            tcn = int(tcn)
+            if m == 'copy neutral LOH' or m == 'amp LOH' or m == "hemizygous del LOH" or (m == "loss" and tcn == 1):
+                LOH_status.append("LOH")
+            elif m == "copy neutral" or m == "gain"                                                      :
+                LOH_status.append("het")
+            elif m == "loss" and tcn == 0:
+                LOH_status.append("homdel")
+            else:
+                print(tcn, m)
+                #raise ValueError('Unable to determine zygosity')
+
     else:
         print("Please provide a proper file type")
 
@@ -153,6 +177,9 @@ def generateCNVMatrix(file_type, input_file, project, output_path):
     elif file_type == 'ASCAT':
         for start, end in zip(df['startpos'], df['endpos']):
             lengths.append((end - start)/1000000)
+    elif file_type == 'PCAWG':
+        for start, end in zip(df['chromosome_start'], df['chromosome_end']):
+            lengths.append((end - start)/1000000)
     else:
         pass
 
@@ -160,7 +187,7 @@ def generateCNVMatrix(file_type, input_file, project, output_path):
     df['length'] = lengths
 
     sizes = []
-    size_bins = [] #features of matrix(matches Chris's classification)
+    size_bins = []
     hom_del_class = ['0-100kb', '100kb-1Mb', '>1Mb']
 
     for l, s in zip(lengths, df['LOH']): #keep in mind the lengths are in megabases
@@ -201,7 +228,7 @@ def generateCNVMatrix(file_type, input_file, project, output_path):
         else:
             channel = tcn + ":" + loh + ":" + size
         nmf_matrix.at[channel, sample] += 1
- 
+
     nmf_matrix.index.name = 'classification'
     output_path = output_path + project + "/"
     if os.path.exists(output_path):
