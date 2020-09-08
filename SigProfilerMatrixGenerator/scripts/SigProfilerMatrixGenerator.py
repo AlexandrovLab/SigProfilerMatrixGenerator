@@ -2253,7 +2253,7 @@ def matrix_generator_INDEL (output_matrix, samples, indel_types, indel_types_tsb
 			output_file_matrix_complete = output_matrix_INDEL + file_prefix_complete + ".all"
 			output_file_matrix_complete_seq = output_matrix_INDEL + file_prefix_complete_seq + ".all"
 
-
+		
 	if initial_chrom != None:
 		output_file_matrix += ".chr" + initial_chrom
 		output_file_matrix_tsb += ".chr" + initial_chrom
@@ -2264,49 +2264,51 @@ def matrix_generator_INDEL (output_matrix, samples, indel_types, indel_types_tsb
 
 
 	# Sort the TSB types (T,U,B,N)
-	types = list(indel_tsb_dict.index)
-	types = sorted(types, key=lambda val: (bias_sort[val[0]], val[2:]))
-	indel_tsb_dict = indel_tsb_dict.reindex(types)
+	try:
+		types = list(indel_tsb_dict.index)
+		types = sorted(types, key=lambda val: (bias_sort[val[0]], val[2:]))
+		indel_tsb_dict = indel_tsb_dict.reindex(types)
 
 
-	# Collapse the Bi-directionally transcribed type to transcribed and untranscribed
-	# trans = indel_tsb_dict[indel_tsb_dict.index.str[0:2] == 'T:']
-	# untrans = indel_tsb_dict[indel_tsb_dict.index.str[0:2] == 'U:']
-	# bitrans = indel_tsb_dict[indel_tsb_dict.index.str[0:2] == 'B:']
-	# nontrans = indel_tsb_dict[indel_tsb_dict.index.str[0:2] == 'N:']
-	# questionable = indel_tsb_dict[indel_tsb_dict.index.str[0:2] == 'Q:']
-	# a = bitrans//2
-	# b = bitrans%2
-	# trans = trans.append(a)
-	# trans  = trans.groupby(trans.index.str[2:]).sum()
-	# trans = trans.rename(index=lambda s: "T:"+s)
-	# untrans = untrans.append(a)
-	# untrans = untrans.groupby(untrans.index.str[2:]).sum()
-	# untrans = untrans.rename(index=lambda s:"U:"+s)
-	# indel_tsb_dict_abbrev = pd.concat([trans, untrans, nontrans, questionable])
-	# for x in list(b.index):
-	# 	mutAbrrev = x[2:]
-	# 	tempMat = pd.concat([trans.loc["T:"+mutAbrrev],untrans.loc["U:"+mutAbrrev]], axis=1)
-	# 	for z,y in zip(tempMat.idxmax(axis=1), list(tempMat.index)):
-	# 		indel_tsb_dict_abbrev.loc[z,y] += b.loc[x,y]
+		# Collapse the Bi-directionally transcribed type to transcribed and untranscribed
+		# trans = indel_tsb_dict[indel_tsb_dict.index.str[0:2] == 'T:']
+		# untrans = indel_tsb_dict[indel_tsb_dict.index.str[0:2] == 'U:']
+		# bitrans = indel_tsb_dict[indel_tsb_dict.index.str[0:2] == 'B:']
+		# nontrans = indel_tsb_dict[indel_tsb_dict.index.str[0:2] == 'N:']
+		# questionable = indel_tsb_dict[indel_tsb_dict.index.str[0:2] == 'Q:']
+		# a = bitrans//2
+		# b = bitrans%2
+		# trans = trans.append(a)
+		# trans  = trans.groupby(trans.index.str[2:]).sum()
+		# trans = trans.rename(index=lambda s: "T:"+s)
+		# untrans = untrans.append(a)
+		# untrans = untrans.groupby(untrans.index.str[2:]).sum()
+		# untrans = untrans.rename(index=lambda s:"U:"+s)
+		# indel_tsb_dict_abbrev = pd.concat([trans, untrans, nontrans, questionable])
+		# for x in list(b.index):
+		# 	mutAbrrev = x[2:]
+		# 	tempMat = pd.concat([trans.loc["T:"+mutAbrrev],untrans.loc["U:"+mutAbrrev]], axis=1)
+		# 	for z,y in zip(tempMat.idxmax(axis=1), list(tempMat.index)):
+		# 		indel_tsb_dict_abbrev.loc[z,y] += b.loc[x,y]
 
-	# Collapse the Bi-directionally transcribed type to non-transcribed
-	trans = indel_tsb_dict[indel_tsb_dict.index.str.contains('T:')]
-	untrans = indel_tsb_dict[indel_tsb_dict.index.str.contains('U:')]
-	bitrans = indel_tsb_dict[indel_tsb_dict.index.str.contains('B:')]
-	nontrans = indel_tsb_dict[indel_tsb_dict.index.str.contains('N:')]
-	questionable = indel_tsb_dict[indel_tsb_dict.index.str.contains('Q:')]
-	a = bitrans//2
-	b = bitrans%2
-	trans = trans.append(a)
-	trans = trans.append(b)
-	trans  = trans.groupby(trans.index.str[2:]).sum()
-	trans = trans.rename(index=lambda s: "T:"+s)
-	untrans = untrans.append(a)
-	untrans = untrans.groupby(untrans.index.str[2:]).sum()
-	untrans = untrans.rename(index=lambda s:"U:"+s)
-	indel_tsb_dict_abbrev = pd.concat([trans, untrans, nontrans, questionable])
-
+		# Collapse the Bi-directionally transcribed type to non-transcribed
+		trans = indel_tsb_dict[indel_tsb_dict.index.str.contains('T:')]
+		untrans = indel_tsb_dict[indel_tsb_dict.index.str.contains('U:')]
+		bitrans = indel_tsb_dict[indel_tsb_dict.index.str.contains('B:')]
+		nontrans = indel_tsb_dict[indel_tsb_dict.index.str.contains('N:')]
+		questionable = indel_tsb_dict[indel_tsb_dict.index.str.contains('Q:')]
+		a = bitrans//2
+		b = bitrans%2
+		trans = trans.append(a)
+		trans = trans.append(b)
+		trans  = trans.groupby(trans.index.str[2:]).sum()
+		trans = trans.rename(index=lambda s: "T:"+s)
+		untrans = untrans.append(a)
+		untrans = untrans.groupby(untrans.index.str[2:]).sum()
+		untrans = untrans.rename(index=lambda s:"U:"+s)
+		indel_tsb_dict_abbrev = pd.concat([trans, untrans, nontrans, questionable])
+	except:
+		pass
 
 	# trans = indel_tsb_dict[indel_tsb_dict.index.str[0:2] == 'T:']
 	# untrans = indel_tsb_dict[indel_tsb_dict.index.str[0:2] == 'U:']
@@ -2317,8 +2319,10 @@ def matrix_generator_INDEL (output_matrix, samples, indel_types, indel_types_tsb
 	# indel_tsb_dict_abbrev = pd.concat([trans, untrans, biTransNonTrans, questionableTrans])
 
 
-
-	short_id = pd.DataFrame(indel_dict).iloc[:83,:]
+	try:
+		short_id = pd.DataFrame(indel_dict).iloc[:83,:]
+	except:
+		pass
 
 	if initial_chrom != None and (exome or bed):
 		if indel_tsb_dict is None and indel_simple_dict is None:

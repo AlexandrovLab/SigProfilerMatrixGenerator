@@ -69,7 +69,8 @@ def convertVCF (project, vcf_path, genome, output_path, ncbi_chrom, log_file):
 							chrom = chrom[3:]
 						if chrom in ncbi_chrom:
 							chrom = ncbi_chrom[chrom]
-
+						if chrom.upper() == "M" or chrom == 'mt':
+							chrom = "MT"
 						start = line[1]
 						ref = line[3]
 						mut = line[4]
@@ -118,6 +119,7 @@ def convertVCF (project, vcf_path, genome, output_path, ncbi_chrom, log_file):
 								outputFile_X = open(output_path + "SNV/X_" + project + ".genome", "w", 10000000)
 								if genome != 'dog':
 									outputFile_Y = open(output_path + "SNV/Y_" + project + ".genome", "w", 10000000)
+									outputFile_MT = open(output_path + "SNV/MT_" + project + ".genome", "w", 10000000)
 									# files.extend(outputFile_Y, outputFile_X)
 								outputFile_1 = open(output_path + "SNV/1_" + project + ".genome", "w", 10000000)
 								outputFile_2 = open(output_path + "SNV/2_" + project + ".genome", "w", 10000000)
@@ -148,6 +150,7 @@ def convertVCF (project, vcf_path, genome, output_path, ncbi_chrom, log_file):
 											'17':outputFile_17, '18':outputFile_18, '19':outputFile_19}#, '20':outputFile_20, '21':outputFile_21, '22':outputFile_22}
 								if genome != 'dog':
 									outFiles['Y'] = outputFile_Y
+									outFiles['MT'] = outputFile_MT
 
 								if genome != 'mm10' and genome != 'mm9':
 									outputFile_20 = open(output_path + "SNV/20_" + project + ".genome", "w", 10000000)
@@ -289,6 +292,7 @@ def convertVCF (project, vcf_path, genome, output_path, ncbi_chrom, log_file):
 								outputFile_X = open(output_path + "SNV/X_" + project + ".genome", "w")
 								if genome != 'dog':
 									outputFile_Y = open(output_path + "SNV/Y_" + project + ".genome", "w", 10000000)
+									outputFile_MT = open(output_path + "SNV/MT_" + project + ".genome", "w", 10000000)
 								outputFile_1 = open(output_path + "SNV/1_" + project + ".genome", "w")
 								outputFile_2 = open(output_path + "SNV/2_" + project + ".genome", "w")
 								outputFile_3 = open(output_path + "SNV/3_" + project + ".genome", "w")
@@ -316,6 +320,7 @@ def convertVCF (project, vcf_path, genome, output_path, ncbi_chrom, log_file):
 
 								if genome != 'dog':
 									outFiles['Y'] = outputFile_Y
+									outFiles['MT'] = outputFile_MT
 								if genome != 'mm10' and genome != 'mm9':
 									outputFile_20 = open(output_path + "SNV/20_" + project + ".genome", "w", 10000000)
 									outFiles['20'] = outputFile_20
@@ -398,6 +403,7 @@ def convertVCF (project, vcf_path, genome, output_path, ncbi_chrom, log_file):
 								outputFileI_X = open(output_path + "INDEL/X_" + project + ".genome", "w")
 								if genome != 'dog':
 									outputFileI_Y = open(output_path + "INDEL/Y_" + project + ".genome", "w")
+									outputFileI_MT = open(output_path + "INDEL/MT_" + project + ".genome", "w", 10000000)
 								outputFileI_1 = open(output_path + "INDEL/1_" + project + ".genome", "w")
 								outputFileI_2 = open(output_path + "INDEL/2_" + project + ".genome", "w")
 								outputFileI_3 = open(output_path + "INDEL/3_" + project + ".genome", "w")
@@ -426,6 +432,7 @@ def convertVCF (project, vcf_path, genome, output_path, ncbi_chrom, log_file):
 
 								if genome != 'dog':
 									outFilesI['Y'] = outputFileI_Y
+									outFilesI['MT'] = outputFileI_MT
 								if genome != 'mm10' and genome != 'mm9':
 									outputFileI_20 = open(output_path + "INDEL/20_" + project + ".genome", "w", 10000000)
 									outFilesI['20'] = outputFileI_20
@@ -569,7 +576,8 @@ def convertTxt (project, vcf_path, genome, output_path, ncbi_chrom, log_file):
 						chrom = chrom[3:]
 					if chrom in ncbi_chrom:
 						chrom = ncbi_chrom[chrom]
-
+					if chrom.upper() == "M" or chrom == 'mt':
+						chrom = "MT"
 					start = line[6]
 					end = line[7]
 					ref = line[8]
@@ -620,6 +628,7 @@ def convertTxt (project, vcf_path, genome, output_path, ncbi_chrom, log_file):
 								outputFile_X = open(output_path + "SNV/X_" + project + ".genome", "w", 10000000)
 								if genome != 'dog':
 									outputFile_Y = open(output_path + "SNV/Y_" + project + ".genome", "w", 10000000)
+									outputFile_MT = open(output_path + "SNV/MT_" + project + ".genome", "w", 10000000)
 								outputFile_1 = open(output_path + "SNV/1_" + project + ".genome", "w", 10000000)
 								outputFile_2 = open(output_path + "SNV/2_" + project + ".genome", "w", 10000000)
 								outputFile_3 = open(output_path + "SNV/3_" + project + ".genome", "w", 10000000)
@@ -646,6 +655,7 @@ def convertTxt (project, vcf_path, genome, output_path, ncbi_chrom, log_file):
 											'17':outputFile_17, '18':outputFile_18, '19':outputFile_19}#, '20':outputFile_20, '21':outputFile_21, '22':outputFile_22}
 								if genome != 'dog':
 									outFiles['Y'] = outputFile_Y
+									outFiles['MT'] = outputFile_MT
 
 								if genome != 'mm10' and genome != 'mm9':
 									outputFile_20 = open(output_path + "SNV/20_" + project + ".genome", "w", 10000000)
@@ -813,6 +823,8 @@ def convertTxt (project, vcf_path, genome, output_path, ncbi_chrom, log_file):
 								outputFile_X = open(output_path + "SNV/X_" + project + ".genome", "w", 10000000)
 								if genome != 'dog':
 									outputFile_Y = open(output_path + "SNV/Y_" + project + ".genome", "w", 10000000)
+									outputFile_MT = open(output_path + "SNV/MT_" + project + ".genome", "w", 10000000)
+
 								outputFile_1 = open(output_path + "SNV/1_" + project + ".genome", "w", 10000000)
 								outputFile_2 = open(output_path + "SNV/2_" + project + ".genome", "w", 10000000)
 								outputFile_3 = open(output_path + "SNV/3_" + project + ".genome", "w", 10000000)
@@ -839,6 +851,7 @@ def convertTxt (project, vcf_path, genome, output_path, ncbi_chrom, log_file):
 											'17':outputFile_17, '18':outputFile_18, '19':outputFile_19}#, '20':outputFile_20, '21':outputFile_21, '22':outputFile_22}
 								if genome != 'dog':
 									outFiles['Y'] = outputFile_Y
+									outFiles['MT'] = outputFile_MT
 
 								if genome != 'mm10' and genome != 'mm9':
 									outputFile_20 = open(output_path + "SNV/20_" + project + ".genome", "w", 10000000)
@@ -958,6 +971,7 @@ def convertTxt (project, vcf_path, genome, output_path, ncbi_chrom, log_file):
 								outputFileI_X = open(output_path + "INDEL/X_" + project + ".genome", "w")
 								if genome != 'dog':
 									outputFileI_Y = open(output_path + "INDEL/Y_" + project + ".genome", "w")
+									outputFileI_MT = open(output_path + "INDEL/MT_" + project + ".genome", "w", 10000000)
 								outputFileI_1 = open(output_path + "INDEL/1_" + project + ".genome", "w")
 								outputFileI_2 = open(output_path + "INDEL/2_" + project + ".genome", "w")
 								outputFileI_3 = open(output_path + "INDEL/3_" + project + ".genome", "w")
@@ -986,6 +1000,7 @@ def convertTxt (project, vcf_path, genome, output_path, ncbi_chrom, log_file):
 
 								if genome != 'dog':
 									outFilesI['Y'] = outputFileI_Y
+									outFilesI['MT'] = outputFileI_MT
 								if genome != 'mm10' and genome != 'mm9':
 									outputFileI_20 = open(output_path + "INDEL/20_" + project + ".genome", "w", 10000000)
 									outFilesI['20'] = outputFileI_20
@@ -1164,7 +1179,8 @@ def convertMAF (project, vcf_path, genome, output_path, ncbi_chrom, log_file):
 						chrom = chrom[3:]
 					if chrom in ncbi_chrom:
 						chrom = ncbi_chrom[chrom]
-
+					if chrom.upper() == "M" or chrom == 'mt':
+						chrom = "MT"
 					start = line[5]
 					end = line[6]
 					ref = line[10]
@@ -1217,6 +1233,7 @@ def convertMAF (project, vcf_path, genome, output_path, ncbi_chrom, log_file):
 								outputFile_X = open(output_path + "SNV/X_" + project + ".genome", "w", 10000000)
 								if genome != 'dog':
 									outputFile_Y = open(output_path + "SNV/Y_" + project + ".genome", "w", 10000000)
+									outputFile_MT = open(output_path + "SNV/MT_" + project + ".genome", "w", 10000000)
 								outputFile_1 = open(output_path + "SNV/1_" + project + ".genome", "w", 10000000)
 								outputFile_2 = open(output_path + "SNV/2_" + project + ".genome", "w", 10000000)
 								outputFile_3 = open(output_path + "SNV/3_" + project + ".genome", "w", 10000000)
@@ -1243,6 +1260,7 @@ def convertMAF (project, vcf_path, genome, output_path, ncbi_chrom, log_file):
 											'17':outputFile_17, '18':outputFile_18, '19':outputFile_19}#, '20':outputFile_20, '21':outputFile_21, '22':outputFile_22}
 								if genome != 'dog':
 									outFiles['Y'] = outputFile_Y
+									outFiles['MT'] = outputFile_MT
 
 								if genome != 'mm10' and genome != 'mm9':
 									outputFile_20 = open(output_path + "SNV/20_" + project + ".genome", "w", 10000000)
@@ -1411,6 +1429,7 @@ def convertMAF (project, vcf_path, genome, output_path, ncbi_chrom, log_file):
 								outputFile_X = open(output_path + "SNV/X_" + project + ".genome", "w", 10000000)
 								if genome != 'dog':
 									outputFile_Y = open(output_path + "SNV/Y_" + project + ".genome", "w", 10000000)
+									outputFile_MT = open(output_path + "SNV/MT_" + project + ".genome", "w", 10000000)
 								outputFile_1 = open(output_path + "SNV/1_" + project + ".genome", "w", 10000000)
 								outputFile_2 = open(output_path + "SNV/2_" + project + ".genome", "w", 10000000)
 								outputFile_3 = open(output_path + "SNV/3_" + project + ".genome", "w", 10000000)
@@ -1437,6 +1456,7 @@ def convertMAF (project, vcf_path, genome, output_path, ncbi_chrom, log_file):
 											'17':outputFile_17, '18':outputFile_18, '19':outputFile_19}#, '20':outputFile_20, '21':outputFile_21, '22':outputFile_22}
 								if genome != 'dog':
 									outFiles['Y'] = outputFile_Y
+									outFiles['MT'] = outputFile_MT
 
 								if genome != 'mm10' and genome != 'mm9':
 									outputFile_20 = open(output_path + "SNV/20_" + project + ".genome", "w", 10000000)
@@ -1556,6 +1576,7 @@ def convertMAF (project, vcf_path, genome, output_path, ncbi_chrom, log_file):
 								outputFileI_X = open(output_path + "INDEL/X_" + project + ".genome", "w")
 								if genome != 'dog':
 									outputFileI_Y = open(output_path + "INDEL/Y_" + project + ".genome", "w")
+									outputFileI_MT = open(output_path + "INDEL/MT_" + project + ".genome", "w", 10000000)
 								outputFileI_1 = open(output_path + "INDEL/1_" + project + ".genome", "w")
 								outputFileI_2 = open(output_path + "INDEL/2_" + project + ".genome", "w")
 								outputFileI_3 = open(output_path + "INDEL/3_" + project + ".genome", "w")
@@ -1584,6 +1605,7 @@ def convertMAF (project, vcf_path, genome, output_path, ncbi_chrom, log_file):
 
 								if genome != 'dog':
 									outFilesI['Y'] = outputFileI_Y
+									outFilesI['MT'] = outputFileI_MT
 								if genome != 'mm10' and genome != 'mm9':
 									outputFileI_20 = open(output_path + "INDEL/20_" + project + ".genome", "w", 10000000)
 									outFilesI['20'] = outputFileI_20
@@ -1760,7 +1782,8 @@ def convertICGC (project, vcf_path, genome, output_path, ncbi_chrom, log_file):
 						chrom = chrom[3:]
 					if chrom in ncbi_chrom:
 						chrom = ncbi_chrom[chrom]
-
+					if chrom.upper() == "M" or chrom == 'mt':
+						chrom = "MT"
 					start = line[9]
 					end = line[10]
 					genome = line[12]
@@ -1817,6 +1840,7 @@ def convertICGC (project, vcf_path, genome, output_path, ncbi_chrom, log_file):
 								outputFile_X = open(output_path + "SNV/X_" + project + ".genome", "w", 10000000)
 								if genome != 'dog':
 									outputFile_Y = open(output_path + "SNV/Y_" + project + ".genome", "w", 10000000)
+									outputFile_MT = open(output_path + "SNV/MT_" + project + ".genome", "w", 10000000)
 								outputFile_1 = open(output_path + "SNV/1_" + project + ".genome", "w", 10000000)
 								outputFile_2 = open(output_path + "SNV/2_" + project + ".genome", "w", 10000000)
 								outputFile_3 = open(output_path + "SNV/3_" + project + ".genome", "w", 10000000)
@@ -1843,6 +1867,7 @@ def convertICGC (project, vcf_path, genome, output_path, ncbi_chrom, log_file):
 											'17':outputFile_17, '18':outputFile_18, '19':outputFile_19}#, '20':outputFile_20, '21':outputFile_21, '22':outputFile_22}
 								if genome != 'dog':
 									outFiles['Y'] = outputFile_Y
+									outFiles['MT'] = outputFile_MT
 
 								if genome != 'mm10' and genome != 'mm9':
 									outputFile_20 = open(output_path + "SNV/20_" + project + ".genome", "w", 10000000)
@@ -2011,6 +2036,7 @@ def convertICGC (project, vcf_path, genome, output_path, ncbi_chrom, log_file):
 								outputFile_X = open(output_path + "SNV/X_" + project + ".genome", "w", 10000000)
 								if genome != 'dog':
 									outputFile_Y = open(output_path + "SNV/Y_" + project + ".genome", "w", 10000000)
+									outputFile_MT = open(output_path + "SNV/MT_" + project + ".genome", "w", 10000000)
 								outputFile_1 = open(output_path + "SNV/1_" + project + ".genome", "w", 10000000)
 								outputFile_2 = open(output_path + "SNV/2_" + project + ".genome", "w", 10000000)
 								outputFile_3 = open(output_path + "SNV/3_" + project + ".genome", "w", 10000000)
@@ -2037,6 +2063,7 @@ def convertICGC (project, vcf_path, genome, output_path, ncbi_chrom, log_file):
 											'17':outputFile_17, '18':outputFile_18, '19':outputFile_19}#, '20':outputFile_20, '21':outputFile_21, '22':outputFile_22}
 								if genome != 'dog':
 									outFiles['Y'] = outputFile_Y
+									outFiles['MT'] = outputFile_MT
 
 								if genome != 'mm10' and genome != 'mm9':
 									outputFile_20 = open(output_path + "SNV/20_" + project + ".genome", "w", 10000000)
@@ -2154,6 +2181,7 @@ def convertICGC (project, vcf_path, genome, output_path, ncbi_chrom, log_file):
 								outputFileI_X = open(output_path + "INDEL/X_" + project + ".genome", "w")
 								if genome != 'dog':
 									outputFileI_Y = open(output_path + "INDEL/Y_" + project + ".genome", "w")
+									outputFileI_MT = open(output_path + "INDEL/MT_" + project + ".genome", "w", 10000000)
 								outputFileI_1 = open(output_path + "INDEL/1_" + project + ".genome", "w")
 								outputFileI_2 = open(output_path + "INDEL/2_" + project + ".genome", "w")
 								outputFileI_3 = open(output_path + "INDEL/3_" + project + ".genome", "w")
@@ -2182,6 +2210,7 @@ def convertICGC (project, vcf_path, genome, output_path, ncbi_chrom, log_file):
 
 								if genome != 'dog':
 									outFilesI['Y'] = outputFileI_Y
+									outFilesI['MT'] = outputFileI_MT
 								if genome != 'mm10' and genome != 'mm9':
 									outputFileI_20 = open(output_path + "INDEL/20_" + project + ".genome", "w", 10000000)
 									outFilesI['20'] = outputFileI_20

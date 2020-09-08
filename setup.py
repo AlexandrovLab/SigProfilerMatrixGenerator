@@ -8,10 +8,14 @@ if os.path.exists("dist"):
 	shutil.rmtree("dist")
 
 def readme():
-	with open('README.rst') as f:
-		return(f.read())
+	this_directory = os.path.abspath(os.path.dirname(__file__))
+	with open(os.path.join(this_directory, 'README.md'), encoding='latin-1') as f:
+		long_description = f.read()
+		return(long_description)
+	# with open('README.rst') as f:
+	# 	return(f.read())
 
-VERSION = '1.1.17'
+VERSION = '1.1.20'
 
 def write_version_py(filename='SigProfilerMatrixGenerator/version.py'):
 	# Copied from numpy setup.py
@@ -30,6 +34,8 @@ write_version_py()
 setup(name='SigProfilerMatrixGenerator',
 		version=VERSION,
 		description='SigProfiler matrix generator tool',
+		long_description= readme(),
+		long_description_content_type='text/markdown',
 		url='',
 		author='Erik Bergstrom',
 		author_email='ebergstr@eng.ucsd.edu',
