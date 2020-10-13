@@ -75,6 +75,9 @@ def SigProfilerMatrixGeneratorFunc (project, genome, vcfFiles, exome=False, bed_
 	'''
 
 	# Instantiates all of the required variables and references
+	if not os.path.exists(vcfFiles):
+		print("The given project path does not appear to exist. Please check that the specified path exists before proceeding...\n\t" + vcfFiles)
+		return()
 	if gs:
 		print("The Gene Strand Bias is not yet supported! Continuing with the matrix generation.")
 		gs = False
@@ -427,6 +430,8 @@ def SigProfilerMatrixGeneratorFunc (project, genome, vcfFiles, exome=False, bed_
 		if i != 1:
 			for file in vcf_files:
 				chrom = file.split("_")[0]
+				if not os.path.exists(chrom_path + chrom + ".txt"):
+					continue
 				if genome == 'ebv':
 					chrom = "_".join([x for x in file.split("_")[:-1]])
 				with open(vcf_path + file) as f:
