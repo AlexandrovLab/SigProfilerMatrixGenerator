@@ -253,8 +253,9 @@ def SigProfilerMatrixGeneratorFunc (project, genome, vcfFiles, exome=False, bed_
 	# Organizes all of the reference directories for later reference:
 	ref_dir, tail = os.path.split(os.path.dirname(os.path.abspath(__file__)))
 	chrom_path =ref_dir + '/references/chromosomes/tsb/' + genome + "/"
+	if 'havana' in genome:
+		genome = genome.split("_")[0]
 	transcript_path = ref_dir + '/references/chromosomes/transcripts/' + genome + "/"
-
 
 
 	# Terminates the code if the genome reference files have not been created/installed
