@@ -95,7 +95,7 @@ $ python3
 
 This tool currently supports the following genomes:
 
-GRCh38.p12 [GRCh38] (Genome Reference Consortium Human Reference 37), INSDC
+GRCh38.p12 [GRCh38] (Genome Reference Consortium Human Reference 38), INSDC
 Assembly GCA_000001405.27, Dec 2013. Released July 2014. Last updated January 2018. This genome was downloaded from ENSEMBL database version 93.38.
 
 GRCh37.p13 [GRCh37] (Genome Reference Consortium Human Reference 37), INSDC
