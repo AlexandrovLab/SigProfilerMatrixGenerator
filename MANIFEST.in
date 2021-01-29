@@ -34,3 +34,4 @@ include SigProfilerMatrixGenerator/references/chromosomes/tsb_BED/yeast/*
 include SigProfilerMatrixGenerator/references/chromosomes/context_distributions/*
 include SigProfilerMatrixGenerator/scripts/Benchmark/*
 include SigProfilerMatrixGenerator/references/matrix/BRCA_bench/*
+include SigProfilerMatrixGenerator/references/CNV/*

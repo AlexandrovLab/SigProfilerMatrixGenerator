@@ -116,6 +116,8 @@ CanFam3.1 [dog] GCA_000002285.2, Sep 2011. Last updated Jun 2019. This genome wa
 
 WBcel235 [c_elegans] GCA_000002985.3, Oct 2014. Last updated Jan 2019. This genome was downloaded from ENSEMBL database version 100. 
 
+*One can specify "_havana" to the end of the genome to include annotations in t-cell receptor genes and IG clusters (available for GRCh37, GRCh38, and mm10).
+
 **LOG FILES**
 
 All errors and progress checkpoints are saved into *sigProfilerMatrixGenerator_[project]_[genome].err* and *sigProfilerMatrixGenerator_[project]_[genome].out*, respectively. 
@@ -141,4 +143,4 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 **CONTACT INFORMATION**
 
-Please address any queries or bug reports to Erik Bergstrom at ebergstr@eng.ucsd.edu
+Please address any queries or bug reports to Erik Bergstrom at ebergstr@eng.ucsd.edu. Please address any queries or bug reports related to CNV's or SV's to Azhar Khandekar at akhandek@eng.ucsd.edu.
