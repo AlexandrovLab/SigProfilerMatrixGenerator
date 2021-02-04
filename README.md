@@ -53,7 +53,7 @@ $ python3
       chrom_based=False  [boolean] Outputs chromosome-based matrices
       plot=False         [boolean] Integrates with SigProfilerPlotting to output all available visualizations for each matrix. 
       tsb_stat=False     [boolean] Outputs the results of a transcriptional strand bias test for the respective matrices. 
-      seqInfo=False      [boolean] Ouputs original mutations into a text file that contains the SigProfilerMatrixGenerator classificaiton for each mutation. 
+      seqInfo=True      [boolean] Ouputs original mutations into a text file that contains the SigProfilerMatrixGenerator classificaiton for each mutation. 
       cushion=100	[integer] Adds an Xbp cushion to the exome/bed_file ranges for downsampling the mutations.
   
 

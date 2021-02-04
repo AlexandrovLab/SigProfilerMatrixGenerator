@@ -542,6 +542,8 @@ def main():
 
 	if genome.upper() == 'MM10' or genome.upper() == 'MM9':
 		chromosomes = chromosomes[:21]
+	if genome.upper() == 'RN6':
+		chromosomes = chromosomes[:22]
 
 	script_dir = os.getcwd()
 	ref_dir = re.sub('\/scripts$', '', script_dir)
@@ -564,7 +566,7 @@ def main():
 	if bed or exome:
 		context_distribution_BED(context, output_file, chromosome_path, chromosomes, bed, bed_file, exome, exome_file, genome, ref_dir, tsb_ref)
 	else:
-		context_distribution(context, output_file, chromosome_path, chromosomes, tsb_ref)
+		context_distribution(context, output_file, chromosome_path, chromosomes, tsb_ref, genome)
 	
 if __name__ == '__main__':
 	main()
