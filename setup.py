@@ -15,7 +15,7 @@ def readme():
 	# with open('README.rst') as f:
 	# 	return(f.read())
 
-VERSION = '1.1.23'
+VERSION = '1.1.25'
 
 def write_version_py(filename='SigProfilerMatrixGenerator/version.py'):
 	# Copied from numpy setup.py
@@ -46,7 +46,7 @@ setup(name='SigProfilerMatrixGenerator',
 			"sigProfilerPlotting>=1.0.1",
 			"statsmodels>=0.9.0",
 			"scipy>=1.1.0",
-			"pandas>=0.23.4",
-			"numpy>='1.18.5'"],
+			"numpy>=1.18.5",
+			"pandas>=0.23.4"],
 		include_package_data=True,
 		zip_safe=False)

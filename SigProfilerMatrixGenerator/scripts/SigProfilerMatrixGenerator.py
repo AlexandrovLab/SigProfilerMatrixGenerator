@@ -851,6 +851,7 @@ def catalogue_generator_INDEL_single (mutation_ID, lines, chrom, vcf_path, vcf_p
 					else:
 						mutation_ID['ID'].at['complex', sample] += 1
 						mutation_ID['simple'].at['complex', sample] += 1
+						total_analyzed += 1
 						continue
 
 					type_sequence = ''
