@@ -193,7 +193,15 @@ def install_chromosomes_tsb (genomes, ref_dir, custom):
 							'13':'f81b976e4e4617b25945d06f9aa30846','14':'95dc042eb2aa7d4cc0abe071d4d7966e','15':'fbf2477833aff73ae085537cd7ee0f85',
 							'16':'77cbcd009ba50891571f785595717ec1','17':'cd9e4dfdd168ed3de05dac4d44c6e692', '18':'945e83694c7c8f69d6186e1a2abc9771',
 							'19':'e57b25f8869de31a9dbce06510711db6','Y':'c2146ba4ab1ec262f5e38b2a1ebc5f5b','X':'9af543088be046fdc63976c2d41de94c',
-							'MT':'a1d56043ed8308908965dd080a4d0c8d'},
+							'MT':'a1d56043ed8308908965dd080a4d0c8d'},                            
+				'mm39':
+							{'1':'1f3864326ee2757e1b26890132ee555c','2':'6ed2b04834aab1f94e1de14eaabca325','3':'778272afa244128f18a061b872864017',
+							'4':'7a95c2342a16b9aaedab359c82f2e728','5':'e581b5029b6d5a12f507729a91e97232','6':'dc32970b285bfa82166c8344471510c6',
+							'7':'22eec11d9ff56e499242ad189cf6d59e','8':'6208f92628ef54feafd4a8de139e57b3','9':'2bf861ca4b81b19f811c3bc882f3664d',
+							'10':'af77800931477dfb92f788cd109e5684','11':'f49a90a3d3bf046e2fe2a2f58a14972e','12':'7b0612e18bbdf6882b97b391cbd8a12d',
+							'13':'d57ad029a139bd5f669b62fbe2af0918','14':'ef85a5099dc46d6db821f38a9047e8c2','15':'8ba5b78c8ed9306d8980ee13bc20c1f1',
+							'16':'720dd3607abedd4c37428546aba7df87','17':'1defb6b2216d95056d11512032000fa8', '18':'87bac9d1dc2b69373bb8ce346fa08bcd',
+							'19':'144afb8e0a1184e11eee46b22b0cb4f8','Y':'61bef4eeca867847dd47330989c51fef','X':'8a8c263fe8ded72370465409c8b8b737'},
 				'rn6':
 							{'1':'003723513cbdb3708fcc5d737c05199c','2':'53e52c5facc7f05462be533845f37425','3':'8d157a9b71fe9770cf783ea5459b19d7',
 							'4':'a66dc1999bcc960ff11fe0b24c0d7b14','5':'601cf83411234adbdd9f911b89509564','6':'03b1f4af58fffdf213466ea85b570b3d',
@@ -451,8 +459,14 @@ def install (genome, custom=False, rsync=False, bash=True, ftp=True, fastaPath=N
 								'16':'77cbcd009ba50891571f785595717ec1','17':'cd9e4dfdd168ed3de05dac4d44c6e692', '18':'945e83694c7c8f69d6186e1a2abc9771',
 								'19':'e57b25f8869de31a9dbce06510711db6','Y':'c2146ba4ab1ec262f5e38b2a1ebc5f5b','X':'9af543088be046fdc63976c2d41de94c',
 								'MT':'a1d56043ed8308908965dd080a4d0c8d'},
-
-
+    				'mm39':
+    							{'1':'1f3864326ee2757e1b26890132ee555c','2':'6ed2b04834aab1f94e1de14eaabca325','3':'778272afa244128f18a061b872864017',
+    							'4':'7a95c2342a16b9aaedab359c82f2e728','5':'e581b5029b6d5a12f507729a91e97232','6':'dc32970b285bfa82166c8344471510c6',
+    							'7':'22eec11d9ff56e499242ad189cf6d59e','8':'6208f92628ef54feafd4a8de139e57b3','9':'2bf861ca4b81b19f811c3bc882f3664d',
+    							'10':'af77800931477dfb92f788cd109e5684','11':'f49a90a3d3bf046e2fe2a2f58a14972e','12':'7b0612e18bbdf6882b97b391cbd8a12d',
+    							'13':'d57ad029a139bd5f669b62fbe2af0918','14':'ef85a5099dc46d6db821f38a9047e8c2','15':'8ba5b78c8ed9306d8980ee13bc20c1f1',
+    							'16':'720dd3607abedd4c37428546aba7df87','17':'1defb6b2216d95056d11512032000fa8', '18':'87bac9d1dc2b69373bb8ce346fa08bcd',
+    							'19':'144afb8e0a1184e11eee46b22b0cb4f8','Y':'61bef4eeca867847dd47330989c51fef','X':'8a8c263fe8ded72370465409c8b8b737'},
 					'mm10_havana':
 								{'1':'8351fa274b2e49b159fdfd1a17b8e522','2':'afa7459e3fa1a40f96279d318e3f6fc4','3':'106064694826ed8b9cfd29c5cfe39f1d',
 								'4':'807aafbf65a28995b2ff64c040f54ff8','5':'afc3c4640788db5b8866d7644be4c49d','6':'2eff5f397f61735e90dc4089705751bc',
@@ -583,7 +597,7 @@ def install (genome, custom=False, rsync=False, bash=True, ftp=True, fastaPath=N
 	print("All reference files have been created.")
 	if 'havana' in genome:
 		genome = genome.split("_")[0]
-	if genome != "rn6" and genome != 'dog' and genome != 'c_elegans' and not custom:
+	if genome != "rn6" and genome != 'dog' and genome != 'c_elegans' and genome != 'mm39' and not custom:
 		print("Verifying and benchmarking installation now...")
 		benchmark(genome, ref_dir)
 
