@@ -273,7 +273,6 @@ def install_chromosomes (genomes, ref_dir, custom, rsync, bash):
 
 
 def install_chromosomes_tsb (genomes, ref_dir, custom):
-    print("entered line 156")
 
     for genome in genomes:
         chrom_number = None
