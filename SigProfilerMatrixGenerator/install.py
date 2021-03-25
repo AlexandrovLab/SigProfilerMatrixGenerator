@@ -206,7 +206,7 @@ def install_chromosomes (genomes, ref_dir, custom, rsync, bash):
 									if bash:
 										os.system("bash -c '" + 'wget -r -l1 -c -nc --no-parent -A "*.dna.chromosome.*" -nd -P ' + chromosome_fasta_path + ' ftp://ftp.ensembl.org/pub/grch37/current/fasta/homo_sapiens/dna/ 2>> install.log' + "'")
 									else:
-										os.system('wget -r -l1 -c -nc --no-parent -A "*.dna.chromosome.*" -nd -P ' + chromosome_fasta_path + ' ftp://ftp.ensembl.org/pub/grch37/current/fasta/homo_sapiens/dna/ 2>> install.log')                                        
+										os.system('wget -r -l1 -c -nc --no-parent -A "*.dna.chromosome.*" -nd -P ' + chromosome_fasta_path + ' ftp://ftp.ensembl.org/pub/grch37/current/fasta/homo_sapiens/dna/ 2>> install.log')
 									#os.system("wget -r -l1 -c -nc --no-parent -A '*.dna.chromosome.*' -nd -P " + chromosome_fasta_path + " ftp://ftp.ensembl.org/pub/grch37/update/fasta/homo_sapiens/dna/ 2>> install.log")
 								elif genome == 'mm9':
 									if bash:
@@ -216,9 +216,9 @@ def install_chromosomes (genomes, ref_dir, custom, rsync, bash):
 
 								elif genome == 'rn6':
 									if bash:
-										os.system("bash -c '" + 'wget -r -l1 -c -nc --no-parent -A "*.dna.chromosome.*" -nd -P ' + chromosome_fasta_path + ' ftp://ftp.ensembl.org/pub/release-96/fasta/rattus_norvegicus/dna/ 2>> install.log' + "'")                                    
+										os.system("bash -c '" + 'wget -r -l1 -c -nc --no-parent -A "*.dna.chromosome.*" -nd -P ' + chromosome_fasta_path + ' ftp://ftp.ensembl.org/pub/release-96/fasta/rattus_norvegicus/dna/ 2>> install.log' + "'")
 									else:
-										os.system('wget -r -l1 -c -nc --no-parent -A "*.dna.chromosome.*" -nd -P ' + chromosome_fasta_path + ' ftp://ftp.ensembl.org/pub/release-96/fasta/rattus_norvegicus/dna/ 2>> install.log')                                    
+										os.system('wget -r -l1 -c -nc --no-parent -A "*.dna.chromosome.*" -nd -P ' + chromosome_fasta_path + ' ftp://ftp.ensembl.org/pub/release-96/fasta/rattus_norvegicus/dna/ 2>> install.log')
 								else:
 									if bash:
 										os.system("bash -c '" + 'wget -r -l1 -c -nc --no-parent -A "*.dna.chromosome.*" -nd -P ' + chromosome_fasta_path + ' ftp://ftp.ensembl.org/pub/release-93/fasta/' +species+'/dna/ 2>> install.log' + "'")
@@ -242,12 +242,12 @@ def install_chromosomes (genomes, ref_dir, custom, rsync, bash):
 								if bash:
 									os.system("bash -c '" + "rsync -av -m --include='*/' --include='*.dna.chromosome.*' --exclude='*' rsync://ftp.ensembl.org/ensembl/pub/release-67/fasta/mus_musculus/dna/ " + chromosome_fasta_path + " 2>&1>> install.log" + "'")
 								else:
-									os.system("rsync -av -m --include='*/' --include='*.dna.chromosome.*' --exclude='*' rsync://ftp.ensembl.org/ensembl/pub/release-67/fasta/mus_musculus/dna/ " + chromosome_fasta_path + " 2>&1>> install.log")                                    
+									os.system("rsync -av -m --include='*/' --include='*.dna.chromosome.*' --exclude='*' rsync://ftp.ensembl.org/ensembl/pub/release-67/fasta/mus_musculus/dna/ " + chromosome_fasta_path + " 2>&1>> install.log")
 							elif genome == 'rn6':
 								if bash:
-									os.system("bash -c '" + "rsync -av -m --include='*/' --include='*.dna.chromosome.*' --exclude='*' rsync://ftp.ensembl.org/ensembl/pub/release-96/fasta/rattus_norvegicus/dna/ " + chromosome_fasta_path + " 2>> install.log" + "'")                                    
+									os.system("bash -c '" + "rsync -av -m --include='*/' --include='*.dna.chromosome.*' --exclude='*' rsync://ftp.ensembl.org/ensembl/pub/release-96/fasta/rattus_norvegicus/dna/ " + chromosome_fasta_path + " 2>> install.log" + "'")
 								else:
-									os.system("rsync -av -m --include='*/' --include='*.dna.chromosome.*' --exclude='*' rsync://ftp.ensembl.org/ensembl/pub/release-96/fasta/rattus_norvegicus/dna/ " + chromosome_fasta_path + " 2>> install.log")                                    
+									os.system("rsync -av -m --include='*/' --include='*.dna.chromosome.*' --exclude='*' rsync://ftp.ensembl.org/ensembl/pub/release-96/fasta/rattus_norvegicus/dna/ " + chromosome_fasta_path + " 2>> install.log")
 							else:
 								if bash:
 									os.system("bash -c '" + "rsync -av -m --include='*/' --include='*.dna.chromosome.*' --exclude='*' rsync://ftp.ensembl.org/ensembl/pub/release-93/fasta/"+species+"/dna/ " + chromosome_fasta_path + " 2>&1>> install.log" + "'")
@@ -452,7 +452,7 @@ def install (genome, custom=False, rsync=False, bash=True, ftp=True, fastaPath=N
 					except:
 						print("The Sanger ftp site is not responding. Please check your internet connection/try again later.")
 				else:
-					os.system('wget -r -l1 -c -nc --no-parent -nd -P ' + chromosome_fasta_path + ' ftp://ngs.sanger.ac.uk/scratch/project/mutographs/SigProf/' + genome + '.tar.gz 2>> install.log')                                        
+					os.system('wget -r -l1 -c -nc --no-parent -nd -P ' + chromosome_fasta_path + ' ftp://ngs.sanger.ac.uk/scratch/project/mutographs/SigProf/' + genome + '.tar.gz 2>> install.log')
 				os.system("tar -xzf " + ref_dir + "/references/chromosomes/tsb/" + genome + ".tar.gz -C " + ref_dir + "/references/chromosomes/tsb/")
 				os.remove(ref_dir + "/references/chromosomes/tsb/" + genome + ".tar.gz")
 			except:
