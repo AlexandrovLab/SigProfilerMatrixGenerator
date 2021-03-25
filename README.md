@@ -26,20 +26,21 @@ This section will guide you through the minimum steps required to create mutatio
 ```
                           pip install SigProfilerMatrixGenerator
 ```
-2a. Install your desired reference genome from the command line/terminal as follows (a complete list of supported genomes can be found below):
-```
-$ python
->> from SigProfilerMatrixGenerator import install as genInstall
->> genInstall.install('GRCh37', rsync=False, bash=True)
-```
-    This will install the human 37 assembly as a reference genome. You may install as many genomes as you wish. If you have a firewall on your server, you may need to install rsync and use the rsync=True parameter. Similarly, if you do not have bash, 
-    use bash=False.
-2b. To install a reference genome that you have saved locally, you can do the following:
-```
-$ python
->> from SigProfilerMatrixGenerator import install as genInstall
->> genInstall.install('GRCh37', offline_files_path='path/to/directory/containing/GRCh37.tar.gz')
-```
+2. 
+    a. Install your desired reference genome from the command line/terminal as follows (a complete list of supported genomes can be found below):
+    ```
+    $ python
+    >> from SigProfilerMatrixGenerator import install as genInstall
+    >> genInstall.install('GRCh37', rsync=False, bash=True)
+    ```
+        This will install the human 37 assembly as a reference genome. You may install as many genomes as you wish. If you have a firewall on your server, you may need to install rsync and use the rsync=True parameter. Similarly, if you do not have bash, 
+        use bash=False.
+    b. To install a reference genome that you have saved locally, you can do the following:
+    ```
+    $ python
+    >> from SigProfilerMatrixGenerator import install as genInstall
+    >> genInstall.install('GRCh37', offline_files_path='path/to/directory/containing/GRCh37.tar.gz')
+    ```
 3. Place your vcf files in your desired output folder. It is recommended that you name this folder based on your project's name
 4. From within a python session, you can now generate the matrices as follows:
 ```
