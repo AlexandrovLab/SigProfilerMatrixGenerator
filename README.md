@@ -26,15 +26,21 @@ This section will guide you through the minimum steps required to create mutatio
 ```
                           pip install SigProfilerMatrixGenerator
 ```
-2. Install your desired reference genome from the command line/terminal as follows (available reference genomes are: GRCh37, GRCh38, mm9, and mm10):
-```
-$ python
->> from SigProfilerMatrixGenerator import install as genInstall
->> genInstall.install('GRCh37', rsync=False, bash=True)
-```
-    This will install the human 37 assembly as a reference genome. You may install as many genomes as you wish. If you have a firewall on your server, you may need to install rsync and use the rsync=True parameter. Similarly, if you do not have bash, 
-    use bash=False.
-
+2. 
+    a. Install your desired reference genome from the command line/terminal as follows (a complete list of supported genomes can be found below):
+    ```
+    $ python
+    >> from SigProfilerMatrixGenerator import install as genInstall
+    >> genInstall.install('GRCh37', rsync=False, bash=True)
+    ```
+        This will install the human 37 assembly as a reference genome. You may install as many genomes as you wish. If you have a firewall on your server, you may need to install rsync and use the rsync=True parameter. Similarly, if you do not have bash, 
+        use bash=False.
+    b. To install a reference genome that you have saved locally, you can do the following:
+    ```
+    $ python
+    >> from SigProfilerMatrixGenerator import install as genInstall
+    >> genInstall.install('GRCh37', offline_files_path='path/to/directory/containing/GRCh37.tar.gz')
+    ```
 3. Place your vcf files in your desired output folder. It is recommended that you name this folder based on your project's name
 4. From within a python session, you can now generate the matrices as follows:
 ```
@@ -95,11 +101,14 @@ $ python3
 
 This tool currently supports the following genomes:
 
-GRCh38.p12 [GRCh38] (Genome Reference Consortium Human Reference 37), INSDC
+GRCh38.p12 [GRCh38] (Genome Reference Consortium Human Reference 38), INSDC
 Assembly GCA_000001405.27, Dec 2013. Released July 2014. Last updated January 2018. This genome was downloaded from ENSEMBL database version 93.38.
 
 GRCh37.p13 [GRCh37] (Genome Reference Consortium Human Reference 37), INSDC
 Assembly GCA_000001405.14, Feb 2009. Released April 2011. Last updated September 2013. This genome was downloaded from ENSEMBL database version 93.37. 
+
+GRCm39 [mm39] (Genome Reference Consortium Mouse Reference 39), INSDC
+Assembly GCA_000001635.9, Jun 2020. Last updated August 2020. This genome was downloaded from ENSEMBL database version 103.
 
 GRCm38.p6 [mm10] (Genome Reference Consortium Mouse Reference 38), INDSDC
 Assembly GCA_000001635.8, Jan 2012. Released July 2012. Last updated March 2018. This genome was downloaded from ENSEMBL database version 93.38. 
