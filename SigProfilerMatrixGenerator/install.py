@@ -382,7 +382,7 @@ def install (genome, custom=False, rsync=False, bash=True, ftp=True, fastaPath=N
 	ref_dir = os.path.dirname(os.path.abspath(__file__))
 	os.chdir(ref_dir)
 
-	if not custom:
+	if not custom and offline_files_path is None:
 		wget_install = shutil.which("wget") is not None
 		rsync_install = shutil.which("rsync") is not None
 		if not wget_install and not rsync_install:
