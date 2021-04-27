@@ -1155,10 +1155,11 @@ def convertMAF (project, vcf_path, genome, output_path, ncbi_chrom, log_file):
 	prev_line = None
 	skipped_count = 0
 	samples = []
-	header = True
+	
 
 	# Iterates through each file 
 	for file in files:
+		header = True
 		if file[0] == '.':
 			continue
 		name = file.split(".")
