@@ -570,7 +570,6 @@ def convertTxt (project, vcf_path, genome, output_path, ncbi_chrom, log_file):
 					sample = line[1]
 					if sample not in samples:
 						samples.append(sample)
-					genome = line[3]
 					chrom = line[5]
 					if len(chrom) > 2:
 						chrom = chrom[3:]
@@ -1174,7 +1173,6 @@ def convertMAF (project, vcf_path, genome, output_path, ncbi_chrom, log_file):
 					line = lines.strip().split("\t")
 					if len(line) == 0:
 						continue
-					genome = line[3]
 					chrom = line[4]
 					if len(chrom) > 2:
 						chrom = chrom[3:]
@@ -1787,7 +1785,6 @@ def convertICGC (project, vcf_path, genome, output_path, ncbi_chrom, log_file):
 						chrom = "MT"
 					start = line[9]
 					end = line[10]
-					genome = line[12]
 					ref = line[15]
 					mut = line[16]
 					if ref == '-':
@@ -2333,7 +2330,3 @@ def convertICGC (project, vcf_path, genome, output_path, ncbi_chrom, log_file):
 		#out_indel.close()
 	out.close()
 	return(snv, indel, skipped_count, samples)
-
-
-
-
