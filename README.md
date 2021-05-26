@@ -152,4 +152,4 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 **CONTACT INFORMATION**
 
-Please address any queries or bug reports to Erik Bergstrom at ebergstr@eng.ucsd.edu. Please address any queries or bug reports related to CNV's or SV's to Azhar Khandekar at akhandek@eng.ucsd.edu.
+Please address any queries or bug reports to Erik Bergstrom at ebergstr@eng.ucsd.edu. Please address any queries or bug reports related to CNV's or SV's to Azhar Khandekar at akhandek@eng.ucsd.edu. Additional support can be provided by Mark Barnes at mdbarnes@health.ucsd.edu.
