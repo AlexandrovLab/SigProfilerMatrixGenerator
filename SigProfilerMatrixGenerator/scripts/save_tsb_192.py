@@ -48,7 +48,7 @@ def save_tsb (chromosome_string_path, transcript_path, output_path):
 			name = file_name[0]
 
 			# Skips hidden files
-			if name == '.DS':
+			if name[0] == '.':
 				pass
 			else:
 
