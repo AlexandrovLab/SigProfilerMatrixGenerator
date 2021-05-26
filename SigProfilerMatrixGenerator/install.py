@@ -320,7 +320,7 @@ def install_chromosomes_tsb (genomes, ref_dir, custom):
 			
 		print("The transcriptional reference data for " + genome + " has been saved.")
 
-def install_chromosomes_tsb_BED (genomes, custom, ref_dir):
+def install_chromosomes_tsb_BED (genomes, ref_dir):
 	for genome in genomes:
 		if not os.path.exists(ref_dir + "chromosomes/tsb_BED/" + genome + "/") or len(os.listdir(ref_dir + "chromosomes/tsb_BED/" + genome + "/")) < 19:
 			os.system("python scripts/save_chrom_tsb_separate.py -g " + genome)
@@ -537,12 +537,19 @@ def install (genome, custom=False, rsync=False, bash=True, ftp=True, fastaPath=N
 		install_chromosomes(genomes, ref_dir, custom, rsync, bash)
 		install_chromosomes_tsb (genomes, ref_dir, custom)
 
+		if custom:
+			install_chromosomes_tsb_BED (genomes, ref_dir)
+
 	if os.path.exists("BRCA_example/"):
 		shutil.copy("BRCA_example/", "references/vcf_files/")
 	if os.path.exists("example_test"):
 		shutil.copy("example_test/", "references/vcf_files/")
 	if os.path.exists("context_distributions/"):
 		shutil.copy("context_distributions/", "references/chromosomes/")
+
+
+
+
 
 	print("All reference files have been created.")
 	if 'havana' in genome:
