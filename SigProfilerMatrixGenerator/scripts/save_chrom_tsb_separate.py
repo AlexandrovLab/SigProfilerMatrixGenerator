@@ -10,7 +10,7 @@ import os
 import argparse
 import re
 
-def save_chrom_tsb_separate (genome, ref_dir):
+def save_chrom_tsb_separate (genome, ref_dir, custom):
 	'''
 	Saves the transcriptional strand bias information for a given genome 
 	into a BED file.
@@ -44,6 +44,9 @@ def save_chrom_tsb_separate (genome, ref_dir):
 			   16:['N','N'], 17:['T','N'], 18:['U','N'], 19:['B','N']}
 	tsb_ref_original = {'N':0, 'T':1, 'U':2, 'B':3}
 
+	if custom:
+		tsb_list = [f for f in os.listdir(chromosome_path) if not f.startswith('.')]
+		chromosomes = sorted([tmp_chrom.replace(".txt", "") for tmp_chrom in tsb_list])
 
 	# Truncates the chromosome variable if a mouse genome is provided
 	if genome == 'mm10' or genome == 'mm9':
@@ -86,13 +89,15 @@ def save_chrom_tsb_separate (genome, ref_dir):
 def main ():
 	parser = argparse.ArgumentParser(description="Provide the necessary arguments to install the reference files.")
 	parser.add_argument("-g", "--genome", nargs='?', help="Optional parameter instructs script to install the custom genome.")
+	parser.add_argument("-c", "--custom", help="custom genome?. (True or False)", default=False)
 	args = parser.parse_args()
 	genome = args.genome
+	custom = bool(args.custom)
 
 	current_dir = os.getcwd()
 	ref_dir = re.sub('\/scripts$', '', current_dir)
 
-	save_chrom_tsb_separate(genome, ref_dir)
+	save_chrom_tsb_separate(genome, ref_dir, custom)
 
 
 if __name__ == '__main__':
