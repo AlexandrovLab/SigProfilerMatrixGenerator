@@ -320,10 +320,13 @@ def install_chromosomes_tsb (genomes, ref_dir, custom):
 			
 		print("The transcriptional reference data for " + genome + " has been saved.")
 
-def install_chromosomes_tsb_BED (genomes, ref_dir):
+def install_chromosomes_tsb_BED (genomes, ref_dir, custom):
 	for genome in genomes:
 		if not os.path.exists(ref_dir + "chromosomes/tsb_BED/" + genome + "/") or len(os.listdir(ref_dir + "chromosomes/tsb_BED/" + genome + "/")) < 19:
-			os.system("python scripts/save_chrom_tsb_separate.py -g " + genome)
+			is_custom = False
+			if custom:
+				is_custom = True
+			os.system("python scripts/save_chrom_tsb_separate.py -g " + genome + " -c " + str(is_custom))
 			print("The TSB BED files for " + genome + " have been saved.")
 
 def benchmark (genome, ref_dir):
@@ -433,7 +436,8 @@ def install (genome, custom=False, rsync=False, bash=True, ftp=True, fastaPath=N
 		if os.path.exists(ref_dir + "/references/chromosomes/exome/" + genome + "/"):
 			shutil.rmtree(ref_dir + "/references/chromosomes/exome/" + genome + "/")
 		os.makedirs(ref_dir + "/references/chromosomes/exome/" +  genome + "/")
-		shutil.copy(exomePath,ref_dir + "/references/chromosomes/exome/" +  genome + "/")
+		if exomePath is not None:
+			shutil.copy(exomePath,ref_dir + "/references/chromosomes/exome/" +  genome + "/")
 
 
 	if ftp:
@@ -538,7 +542,7 @@ def install (genome, custom=False, rsync=False, bash=True, ftp=True, fastaPath=N
 		install_chromosomes_tsb (genomes, ref_dir, custom)
 
 		if custom:
-			install_chromosomes_tsb_BED (genomes, ref_dir)
+			install_chromosomes_tsb_BED (genomes, ref_dir, custom)
 
 	if os.path.exists("BRCA_example/"):
 		shutil.copy("BRCA_example/", "references/vcf_files/")
