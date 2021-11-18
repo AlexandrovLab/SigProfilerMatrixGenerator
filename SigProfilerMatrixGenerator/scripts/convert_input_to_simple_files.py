@@ -65,10 +65,10 @@ def convertVCF (project, vcf_path, genome, output_path, ncbi_chrom, log_file):
 						if len(line) == 0:
 							continue
 						chrom = line[0]
-						if len(chrom) > 2:
-							chrom = chrom[3:]
 						if chrom in ncbi_chrom:
 							chrom = ncbi_chrom[chrom]
+						if len(chrom) > 2:
+							chrom = chrom[3:]
 						if chrom.upper() == "M" or chrom == 'mt':
 							chrom = "MT"
 						start = line[1]
