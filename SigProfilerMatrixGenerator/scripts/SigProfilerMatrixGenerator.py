@@ -1592,6 +1592,23 @@ def panel_check (chrom_based, samples, bias_sort, exome, mut_types, bed, chrom, 
 		os.makedirs(panel_output_path)
 
 
+
+	with open(panel_file) as f:
+		lines = [line.strip().split() for line in f]
+	output = open(panel_file, 'w')
+	print('\t'.join(lines[0]), file=output)
+	if len(lines) > 1:
+		if len(lines[1][0]) > 2:
+			for line in sorted(lines[1:], key = lambda x: ['X','Y', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22','MT'].index(x[0][3:])):
+				print('\t'.join(line), file=output)
+		else:
+			for line in sorted(lines[1:], key = lambda x: ['X','Y','1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', 'MT'].index(x[0])):
+				print('\t'.join(line), file=output)
+	output.close()
+
+
+
+
 	with open(bed_temp_file) as f, open(panel_file) as exome, open(panel_output, "w") as out:
 		previous_chrom_ref = None
 		previous_chrom_start = None
