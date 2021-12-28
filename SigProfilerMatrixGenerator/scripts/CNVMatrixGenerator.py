@@ -6,24 +6,24 @@ import shutil
 def generateCNVMatrix(file_type, input_file, project, output_path):
 
     def annotateSegFile(df, file_type, project, output_path):
-        
+
         super_class = ['het', 'LOH', "homdel"]
         # het_sub_class = ['amp+', 'amp', 'gain', 'neut']
         # loh_subclass = ['amp+', 'amp', 'gain', 'neut', "del"]
         hom_del_class = ['0-100kb', '100kb-1Mb', '>1Mb']
         x_labels = ['>40Mb', '10Mb-40Mb', '1Mb-10Mb', '100kb-1Mb', '0-100kb']
-        
-        features = ['0:homdel:0-100kb', '0:homdel:100kb-1Mb', '0:homdel:>1Mb', '1:LOH:0-100kb', 
-            '1:LOH:100kb-1Mb', '1:LOH:1Mb-10Mb', '1:LOH:10Mb-40Mb', '1:LOH:>40Mb', 
-            '2:LOH:0-100kb', '2:LOH:100kb-1Mb', '2:LOH:1Mb-10Mb', '2:LOH:10Mb-40Mb', '2:LOH:>40Mb', 
-            '3-4:LOH:0-100kb', '3-4:LOH:100kb-1Mb', '3-4:LOH:1Mb-10Mb', '3-4:LOH:10Mb-40Mb', '3-4:LOH:>40Mb', 
-            '5-8:LOH:0-100kb', '5-8:LOH:100kb-1Mb', '5-8:LOH:1Mb-10Mb', '5-8:LOH:10Mb-40Mb', '5-8:LOH:>40Mb', 
-            '9+:LOH:0-100kb', '9+:LOH:100kb-1Mb', '9+:LOH:1Mb-10Mb', '9+:LOH:10Mb-40Mb', '9+:LOH:>40Mb', 
-            '2:het:0-100kb', '2:het:100kb-1Mb', '2:het:1Mb-10Mb', '2:het:10Mb-40Mb', '2:het:>40Mb', 
-            '3-4:het:0-100kb', '3-4:het:100kb-1Mb', '3-4:het:1Mb-10Mb', '3-4:het:10Mb-40Mb', '3-4:het:>40Mb', 
-            '5-8:het:0-100kb', '5-8:het:100kb-1Mb', '5-8:het:1Mb-10Mb', '5-8:het:10Mb-40Mb', '5-8:het:>40Mb', 
-            '9+:het:0-100kb', '9+:het:100kb-1Mb', '9+:het:1Mb-10Mb', '9+:het:10Mb-40Mb', '9+:het:>40Mb'] 
-    
+
+        features = ['0:homdel:0-100kb', '0:homdel:100kb-1Mb', '0:homdel:>1Mb', '1:LOH:0-100kb',
+            '1:LOH:100kb-1Mb', '1:LOH:1Mb-10Mb', '1:LOH:10Mb-40Mb', '1:LOH:>40Mb',
+            '2:LOH:0-100kb', '2:LOH:100kb-1Mb', '2:LOH:1Mb-10Mb', '2:LOH:10Mb-40Mb', '2:LOH:>40Mb',
+            '3-4:LOH:0-100kb', '3-4:LOH:100kb-1Mb', '3-4:LOH:1Mb-10Mb', '3-4:LOH:10Mb-40Mb', '3-4:LOH:>40Mb',
+            '5-8:LOH:0-100kb', '5-8:LOH:100kb-1Mb', '5-8:LOH:1Mb-10Mb', '5-8:LOH:10Mb-40Mb', '5-8:LOH:>40Mb',
+            '9+:LOH:0-100kb', '9+:LOH:100kb-1Mb', '9+:LOH:1Mb-10Mb', '9+:LOH:10Mb-40Mb', '9+:LOH:>40Mb',
+            '2:het:0-100kb', '2:het:100kb-1Mb', '2:het:1Mb-10Mb', '2:het:10Mb-40Mb', '2:het:>40Mb',
+            '3-4:het:0-100kb', '3-4:het:100kb-1Mb', '3-4:het:1Mb-10Mb', '3-4:het:10Mb-40Mb', '3-4:het:>40Mb',
+            '5-8:het:0-100kb', '5-8:het:100kb-1Mb', '5-8:het:1Mb-10Mb', '5-8:het:10Mb-40Mb', '5-8:het:>40Mb',
+            '9+:het:0-100kb', '9+:het:100kb-1Mb', '9+:het:1Mb-10Mb', '9+:het:10Mb-40Mb', '9+:het:>40Mb']
+
         assert(len(features) == 48)
         columns = list(df[df.columns[0]].unique())
         arr = np.zeros((48, len(columns)), dtype='int')
@@ -297,7 +297,7 @@ def generateCNVMatrix(file_type, input_file, project, output_path):
         os.makedirs(output_path)
         nmf_matrix.reset_index(level=0, inplace=True)
         if file_type != "BATTENBERG":
-            nmf_matrix.to_csv(output_path + file_type + '.CNV48.matrix.tsv', sep='\t')
+            nmf_matrix.to_csv(output_path + project + '.CNV48.matrix.tsv', sep='\t')
         return nmf_matrix
 
     df = pd.read_csv(input_file, sep='\t')
@@ -316,11 +316,35 @@ def generateCNVMatrix(file_type, input_file, project, output_path):
             for i,j in enumerate(subclonal_matrix.columns):
                 clonal_matrix.at[subclonal_matrix.index.to_list()[k], j] = subclonal_matrix.iat[k, i] + clonal_matrix.loc[subclonal_matrix.index.to_list()[k], j]
         clonal_matrix.to_csv(output_path + file_type + '.CNV48.matrix.tsv', sep='\t')
+    elif file_type = "VCF":
+        #convert vcf to dataframe with necessary info
+        vcf_file = vcf.Reader(open(file, 'r'))
+        sample_name=file.split(".vcf")[0]
+        # include the file-header:
+        b = []
+        l = []
+        c = []
+        samples = []
+        starts= []
+        ends = []
+        for record in vcf_file:
+            if record.INFO.get('LCN_EM') is not None and record.INFO.get('TCN_EM') is not None:
+                tcn = record.INFO.get('TCN_EM')
+                lcn = record.INFO.get('LCN_EM')
+                bcn = abs(tcn-lcn)
+                b.append(bcn)
+                l.append(lcn)
+                assert(tcn >= lcn)
+                samples.append(sample_name)
+                starts.append(record.POS)
+                ends.append(record.INFO.get('END'))
+                c.append(record.CHROM)
+        df = pd.Dataframe({"sample":samples, "chr":c, "startpos":starts , "endpos":ends, "nMajor"tcn:, "nMinor":lcn})
+        annotateSegFile(df, "ASCAT", input_file, project, output_path)
     else:
-        nmf_matrix = annotateSegFile(df, file_type, input_file, project, output_path) 
+        nmf_matrix = annotateSegFile(df, file_type, input_file, project, output_path)
 
-file_type = "BATTENBERG"
-input_file = "/Users/azhark/iCloud/dev/Sherlock-Lung/data/sherlock_wgs_subclone_segements.tsv"
-project = "Sherlock-Lung_CNV48_BATTENBERG_test"
-output_path = "/Users/azhark/iCloud/dev/Sherlock-Lung/data/"
-generateCNVMatrix(file_type, input_file, project, output_path)
+if __name__ == "__main__":
+    if len(sys.argv) > 1:
+        input_dir, project, output_dir = sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4]
+        generateCNVMatrix(file_type, input_file, project, output_path)
