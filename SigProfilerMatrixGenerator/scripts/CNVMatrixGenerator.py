@@ -2,6 +2,62 @@ import pandas as pd
 import numpy as np
 import os
 import shutil
+from typing import Union
+
+
+def _bucketize_total_copy_number(copy_number: Union[float,int] ) -> str:
+    """Transform copy number into bucket label."""
+    if copy_number == 2:
+        return "2"
+    elif copy_number in (0, 1):
+        return "1"
+    elif copy_number in (3, 4):
+        return "3-4"
+    elif 5 <= copy_number <= 8:
+        return "5-8"
+    return "9+"
+
+
+def _bucketize_segment_length(length: float, homozygous_deletion: bool) -> str:
+    """Transform segment length (in megabases) into bucket label.
+    
+    Args:
+        length: Segment length in megabases (mb).
+        homozygous_deletion: Is this copy number variant a homozygous deletion?
+    """
+    if -0.01 < length <= 0.1:
+        return "0-100kb"
+    elif 0.1 < length <= 1:
+        return "100kb-1Mb"
+    # Bucketization for homozygous deletion is coarser.
+    if homozygous_deletion:
+        return '>1Mb'
+    
+    if 1 < length <= 10:
+        return "1Mb-10Mb"
+    elif 10 < length <= 40:
+        return "10Mb-40Mb"
+    return ">40Mb"
+
+
+def _classify_heterozygosity_state(minor_allele: Union[int, float], major_allele: Union[int, float]) -> str:
+    """Transform minor and major allele copy number into status.
+    
+    As described on p. 9 in Steele et al., Nature ('22).
+
+    Returns:
+        homdel: Homozygous deletion.
+        het: Heterozygous segment.
+        LOH: Loss of heterozygocity.
+    """
+    total_copy_number = minor_allele + major_allele
+    if total_copy_number == 0:
+        return "homdel"
+    elif minor_allele == 0 or major_allele == 0:
+        return "LOH"
+    else:
+        return "het"
+
 
 def generateCNVMatrix(file_type, input_file, project, output_path):
 
@@ -35,79 +91,33 @@ def generateCNVMatrix(file_type, input_file, project, output_path):
     CN_class = []
     if file_type == 'ASCAT_NGS':
         for tcn in df['Tumour TCN']:
-            if tcn == 2:
-                CN_class.append("2")
-            elif tcn == 0 or tcn == 1:
-                CN_class.append("1")
-            elif tcn == 3 or tcn == 4:
-                CN_class.append("3-4")
-            elif tcn >= 5 and tcn <= 8:
-                CN_class.append("5-8")
-            else:
-                CN_class.append("9+")
+            CN_class.append(_bucketize_total_copy_number(tcn))
 
     elif file_type == 'SEQUENZA':
         for tcn in df['CNt']:
-            if tcn == 2:
-                CN_class.append("2")
-            elif tcn == 0 or tcn == 1:
-                CN_class.append("1")
-            elif tcn == 3 or tcn == 4:
-                CN_class.append("3-4")
-            elif tcn >= 5 and tcn <= 8:
-                CN_class.append("5-8")
-            else:
-                CN_class.append("9+")
+            CN_class.append(_bucketize_total_copy_number(tcn))
+
     elif file_type == "ASCAT":
         for acn, bcn in zip(df['nMajor'], df['nMinor']):
             tcn = acn + bcn
-            if tcn == 2:
-                CN_class.append("2")
-            elif tcn == 0 or tcn == 1:
-                CN_class.append("1")
-            elif tcn == 3 or tcn == 4:
-                CN_class.append("3-4")
-            elif tcn >= 5 and tcn <= 8:
-                CN_class.append("5-8")
-            else:
-                CN_class.append("9+")
+            CN_class.append(_bucketize_total_copy_number(tcn))
+            
     elif file_type == 'ABSOLUTE':
         for acn, bcn in zip(df['Modal_HSCN_1'], df['Modal_HSCN_2']):
             tcn = acn + bcn
-            if tcn == 2:
-                CN_class.append("2")
-            elif tcn == 0 or tcn == 1:
-                CN_class.append("1")
-            elif tcn == 3 or tcn == 4:
-                CN_class.append("3-4")
-            elif tcn >= 5 and tcn <= 8:
-                CN_class.append("5-8")
-            else:
-                CN_class.append("9+")
+            CN_class.append(_bucketize_total_copy_number(tcn))
+            
     elif file_type == 'PCAWG':
         for tcn in df["copy_number"]:
-            if tcn == 2:
-                CN_class.append("2")
-            elif tcn == 0 or tcn == 1:
-                CN_class.append("1")
-            elif tcn == 3 or tcn == 4:
-                CN_class.append("3-4")
-            elif tcn >= 5 and tcn <= 8:
-                CN_class.append("5-8")
-            else:
-                CN_class.append("9+")
+            CN_class.append(_bucketize_total_copy_number(tcn))
+
     elif file_type == 'FACETS':
         for tcn in df["tcn.em"]:
-            if tcn == 2:
-                CN_class.append("2")
-            elif tcn == 0 or tcn == 1:
-                CN_class.append("1")
-            elif tcn == 3 or tcn == 4:
-                CN_class.append("3-4")
-            elif tcn >= 5 and tcn <= 8:
-                CN_class.append("5-8")
-            else:
-                CN_class.append("9+")
+            CN_class.append(_bucketize_total_copy_number(tcn))
+
+    elif file_type == 'PURPLE':
+        CN_class = df['copyNumber'].apply(_bucketize_segment_length)
+
     else:
         pass
 
@@ -119,22 +129,12 @@ def generateCNVMatrix(file_type, input_file, project, output_path):
 
     if file_type == 'ASCAT':
        for acn, bcn in zip(df['nMajor'], df['nMinor']):
-            t = acn + bcn
-            if t == 0:
-                LOH_status.append("homdel")
-            elif acn == 0 or bcn == 0:
-                LOH_status.append("LOH")
-            else:
-                LOH_status.append("het")
+            LOH_status.append(_classify_heterozygosity_state(bcn, acn))
 
     elif file_type == 'SEQUENZA':
         for t, a, b in zip(df['CNt'], df['A'], df['B']):
-            if t == 0:
-                LOH_status.append("homdel")
-            elif a == 0 or b == 0:
-                LOH_status.append("LOH")
-            else:
-                LOH_status.append("het")
+            assert t == a + b 
+            LOH_status.append(_classify_heterozygosity_state(b, a))
     elif file_type == 'ASCAT_NGS':
         normal_ACN = np.asarray(df['Normal TCN']) - np.asarray(df['Normal BCN'])
         tumour_ACN = np.asarray(df['Tumour TCN']) - np.asarray(df['Tumour BCN'])
@@ -146,22 +146,11 @@ def generateCNVMatrix(file_type, input_file, project, output_path):
         loh = np.minimum(A_CN, B_CN) #minimum copy number when considering both A and B alleles
         df['loh'] = list(loh)
         for t, a in zip(df['Tumour TCN'], df['loh']):
-            if t == 0:
-                LOH_status.append("homdel")
-            elif a == 0:
-                LOH_status.append("LOH")
-            else:
-                LOH_status.append("het")
+            LOH_status.append(_classify_heterozygosity_state(t - a, a))
 
     elif file_type == 'ABSOLUTE':
         for acn, bcn in zip(df['Modal_HSCN_1'], df['Modal_HSCN_2']):
-            t = acn + bcn
-            if t == 0:
-                LOH_status.append("homdel")
-            elif acn == 0 or bcn == 0:
-                LOH_status.append("LOH")
-            else:
-                LOH_status.append("het")
+            LOH_status.append(_classify_heterozygosity_state(bcn, acn))
     elif file_type == 'PCAWG':
         for tcn, m in zip(df['copy_number'], df['mutation_type']):
             tcn = int(tcn)
@@ -184,6 +173,10 @@ def generateCNVMatrix(file_type, input_file, project, output_path):
                 LOH_status.append("het")
                 if t == 1:
                     print(t, a) 
+
+    elif file_type == 'PURPLE':    
+        for minor, major in zip(df['minorAlleleCopyNumber'], df['majorAlleleCopyNumber']):
+            LOH_status.append(_classify_heterozygosity_state(minor, major))
 
     else:
         print("Please provide a proper file type")
@@ -215,7 +208,7 @@ def generateCNVMatrix(file_type, input_file, project, output_path):
     elif file_type == 'PCAWG':
         for start, end in zip(df['chromosome_start'], df['chromosome_end']):
             lengths.append((end - start)/1000000)
-    elif file_type == 'FACETS':
+    elif file_type in ('FACETS', 'PURPLE'):
         for start, end in zip(df['start'], df['end']):
             lengths.append((end - start)/1000000)
     else:
@@ -225,38 +218,12 @@ def generateCNVMatrix(file_type, input_file, project, output_path):
     df['length'] = lengths
 
     sizes = []
-    size_bins = []
     hom_del_class = ['0-100kb', '100kb-1Mb', '>1Mb']
 
     for l, s in zip(lengths, df['LOH']): #keep in mind the lengths are in megabases
-        if s == 'homdel':
-            if l > -0.01 and l <= 0.1:
-                size = "0-100kb"
-                size_bin = "(-0.01,0.1]"
-            elif l > 0.1 and l <= 1:
-                size = "100kb-1Mb"
-                size_bin = "(0.1,1]"
-            else:
-                size = '>1Mb'
-                size_bin = "(1,Inf]"
-        else:
-            if l > -0.01 and l <= 0.1:
-                size = "0-100kb"
-                size_bin = "(-0.01,0.1]"
-            elif l > 0.1 and l <= 1:
-                size = "100kb-1Mb"
-                size_bin = "(0.1,1]"
-            elif l > 1 and l <= 10:
-                size = "1Mb-10Mb"
-                size_bin = "(1,10]"
-            elif l > 10 and l <= 40:
-                size = "10Mb-40Mb"
-                size_bin = "(10,40]"
-            else:
-                size = ">40Mb"
-                size_bin = "(40,Inf]"
+        is_homozygous_deletion = s == 'homdel'
+        size = _bucketize_segment_length(length=l, homozygous_deletion=is_homozygous_deletion)
         sizes.append(size)
-        size_bins.append(size_bin)
     df['size_classification'] = sizes
 
     for sample, tcn, loh, size in zip(df[df.columns[0]], df['CN_class'], df['LOH'], df['size_classification']):
