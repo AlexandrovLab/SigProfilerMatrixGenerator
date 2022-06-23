@@ -1,12 +1,15 @@
 import pandas as pd
 import numpy as np
 import os
+from pathlib import Path
 import shutil
 from typing import Union
 
 
 def _bucketize_total_copy_number(copy_number: Union[float,int] ) -> str:
     """Transform copy number into bucket label."""
+    copy_number = round(copy_number)
+
     if copy_number == 2:
         return "2"
     elif copy_number in (0, 1):
@@ -20,9 +23,9 @@ def _bucketize_total_copy_number(copy_number: Union[float,int] ) -> str:
 
 def _bucketize_segment_length(length: float, homozygous_deletion: bool) -> str:
     """Transform segment length (in megabases) into bucket label.
-    
+
     Args:
-        length: Segment length in megabases (mb).
+        length: Copy number segment length in megabases (mb).
         homozygous_deletion: Is this copy number variant a homozygous deletion?
     """
     if -0.01 < length <= 0.1:
@@ -32,7 +35,7 @@ def _bucketize_segment_length(length: float, homozygous_deletion: bool) -> str:
     # Bucketization for homozygous deletion is coarser.
     if homozygous_deletion:
         return '>1Mb'
-    
+
     if 1 < length <= 10:
         return "1Mb-10Mb"
     elif 10 < length <= 40:
@@ -42,7 +45,7 @@ def _bucketize_segment_length(length: float, homozygous_deletion: bool) -> str:
 
 def _classify_heterozygosity_state(minor_allele: Union[int, float], major_allele: Union[int, float]) -> str:
     """Transform minor and major allele copy number into status.
-    
+
     As described on p. 9 in Steele et al., Nature ('22).
 
     Returns:
@@ -50,6 +53,9 @@ def _classify_heterozygosity_state(minor_allele: Union[int, float], major_allele
         het: Heterozygous segment.
         LOH: Loss of heterozygocity.
     """
+    # Round floating point copy numbers to nearest integer.
+    minor_allele, major_allele = round(minor_allele), round(major_allele)
+
     total_copy_number = minor_allele + major_allele
     if total_copy_number == 0:
         return "homdel"
@@ -81,7 +87,17 @@ def generateCNVMatrix(file_type, input_file, project, output_path):
             '9+:het:0-100kb', '9+:het:100kb-1Mb', '9+:het:1Mb-10Mb', '9+:het:10Mb-40Mb', '9+:het:>40Mb']
     
     assert(len(features) == 48)
-    columns = list(df[df.columns[0]].unique())
+
+    sample_names = df[df.columns[0]]
+    # For filetype PURPLE, only one sample per file.
+    if file_type == 'PURPLE':
+        # Use filename as sample name, stripping trailing suffix.
+        name = Path(input_file).stem
+        sample_names = [name] * df.shape[0]  # One for each record.
+        columns = [name]
+    # Other formats accomodate multiple samples per file.
+    else:
+        columns = list(sample_names.unique())
     arr = np.zeros((48, len(columns)), dtype='int')
     nmf_matrix = pd.DataFrame(arr, index=features, columns=columns)
 
@@ -101,12 +117,12 @@ def generateCNVMatrix(file_type, input_file, project, output_path):
         for acn, bcn in zip(df['nMajor'], df['nMinor']):
             tcn = acn + bcn
             CN_class.append(_bucketize_total_copy_number(tcn))
-            
+
     elif file_type == 'ABSOLUTE':
         for acn, bcn in zip(df['Modal_HSCN_1'], df['Modal_HSCN_2']):
             tcn = acn + bcn
             CN_class.append(_bucketize_total_copy_number(tcn))
-            
+
     elif file_type == 'PCAWG':
         for tcn in df["copy_number"]:
             CN_class.append(_bucketize_total_copy_number(tcn))
@@ -116,7 +132,7 @@ def generateCNVMatrix(file_type, input_file, project, output_path):
             CN_class.append(_bucketize_total_copy_number(tcn))
 
     elif file_type == 'PURPLE':
-        CN_class = df['copyNumber'].apply(_bucketize_segment_length)
+        CN_class = df['copyNumber'].apply(_bucketize_total_copy_number)
 
     else:
         pass
@@ -174,7 +190,7 @@ def generateCNVMatrix(file_type, input_file, project, output_path):
                 if t == 1:
                     print(t, a) 
 
-    elif file_type == 'PURPLE':    
+    elif file_type == 'PURPLE':
         for minor, major in zip(df['minorAlleleCopyNumber'], df['majorAlleleCopyNumber']):
             LOH_status.append(_classify_heterozygosity_state(minor, major))
 
@@ -226,7 +242,7 @@ def generateCNVMatrix(file_type, input_file, project, output_path):
         sizes.append(size)
     df['size_classification'] = sizes
 
-    for sample, tcn, loh, size in zip(df[df.columns[0]], df['CN_class'], df['LOH'], df['size_classification']):
+    for sample, tcn, loh, size in zip(sample_names, df['CN_class'], df['LOH'], df['size_classification']):
         if loh == "homdel":
             channel = "0" + ":" + loh + ":" + size
         else:

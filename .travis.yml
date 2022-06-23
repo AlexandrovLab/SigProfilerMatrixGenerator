@@ -8,5 +8,4 @@ install:
   - pip install --force-reinstall "setuptools<60.0"
   - pip install .
 
-script: python3 test.py
-
+script: python3 -m unittest test

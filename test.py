@@ -16,35 +16,43 @@ REFERENCE_CNV = Path().resolve() / "SigProfilerMatrixGenerator" / "references" /
 
 
 class TestPurpleCnvMatrix(TestCase):
-    def test_purple_cnv_file(self):
-        """Test parse a CNV file in PURPLE format.
-
-        We have transformed the first records in
-        "all.breast.ascat.summary.sample.tsv" from ASCAT format to PURPLE
-        format. This unit test verifies, irrespective of the data format, the
-        same matrix is generated.
-        """
+    def test_ascat_cnv_file(self):
+        """Test parse a CNV file in ASCAT format."""
         cnv_in_ascat = REFERENCE_CNV / "all.breast.ascat.summary.sample.tsv"
-        cnv_in_purple = REFERENCE_CNV / "example.purple.sample.tsv"
         with TemporaryDirectory() as tmpdir:
             scna.generateCNVMatrix(
-                file_type="ASCAT",
+                file_type="ASCAT_NGS",
                 input_file=cnv_in_ascat,
                 project="ascat",
                 output_path=tmpdir,
             )
+
+            ascat_matrix_name = tmpdir + "ascat/ASCAT_NGS.CNV.matrix.tsv"
+            df_ascat = read_csv(ascat_matrix_name, sep="\t", index_col=0).transpose()
+
+            sample_name = "PD9067a"
+            # Verify that there are 15 homozygous deletions (verified by counting).
+            is_homdel = df_ascat.columns.map(lambda x: "homdel" in x)
+            self.assertEqual(df_ascat.loc[sample_name, is_homdel].sum(), 15)
+            # There are 158 records for sample "PD9067a".
+            self.assertEqual(df_ascat.sum(axis=1)[sample_name], 158)
+
+    def test_purple_cnv_file(self):
+        """Test parse a CNV file in PURPLE format."""
+        cnv_in_purple = REFERENCE_CNV / "example.purple.tsv"
+        with TemporaryDirectory() as tmpdir:
             scna.generateCNVMatrix(
                 file_type="PURPLE",
-                input_file=cnv_in_purple,
+                input_file=str(cnv_in_purple),
                 project="purple",
                 output_path=tmpdir,
             )
 
-            ascat_matrix_name = tmpdir + "ascat/ASCAT.CNV.matrix.tsv"
-            df_ascat = read_csv(ascat_matrix_name, sep="\t", index_col=0)
-
             purple_matrix_name = tmpdir + "purple/PURPLE.CNV.matrix.tsv"
-            df_purple = read_csv(purple_matrix_name, sep="\t", index_col=0)
+            df_purple = read_csv(purple_matrix_name, sep="\t", index_col=0).transpose()
 
-            # Verify that the first two segments are identical.
-            assert_frame_equal(df_ascat.iloc[:2], df_purple.iloc[:2])
+            sample_name = "example.purple"
+            # Verify that the right column is 1.
+            self.assertEqual(df_purple.loc[sample_name, "3-4:het:>40Mb"], 1)
+            # Check that the remaining columns are zero.
+            self.assertEqual(df_purple.sum(axis=1)[sample_name], 1)
