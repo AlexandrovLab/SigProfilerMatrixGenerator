@@ -115,12 +115,12 @@ def generateCNVMatrix(file_type, input_file, project, output_path):
 
     elif file_type == "ASCAT":
         for acn, bcn in zip(df['nMajor'], df['nMinor']):
-            tcn = acn + bcn
+            tcn = round(acn) + round(bcn)
             CN_class.append(_bucketize_total_copy_number(tcn))
 
     elif file_type == 'ABSOLUTE':
         for acn, bcn in zip(df['Modal_HSCN_1'], df['Modal_HSCN_2']):
-            tcn = acn + bcn
+            tcn = round(acn) + round(bcn)
             CN_class.append(_bucketize_total_copy_number(tcn))
 
     elif file_type == 'PCAWG':
@@ -132,7 +132,8 @@ def generateCNVMatrix(file_type, input_file, project, output_path):
             CN_class.append(_bucketize_total_copy_number(tcn))
 
     elif file_type == 'PURPLE':
-        CN_class = df['copyNumber'].apply(_bucketize_total_copy_number)
+        tcn = round(df['minorAlleleCopyNumber']) + round(df['majorAlleleCopyNumber'])
+        CN_class = tcn.apply(_bucketize_total_copy_number)
 
     else:
         pass
@@ -206,32 +207,23 @@ def generateCNVMatrix(file_type, input_file, project, output_path):
 
     df['LOH'] = LOH_status
 
-    lengths = []
-
     #get chromosomal sizes
-    if file_type == 'ASCAT_NGS':
-        for start, end in zip(df['Start Position'], df['End Position']):
-            lengths.append((end - start)/1000000) #megabases
-    elif file_type == 'SEQUENZA':
-        for start, end in zip(df['start.pos'], df['end.pos']):
-            lengths.append((end - start)/1000000)
-    elif file_type == 'ABSOLUTE': #Start End
-        for start, end in zip(df['Start'], df['End']):
-            lengths.append((end - start)/1000000)
-    elif file_type == 'ASCAT':
-        for start, end in zip(df['startpos'], df['endpos']):
-            lengths.append((end - start)/1000000)
-    elif file_type == 'PCAWG':
-        for start, end in zip(df['chromosome_start'], df['chromosome_end']):
-            lengths.append((end - start)/1000000)
-    elif file_type in ('FACETS', 'PURPLE'):
-        for start, end in zip(df['start'], df['end']):
-            lengths.append((end - start)/1000000)
-    else:
-        pass
 
+    # The column name convention, per file type, that indicates the chromosome starting
+    # and ending position of the copy number segment.
+    start_end_columns = {
+        'ASCAT_NGS': ('Start Position', 'End Position'),
+        'SEQUENZA': ('start.pos', 'end.pos'),
+        'ABSOLUTE': ('Start', 'End'),
+        'ASCAT': ('startpos', 'endpos'),
+        'PCAWG': ('chromosome_start', 'chromosome_end'),
+        'FACETS': ('start', 'end'),
+        'PURPLE': ('start', 'end'),
+    }
+    start, end = start_end_columns[file_type]
 
-    df['length'] = lengths
+    mega_base = 1_000_000
+    lengths = (df[end] - df[start]) / mega_base
 
     sizes = []
     hom_del_class = ['0-100kb', '100kb-1Mb', '>1Mb']

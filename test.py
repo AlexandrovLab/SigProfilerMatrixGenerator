@@ -54,5 +54,7 @@ class TestPurpleCnvMatrix(TestCase):
             sample_name = "example.purple"
             # Verify that the right column is 1.
             self.assertEqual(df_purple.loc[sample_name, "3-4:het:>40Mb"], 1)
+            self.assertEqual(df_purple.loc[sample_name, "2:het:0-100kb"], 1)
+
             # Check that the remaining columns are zero.
-            self.assertEqual(df_purple.sum(axis=1)[sample_name], 1)
+            self.assertEqual(df_purple.sum(axis=1)[sample_name], 2)
