@@ -49,7 +49,7 @@ def save_chrom_tsb_separate (genome, ref_dir, custom):
 		chromosomes = sorted([tmp_chrom.replace(".txt", "") for tmp_chrom in tsb_list])
 
 	# Truncates the chromosome variable if a mouse genome is provided
-	if genome == 'mm10' or genome == 'mm9':
+	if genome == 'mm10' or genome == 'mm9' or genome == 'mm39':
 		chromosomes = chromosomes[:21]
 
 	if genome == 'c_elegans':
