@@ -8,6 +8,7 @@ include SigProfilerMatrixGenerator/references/chromosomes/transcripts/GRCh37/*
 include SigProfilerMatrixGenerator/references/chromosomes/transcripts/GRCh38/*
 include SigProfilerMatrixGenerator/references/chromosomes/transcripts/mm9/*
 include SigProfilerMatrixGenerator/references/chromosomes/transcripts/mm10/*
+include SigProfilerMatrixGenerator/references/chromosomes/transcripts/mm39/*
 include SigProfilerMatrixGenerator/references/chromosomes/transcripts/dog/*
 include SigProfilerMatrixGenerator/references/chromosomes/transcripts/c_elegans/*
 include SigProfilerMatrixGenerator/references/chromosomes/transcripts/rn6/*
@@ -15,6 +16,7 @@ include SigProfilerMatrixGenerator/references/chromosomes/transcripts/ebv/*
 include SigProfilerMatrixGenerator/references/chromosomes/transcripts/yeast/*
 include SigProfilerMatrixGenerator/references/chromosomes/exome/GRCh37/*
 include SigProfilerMatrixGenerator/references/chromosomes/exome/GRCh38/*
+include SigProfilerMatrixGenerator/references/chromosomes/exome/mm39/*
 include SigProfilerMatrixGenerator/references/chromosomes/exome/mm10/*
 include SigProfilerMatrixGenerator/references/chromosomes/exome/mm9/*
 include SigProfilerMatrixGenerator/references/chromosomes/exome/dog/*
@@ -26,6 +28,7 @@ include SigProfilerMatrixGenerator/references/chromosomes/tsb_BED/GRCh37/*
 include SigProfilerMatrixGenerator/references/chromosomes/tsb_BED/GRCh38/*
 include SigProfilerMatrixGenerator/references/chromosomes/tsb_BED/mm9/*
 include SigProfilerMatrixGenerator/references/chromosomes/tsb_BED/mm10/*
+include SigProfilerMatrixGenerator/references/chromosomes/tsb_BED/mm39/*
 include SigProfilerMatrixGenerator/references/chromosomes/tsb_BED/dog/*
 include SigProfilerMatrixGenerator/references/chromosomes/tsb_BED/c_elegans/*
 include SigProfilerMatrixGenerator/references/chromosomes/tsb_BED/rn6/*
