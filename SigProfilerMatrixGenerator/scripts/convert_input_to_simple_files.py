@@ -113,7 +113,6 @@ def convertVCF (project, vcf_path, genome, output_path, ncbi_chrom, log_file, ou
 						if first_SNV:
 							if not os.path.exists(output_path + "SNV/"):
 								os.mkdir(output_path + 'SNV/')
-
 							chrom_names = [str(output_path) + "SNV/" + out_chroms[i] \
 								+ "_"+ project + ".genome" for i in range(0,len(out_chroms))]
 							chrom_files = [open(file_name, "w", 10000000) for file_name in chrom_names]
