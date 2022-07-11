@@ -354,7 +354,7 @@ def SigProfilerMatrixGeneratorFunc (project, genome, vcfFiles, exome=False, bed_
 
 	skipped_muts = 0
 	# Converts the input files to standard text in the temporary folder
-	out_chroms = [x.replace("_transcripts.txt", "") for x in os.listdir(transcript_path)]
+	out_chroms = [x.replace("_transcripts.txt", "") for x in os.listdir(transcript_path) if not x.startswith('.')]
 	if file_extension == 'genome':
 			snv, indel, skipped, samples = convertIn.convertTxt(project, vcf_path, genome, output_path, out_chroms)
 	else:
