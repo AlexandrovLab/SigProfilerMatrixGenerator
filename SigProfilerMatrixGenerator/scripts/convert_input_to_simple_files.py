@@ -458,14 +458,13 @@ def convertTxt (project, vcf_path, genome, output_path, ncbi_chrom, log_file, ou
 	out.close()
 	return(snv, indel, skipped_count, samples)
 
-def convertMAF (project, vcf_path, genome, output_path, ncbi_chrom, log_file, out_chroms):
+def convertMAF (project, vcf_path, output_path, ncbi_chrom, log_file, out_chroms):
 	'''
 	Converts input MAF files into a single simple text format.
 
 	Parameters:
 		 project  -> unique name given to the current samples
 		vcf_path  -> path to the input MAF files
-		  genome  -> reference genome
 	 output_path  -> path to the temporary folder 
 	  out_chroms  -> list of chromosomes used
 
