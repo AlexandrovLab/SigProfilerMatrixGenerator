@@ -2,6 +2,10 @@ import pandas as pd
 import numpy as np
 import os
 import shutil
+#from .plotCNV import plotCNV
+import warnings
+import sys
+warnings.filterwarnings("ignore")
 
 def generateCNVMatrix(file_type, input_file, project, output_path):
 
@@ -25,7 +29,7 @@ def generateCNVMatrix(file_type, input_file, project, output_path):
             '9+:het:0-100kb', '9+:het:100kb-1Mb', '9+:het:1Mb-10Mb', '9+:het:10Mb-40Mb', '9+:het:>40Mb']
 
         assert(len(features) == 48)
-        columns = list(df[df.columns[0]].unique())
+        columns = list(df["sample"].unique())
         arr = np.zeros((48, len(columns)), dtype='int')
         nmf_matrix = pd.DataFrame(arr, index=features, columns=columns)
 
@@ -121,9 +125,23 @@ def generateCNVMatrix(file_type, input_file, project, output_path):
                     CN_class.append("5-8")
                 else:
                     CN_class.append("9+")
+        elif file_type == "PURPLE":
+            for acn, bcn in zip(df['minorAlleleCopyNumber'], df['majorAlleleCopyNumber']):
+                acn = int(acn)
+                bcn = int(bcn)
+                tcn = acn + bcn
+                if tcn == 2:
+                    CN_class.append("2")
+                elif tcn == 0 or tcn == 1:
+                    CN_class.append("1")
+                elif tcn == 3 or tcn == 4:
+                    CN_class.append("3-4")
+                elif tcn >= 5 and tcn <= 8:
+                    CN_class.append("5-8")
+                else:
+                    CN_class.append("9+")       
         else:
-            pass
-
+            print("The file type " + str(file_type) + " is not currently supported. Please provide a proper file type.")
 
         df['CN_class'] = CN_class
 
@@ -185,7 +203,7 @@ def generateCNVMatrix(file_type, input_file, project, output_path):
                 elif m == "loss" and tcn == 0:
                     LOH_status.append("homdel")
                 else:
-                    print(tcn, m)
+                    pass
                     #raise ValueError('Unable to determine zygosity')
         elif file_type == 'FACETS':
             for t, a in zip(df['tcn.em'], df['lcn.em']):
@@ -207,13 +225,23 @@ def generateCNVMatrix(file_type, input_file, project, output_path):
                     LOH_status.append("LOH")
                 else:
                     LOH_status.append("het")
-        else:
-            print("Please provide a proper file type")
+        elif file_type == "PURPLE":
+            for acn, bcn in zip(df['minorAlleleCopyNumber'], df['majorAlleleCopyNumber']):
+                acn = int(acn)
+                bcn = int(bcn)
+                tcn = acn + bcn
+                #print(acn,bcn, tcn)
+                if tcn == 0:
+                    LOH_status.append("homdel")
+                elif acn == 0 or bcn == 0:
+                    LOH_status.append("LOH")
+                else:
+                    LOH_status.append("het")
 
-    # chrom   seg     num.mark        nhet    cnlr.median     mafR    segclust        cnlr.median.clust       mafR.clust      start   end     cf.em   tcn.em  lcn.em  cnlr.median-dipLogR
-    # 1       1       148     2       -0.524597703662466      1.13764233698258        21      -0.561362815875377      NA      10700   588600  0.72333842611374        1       0       -0.643682513766257
-    # 1       2       72      0       -2.07028566583277       0       5       -2.07028566583277       NA      589500  687700  0.72333842611374        0       0       -2.18937047593656
-    # 1       3       6485    10      -0.534644008651447      0.412452808996456       21      -0.561362815875377      NA      690300  7305200 0.72333842611374        1       0       -0.653728818755238
+        else:
+            print("The file type " + str(file_type) + " is not currently supported. Please provide a proper file type.")
+
+   
 
         df['LOH'] = LOH_status
 
@@ -235,15 +263,14 @@ def generateCNVMatrix(file_type, input_file, project, output_path):
         elif file_type == 'PCAWG':
             for start, end in zip(df['chromosome_start'], df['chromosome_end']):
                 lengths.append((end - start)/1000000)
-        elif file_type == 'FACETS':
+        elif file_type == 'FACETS' or file_type == "PURPLE":
             for start, end in zip(df['start'], df['end']):
                 lengths.append((end - start)/1000000)
         elif file_type == "BATTENBERG":
             for start, end in zip(df['startpos'], df['endpos']):
                 lengths.append((end - start)/1000000)
-
         else:
-            pass
+             print("The file type " + str(file_type) + " is not currently supported. Please provide a proper file type.")
 
 
         df['length'] = lengths
@@ -283,7 +310,7 @@ def generateCNVMatrix(file_type, input_file, project, output_path):
             size_bins.append(size_bin)
         df['size_classification'] = sizes
 
-        for sample, tcn, loh, size in zip(df[df.columns[0]], df['CN_class'], df['LOH'], df['size_classification']):
+        for sample, tcn, loh, size in zip(df["sample"], df['CN_class'], df['LOH'], df['size_classification']):
             if loh == "homdel":
                 channel = "0" + ":" + loh + ":" + size
             else:
@@ -291,32 +318,35 @@ def generateCNVMatrix(file_type, input_file, project, output_path):
             nmf_matrix.at[channel, sample] += 1
 
         nmf_matrix.index.name = 'classification'
-        output_path = output_path + project + "/"
-        if os.path.exists(output_path):
-            shutil.rmtree(output_path)
-        os.makedirs(output_path)
+        # output_path = output_path + project + "/"
+        # if os.path.exists(output_path):
+        #     shutil.rmtree(output_path)
+        # os.makedirs(output_path)
         nmf_matrix.reset_index(level=0, inplace=True)
         if file_type != "BATTENBERG":
-            nmf_matrix.to_csv(output_path + project + '.CNV48.matrix.tsv', sep='\t')
-        return nmf_matrix
+            nmf_matrix.to_csv(output_path + project + '.CNV48.matrix.tsv', sep='\t', index=None)
+            print("Saved matrix to " + output_path + project + ".CNV48.matrix.tsv")
+        return nmf_matrix, df
+
 
     df = pd.read_csv(input_file, sep='\t')
     if file_type == "BATTENBERG":
-        clonal_df = df[[df.columns[0], "chr", "startpos", "endpos", "nMaj1_A", "nMin1_A"]]
-        subclonal_df = df[[df.columns[0], "chr", "startpos", "endpos", "nMaj2_A", "nMin2_A"]]
+        clonal_df = df[["sample", "chr", "startpos", "endpos", "nMaj1_A", "nMin1_A"]]
+        subclonal_df = df[["sample", "chr", "startpos", "endpos", "nMaj2_A", "nMin2_A"]]
         clonal_df = clonal_df.dropna()
         subclonal_df = subclonal_df.dropna()
         subclonal_df = subclonal_df.rename(columns={"nMaj2_A": "nMaj1_A", "nMin2_A": "nMin1_A"})
-        clonal_matrix = annotateSegFile(clonal_df, file_type, project, output_path)
-        subclonal_matrix = annotateSegFile(subclonal_df, file_type, project, output_path)
-        subclonal_matrix = subclonal_matrix.set_index(subclonal_matrix.columns[0])
-        clonal_matrix = clonal_matrix.set_index(clonal_matrix.columns[0])
+        clonal_matrix = annotateSegFile(clonal_df, file_type, project, output_path)[0]
+        subclonal_matrix = annotateSegFile(subclonal_df, file_type, project, output_path)[0]
+        subclonal_matrix = subclonal_matrix.set_index(subclonal_matrix[subclonal_matrix.columns[0]])
+        clonal_matrix = clonal_matrix.set_index(clonal_matrix[clonal_matrix.columns[0]])
         #add subclonal events to matrix containing clonal events to produce a final matrix that accounts for all events(Clonal + Subclonal)
         for k in range(0,len(subclonal_matrix)):
             for i,j in enumerate(subclonal_matrix.columns):
                 clonal_matrix.at[subclonal_matrix.index.to_list()[k], j] = subclonal_matrix.iat[k, i] + clonal_matrix.loc[subclonal_matrix.index.to_list()[k], j]
-        clonal_matrix.to_csv(output_path + file_type + '.CNV48.matrix.tsv', sep='\t')
-    elif file_type = "VCF":
+        clonal_matrix.to_csv(output_path + project + '.CNV48.matrix.tsv', sep='\t', index=None)
+        print("Saved matrix to " + output_path + project + ".CNV48.matrix.tsv")
+    elif file_type == "VCF":
         #convert vcf to dataframe with necessary info
         vcf_file = vcf.Reader(open(file, 'r'))
         sample_name=file.split(".vcf")[0]
@@ -339,12 +369,15 @@ def generateCNVMatrix(file_type, input_file, project, output_path):
                 starts.append(record.POS)
                 ends.append(record.INFO.get('END'))
                 c.append(record.CHROM)
-        df = pd.Dataframe({"sample":samples, "chr":c, "startpos":starts , "endpos":ends, "nMajor"tcn:, "nMinor":lcn})
-        annotateSegFile(df, "ASCAT", input_file, project, output_path)
+        df = pd.Dataframe({"sample":samples, "chr":c, "startpos":starts, "endpos":ends, "nMajor":tcn, "nMinor":lcn})
+        nmf_matrix, annotated_df = annotateSegFile(df, "ASCAT", project, output_path)
     else:
-        nmf_matrix = annotateSegFile(df, file_type, input_file, project, output_path)
+        nmf_matrix, annotated_df = annotateSegFile(df, file_type, project, output_path)
+      
+    matrix_path = output_path + project + ".CNV48.matrix.tsv"
+    #plotCNV(matrix_path, output_path, project, plot_type="pdf", percentage=False, aggregate=False, read_from_file=True, write_to_file=True)
 
 if __name__ == "__main__":
     if len(sys.argv) > 1:
-        input_dir, project, output_dir = sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4]
-        generateCNVMatrix(file_type, input_file, project, output_path)
+        file_type, input_dir, project, output_path = sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4]
+        generateCNVMatrix(file_type, input_dir, project, output_path)

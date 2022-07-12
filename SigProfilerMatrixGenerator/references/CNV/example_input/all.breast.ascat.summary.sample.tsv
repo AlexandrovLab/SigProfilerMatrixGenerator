@@ -1,4 +1,4 @@
-Sample	Chromosome	Start Position	End Position	Normal TCN	Normal BCN	Tumour TCN	Tumour BCN
+sample	Chromosome	Start Position	End Position	Normal TCN	Normal BCN	Tumour TCN	Tumour BCN
 PD9067a	1	61735	61059101	2	1	2	1
 PD9067a	1	61059259	61062474	2	1	5	2
 PD9067a	1	61063647	72508131	2	1	2	1
