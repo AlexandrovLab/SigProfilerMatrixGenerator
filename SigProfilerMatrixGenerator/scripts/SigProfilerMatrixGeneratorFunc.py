@@ -354,17 +354,18 @@ def SigProfilerMatrixGeneratorFunc (project, genome, vcfFiles, exome=False, bed_
 
 	skipped_muts = 0
 	# Converts the input files to standard text in the temporary folder
+	out_chroms = [x.replace("_transcripts.txt", "") for x in os.listdir(transcript_path) if not x.startswith('.')]
 	if file_extension == 'genome':
-			snv, indel, skipped, samples = convertIn.convertTxt(project, vcf_path, genome, output_path)
+			snv, indel, skipped, samples = convertIn.convertTxt(project, vcf_path, genome, output_path, out_chroms)
 	else:
 		if file_extension == 'txt':
-			snv, indel, skipped, samples = convertIn.convertTxt(project, vcf_path,  genome,  output_path, ncbi_chrom, log_file)
+			snv, indel, skipped, samples = convertIn.convertTxt(project, vcf_path,  genome,  output_path, ncbi_chrom, log_file, out_chroms)
 		elif file_extension == 'vcf':
-			snv, indel, skipped, samples = convertIn.convertVCF(project, vcf_path,  genome, output_path, ncbi_chrom, log_file)
+			snv, indel, skipped, samples = convertIn.convertVCF(project, vcf_path,  genome, output_path, ncbi_chrom, log_file, out_chroms)
 		elif file_extension == 'maf':
-			snv, indel, skipped, samples = convertIn.convertMAF(project, vcf_path,  genome, output_path, ncbi_chrom, log_file)
+			snv, indel, skipped, samples = convertIn.convertMAF(project, vcf_path, output_path, ncbi_chrom, log_file, out_chroms)
 		elif file_extension == 'tsv':
-			snv, indel, skipped, samples = convertIn.convertICGC(project, vcf_path,  genome, output_path, ncbi_chrom, log_file)
+			snv, indel, skipped, samples = convertIn.convertICGC(project, vcf_path,  genome, output_path, ncbi_chrom, log_file, out_chroms)
 		else:
 			print("File format not supported")
 

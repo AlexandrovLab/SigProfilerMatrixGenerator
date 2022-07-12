@@ -540,7 +540,7 @@ def main():
 		chromosomes.remove('Y')
 
 
-	if genome.upper() == 'MM10' or genome.upper() == 'MM9':
+	if genome.upper() == 'MM10' or genome.upper() == 'MM9' or genome.upper() == 'MM39':
 		chromosomes = chromosomes[:21]
 	if genome.upper() == 'RN6':
 		chromosomes = chromosomes[:22]

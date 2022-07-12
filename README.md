@@ -1,4 +1,4 @@
-[![Docs](https://img.shields.io/badge/docs-latest-blue.svg)](https://osf.io/s93d5/wiki/home/) [![License](https://img.shields.io/badge/License-BSD\%202--Clause-orange.svg)](https://opensource.org/licenses/BSD-2-Clause) [![Build Status](https://travis-ci.com/AlexandrovLab/SigProfilerMatrixGenerator.svg?branch=master)](https://travis-ci.com/AlexandrovLab/SigProfilerMatrixGenerator)
+[![Docs](https://img.shields.io/badge/docs-latest-blue.svg)](https://osf.io/s93d5/wiki/home/) [![License](https://img.shields.io/badge/License-BSD\%202--Clause-orange.svg)](https://opensource.org/licenses/BSD-2-Clause) [![Build Status](https://travis-ci.com/AlexandrovLab/SigProfilerMatrixGenerator.svg?branch=master)](https://app.travis-ci.com/AlexandrovLab/SigProfilerMatrixGenerator)
 
 # SigProfilerMatrixGenerator
 SigProfilerMatrixGenerator creates mutational matrices for all types of somatic mutations. It allows downsizing the generated mutations only to parts for the genome (e.g., exome or a custom BED file). The tool seamlessly integrates with other SigProfiler tools.
@@ -26,6 +26,7 @@ This section will guide you through the minimum steps required to create mutatio
 ```
                           pip install SigProfilerMatrixGenerator
 ```
+<<<<<<< HEAD
 2. Install your desired reference genome from the command line/terminal as follows (available reference genomes are: GRCh37, GRCh38, mm9, and mm10):
 ```
 $ python
@@ -35,6 +36,23 @@ $ python
     This will install the human 37 assembly as a reference genome. You may install as many genomes as you wish. If you have a firewall on your server, you may need to install rsync and use the rsync=True parameter. Similarly, if you do not have bash,
     use bash=False.
 
+=======
+2.
+    a. Install your desired reference genome from the command line/terminal as follows (a complete list of supported genomes can be found below):
+    ```
+    $ python
+    >> from SigProfilerMatrixGenerator import install as genInstall
+    >> genInstall.install('GRCh37', rsync=False, bash=True)
+    ```
+        This will install the human 37 assembly as a reference genome. You may install as many genomes as you wish. If you have a firewall on your server, you may need to install rsync and use the rsync=True parameter. Similarly, if you do not have bash,
+        use bash=False.
+    b. To install a reference genome that you have saved locally, you can do the following:
+    ```
+    $ python
+    >> from SigProfilerMatrixGenerator import install as genInstall
+    >> genInstall.install('GRCh37', offline_files_path='path/to/directory/containing/GRCh37.tar.gz')
+    ```
+>>>>>>> 20487a0788e785a1be7c15b6e2546c4cecbc48dc
 3. Place your vcf files in your desired output folder. It is recommended that you name this folder based on your project's name
 4. From within a python session, you can now generate the matrices as follows:
 ```
@@ -54,7 +72,11 @@ $ python3
       plot=False         [boolean] Integrates with SigProfilerPlotting to output all available visualizations for each matrix.
       tsb_stat=False     [boolean] Outputs the results of a transcriptional strand bias test for the respective matrices.
       seqInfo=True      [boolean] Ouputs original mutations into a text file that contains the SigProfilerMatrixGenerator classificaiton for each mutation.
+<<<<<<< HEAD
       cushion=100	[integer] Adds an Xbp cushion to the exome/bed_file ranges for downsampling the mutations.
+=======
+      cushion=100 [integer] Adds an Xbp cushion to the exome/bed_file ranges for downsampling the mutations.
+>>>>>>> 20487a0788e785a1be7c15b6e2546c4cecbc48dc
 
 
 
@@ -68,7 +90,48 @@ This tool currently supports maf, vcf, simple text file, and ICGC formats. The u
 The output structure is divided into three folders: input, output, and logs. The input folder contains copies of the user-provided input files. The outputfolder contains
 a DBS, SBS, ID, and TSB folder (there will also be a plots folder if this parameter is chosen). The matrices are saved into the appropriate folders. The logs folder contains the error and log files for the submitted job.
 
-**COPY NUMBER MATRIX GENERATION**
+## STRUCTURAL VARIANT MATRIX GENERATION
+
+### INPUT FORMAT:
+
+***First six columns are required, and either the column "svclass" (deletion, translocation, tandem-duplication, or inversion) or the columns "strand1" & "strand2" (BRASS convention) must also be present***
+
+
+### Example with SV class present (tsv or csv file):
+
+
+| chrom1 | start1 | end1 | chrom2 | start2 | end2 | svclass |
+| :-----: | :-: | :-: | :-: | :-: | :-: | :-: |
+| 19 | 21268384 | 21268385 | 19 | 21327858 | 21327859 | deletion
+
+### Example without SV class present (tsv or csv file):
+
+| chrom1 | start1 | end1 | chrom2 | start2 | end2 | strand1 | strand2
+| :-----: | :-: | :-: | :-: | :-: | :-: | :-: | :-: |
+| 19 | 21268384 | 21268385 | 19 | 21327858 | 21327859 | + | +
+
+### Quick Start Example: ###
+
+```
+#navigate to SVMatrixGenerator directory and start python3 interpreter
+
+from SigProfilerMatrixGenerator.scripts import SVMatrixGenerator as sv
+input_dir = "./SigProfilerMatrixGenerator/references/SV/560-Breast" #directory which contains collection of bedpe files (one per sample)
+output_path = "./SigProfilerMatrixGenerator/references/SV/"
+project = "560-Breast"
+sv.generateSVMatrix(input_dir, project, output_dir)
+```
+**Alternatively, you can run directly from the command line:**
+```
+python3 ./SigProfilerMatrixGenerator/scripts/SVMatrixGenerator.py ./SigProfilerMatrixGenerator/references/SV/example_input/560-Breast 560-Breast ./SigProfilerMatrixGenerator/references/SV/example_output/ #provide input_dir, project, output_dir as command-line arguments
+```
+## OUTPUT:
+1. Annotated bedpe file - a file with each SV annotated with its type, size bin, and clustered/non-clustered status
+2. Aggregate SV plot - a summary plot showing the average number of events in each channel for the whole cohort of samples
+3. SV Matrix - a 32 X n matrix (where n is the number of samples) that can be used to perform signature decomposition, clustering, etc.
+
+
+## COPY NUMBER MATRIX GENERATION
 
 In order to generate a copy number matrix, provide the an absolute path to a multi-sample segmentation file obtained from one of the following copy number calling tools listed below(if you have individual sample files, please combine them into one file with the first column corresponding to the sample name). Please note that your segmentation file should contain a "sample" column, the chromosome, start and end of a segment, and the copy number of the A and B allele.
 
@@ -105,11 +168,17 @@ python ./SigProfilerMatrixGenerator/scripts/CNVMatrixGenerator.py BATTENBERG ./r
 
 This tool currently supports the following genomes:
 
-GRCh38.p12 [GRCh38] (Genome Reference Consortium Human Reference 37), INSDC
+GRCh38.p12 [GRCh38] (Genome Reference Consortium Human Reference 38), INSDC
 Assembly GCA_000001405.27, Dec 2013. Released July 2014. Last updated January 2018. This genome was downloaded from ENSEMBL database version 93.38.
 
 GRCh37.p13 [GRCh37] (Genome Reference Consortium Human Reference 37), INSDC
 Assembly GCA_000001405.14, Feb 2009. Released April 2011. Last updated September 2013. This genome was downloaded from ENSEMBL database version 93.37.
+<<<<<<< HEAD
+=======
+
+GRCm39 [mm39] (Genome Reference Consortium Mouse Reference 39), INSDC
+Assembly GCA_000001635.9, Jun 2020. Last updated August 2020. This genome was downloaded from ENSEMBL database version 103.
+>>>>>>> 20487a0788e785a1be7c15b6e2546c4cecbc48dc
 
 GRCm38.p6 [mm10] (Genome Reference Consortium Mouse Reference 38), INDSDC
 Assembly GCA_000001635.8, Jan 2012. Released July 2012. Last updated March 2018. This genome was downloaded from ENSEMBL database version 93.38.
@@ -153,4 +222,4 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 **CONTACT INFORMATION**
 
-Please address any queries or bug reports to Erik Bergstrom at ebergstr@eng.ucsd.edu. Please address any queries or bug reports related to CNV's or SV's to Azhar Khandekar at akhandek@eng.ucsd.edu.
+Please address any queries or bug reports to Erik Bergstrom at ebergstr@eng.ucsd.edu. Please address any queries or bug reports related to CNV's or SV's to Azhar Khandekar at akhandek@eng.ucsd.edu. Additional support can be provided by Mark Barnes at mdbarnes@health.ucsd.edu.

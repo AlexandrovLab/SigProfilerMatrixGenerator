@@ -37,7 +37,7 @@ def save_tsb (chromosome_string_path, transcript_path, output_path):
 	'''
 
 	# Retrieves the transcript file 
-	transcript_files = os.listdir(transcript_path)
+	transcript_files = [f for f in os.listdir(transcript_path) if not f.startswith('.')]
 
 	if len(transcript_files) < 3:
 		# Instantiates required flag variables
@@ -48,7 +48,7 @@ def save_tsb (chromosome_string_path, transcript_path, output_path):
 			name = file_name[0]
 
 			# Skips hidden files
-			if name == '.DS':
+			if name[0] == '.':
 				pass
 			else:
 
@@ -89,7 +89,7 @@ def save_tsb (chromosome_string_path, transcript_path, output_path):
 			os.remove(transcript_path + file)
 
 	# Retrieves the chromosome based list of transcript files 
-	transcript_files = os.listdir(transcript_path)
+	transcript_files = [f for f in os.listdir(transcript_path) if not f.startswith('.')]
 	if '.DS_Store' in transcript_files:
 		transcript_files.remove('.DS_Store')
 	for files in transcript_files:
@@ -345,5 +345,3 @@ def main ():
 
 if __name__ == '__main__':
 	main()
-
-
