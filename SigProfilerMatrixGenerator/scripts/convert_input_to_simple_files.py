@@ -5,13 +5,14 @@
 #Contact: ebergstr@eng.ucsd.edu
 
 from __future__ import print_function
+from SigProfilerMatrixGenerator.scripts import SigProfilerMatrixGenerator as spm
 import os
 import sys
 import re
 import pdb
 
 
-def convertVCF (project, vcf_path, genome, output_path, ncbi_chrom, log_file, out_chroms):
+def convertVCF (project, vcf_path, genome, output_path, ncbi_chrom, log_file):
 	'''
 	Converts input vcf files into a single simple text format.
 
@@ -20,7 +21,6 @@ def convertVCF (project, vcf_path, genome, output_path, ncbi_chrom, log_file, ou
 		vcf_path  -> path to the input vcf files
 		  genome  -> reference genome
 	 output_path  -> path to the temporary folder 
-	  out_chroms  -> list of chromosomes used
 
 	Returns:
 			 snv  -> Boolean that informs whether there are SNVs present in the 
@@ -33,6 +33,8 @@ def convertVCF (project, vcf_path, genome, output_path, ncbi_chrom, log_file, ou
 
 	'''
 	# Collect all input file names and instantiate flags
+	transcript_path=str(spm.reference_paths(genome)[1])+'/references/chromosomes/transcripts/'+genome+"/"
+	out_chroms=[x.replace("_transcripts.txt", "") for x in os.listdir(transcript_path) if not x.startswith('.')]
 	files = os.listdir(vcf_path)
 	first_indel = True
 	first_SNV = True
@@ -236,7 +238,7 @@ def convertVCF (project, vcf_path, genome, output_path, ncbi_chrom, log_file, ou
 	return(snv, indel, skipped_count, samples)
 
 
-def convertTxt (project, vcf_path, genome, output_path, ncbi_chrom, log_file, out_chroms):
+def convertTxt (project, vcf_path, genome, output_path, ncbi_chrom, log_file):
 	'''
 	Converts input text files into a single simple text format.
 
@@ -245,7 +247,6 @@ def convertTxt (project, vcf_path, genome, output_path, ncbi_chrom, log_file, ou
 		vcf_path  -> path to the input text files
 		  genome  -> reference genome
 	 output_path  -> path to the temporary folder 
-	  out_chroms  -> list of chromosomes used
 
 	Returns:
 			 snv  -> Boolean that informs whether there are SNVs present in the 
@@ -259,6 +260,8 @@ def convertTxt (project, vcf_path, genome, output_path, ncbi_chrom, log_file, ou
 	'''
 
 	# Collect all input file names and instantiate flags
+	transcript_path=str(spm.reference_paths(genome)[1])+'/references/chromosomes/transcripts/'+genome+"/"
+	out_chroms=[x.replace("_transcripts.txt", "") for x in os.listdir(transcript_path) if not x.startswith('.')]
 	out = open(log_file, 'a')
 	files = os.listdir(vcf_path)
 	first_indel = True
@@ -458,15 +461,15 @@ def convertTxt (project, vcf_path, genome, output_path, ncbi_chrom, log_file, ou
 	out.close()
 	return(snv, indel, skipped_count, samples)
 
-def convertMAF (project, vcf_path, output_path, ncbi_chrom, log_file, out_chroms):
+def convertMAF (project, vcf_path, genome, output_path, ncbi_chrom, log_file):
 	'''
 	Converts input MAF files into a single simple text format.
 
 	Parameters:
 		 project  -> unique name given to the current samples
 		vcf_path  -> path to the input MAF files
+		genome  -> reference genome
 	 output_path  -> path to the temporary folder 
-	  out_chroms  -> list of chromosomes used
 
 	Returns:
 			 snv  -> Boolean that informs whether there are SNVs present in the 
@@ -491,6 +494,8 @@ def convertMAF (project, vcf_path, output_path, ncbi_chrom, log_file, out_chroms
 	samples = []	
 
 	# Iterates through each file 
+	transcript_path=str(spm.reference_paths(genome)[1])+'/references/chromosomes/transcripts/'+genome+"/"
+	out_chroms=[x.replace("_transcripts.txt", "") for x in os.listdir(transcript_path) if not x.startswith('.')]
 	for file in files:
 		header = True
 		if file[0] == '.':
@@ -690,7 +695,7 @@ def convertMAF (project, vcf_path, output_path, ncbi_chrom, log_file, out_chroms
 
 
 
-def convertICGC (project, vcf_path, output_path, ncbi_chrom, log_file, out_chroms):
+def convertICGC (project, vcf_path, genome, output_path, ncbi_chrom, log_file):
 	'''
 	Converts input ICGC files into a single simple text format.
 
@@ -698,7 +703,7 @@ def convertICGC (project, vcf_path, output_path, ncbi_chrom, log_file, out_chrom
 		 project  -> unique name given to the current samples
 		vcf_path  -> path to the input ICGC files
 	 output_path  -> path to the temporary folder 
-	  out_chroms  -> list of chromosomes used
+	      genome  -> reference genome
 
 	Returns:
 			 snv  -> Boolean that informs whether there are SNVs present in the 
@@ -723,6 +728,8 @@ def convertICGC (project, vcf_path, output_path, ncbi_chrom, log_file, out_chrom
 	samples = []
 
 	# Iterates through each file 
+	transcript_path=str(spm.reference_paths(genome)[1])+'/references/chromosomes/transcripts/'+genome+"/"
+	out_chroms=[x.replace("_transcripts.txt", "") for x in os.listdir(transcript_path) if not x.startswith('.')]
 	for file in files:
 		if file[0] == '.':
 			continue
