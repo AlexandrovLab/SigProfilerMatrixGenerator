@@ -161,7 +161,7 @@ $ python3
 
 Alternatively, you can run directly from the command line:
 ```
-python ./SigProfilerMatrixGenerator/scripts/CNVMatrixGenerator.py BATTENBERG ./references/CNV/example_input/Battenberg_test.tsv BATTENBERG-TEST ./references/CNV/example_output/
+python ./SigProfilerMatrixGenerator/scripts/CNVMatrixGenerator.py BATTENBERG ./SigProfilerMatrixGenerator/references/CNV/example_input/Battenberg_test.tsv BATTENBERG-TEST ./SigProfilerMatrixGenerator/references/CNV/example_output/
 
 ```
 **SUPPORTED GENOMES**
@@ -206,7 +206,6 @@ For all errors, please email the error and progress log files to the primary con
 
 Bergstrom EN, Huang MN, Mahto U, Barnes M, Stratton MR, Rozen SG, and Alexandrov LB (2019) SigProfilerMatrixGenerator: a tool for visualizing and exploring patterns of small mutational events. **BMC Genomics** 20, Article number: 685.
 https://bmcgenomics.biomedcentral.com/articles/10.1186/s12864-019-6041-2
-
 
 **COPYRIGHT**
 
