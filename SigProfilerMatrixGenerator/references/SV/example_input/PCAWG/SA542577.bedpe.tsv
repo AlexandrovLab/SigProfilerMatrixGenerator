@@ -1,0 +1,3 @@
+chrom1	start1	end1	chrom2	start2	end2	strand1	strand2	sample	project	donor	specimen
+12	53952826	53952827	19	13536954	13536955	-	-	SA542577	PAEN-AU	DO51171	Primary tumour - solid tissue
+7	77176380	77176381	7	77302940	77302941	-	+	SA542577	PAEN-AU	DO51171	Primary tumour - solid tissue
