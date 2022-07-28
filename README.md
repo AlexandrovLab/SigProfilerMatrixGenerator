@@ -100,8 +100,8 @@ a DBS, SBS, ID, and TSB folder (there will also be a plots folder if this parame
 #navigate to SVMatrixGenerator directory and start python3 interpreter
 
 from SigProfilerMatrixGenerator.scripts import SVMatrixGenerator as sv
-input_dir = "./SigProfilerMatrixGenerator/references/SV/560-Breast" #directory which contains collection of bedpe files (one per sample)
-output_path = "./SigProfilerMatrixGenerator/references/SV/"
+input_dir = "./SigProfilerMatrixGenerator/references/SV/example_input/560-Breast" #directory which contains collection of bedpe files (one per sample)
+output_dir = "./SigProfilerMatrixGenerator/references/SV/"
 project = "560-Breast"
 sv.generateSVMatrix(input_dir, project, output_dir)
 ```
@@ -123,19 +123,30 @@ In order to generate a copy number matrix, provide the an absolute path to a mul
 2. ASCAT_NGS
 3. SEQUENZA
 4. ABSOLUTE
+5. BATTENBERG
+6. FACETS
+7. PURPLE
+8. TCGA
 
 In addition, provide the name of the project and the output directory for the resulting matrix. The final matrix will be placed in a folder with the name of the project in the directory specified by the output path.
 
-An example to generate the CNV matrix is as follows:
+**An example to generate the CNV matrix is as follows:**
 
 $ python3
 ```
 >>from SigProfilerMatrixGenerator.scripts import CNVMatrixGenerator as scna
->>file_type = "ASCAT_NGS"
->>input_file = "./SigProfilerMatrixGenerator/references/CNV/all.breast.ascat.summary.sample.tsv" #example input file for testing
->>output_path = "./SigProfilerMatrixGenerator/references/CNV/"
->>project = "Breast_Cancer"
+>>file_type = "BATTENBERG"
+>>input_file = "./SigProfilerMatrixGenerator/references/CNV/example_input/Battenberg_test.tsv" #example input file for testing
+>>output_path = "/Users/azhark/iCloud/dev/CNVMatrixGenerator/example_output/"
+>>project = "Battenberg_test"
 >>scna.generateCNVMatrix(file_type, input_file, project, output_path)
+
+```
+
+**Alternatively, you can run directly from the command line:**
+
+```
+python ./SigProfilerMatrixGenerator/scripts/CNVMatrixGenerator.py BATTENBERG ./SigProfilerMatrixGenerator/references/CNV/example_input/Battenberg_test.tsv BATTENBERG-TEST ./SigProfilerMatrixGenerator/references/CNV/example_output/
 
 ```
 **SUPPORTED GENOMES**

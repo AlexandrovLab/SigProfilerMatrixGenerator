@@ -1,0 +1,8 @@
+chrom1	start1	end1	chrom2	start2	end2	strand1	strand2	sample	project	donor	specimen
+14	106324883	106324884	14	106326891	106326892	+	+	SA539008	CLLE-ES	DO7196	Primary tumour - blood derived (peripheral blood)
+14	106324893	106324894	14	106326882	106326883	-	-	SA539008	CLLE-ES	DO7196	Primary tumour - blood derived (peripheral blood)
+14	106329452	106329453	14	106725200	106725201	+	-	SA539008	CLLE-ES	DO7196	Primary tumour - blood derived (peripheral blood)
+14	107132494	107132495	14	107169932	107169933	+	-	SA539008	CLLE-ES	DO7196	Primary tumour - blood derived (peripheral blood)
+2	89161075	89161076	2	89197302	89197303	-	-	SA539008	CLLE-ES	DO7196	Primary tumour - blood derived (peripheral blood)
+2	89161433	89161434	2	89291927	89291928	+	-	SA539008	CLLE-ES	DO7196	Primary tumour - blood derived (peripheral blood)
+22	23135467	23135468	22	23241798	23241799	+	-	SA539008	CLLE-ES	DO7196	Primary tumour - blood derived (peripheral blood)
