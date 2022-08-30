@@ -16,7 +16,6 @@ import pandas as pd
 import shutil
 import logging
 import hashlib
-from SigProfilerMatrixGenerator.scripts import convert_input_to_simple_files as convertIn
 from SigProfilerMatrixGenerator.scripts import SigProfilerMatrixGeneratorFunc as matGen
 import glob
 
@@ -139,6 +138,9 @@ check_sum = {'GRCh37':
 					 'X':'dac706139aeb5cd3d75f24d0e405131e', 'XI':'5d4b415e1e313918bba6cd061d416d58', 'XII':'e26e59a4b4944ab96b819a92b60c9868',
 					 'XIII':'a12878f65ed7464e2824cb0c291d359e', 'XIV':'807431901ba993e6ba87861401da1cb2', 'XV':'44fd7223d9d30bdcf94cf627e5a172ca',
 					 'XVI':'670d7aad863043ea7a125f004e281483'}}
+
+def get_reference_md5():
+	return check_sum
 
 def md5(fname):
 	hash_md5 = hashlib.md5()
