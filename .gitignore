@@ -12,3 +12,4 @@
 
 # pypi build folder
 /build/
+SigProfilerMatrixGenerator/version.py
