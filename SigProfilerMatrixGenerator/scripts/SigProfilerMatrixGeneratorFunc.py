@@ -76,14 +76,18 @@ def SigProfilerMatrixGeneratorFunc (project, genome, vcfFiles, exome=False, bed_
 	'''
 	# verify that installation of all chromosome files was successful
 	# 1. get list of all files that were downloaded
-	genome_loc = os.path.join("references/chromosomes/transcripts/", genome)
+	# Terminates the code if the genome reference files have not been created/installed
 	lib_loc = os.path.split(os.path.dirname(matGen.__file__))[0]
+	tsb_path = os.path.join("references/chromosomes/tsb/", genome)
+	if not os.path.exists(os.path.join(lib_loc,tsb_path)):
+		print("The specified genome " + genome + " has not been installed\nPlease refer to the SigProfilerMatrixGenerator README for installation instructions:\n\thttps://github.com/AlexandrovLab/SigProfilerMatrixGenerator")
+		sys.exit()
+	genome_loc = os.path.join("references/chromosomes/transcripts/", genome)
 	check_files = [tmp_f for tmp_f in os.listdir(os.path.join(lib_loc, genome_loc)) if not tmp_f.startswith(".")]
 
 	# 2. compare list of downloaded files to md5sum reference
 	if genome in list(install.get_reference_md5().keys()):
 		for chrom_file_name in check_files:
-			tsb_path = os.path.join("references/chromosomes/tsb/", genome)
 			chrom_path = os.path.join(lib_loc , tsb_path, chrom_file_name.replace("_transcripts", ""))
 			chrom_val = chrom_file_name.strip("_transcripts.txt")
 			chrom_md5 = install.md5(chrom_path)
