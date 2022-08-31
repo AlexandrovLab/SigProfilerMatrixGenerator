@@ -1,4 +1,3 @@
-include README.rst
 include SigProfilerMatrixGenerator/references/vcf_files/GRCh37_bench/*
 include SigProfilerMatrixGenerator/references/vcf_files/GRCh38_bench/*
 include SigProfilerMatrixGenerator/references/vcf_files/mm9_bench/*
@@ -30,9 +29,6 @@ include SigProfilerMatrixGenerator/references/chromosomes/tsb_BED/mm39/*
 include SigProfilerMatrixGenerator/references/chromosomes/tsb_BED/dog/*
 include SigProfilerMatrixGenerator/references/chromosomes/tsb_BED/c_elegans/*
 include SigProfilerMatrixGenerator/references/chromosomes/tsb_BED/rn6/*
-include SigProfilerMatrixGenerator/references/chromosomes/tsb_BED/ebv/*
-include SigProfilerMatrixGenerator/references/chromosomes/tsb_BED/yeast/*
 include SigProfilerMatrixGenerator/references/chromosomes/context_distributions/*
 include SigProfilerMatrixGenerator/scripts/Benchmark/*
-include SigProfilerMatrixGenerator/references/matrix/BRCA_bench/*
 include SigProfilerMatrixGenerator/references/CNV/*
