@@ -317,7 +317,7 @@ def generateCNVMatrix(file_type, input_file, project, output_path, folder=False)
                 channel = tcn + ":" + loh + ":" + size
             nmf_matrix.at[channel, sample] += 1
 
-        nmf_matrix.index.name = 'classification'
+        nmf_matrix.index.name = 'MutationType'
         # output_path = output_path + project + "/"
         # if os.path.exists(output_path):
         #     shutil.rmtree(output_path)
@@ -329,6 +329,9 @@ def generateCNVMatrix(file_type, input_file, project, output_path, folder=False)
         return nmf_matrix, df
 
 
+    # create output_dir if it does not yet exist
+    if not os.path.exists(output_path):
+        os.makedirs(output_path)
     df = pd.read_csv(input_file, sep='\t')
     if file_type == "BATTENBERG":
         clonal_df = df[["sample", "chr", "startpos", "endpos", "nMaj1_A", "nMin1_A"]]

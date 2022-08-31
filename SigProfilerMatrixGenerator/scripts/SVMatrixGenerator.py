@@ -675,6 +675,9 @@ def annotateBedpe(sv_bedpe):
     return result
 
 def generateSVMatrix(input_dir, project, output_dir):
+    # create output_dir if it does not yet exist
+    if not os.path.exists(output_dir):
+        os.makedirs(output_dir)
     if input_dir[-1] != "/":
         input_dir = input_dir + "/"
     all_samples = [] #list of dataframes for each sample
@@ -820,7 +823,7 @@ def tsv2matrix(sv_bedpe_list, project, output_dir):
             channel = c + "_" + svclass_mapping[row.svclass]
         nmf_matrix.at[channel, row.sample] += 1
     nmf_matrix.reindex([features])
-    nmf_matrix.index.name = 'Mutation Types'
+    nmf_matrix.index.name = 'MutationType'
     #nmf_matrix.reindex([features]).reset_index()
 
     return nmf_matrix
