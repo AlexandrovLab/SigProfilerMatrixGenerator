@@ -2,7 +2,6 @@ import pandas as pd
 import numpy as np
 import os
 import shutil
-#from .plotCNV import plotCNV
 import warnings
 import sys
 warnings.filterwarnings("ignore")
@@ -324,8 +323,9 @@ def generateCNVMatrix(file_type, input_file, project, output_path, folder=False)
         # os.makedirs(output_path)
         nmf_matrix.reset_index(level=0, inplace=True)
         if file_type != "BATTENBERG":
-            nmf_matrix.to_csv(output_path + project + '.CNV48.matrix.tsv', sep='\t', index=None)
-            print("Saved matrix to " + output_path + project + ".CNV48.matrix.tsv")
+            out_file_path=os.path.join(output_path, project + '.CNV48.matrix.tsv')
+            nmf_matrix.to_csv(out_file_path, sep='\t', index=None)
+            print("Saved matrix to " + out_file_path)
         return nmf_matrix, df
 
 
@@ -341,14 +341,16 @@ def generateCNVMatrix(file_type, input_file, project, output_path, folder=False)
         subclonal_df = subclonal_df.rename(columns={"nMaj2_A": "nMaj1_A", "nMin2_A": "nMin1_A"})
         clonal_matrix = annotateSegFile(clonal_df, file_type, project, output_path)[0]
         subclonal_matrix = annotateSegFile(subclonal_df, file_type, project, output_path)[0]
-        subclonal_matrix = subclonal_matrix.set_index(subclonal_matrix[subclonal_matrix.columns[0]])
-        clonal_matrix = clonal_matrix.set_index(clonal_matrix[clonal_matrix.columns[0]])
+        subclonal_matrix = subclonal_matrix.set_index(subclonal_matrix.columns[0])
+        clonal_matrix = clonal_matrix.set_index(clonal_matrix.columns[0])
         #add subclonal events to matrix containing clonal events to produce a final matrix that accounts for all events(Clonal + Subclonal)
         for k in range(0,len(subclonal_matrix)):
             for i,j in enumerate(subclonal_matrix.columns):
                 clonal_matrix.at[subclonal_matrix.index.to_list()[k], j] = subclonal_matrix.iat[k, i] + clonal_matrix.loc[subclonal_matrix.index.to_list()[k], j]
-        clonal_matrix.to_csv(output_path + project + '.CNV48.matrix.tsv', sep='\t', index=None)
-        print("Saved matrix to " + output_path + project + ".CNV48.matrix.tsv")
+        out_file_path = os.path.join(output_path, project + '.CNV48.matrix.tsv')
+        clonal_matrix.to_csv(out_file_path, sep='\t')
+        nmf_matrix = clonal_matrix
+        print("Saved matrix to " + out_file_path)
     elif file_type == "VCF":
         #convert vcf to dataframe with necessary info
         vcf_file = vcf.Reader(open(file, 'r'))
@@ -377,8 +379,7 @@ def generateCNVMatrix(file_type, input_file, project, output_path, folder=False)
     else:
         nmf_matrix, annotated_df = annotateSegFile(df, file_type, project, output_path)
 
-    matrix_path = output_path + project + ".CNV48.matrix.tsv"
-    #plotCNV(matrix_path, output_path, project, plot_type="pdf", percentage=False, aggregate=False, read_from_file=True, write_to_file=True)
+    return nmf_matrix
 
 if __name__ == "__main__":
     if len(sys.argv) > 1:

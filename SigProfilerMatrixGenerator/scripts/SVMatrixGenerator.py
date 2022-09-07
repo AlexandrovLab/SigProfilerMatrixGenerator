@@ -16,7 +16,6 @@ from matplotlib.ticker import LinearLocator
 import matplotlib.lines as lines
 import matplotlib.transforms as transforms
 import string
-#import pdb
 #import seaborn as sns
 import sys
 pd.options.mode.chained_assignment = None
@@ -694,10 +693,13 @@ def generateSVMatrix(input_dir, project, output_dir):
 
             all_samples.append(result['sv_bedpe'])
     matrix = tsv2matrix(all_samples, project, output_dir)
-    matrix.to_csv(output_dir + project + ".SV32.matrix.tsv", sep="\t")
-    print("Saved matrix to " + output_dir + project + ".SV32.matrix.tsv")
+    out_file = os.path.join(output_dir, project + ".SV32.matrix.tsv")
+    matrix.to_csv(out_file, sep="\t")
+    print("Saved matrix to " + out_file)
     plotSV(matrix, output_dir, project, plot_type="pdf", percentage=False, aggregate=True)
-    print("Saved aggregate SV32 plot to " + output_dir + project + '_RS32_counts_aggregated' + '.pdf')
+    plot_file_name = os.path.join(output_dir, project + '_RS32_counts_aggregated.pdf')
+    print("Saved aggregate SV32 plot to " + plot_file_name)
+    return matrix
 
 
 #reformat input bedpe files
@@ -806,8 +808,9 @@ def tsv2matrix(sv_bedpe_list, project, output_dir):
     features = ['clustered_del_1-10Kb', 'clustered_del_10-100Kb', 'clustered_del_100Kb-1Mb', 'clustered_del_1Mb-10Mb', 'clustered_del_>10Mb', 'clustered_tds_1-10Kb', 'clustered_tds_10-100Kb', 'clustered_tds_100Kb-1Mb', 'clustered_tds_1Mb-10Mb', 'clustered_tds_>10Mb', 'clustered_inv_1-10Kb', 'clustered_inv_10-100Kb', 'clustered_inv_100Kb-1Mb', 'clustered_inv_1Mb-10Mb', 'clustered_inv_>10Mb', 'clustered_trans', 'non-clustered_del_1-10Kb', 'non-clustered_del_10-100Kb', 'non-clustered_del_100Kb-1Mb', 'non-clustered_del_1Mb-10Mb', 'non-clustered_del_>10Mb', 'non-clustered_tds_1-10Kb', 'non-clustered_tds_10-100Kb', 'non-clustered_tds_100Kb-1Mb', 'non-clustered_tds_1Mb-10Mb', 'non-clustered_tds_>10Mb', 'non-clustered_inv_1-10Kb', 'non-clustered_inv_10-100Kb', 'non-clustered_inv_100Kb-1Mb', 'non-clustered_inv_1Mb-10Mb', 'non-clustered_inv_>10Mb', 'non-clustered_trans']
     svclass_mapping = {"deletion":"del", "tandem-duplication":"tds", "inversion":"inv", "translocation":"trans"}
     df = pd.concat(sv_bedpe_list) #one master table with all samples
-    df.to_csv(output_dir + project + ".SV32.annotated.tsv", index=False, sep="\t")
-    print("Saved annotated bedpe to " + output_dir + project + ".SV32.annotated.tsv")
+    out_file = os.path.join(output_dir, project + ".SV32.annotated.tsv")
+    df.to_csv(out_file, index=False, sep="\t")
+    print("Saved annotated bedpe to " + out_file)
     samples = list(df["sample"].unique())
     arr = np.zeros((32, len(samples)), dtype='int')
     nmf_matrix = pd.DataFrame(arr, index=features, columns=samples)
@@ -949,7 +952,7 @@ def plotSV(matrix, output_path, project, plot_type="pdf", percentage=False, aggr
 
         plt.show()
         pp.savefig(fig, dpi=600, bbox_inches='tight')
-    df = matrix
+    df = matrix.copy()
     labels = list(df.index)
     #labels = list(df[label])
     if aggregate:
@@ -957,13 +960,16 @@ def plotSV(matrix, output_path, project, plot_type="pdf", percentage=False, aggr
         df['total_count'] = df.sum(axis=1) / num_samples #NORMALIZE BY # of SAMPLES
         counts = list(df['total_count'])
         sample = ''
-        pp = PdfPages(output_path + project + '_RS32_counts_aggregated' + '.pdf')
+        output_plot_path = os.path.join(output_path, project + '_RS32_counts_aggregated.pdf')
+        pp = PdfPages(output_plot_path)
         plot(counts, labels, sample, project, percentage, aggregate=True)
     else:
         if plot_type == 'pdf' and percentage:
-            pp = PdfPages(output_path + project + '_RS32_signatures' + '.pdf')
+            output_plot_path = os.path.join(output_path, project + '_RS32_signatures.pdf')
+            pp = PdfPages(output_plot_path)
         elif plot_type == 'pdf' and percentage==False:
-            pp = PdfPages(output_path + project + '_RS32_counts' + '.pdf')
+            output_plot_path = os.path.join(output_path, project + '_RS32_counts.pdf')
+            pp = PdfPages(output_path + project + '_RS32_counts.pdf')
         else: #input == counts
             f.write("The only plot type supported at this time is pdf")
 
