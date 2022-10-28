@@ -16,6 +16,7 @@ from matplotlib.ticker import LinearLocator
 import matplotlib.lines as lines
 import matplotlib.transforms as transforms
 import string
+import warnings
 #import seaborn as sns
 import sys
 pd.options.mode.chained_assignment = None
@@ -673,7 +674,7 @@ def annotateBedpe(sv_bedpe):
     result={'sv_bedpe':sv_bedpe,'kat_regions':all_kat_regions}
     return result
 
-def generateSVMatrix(input_dir, project, output_dir):
+def generateSVMatrix(input_dir, project, output_dir, skip=False):
     # create output_dir if it does not yet exist
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
@@ -686,6 +687,11 @@ def generateSVMatrix(input_dir, project, output_dir):
             data = pd.read_csv(input_dir + f,sep='\t')
             if data.shape[0] == 0:
                 print("SKIPPING " + str(f) + "because it has 0 SVs")
+                continue
+            elif ("sample" not in data.columns or len(data["sample"].iloc[0]) <= 1 or "chrom1" not in data.columns or "chrom2" not in data.columns or "start1" not in data.columns or "start2" not in data.columns or "end1" not in data.columns or "end2" not in data.columns) and skip==False:
+                raise Exception("Please ensure that there is a sample column containing the name of the sample")
+            elif ("sample" not in data.columns or len(data["sample"].iloc[0]) <= 1 or "chrom1" not in data.columns or "chrom2" not in data.columns or "start1" not in data.columns or "start2" not in data.columns or "end1" not in data.columns or "end2" not in data.columns) and skip==True:
+                print("Warning: it appears that " + str(f) + " may not have the correct input format, please check for required columns that are missing")
                 continue
             else:
                 #get annotated bedpe for a single sample
@@ -704,7 +710,9 @@ def generateSVMatrix(input_dir, project, output_dir):
 
 #reformat input bedpe files
 def processBEDPE(df):
-    """A function that process a given bedpe file produced by an SV caller"""
+    """A function that processes a given bedpe file produced by an SV caller"""
+
+
 
     #CHECK FORMAT OF CHROMOSOME COLUMN ("chr1" vs. "1"), needs to be the latter
     if not str(df['chrom1'][0]).isdigit():
@@ -724,6 +732,7 @@ def processBEDPE(df):
             df['chrom2'] = chrom2
 
     #df = df[(df["chrom1"] != 'Y') & (df["chrom2"] != 'Y')]
+
 
     if "strand1" in df.columns and "strand2" in df.columns:
         df = df[["chrom1", "start1", "end1", "chrom2", "start2", "end2", "strand1", "strand2", "sample", "is_clustered"]]
@@ -807,6 +816,8 @@ def processBEDPE(df):
 def tsv2matrix(sv_bedpe_list, project, output_dir):
     features = ['clustered_del_1-10Kb', 'clustered_del_10-100Kb', 'clustered_del_100Kb-1Mb', 'clustered_del_1Mb-10Mb', 'clustered_del_>10Mb', 'clustered_tds_1-10Kb', 'clustered_tds_10-100Kb', 'clustered_tds_100Kb-1Mb', 'clustered_tds_1Mb-10Mb', 'clustered_tds_>10Mb', 'clustered_inv_1-10Kb', 'clustered_inv_10-100Kb', 'clustered_inv_100Kb-1Mb', 'clustered_inv_1Mb-10Mb', 'clustered_inv_>10Mb', 'clustered_trans', 'non-clustered_del_1-10Kb', 'non-clustered_del_10-100Kb', 'non-clustered_del_100Kb-1Mb', 'non-clustered_del_1Mb-10Mb', 'non-clustered_del_>10Mb', 'non-clustered_tds_1-10Kb', 'non-clustered_tds_10-100Kb', 'non-clustered_tds_100Kb-1Mb', 'non-clustered_tds_1Mb-10Mb', 'non-clustered_tds_>10Mb', 'non-clustered_inv_1-10Kb', 'non-clustered_inv_10-100Kb', 'non-clustered_inv_100Kb-1Mb', 'non-clustered_inv_1Mb-10Mb', 'non-clustered_inv_>10Mb', 'non-clustered_trans']
     svclass_mapping = {"deletion":"del", "tandem-duplication":"tds", "inversion":"inv", "translocation":"trans"}
+    if len(sv_bedpe_list) <= 1:
+        warnings.warn("There seems to be <= 1 samples, please ensure the sample column contains a unique sample name")
     df = pd.concat(sv_bedpe_list) #one master table with all samples
     out_file = os.path.join(output_dir, project + ".SV32.annotated.tsv")
     df.to_csv(out_file, index=False, sep="\t")
