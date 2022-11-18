@@ -685,6 +685,8 @@ def generateSVMatrix(input_dir, project, output_dir, skip=False):
         if os.path.isfile(input_dir + f):
             print("Generating count vector for " + f)
             data = pd.read_csv(input_dir + f,sep='\t')
+            if "sample" in data.columns:
+                data.columns["sample"]= data.columns["sample"].astype(str)
             if data.shape[0] == 0:
                 print("SKIPPING " + str(f) + "because it has 0 SVs")
                 continue
