@@ -48,6 +48,6 @@ setup(name='SigProfilerMatrixGenerator',
 			"scipy>=1.1.0",
 			"numpy>=1.18.5",
 			"pandas>=0.23.4"
-			"sklearn>=1.0.0"],
+			'scikit-learn>=0.24.2'],
 		include_package_data=True,
 		zip_safe=False)
