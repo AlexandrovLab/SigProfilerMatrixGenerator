@@ -2,7 +2,7 @@ dist: xenial
 language: python
 
 python:
-  - '3.7'
+  - '3.9.13'
 
 install:
   - pip install --force-reinstall "setuptools<60.0"
