@@ -1,4 +1,4 @@
-from setuptools import setup, find_packages
+from setuptools import setup, find_namespace_packages
 import os
 import shutil
 
@@ -40,7 +40,7 @@ setup(name='SigProfilerMatrixGenerator',
 		author='Erik Bergstrom',
 		author_email='ebergstr@eng.ucsd.edu',
 		license='UCSD',
-		packages=find_packages(),#['SigProfilerMatrixGenerator'],
+		packages=find_namespace_packages(),#['SigProfilerMatrixGenerator'],
 		install_requires =[
 			"matplotlib>=2.2.2",
 			"sigProfilerPlotting>=1.0.1",

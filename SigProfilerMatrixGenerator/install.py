@@ -132,12 +132,12 @@ check_sum = {'GRCh37':
 						{'gi_82503188_ref_NC_007605':'7f8894e52b0cac1f968c0402838bea07'},
 
 			'yeast':
-					{'I':'c7cd4d6148ff54d1d003d7fe3c39bfdf', 'II':'3303648ecf106df7c6c1449cb55980e8', 'III':'12f784db9c1cd2bc632fbefdb5329504',
-					 'IV':'e5bbd701bae1ab3965da90e1131f5b5c', 'V':'b4447ed088b10a404925c153ca3055d4', 'VI':'3285962c283977064340b62a7f843601', 
-					 'VII':'72e1438a61fde52bd66cef12c53ae4db', 'VIII':'0e00648307fd4d64f50d0feb7e428e13', 'IX':'43466267caa5ae7aec23df022b583564',
-					 'X':'dac706139aeb5cd3d75f24d0e405131e', 'XI':'5d4b415e1e313918bba6cd061d416d58', 'XII':'e26e59a4b4944ab96b819a92b60c9868',
-					 'XIII':'a12878f65ed7464e2824cb0c291d359e', 'XIV':'807431901ba993e6ba87861401da1cb2', 'XV':'44fd7223d9d30bdcf94cf627e5a172ca',
-					 'XVI':'670d7aad863043ea7a125f004e281483'}}
+					{'I':'49fe0862d533d1c6ad66d534216e8ab9', 'II':'d8f6151b5cc080601fd759267f674fba', 'III':'4c80933f7958261369d68ed84bfa8d5f',
+					 'IV':'afdb839d9289c33cea42f3bc53f978b1', 'V':'48e5530f587b97fcfbc4742261ded994', 'VI':'0cc51e4f21f3d3f89b98061428002f95',
+					 'VII':'c9566b7a2264909ea0cee9202ef93e55', 'VIII':'66193457ece167d15330dc3be2fbb0ef', 'IX':'b3f57177000e0322c824ffdab69cb7ed',
+					 'X':'ad715c5261132608d27e79d8e8bc68a7', 'XI':'5d84fe013b962aafade20413bb82758a', 'XII':'740b5b5dc0dd3f30bc67d391b15bf639',
+					 'XIII':'87691656b7200080f728f990d4f74877', 'XIV':'270346a6575023f7bc9e7f4f8e750fd1', 'XV':'89ee60c9779424d666268508df34bad9',
+					 'XVI':'3d72cbd3bc4bb1bff109e5ecea70fd2d', 'M':'64b4f865366c9cee76635019f30712c0'}}
 
 def get_reference_md5():
 	return check_sum
