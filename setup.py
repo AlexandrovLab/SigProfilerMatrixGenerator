@@ -1,7 +1,8 @@
-from setuptools import setup, find_namespace_packages
+from setuptools import setup
 import os
 import shutil
 
+VERSION = '1.2.13'
 
 #remove the dist folder first if exists
 if os.path.exists("dist"):
@@ -12,10 +13,6 @@ def readme():
 	with open(os.path.join(this_directory, 'README.md'), encoding='latin-1') as f:
 		long_description = f.read()
 		return(long_description)
-	# with open('README.rst') as f:
-	# 	return(f.read())
-
-VERSION = '1.2.13'
 
 def write_version_py(filename='SigProfilerMatrixGenerator/version.py'):
 	# Copied from numpy setup.py
@@ -23,6 +20,7 @@ def write_version_py(filename='SigProfilerMatrixGenerator/version.py'):
 # THIS FILE IS GENERATED FROM SIGPROFILEMATRIXGENERATOR SETUP.PY
 short_version = '%(version)s'
 version = '%(version)s'
+Update = 'Upgrade v1.2.13: Add update message and URL.'
 	
 	"""
 	fh = open(filename, 'w')
@@ -36,11 +34,11 @@ setup(name='SigProfilerMatrixGenerator',
 		description='SigProfiler matrix generator tool',
 		long_description= readme(),
 		long_description_content_type='text/markdown',
-		url='',
+		url='https://github.com/AlexandrovLab/SigProfilerMatrixGenerator.git',
 		author='Erik Bergstrom',
 		author_email='ebergstr@eng.ucsd.edu',
 		license='UCSD',
-		packages=find_namespace_packages(),#['SigProfilerMatrixGenerator'],
+		packages=['SigProfilerMatrixGenerator'],
 		install_requires =[
 			"matplotlib>=2.2.2",
 			"sigProfilerPlotting>=1.0.1",
