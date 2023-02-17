@@ -663,6 +663,9 @@ def SigProfilerMatrixGeneratorFunc (project, genome, vcfFiles, exome=False, bed_
 	# Prints a summary for the given run (total samples, skipped mutations, etc.)
 	if not chrom_based:
 		print("Matrices generated for " + str(sample_count_high) + " samples with " + str(skipped_muts) + " errors. Total of " + str(analyzed_muts[0]) + " SNVs, " + str(analyzed_muts[1]) + " DINUCs, and " + str(analyzed_muts[2]) + " INDELs were successfully analyzed.")
+		# Raise an error when more than 30% of mutations are skipped
+		if skipped_muts > (analyzed_muts[0] + analyzed_muts[1] + analyzed_muts[2]) * 0.3:
+			raise ValueError("Error: More than 30% of mutations were skipped. Please check the log file for more information.")
 	return(matrices)
 
 	
