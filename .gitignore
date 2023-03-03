@@ -13,3 +13,11 @@
 # pypi build folder
 /build/
 SigProfilerMatrixGenerator/version.py
+SigProfilerMatrixGenerator/references/chromosomes/tsb/
+SigProfilerMatrixGenerator/references/vcf_files/*_bench/input/
+SigProfilerMatrixGenerator/references/vcf_files/*_bench/output/
+SigProfilerMatrixGenerator/references/vcf_files/*_bench/logs/
+SigProfilerMatrixGenerator/references/tests/*/input/
+SigProfilerMatrixGenerator/references/tests/*/logs/
+SigProfilerMatrixGenerator/references/tests/*/output/
+SigProfilerMatrixGenerator/install.log

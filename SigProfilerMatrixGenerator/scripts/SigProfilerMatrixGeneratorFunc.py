@@ -43,8 +43,7 @@ def perm(n, seq):
 	return(permus)
 
 
-
-def SigProfilerMatrixGeneratorFunc (project, genome, vcfFiles, exome=False, bed_file=None, chrom_based=False, plot=False, tsb_stat=False, seqInfo=True, cushion=100, gs=False):
+def SigProfilerMatrixGeneratorFunc(project, genome, vcfFiles, exome=False, bed_file=None, chrom_based=False, plot=False, tsb_stat=False, seqInfo=True, cushion=100, gs=False):
 	'''
 	Allows for the import of the sigProfilerMatrixGenerator.py function. Returns a dictionary
 	with each context serving as the first level of keys. 
@@ -74,31 +73,28 @@ def SigProfilerMatrixGeneratorFunc (project, genome, vcfFiles, exome=False, bed_
 							  'PD1202a':{'T:A[A>C]A':23,
 										 'T:A[A>G]A':10,...},...},...}
 	'''
-	# verify that installation of all chromosome files was successful
+	# verify that chromosome file installation for supported genomes
 	# 1. get list of all files that were downloaded
 	# Terminates the code if the genome reference files have not been created/installed
 	lib_loc = os.path.split(os.path.dirname(matGen.__file__))[0]
 	tsb_path = os.path.join("references/chromosomes/tsb/", genome)
 	if not os.path.exists(os.path.join(lib_loc,tsb_path)):
-		print("The specified genome " + genome + " has not been installed\nPlease refer to the SigProfilerMatrixGenerator README for installation instructions:\n\thttps://github.com/AlexandrovLab/SigProfilerMatrixGenerator")
-		sys.exit()
+		raise Exception("The specified genome " + genome + " has not been installed\nPlease refer to the SigProfilerMatrixGenerator README for installation instructions:\n\thttps://github.com/AlexandrovLab/SigProfilerMatrixGenerator")
 	genome_loc = os.path.join("references/chromosomes/transcripts/", genome)
 	check_files = [tmp_f for tmp_f in os.listdir(os.path.join(lib_loc, genome_loc)) if not tmp_f.startswith(".")]
 
 	# 2. compare list of downloaded files to md5sum reference
-	if genome in list(install.get_reference_md5().keys()):
+	if genome in list(install.check_sum.keys()):
 		for chrom_file_name in check_files:
 			chrom_path = os.path.join(lib_loc , tsb_path, chrom_file_name.replace("_transcripts", ""))
 			chrom_val = chrom_file_name.strip("_transcripts.txt")
 			chrom_md5 = install.md5(chrom_path)
-			ref_md5 = install.get_reference_md5()[genome][chrom_val]
+			ref_md5 = install.check_sum[genome][chrom_val]
 			if chrom_md5 != ref_md5:
-				print("ERROR: The reference genome installation for", genome, \
+				raise Exception("ERROR: The reference genome installation for", genome, \
 					"chromosome", str(chrom_val) + " is incomplete.", \
 					"Please run the genome installation script for", genome, \
 					"to resolve this issue before proceeding.")
-				sys.exit()
-
 
 	# Instantiates all of the required variables and references
 	if not os.path.exists(vcfFiles):
@@ -286,8 +282,7 @@ def SigProfilerMatrixGeneratorFunc (project, genome, vcfFiles, exome=False, bed_
 
 	# Terminates the code if the genome reference files have not been created/installed
 	if not os.path.exists(chrom_path):
-		print("The specified genome " + genome + " has not been installed\nPlease refer to the SigProfilerMatrixGenerator README for installation instructions:\n\thttps://github.com/AlexandrovLab/SigProfilerMatrixGenerator")
-		sys.exit()
+		raise Exception("The specified genome " + genome + " has not been installed\nPlease refer to the SigProfilerMatrixGenerator README for installation instructions:\n\thttps://github.com/AlexandrovLab/SigProfilerMatrixGenerator")
 
 	# Organizes all of the input and output directories:
 	if vcfFiles[-1] != "/":

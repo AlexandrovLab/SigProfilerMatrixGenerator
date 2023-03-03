@@ -19,6 +19,7 @@ import hashlib
 from SigProfilerMatrixGenerator.scripts import SigProfilerMatrixGeneratorFunc as matGen
 import glob
 
+BENCH_LIST = ['brca', 'grch37', 'grch38', 'mm10', 'mm9']
 check_sum = {'GRCh37':
 						{'1':'a7d51305e943cf06ff2029146bd91bca','2':'d24d0185af89356d44614ab0d6fd6a68','3':'ea5e033147dcaf77bfd4c70f50688d37',
 						 '4':'00d7797c7184f1802367e33f6e2bc3da','5':'f74b1eeb329088242a9f22a16322b325','6':'b353cc4c4abc90340e7747509fe7b457',
@@ -106,8 +107,8 @@ check_sum = {'GRCh37':
 						'10':'9c1af453a5facc9bfa821457bcfc4d30','11':'ef0480a905c55d76a3c58e295a85bc75','12':'643b6fe4a3a6363ffe64a6c316fa3e1a',
 						'13':'102bb3fb420a4104c216bcdf99870374','14':'e26b8b63fba0ea7ced4f0330e93a8cdc','15':'da747616a1362d374d4786102fab6f9f',
 						'16':'54e4f932eb0eda4cbf31156f96ef7235','17':'46c2facf5415e4eff8b0804161db722d', '18':'f1cb84f002967854b83bf266ec59a7a3',
-						'19':'b85ca155fd1780fe5c327a4589c212a6','20':'899d3511352d78b9b9dc63f063d91b31','Y':'6a7a3539c329dc540dfa6db006003bb1',
-						'X':'7a06bafab97c59a819f03633f0a6b7a2'},
+						'19':'b85ca155fd1780fe5c327a4589c212a6','20':'1f7efe08722aa6a87e49b23e8e1a94c2','Y':'6a7a3539c329dc540dfa6db006003bb1',
+						'X':'7a06bafab97c59a819f03633f0a6b7a2', 'MT':'cb841662629aa1b6c1b7b0b3a8f689d1'},
 
 			'c_elegans':
 						{'I':'5a3ea8cf3dfbc641716b7bc805edcaae','II':'bf82edaa92809dd2fea2b791c38c9728','III':'d2df34b6743f41d3964549fc76c5f1a2',
@@ -139,8 +140,6 @@ check_sum = {'GRCh37':
 					 'XIII':'87691656b7200080f728f990d4f74877', 'XIV':'270346a6575023f7bc9e7f4f8e750fd1', 'XV':'89ee60c9779424d666268508df34bad9',
 					 'XVI':'3d72cbd3bc4bb1bff109e5ecea70fd2d', 'M':'64b4f865366c9cee76635019f30712c0'}}
 
-def get_reference_md5():
-	return check_sum
 
 def md5(fname):
 	hash_md5 = hashlib.md5()
@@ -560,7 +559,7 @@ def install (genome, custom=False, rsync=False, bash=True, ftp=True, fastaPath=N
 	print("All reference files have been created.")
 	if 'havana' in genome:
 		genome = genome.split("_")[0]
-	if genome != "rn6" and genome != 'dog' and genome != 'c_elegans' and genome != 'mm39' and not custom:
+	if genome.lower() in BENCH_LIST and not custom:
 		print("Verifying and benchmarking installation now...")
 		benchmark(genome, ref_dir)
 
