@@ -4,9 +4,21 @@ language: python
 python:
   - '3.7'
 
+before_install:
+  if ! [ -f ./src/GRCh37.tar.gz ]; then
+    wget ftp://alexandrovlab-ftp.ucsd.edu/pub/tools/SigProfilerMatrixGenerator/GRCh37.tar.gz -P ./src/;
+  fi
+
 install:
   - pip install --force-reinstall "setuptools<60.0"
   - pip install .
+
+cache:
+  directories:
+    - $TRAVIS_BUILD_DIR/src/
+
+before_script:
+  - python3 install_genome.py $TRAVIS_BUILD_DIR/src/ GRCh37
 
 script: python3 test.py
 

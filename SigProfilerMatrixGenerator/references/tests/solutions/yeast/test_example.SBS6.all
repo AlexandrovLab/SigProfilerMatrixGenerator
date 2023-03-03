@@ -1,0 +1,7 @@
+MutationType	yeast_example_subs
+C>A	0
+C>G	1
+C>T	0
+T>A	1
+T>C	1
+T>G	1
