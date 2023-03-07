@@ -2,7 +2,7 @@ dist: xenial
 language: python
 
 python:
-  - '3.7'
+  - '3.8'
 
 before_install:
   if ! [ -f ./src/GRCh37.tar.gz ]; then
@@ -10,7 +10,6 @@ before_install:
   fi
 
 install:
-  - pip install --force-reinstall "setuptools<60.0"
   - pip install .
 
 cache:
