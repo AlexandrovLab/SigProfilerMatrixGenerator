@@ -1,0 +1,7 @@
+MutationType	test_example
+C>A	0
+C>G	1
+C>T	1
+T>A	1
+T>C	0
+T>G	1

@@ -44,15 +44,25 @@ def perm(n, seq):
 
 
 
-def SigProfilerMatrixGeneratorFunc (project, genome, vcfFiles, exome=False, bed_file=None, chrom_based=False, plot=False, tsb_stat=False, seqInfo=True, cushion=100, gs=False):
+def SigProfilerMatrixGeneratorFunc (project,
+									reference_genome,
+									path_to_input_files,
+									exome=False,
+									bed_file=None,
+									chrom_based=False,
+									plot=False,
+									tsb_stat=False,
+									seqInfo=True,
+									cushion=100,
+									gs=False):
 	'''
 	Allows for the import of the sigProfilerMatrixGenerator.py function. Returns a dictionary
 	with each context serving as the first level of keys. 
 
 	Parameters:
 				  project  -> unique name given to the current samples
-				   genome  -> reference genome 
-				 vcfFiles  -> path where the input vcf files are located.
+		 reference_genome  -> reference genome
+	  path_to_input_files  -> path where the input vcf files are located.
 					exome  -> flag to use only the exome or not
 				 bed_file  -> BED file that contains a list of ranges to be used in generating the matrices
 			  chrom_based  -> flag to create the matrices on a per chromosome basis
@@ -74,36 +84,35 @@ def SigProfilerMatrixGeneratorFunc (project, genome, vcfFiles, exome=False, bed_
 							  'PD1202a':{'T:A[A>C]A':23,
 										 'T:A[A>G]A':10,...},...},...}
 	'''
-	# verify that installation of all chromosome files was successful
+
+	# verify chromosome file installation for supported genomes
 	# 1. get list of all files that were downloaded
 	# Terminates the code if the genome reference files have not been created/installed
 	lib_loc = os.path.split(os.path.dirname(matGen.__file__))[0]
-	tsb_path = os.path.join("references/chromosomes/tsb/", genome)
+	tsb_path = os.path.join("references/chromosomes/tsb/", reference_genome)
 	if not os.path.exists(os.path.join(lib_loc,tsb_path)):
-		print("The specified genome " + genome + " has not been installed\nPlease refer to the SigProfilerMatrixGenerator README for installation instructions:\n\thttps://github.com/AlexandrovLab/SigProfilerMatrixGenerator")
-		sys.exit()
-	genome_loc = os.path.join("references/chromosomes/transcripts/", genome)
+		raise Exception("The specified genome " + reference_genome + " has not been installed\nPlease refer to the SigProfilerMatrixGenerator README for installation instructions:\n\thttps://github.com/AlexandrovLab/SigProfilerMatrixGenerator")
+	genome_loc = os.path.join("references/chromosomes/transcripts/", reference_genome)
 	check_files = [tmp_f for tmp_f in os.listdir(os.path.join(lib_loc, genome_loc)) if not tmp_f.startswith(".")]
 
 	# 2. compare list of downloaded files to md5sum reference
-	if genome in list(install.get_reference_md5().keys()):
+	if reference_genome in list(install.check_sum.keys()):
 		for chrom_file_name in check_files:
 			chrom_path = os.path.join(lib_loc , tsb_path, chrom_file_name.replace("_transcripts", ""))
 			chrom_val = chrom_file_name.strip("_transcripts.txt")
 			chrom_md5 = install.md5(chrom_path)
-			ref_md5 = install.get_reference_md5()[genome][chrom_val]
+			ref_md5 = install.check_sum[reference_genome][chrom_val]
 			if chrom_md5 != ref_md5:
-				print("ERROR: The reference genome installation for", genome, \
+				raise Exception("ERROR: The reference genome installation for", reference_genome, \
 					"chromosome", str(chrom_val) + " is incomplete.", \
-					"Please run the genome installation script for", genome, \
+					"Please run the genome installation script for", reference_genome, \
 					"to resolve this issue before proceeding.")
-				sys.exit()
 
 
 	# Instantiates all of the required variables and references
-	if not os.path.exists(vcfFiles):
-		print("The given project path does not appear to exist. Please check that the specified path exists before proceeding...\n\t" + vcfFiles)
-		return()
+	if not os.path.exists(path_to_input_files):
+		print("The given project path does not appear to exist. Please check that the specified path exists before proceeding...\n\t" + path_to_input_files)
+		return
 	if gs:
 		print("The Gene Strand Bias is not yet supported! Continuing with the matrix generation.")
 		gs = False
@@ -278,30 +287,29 @@ def SigProfilerMatrixGeneratorFunc (project, genome, vcfFiles, exome=False, bed_
 
 	# Organizes all of the reference directories for later reference:
 	ref_dir, tail = os.path.split(os.path.dirname(os.path.abspath(__file__)))
-	chrom_path =ref_dir + '/references/chromosomes/tsb/' + genome + "/"
-	if 'havana' in genome:
-		genome = genome.split("_")[0]
-	transcript_path = ref_dir + '/references/chromosomes/transcripts/' + genome + "/"
+	chrom_path =ref_dir + '/references/chromosomes/tsb/' + reference_genome + "/"
+	if 'havana' in reference_genome:
+		reference_genome = reference_genome.split("_")[0]
+	transcript_path = ref_dir + '/references/chromosomes/transcripts/' + reference_genome + "/"
 
 
 	# Terminates the code if the genome reference files have not been created/installed
 	if not os.path.exists(chrom_path):
-		print("The specified genome " + genome + " has not been installed\nPlease refer to the SigProfilerMatrixGenerator README for installation instructions:\n\thttps://github.com/AlexandrovLab/SigProfilerMatrixGenerator")
-		sys.exit()
+		raise Exception("The specified genome " + reference_genome + " has not been installed\nPlease refer to the SigProfilerMatrixGenerator README for installation instructions:\n\thttps://github.com/AlexandrovLab/SigProfilerMatrixGenerator")
 
 	# Organizes all of the input and output directories:
-	if vcfFiles[-1] != "/":
-		vcfFiles += "/"
-	vcf_path = vcfFiles + "input/"
+	if path_to_input_files[-1] != "/":
+		path_to_input_files += "/"
+	vcf_path = path_to_input_files + "input/"
 
 
 	vcf_path_original = vcf_path
 	if not os.path.exists(vcf_path) or len(os.listdir(vcf_path)) < 1:
 		os.makedirs(vcf_path, exist_ok=True)
-		input_files = os.listdir(vcfFiles)
-		if os.path.exists(vcfFiles + "input/"):
+		input_files = os.listdir(path_to_input_files)
+		if os.path.exists(path_to_input_files + "input/"):
 			input_files.remove("input")
-		if os.path.exists(vcfFiles + "logs/"):
+		if os.path.exists(path_to_input_files + "logs/"):
 			input_files.remove("logs")
 		if ".DS_Store" in input_files:
 			input_files.remove(".DS_Store")
@@ -309,11 +317,11 @@ def SigProfilerMatrixGeneratorFunc (project, genome, vcfFiles, exome=False, bed_
 			input_files.remove("__init__.py")
 		if "__pycache__" in input_files:
 			input_files.remove("__pycache__")
-		if os.path.exists(vcfFiles + "output/"):
+		if os.path.exists(path_to_input_files + "output/"):
 			input_files.remove("output")
 		for files in input_files:
-			shutil.copy(vcfFiles + files, vcf_path + files)
-	output_matrix = vcfFiles + "output/"
+			shutil.copy(path_to_input_files + files, vcf_path + files)
+	output_matrix = path_to_input_files + "output/"
 
 	if not os.path.exists(output_matrix):
 		os.makedirs(output_matrix)
@@ -321,11 +329,11 @@ def SigProfilerMatrixGeneratorFunc (project, genome, vcfFiles, exome=False, bed_
 
 	# Organizes the error and log files
 	time_stamp = datetime.date.today()
-	output_log_path = vcfFiles + "logs/"
+	output_log_path = path_to_input_files + "logs/"
 	if not os.path.exists(output_log_path):
 		os.makedirs(output_log_path)
-	error_file = output_log_path + 'SigProfilerMatrixGenerator_' + project + "_" + genome + str(time_stamp) + ".err"
-	log_file = output_log_path + 'SigProfilerMatrixGenerator_' + project + "_" + genome + str(time_stamp) + ".out"
+	error_file = output_log_path + 'SigProfilerMatrixGenerator_' + project + "_" + reference_genome + str(time_stamp) + ".err"
+	log_file = output_log_path + 'SigProfilerMatrixGenerator_' + project + "_" + reference_genome + str(time_stamp) + ".out"
 
 	if os.path.exists(error_file):
 		os.remove(error_file)
@@ -349,7 +357,7 @@ def SigProfilerMatrixGeneratorFunc (project, genome, vcfFiles, exome=False, bed_
 	
 
 	log_out.write("\n-------Vital Parameters Used for the execution -------\n")
-	log_out.write("Project: {}\nGenome: {}\nInput File Path: {}\nexome: {}\nbed_file: {}\nchrom_based: {}\nplot: {}\ntsb_stat: {}\nseqInfo: {}\n".format(project, genome, vcfFiles, str(exome), str(bed_file), str(chrom_based),  str(plot), str(tsb_stat), str(seqInfo)))
+	log_out.write("Project: {}\nGenome: {}\nInput File Path: {}\nexome: {}\nbed_file: {}\nchrom_based: {}\nplot: {}\ntsb_stat: {}\nseqInfo: {}\n".format(project, reference_genome, path_to_input_files, str(exome), str(bed_file), str(chrom_based),  str(plot), str(tsb_stat), str(seqInfo)))
 	log_out.write("\n-------Date and Time Data------- \n")
 	tic = datetime.datetime.now()
 	log_out.write("Date and Clock time when the execution started: "+str(tic)+"\n\n\n")
@@ -381,16 +389,16 @@ def SigProfilerMatrixGeneratorFunc (project, genome, vcfFiles, exome=False, bed_
 	skipped_muts = 0
 	# Converts the input files to standard text in the temporary folder
 	if file_extension == 'genome':
-			snv, indel, skipped, samples = convertIn.convertTxt(project, vcf_path, genome, output_path)
+			snv, indel, skipped, samples = convertIn.convertTxt(project, vcf_path, reference_genome, output_path)
 	else:
 		if file_extension == 'txt':
-			snv, indel, skipped, samples = convertIn.convertTxt(project, vcf_path, genome,  output_path, ncbi_chrom, log_file)
+			snv, indel, skipped, samples = convertIn.convertTxt(project, vcf_path, reference_genome,  output_path, ncbi_chrom, log_file)
 		elif file_extension == 'vcf':
-			snv, indel, skipped, samples = convertIn.convertVCF(project, vcf_path, genome, output_path, ncbi_chrom, log_file)
+			snv, indel, skipped, samples = convertIn.convertVCF(project, vcf_path, reference_genome, output_path, ncbi_chrom, log_file)
 		elif file_extension == 'maf':
-			snv, indel, skipped, samples = convertIn.convertMAF(project, vcf_path, genome,output_path, ncbi_chrom, log_file)
+			snv, indel, skipped, samples = convertIn.convertMAF(project, vcf_path, reference_genome,output_path, ncbi_chrom, log_file)
 		elif file_extension == 'tsv':
-			snv, indel, skipped, samples = convertIn.convertICGC(project, vcf_path, genome, output_path, ncbi_chrom, log_file)
+			snv, indel, skipped, samples = convertIn.convertICGC(project, vcf_path, reference_genome, output_path, ncbi_chrom, log_file)
 		else:
 			print("File format not supported")
 
@@ -459,7 +467,7 @@ def SigProfilerMatrixGeneratorFunc (project, genome, vcfFiles, exome=False, bed_
 				chrom = file.split("_")[0]
 				if not os.path.exists(chrom_path + chrom + ".txt"):
 					continue
-				if genome == 'ebv':
+				if reference_genome == 'ebv':
 					chrom = "_".join([x for x in file.split("_")[:-1]])
 				with open(vcf_path + file) as f:
 					lines = [line.strip().split() for line in f]
@@ -467,7 +475,7 @@ def SigProfilerMatrixGeneratorFunc (project, genome, vcfFiles, exome=False, bed_
 
 
 				context = '6144'
-				mutation_pd, skipped_mut, total, total_DINUC, mutation_dinuc_pd_all = matGen.catalogue_generator_single (lines, chrom, mutation_pd, mutation_dinuc_pd_all, mutation_types_tsb_context, vcf_path, vcf_path_original, vcf_files, bed_file_path, chrom_path, project, output_matrix, context, exome, genome, ncbi_chrom, functionFlag, bed, bed_ranges, chrom_based, plot, tsb_ref, transcript_path, tsb_stat, seqInfo, gs, log_file)
+				mutation_pd, skipped_mut, total, total_DINUC, mutation_dinuc_pd_all = matGen.catalogue_generator_single (lines, chrom, mutation_pd, mutation_dinuc_pd_all, mutation_types_tsb_context, vcf_path, vcf_path_original, vcf_files, bed_file_path, chrom_path, project, output_matrix, context, exome, reference_genome, ncbi_chrom, functionFlag, bed, bed_ranges, chrom_based, plot, tsb_ref, transcript_path, tsb_stat, seqInfo, gs, log_file)
 				
 				if chrom_based and not exome and not bed:
 					matrices = matGen.matrix_generator (context, output_matrix, project, samples, bias_sort, mutation_pd, exome, mut_types, bed, chrom, functionFlag, plot, tsb_stat)
@@ -494,7 +502,7 @@ def SigProfilerMatrixGeneratorFunc (project, genome, vcfFiles, exome=False, bed_
 				mutation_pd = {}
 				mutation_pd['6144'] = pd.DataFrame(0, index=mut_types, columns=samples)
 				# mutation_pd['6144'], samples2 = matGen.exome_check(mutation_pd['6144'], genome, vcf_path + "exome_temp.txt", output_matrix, project, "SNV", cushion)
-				mutation_pd['6144'], samples2 = matGen.exome_check(chrom_based, samples, bias_sort, exome, mut_types, bed, chrom, functionFlag, plot, tsb_stat, mutation_pd['6144'], genome, vcf_path + "exome_temp.txt", output_matrix, project, "SNV", cushion)
+				mutation_pd['6144'], samples2 = matGen.exome_check(chrom_based, samples, bias_sort, exome, mut_types, bed, chrom, functionFlag, plot, tsb_stat, mutation_pd['6144'], reference_genome, vcf_path + "exome_temp.txt", output_matrix, project, "SNV", cushion)
 
 
 			if bed:
@@ -509,7 +517,7 @@ def SigProfilerMatrixGeneratorFunc (project, genome, vcfFiles, exome=False, bed_
 
 				mutation_pd = {}
 				mutation_pd['6144'] = pd.DataFrame(0, index=mut_types, columns=samples)
-				mutation_pd['6144'], samples2 = matGen.panel_check(chrom_based, samples, bias_sort, exome, mut_types, bed, chrom, functionFlag, plot, tsb_stat, mutation_pd['6144'], genome, vcf_path + "bed_temp.txt", output_matrix, bed_file_path, project, "SNV", cushion)
+				mutation_pd['6144'], samples2 = matGen.panel_check(chrom_based, samples, bias_sort, exome, mut_types, bed, chrom, functionFlag, plot, tsb_stat, mutation_pd['6144'], reference_genome, vcf_path + "bed_temp.txt", output_matrix, bed_file_path, project, "SNV", cushion)
 				
 
 
@@ -528,7 +536,7 @@ def SigProfilerMatrixGeneratorFunc (project, genome, vcfFiles, exome=False, bed_
 					output.close()
 
 					mutation_dinuc_pd_all = pd.DataFrame(0, index=mutation_types_tsb_context, columns=samples)
-					mutation_dinuc_pd_all, samples2 = matGen.exome_check(chrom_based, samples, bias_sort, exome, mutation_types_tsb_context, bed, chrom, functionFlag, plot, tsb_stat, mutation_dinuc_pd_all, genome, vcf_path + "exome_temp_context_tsb_DINUC.txt", output_matrix, project, "DBS", cushion)
+					mutation_dinuc_pd_all, samples2 = matGen.exome_check(chrom_based, samples, bias_sort, exome, mutation_types_tsb_context, bed, chrom, functionFlag, plot, tsb_stat, mutation_dinuc_pd_all, reference_genome, vcf_path + "exome_temp_context_tsb_DINUC.txt", output_matrix, project, "DBS", cushion)
 			
 				if bed:
 					with open(vcf_path + "bed_temp_context_tsb_DINUC.txt") as f:
@@ -540,7 +548,7 @@ def SigProfilerMatrixGeneratorFunc (project, genome, vcfFiles, exome=False, bed_
 					output.close()
 
 					mutation_dinuc_pd_all = pd.DataFrame(0, index=mutation_types_tsb_context, columns=samples)
-					mutation_dinuc_pd_all, samples2 = matGen.panel_check(chrom_based, samples, bias_sort, exome, mutation_types_tsb_context, bed, chrom, functionFlag, plot, tsb_stat, mutation_dinuc_pd_all, genome, vcf_path + "bed_temp_context_tsb_DINUC.txt", output_matrix, bed_file_path, project, "DBS", cushion)
+					mutation_dinuc_pd_all, samples2 = matGen.panel_check(chrom_based, samples, bias_sort, exome, mutation_types_tsb_context, bed, chrom, functionFlag, plot, tsb_stat, mutation_dinuc_pd_all, reference_genome, vcf_path + "bed_temp_context_tsb_DINUC.txt", output_matrix, bed_file_path, project, "DBS", cushion)
 
 				if not chrom_based:
 					if not mutation_dinuc_pd_all.empty:
@@ -550,12 +558,12 @@ def SigProfilerMatrixGeneratorFunc (project, genome, vcfFiles, exome=False, bed_
 		else:
 			for file in vcf_files:
 				chrom = file.split("_")[0]
-				if genome == 'ebv':
+				if reference_genome == 'ebv':
 					chrom = "_".join([x for x in file.split("_")[:-1]])
 				with open(vcf_path + file) as f:
 					lines = [line.strip().split() for line in f]
 				lines = sorted(lines, key = lambda x: (x[0], int(x[2])))			
-				mutation_ID, skipped_mut, total = matGen.catalogue_generator_INDEL_single (mutation_ID, lines, chrom, vcf_path, vcf_path_original, vcf_files, bed_file_path, chrom_path, project, output_matrix, exome, genome, ncbi_chrom, limited_indel, functionFlag, bed, bed_ranges, chrom_based, plot, tsb_ref, transcript_path, seqInfo, gs, log_file)
+				mutation_ID, skipped_mut, total = matGen.catalogue_generator_INDEL_single (mutation_ID, lines, chrom, vcf_path, vcf_path_original, vcf_files, bed_file_path, chrom_path, project, output_matrix, exome, reference_genome, ncbi_chrom, limited_indel, functionFlag, bed, bed_ranges, chrom_based, plot, tsb_ref, transcript_path, seqInfo, gs, log_file)
 
 				if chrom_based and not exome and not bed:
 					matGen.matrix_generator_INDEL(output_matrix, samples, indel_types, indel_types_tsb, indel_types_simple, mutation_ID['ID'], mutation_ID['tsb'], mutation_ID['simple'], mutation_ID['complete'], project, exome, limited_indel, bed, chrom, plot)
@@ -581,7 +589,7 @@ def SigProfilerMatrixGeneratorFunc (project, genome, vcfFiles, exome=False, bed_
 
 				mutation_ID = {}
 				mutation_ID['ID'] = pd.DataFrame(0, index=indel_types, columns=samples)
-				mutation_ID['ID'], samples2 = matGen.exome_check(chrom_based, samples, bias_sort, exome, indel_types, bed, chrom, functionFlag, plot, tsb_stat, mutation_ID['ID'], genome, vcf_path + "exome_temp.txt", output_matrix, project, "ID", cushion, '83')
+				mutation_ID['ID'], samples2 = matGen.exome_check(chrom_based, samples, bias_sort, exome, indel_types, bed, chrom, functionFlag, plot, tsb_stat, mutation_ID['ID'], reference_genome, vcf_path + "exome_temp.txt", output_matrix, project, "ID", cushion, '83')
 
 
 				with open(vcf_path + "exome_temp_simple.txt") as f:
@@ -593,7 +601,7 @@ def SigProfilerMatrixGeneratorFunc (project, genome, vcfFiles, exome=False, bed_
 				output.close()
 
 				mutation_ID['simple'] = pd.DataFrame(0, index=indel_types_simple, columns=samples)
-				mutation_ID['simple'], samples2 = matGen.exome_check(chrom_based, samples, bias_sort, exome, indel_types_simple, bed, chrom, functionFlag, plot, tsb_stat, mutation_ID['simple'], genome, vcf_path + "exome_temp_simple.txt", output_matrix, project, "ID", cushion, 'simple')
+				mutation_ID['simple'], samples2 = matGen.exome_check(chrom_based, samples, bias_sort, exome, indel_types_simple, bed, chrom, functionFlag, plot, tsb_stat, mutation_ID['simple'], reference_genome, vcf_path + "exome_temp_simple.txt", output_matrix, project, "ID", cushion, 'simple')
 
 
 				with open(vcf_path + "exome_temp_tsb.txt") as f:
@@ -605,7 +613,7 @@ def SigProfilerMatrixGeneratorFunc (project, genome, vcfFiles, exome=False, bed_
 				output.close()
 
 				mutation_ID['tsb'] = pd.DataFrame(0, index=indel_types_tsb, columns=samples)
-				mutation_ID['tsb'], samples2 = matGen.exome_check(chrom_based, samples, bias_sort, exome, indel_types_tsb, bed, chrom, functionFlag, plot, tsb_stat, mutation_ID['tsb'], genome, vcf_path + "exome_temp_tsb.txt", output_matrix, project, "ID", cushion, 'tsb')
+				mutation_ID['tsb'], samples2 = matGen.exome_check(chrom_based, samples, bias_sort, exome, indel_types_tsb, bed, chrom, functionFlag, plot, tsb_stat, mutation_ID['tsb'], reference_genome, vcf_path + "exome_temp_tsb.txt", output_matrix, project, "ID", cushion, 'tsb')
 				mutation_ID['complete'] = pd.DataFrame(0, index=indel_complete, columns=samples)
 
 			if bed:
@@ -619,7 +627,7 @@ def SigProfilerMatrixGeneratorFunc (project, genome, vcfFiles, exome=False, bed_
 
 				mutation_ID = {}
 				mutation_ID['ID'] = pd.DataFrame(0, index=indel_types, columns=samples)
-				mutation_ID['ID'], samples2 = matGen.panel_check(chrom_based, samples, bias_sort, exome, indel_types, bed, chrom, functionFlag, plot, tsb_stat, mutation_ID['ID'], genome, vcf_path + "bed_temp.txt", output_matrix, bed_file_path, project, "ID", cushion, '83')
+				mutation_ID['ID'], samples2 = matGen.panel_check(chrom_based, samples, bias_sort, exome, indel_types, bed, chrom, functionFlag, plot, tsb_stat, mutation_ID['ID'], reference_genome, vcf_path + "bed_temp.txt", output_matrix, bed_file_path, project, "ID", cushion, '83')
 
 				
 				with open(vcf_path + "bed_temp_simple.txt") as f:
@@ -631,7 +639,7 @@ def SigProfilerMatrixGeneratorFunc (project, genome, vcfFiles, exome=False, bed_
 				output.close()
 
 				mutation_ID['simple'] = pd.DataFrame(0, index=indel_types_simple, columns=samples)
-				mutation_ID['simple'], samples2 = matGen.panel_check(chrom_based, samples, bias_sort, exome, indel_types_simple, bed, chrom, functionFlag, plot, tsb_stat, mutation_ID['simple'], genome, vcf_path + "bed_temp_simple.txt", output_matrix, bed_file_path, project, "ID", cushion, 'simple')
+				mutation_ID['simple'], samples2 = matGen.panel_check(chrom_based, samples, bias_sort, exome, indel_types_simple, bed, chrom, functionFlag, plot, tsb_stat, mutation_ID['simple'], reference_genome, vcf_path + "bed_temp_simple.txt", output_matrix, bed_file_path, project, "ID", cushion, 'simple')
 
 
 				with open(vcf_path + "bed_temp_tsb.txt") as f:
@@ -645,7 +653,7 @@ def SigProfilerMatrixGeneratorFunc (project, genome, vcfFiles, exome=False, bed_
 
 
 				mutation_ID['tsb'] = pd.DataFrame(0, index=indel_types_tsb, columns=samples)
-				mutation_ID['tsb'], samples2 = matGen.panel_check(chrom_based, samples, bias_sort, exome, indel_types_tsb, bed, chrom, functionFlag, plot, tsb_stat, mutation_ID['tsb'], genome, vcf_path + "bed_temp_tsb.txt", output_matrix, bed_file_path, project, "ID", cushion, 'tsb')
+				mutation_ID['tsb'], samples2 = matGen.panel_check(chrom_based, samples, bias_sort, exome, indel_types_tsb, bed, chrom, functionFlag, plot, tsb_stat, mutation_ID['tsb'], reference_genome, vcf_path + "bed_temp_tsb.txt", output_matrix, bed_file_path, project, "ID", cushion, 'tsb')
 				mutation_ID['complete'] = pd.DataFrame(0, index=indel_complete, columns=samples)
 
 			if not chrom_based:
@@ -663,6 +671,7 @@ def SigProfilerMatrixGeneratorFunc (project, genome, vcfFiles, exome=False, bed_
 	# Prints a summary for the given run (total samples, skipped mutations, etc.)
 	if not chrom_based:
 		print("Matrices generated for " + str(sample_count_high) + " samples with " + str(skipped_muts) + " errors. Total of " + str(analyzed_muts[0]) + " SNVs, " + str(analyzed_muts[1]) + " DINUCs, and " + str(analyzed_muts[2]) + " INDELs were successfully analyzed.")
+		# Raise an error when more than 30% of mutations are skipped
+		if skipped_muts > (analyzed_muts[0] + analyzed_muts[1] + analyzed_muts[2]) * 0.3:
+			raise ValueError("Error: More than 30% of mutations were skipped. Please check the log file for more information.")
 	return(matrices)
-
-	

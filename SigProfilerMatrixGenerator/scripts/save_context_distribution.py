@@ -564,7 +564,7 @@ def main():
 			output_file = ref_dir + '/references/chromosomes/context_distributions/context_distribution_' + genome + "_" + context + "_" + gender +'.csv'
 
 	if bed or exome:
-		context_distribution_BED(context, output_file, chromosome_path, chromosomes, bed, bed_file, exome, exome_file, genome, ref_dir, tsb_ref)
+		context_distribution_BED(context, output_file, chromosome_path, chromosomes, bed, bed_file, exome, exome_file, genome, ref_dir, tsb_ref, gender)
 	else:
 		context_distribution(context, output_file, chromosome_path, chromosomes, tsb_ref, genome)
 	
