@@ -20,7 +20,7 @@ def write_version_py(filename='SigProfilerMatrixGenerator/version.py'):
 # THIS FILE IS GENERATED FROM SIGPROFILEMATRIXGENERATOR SETUP.PY
 short_version = '%(version)s'
 version = '%(version)s'
-Update = 'Upgrade v1.2.13: Add update message and URL.'
+Update = 'v1.2.14: Resolve issues with rn6 and yeast. Add basic SBS tests.'
 	
 	"""
 	fh = open(filename, 'w')
@@ -39,6 +39,7 @@ setup(name='SigProfilerMatrixGenerator',
 		author_email='ebergstr@eng.ucsd.edu',
 		license='UCSD',
 		packages=['SigProfilerMatrixGenerator'],
+		python_requires='>=3.8',
 		install_requires =[
 			"matplotlib>=2.2.2",
 			"sigProfilerPlotting>=1.3.11",
