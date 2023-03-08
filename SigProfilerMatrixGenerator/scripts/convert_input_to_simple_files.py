@@ -734,9 +734,11 @@ def convertICGC (project, vcf_path, genome, output_path, ncbi_chrom, log_file):
 		if file[0] == '.':
 			continue
 		with open (vcf_path + file) as f:
+			# skip the header line in the file
+			next(f)
 			for lines in f:
 				try:
-					line = lines.strip().split()
+					line = lines.strip().split('\t')
 					if len(line) == 0:
 						continue
 					sample = line[1]
@@ -757,7 +759,7 @@ def convertICGC (project, vcf_path, genome, output_path, ncbi_chrom, log_file):
 					if ref == '-':
 						mut = '-' + mut
 					elif mut == '-':
-						start -= 1
+						start -= str(int(start) - 1)
 						ref = '-' + ref
 					int(start)
 					int(end)
