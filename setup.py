@@ -2,7 +2,7 @@ from setuptools import setup
 import os
 import shutil
 
-VERSION = '1.2.13'
+VERSION = '1.2.14'
 
 #remove the dist folder first if exists
 if os.path.exists("dist"):
