@@ -2,7 +2,7 @@ from setuptools import setup
 import os
 import shutil
 
-VERSION = '1.2.14'
+VERSION = '1.2.15'
 
 #remove the dist folder first if exists
 if os.path.exists("dist"):
@@ -21,7 +21,7 @@ def write_version_py(filename='SigProfilerMatrixGenerator/version.py'):
 short_version = '%(version)s'
 version = '%(version)s'
 Update = 'v1.2.14: Resolve issues with rn6 and yeast. Add basic SBS tests.'
-	
+
 	"""
 	fh = open(filename, 'w')
 	fh.write(cnt % {'version': VERSION,})

@@ -16,6 +16,7 @@ import pandas as pd
 import shutil
 import logging
 import hashlib
+from SigProfilerMatrixGenerator.references import ref_install
 from SigProfilerMatrixGenerator.scripts import SigProfilerMatrixGeneratorFunc as matGen
 import glob
 
@@ -161,7 +162,7 @@ def install_chromosomes (genomes, ref_dir, custom, rsync, bash):
 		for genome in genomes:
 			species = None
 			chrom_number = None
-			if genome == 'GRCh37' or genome == 'GRCh38': 
+			if genome == 'GRCh37' or genome == 'GRCh38':
 				species = "homo_sapiens"
 				chrom_number = 24
 			elif genome == 'mm10' or genome == 'mm9':
@@ -173,7 +174,7 @@ def install_chromosomes (genomes, ref_dir, custom, rsync, bash):
 			else:
 				print(genome + " is not supported. The following genomes are supported:\nGRCh37, GRCh38, mm10")
 				sys.exit()
-			
+
 			chromosome_string_path = "references/chromosomes/chrom_string/" + genome + "/"
 			chromosome_fasta_path = "references/chromosomes/fasta/" + genome + "/"
 
@@ -277,7 +278,7 @@ def install_chromosomes_tsb (genomes, ref_dir, custom):
 
 	for genome in genomes:
 		chrom_number = None
-		if genome == 'GRCh37' or genome == 'GRCh38': 
+		if genome == 'GRCh37' or genome == 'GRCh38':
 			chrom_number = 24
 		elif genome == 'mm10' or genome == 'mm9':
 			chrom_number = 21
@@ -318,7 +319,7 @@ def install_chromosomes_tsb (genomes, ref_dir, custom):
 			if corrupt:
 				print("The transcriptional reference data appears to be corrupted. Please reinstall the " + genome + " genome.")
 				sys.exit()
-			
+
 		print("The transcriptional reference data for " + genome + " has been saved.")
 
 def install_chromosomes_tsb_BED (genomes, ref_dir, custom):
@@ -379,11 +380,12 @@ def benchmark (genome, ref_dir):
 	print("Installation was succesful.\nSigProfilerMatrixGenerator took " + str(end_time-start_time) + " seconds to complete.")
 
 
-def install (genome, custom=False, rsync=False, bash=True, ftp=True, fastaPath=None, transcriptPath=None, exomePath=None, offline_files_path=None):
+def install (genome, custom=False, rsync=False, bash=True, ftp=True, fastaPath=None, transcriptPath=None, exomePath=None, offline_files_path=None, install_dir=None):
 	if custom or offline_files_path is not None:
 		ftp=False
 	first_path= os.getcwd()
-	ref_dir = os.path.dirname(os.path.abspath(__file__))
+	reference_dir = ref_install.reference_dir(install_dir)
+	ref_dir = str(reference_dir.path)
 	os.chdir(ref_dir)
 
 	if not custom and offline_files_path is None:
@@ -498,17 +500,17 @@ def install (genome, custom=False, rsync=False, bash=True, ftp=True, fastaPath=N
 
 	elif offline_files_path is not None:
 		print("Beginning installation using locally provided files.")
-		
+
 		# unpack user provided tar file into environment
 		cur_dir = os.getcwd()
 		os.chdir(first_path)
 		shutil.unpack_archive(offline_files_path + genome + ".tar.gz", ref_dir + "/references/chromosomes/tsb/")
 		os.chdir(cur_dir)
-		
+
 		chromosome_fasta_path = ref_dir + "/references/chromosomes/tsb/"
 		chromosome_TSB_path = chromosome_fasta_path + genome + "/"
 		corrupt=False
-		
+
 		for files in os.listdir(chromosome_TSB_path):
 			if "proportions" in files:
 				continue
@@ -525,7 +527,7 @@ def install (genome, custom=False, rsync=False, bash=True, ftp=True, fastaPath=N
 			print("The transcriptional reference data appears to be corrupted. Please reinstall the " + genome + " genome.")
 			sys.exit()
 		print("The transcriptional reference data for " + genome + " has been saved.")
-		
+
 	else:
 		print("Beginning installation. This may take up to 20 minutes to complete.")
 		first_path = os.getcwd()
@@ -614,7 +616,7 @@ def main ():
 	if os.path.exists("context_distributions/"):
 		os.system("mv context_distributions/ references/chromosomes/")
 
-	
+
 	if os.path.exists(chrom_tsb_dir + "GRCh37/"):
 		print("All reference files have been created.\nVerifying and benchmarking installation now...")
 		benchmark(ref_dir)
