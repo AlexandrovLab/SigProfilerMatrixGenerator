@@ -380,11 +380,11 @@ def benchmark (genome, ref_dir):
 	print("Installation was succesful.\nSigProfilerMatrixGenerator took " + str(end_time-start_time) + " seconds to complete.")
 
 
-def install (genome, custom=False, rsync=False, bash=True, ftp=True, fastaPath=None, transcriptPath=None, exomePath=None, offline_files_path=None, install_dir=None):
+def install (genome, custom=False, rsync=False, bash=True, ftp=True, fastaPath=None, transcriptPath=None, exomePath=None, offline_files_path=None):
 	if custom or offline_files_path is not None:
 		ftp=False
 	first_path= os.getcwd()
-	reference_dir = ref_install.reference_dir(install_dir)
+	reference_dir = ref_install.reference_dir()
 	ref_dir = str(reference_dir.path)
 	os.chdir(ref_dir)
 
