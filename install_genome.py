@@ -8,4 +8,4 @@ def install_ref(ref_path, genome="GRCh37"):
 if __name__=="__main__":
   ref_path=sys.argv[1]
   genome=sys.argv[2]
-  install_ref(ref_path)
+  install_ref(ref_path, genome=genome)
