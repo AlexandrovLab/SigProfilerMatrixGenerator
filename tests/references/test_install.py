@@ -4,7 +4,7 @@ import unittest
 import pkg_resources
 
 import SigProfilerMatrixGenerator
-from SigProfilerMatrixGenerator.references import ref_install
+from SigProfilerMatrixGenerator.scripts import ref_install
 
 
 class TestReferenceDir(unittest.TestCase):

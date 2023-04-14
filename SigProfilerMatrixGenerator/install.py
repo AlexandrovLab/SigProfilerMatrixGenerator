@@ -16,7 +16,7 @@ import pandas as pd
 import shutil
 import logging
 import hashlib
-from SigProfilerMatrixGenerator.references import ref_install
+from SigProfilerMatrixGenerator.scripts import ref_install
 from SigProfilerMatrixGenerator.scripts import SigProfilerMatrixGeneratorFunc as matGen
 import glob
 
