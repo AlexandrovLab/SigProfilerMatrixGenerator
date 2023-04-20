@@ -46,6 +46,6 @@ setup(name='SigProfilerMatrixGenerator',
 			"statsmodels>=0.9.0",
 			"scipy>=1.1.0",
 			"numpy>=1.18.5",
-			"pandas>=0.23.4"],
+			"pandas>=0.23.4,<2.0.0"],
 		include_package_data=True,
 		zip_safe=False)
