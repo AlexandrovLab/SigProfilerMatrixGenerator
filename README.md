@@ -15,7 +15,7 @@ For users that prefer working in an R environment, a wrapper package is provided
 
 The framework is written in PYTHON, however, it also requires the following software with the given versions (or newer):
 
-  * PYTHON          version 3.4 or newer
+  * PYTHON          version 3.8 or newer
   * WGET                   version 1.9  or RSYNC if you have a firewall
 
 By default the installation process will save the FASTA files for all chromosomes for the default genome
@@ -185,6 +185,16 @@ WBcel235 [c_elegans] GCA_000002985.3, Oct 2014. Last updated Jan 2019. This geno
 
 All errors and progress checkpoints are saved into *sigProfilerMatrixGenerator_[project]_[genome].err* and *sigProfilerMatrixGenerator_[project]_[genome].out*, respectively.
 For all errors, please email the error and progress log files to the primary contact under CONTACT INFORMATION.
+
+UNIT TESTS
+
+unit tests can be run with
+
+```
+python setup.py sdist
+python -m unittest discover tests
+```
+
 
 **CITATION**
 
