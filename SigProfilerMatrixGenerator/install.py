@@ -20,6 +20,7 @@ import time
 import pandas as pd
 from scipy import spatial
 
+from SigProfilerMatrixGenerator.scripts import ref_install
 from SigProfilerMatrixGenerator.scripts import SigProfilerMatrixGeneratorFunc as matGen
 
 BENCH_LIST = ["brca", "grch37", "grch38", "mm10", "mm9"]
@@ -770,7 +771,8 @@ def install(
     if custom or offline_files_path is not None:
         ftp = False
     first_path = os.getcwd()
-    ref_dir = os.path.dirname(os.path.abspath(__file__))
+    reference_dir = ref_install.reference_dir()
+    ref_dir = str(reference_dir.path)
     os.chdir(ref_dir)
 
     if not custom and offline_files_path is None:
