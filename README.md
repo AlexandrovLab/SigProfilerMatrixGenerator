@@ -190,11 +190,22 @@ UNIT TESTS
 
 unit tests can be run with
 
-```
+```bash
 python setup.py sdist
-python -m unittest discover tests
+pip install .[tests]
+pytest tests
 ```
 
+END-TO-END tests
+
+An integration test can be run with the following commands:
+
+```bash
+wget ftp://alexandrovlab-ftp.ucsd.edu/pub/tools/SigProfilerMatrixGenerator/GRCh37.tar.gz -P ./src/
+pip install .
+python3 install_genome.py src/ GRCh37
+python3 test.py -t GRCh37
+```
 
 **CITATION**
 

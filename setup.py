@@ -58,6 +58,11 @@ setup(
         "numpy>=1.18.5",
         "pandas>=0.23.4,<2.0.0",
     ],
+    extras_require={
+        "tests": [
+            "pytest",
+        ],
+    },
     include_package_data=True,
     zip_safe=False,
 )

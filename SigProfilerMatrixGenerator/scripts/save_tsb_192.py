@@ -12,6 +12,8 @@ import re
 import sys
 import time
 
+from SigProfilerMatrixGenerator.scripts import ref_install
+
 start_time = time.time()
 
 
@@ -457,9 +459,8 @@ def main():
     args = parser.parse_args()
     genome = args.genome
 
-    # script_dir = os.getcwd()
-    # ref_dir = re.sub('\/scripts$', '', script_dir)
-    ref_dir, tail = os.path.split(os.path.dirname(os.path.abspath(__file__)))
+    reference_dir = ref_install.reference_dir()
+    ref_dir = str(reference_dir.path)
 
     chromosome_string_path = (
         ref_dir + "/references/chromosomes/chrom_string/" + genome + "/"

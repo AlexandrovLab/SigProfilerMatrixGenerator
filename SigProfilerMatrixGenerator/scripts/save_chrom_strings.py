@@ -11,6 +11,8 @@ import os
 import re
 import sys
 
+from SigProfilerMatrixGenerator.scripts import ref_install
+
 
 def save_chrom_strings(genome, custom):
     """
@@ -29,7 +31,9 @@ def save_chrom_strings(genome, custom):
     """
 
     # Instantiates all of the relevant paths/creates them if not present
-    ref_dir, tail = os.path.split(os.path.dirname(os.path.abspath(__file__)))
+
+    reference_dir = ref_install.reference_dir()
+    ref_dir = str(reference_dir.path)
     chrom_fasta_path = ref_dir + "/references/chromosomes/fasta/" + genome + "/"
     chrom_string_path = ref_dir + "/references/chromosomes/chrom_string/" + genome + "/"
     chrom_fasta_files = os.listdir(chrom_fasta_path)
