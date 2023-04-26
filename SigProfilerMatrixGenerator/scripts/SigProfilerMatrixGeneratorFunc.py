@@ -97,7 +97,10 @@ def SigProfilerMatrixGeneratorFunc(
     # verify chromosome file installation for supported genomes
     # 1. get list of all files that were downloaded
     # Terminates the code if the genome reference files have not been created/installed
-    lib_loc = os.path.split(os.path.dirname(matGen.__file__))[0]
+
+    reference_dir = ref_install.reference_dir()
+    lib_loc = str(reference_dir.path)
+
     tsb_path = os.path.join("references/chromosomes/tsb/", reference_genome)
     if not os.path.exists(os.path.join(lib_loc, tsb_path)):
         raise Exception(
