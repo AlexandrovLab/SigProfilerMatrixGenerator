@@ -25,27 +25,27 @@ assemblies (GRCh37, GRCH38, mm10, mm9, rn6). As a result, ~3 Gb of storage must 
 
 This section will guide you through the minimum steps required to create mutational matrices:
 1. Install the python package using pip:
-```
+```bash
                           pip install SigProfilerMatrixGenerator
 ```
 2.
     a. Install your desired reference genome from the command line/terminal as follows (a complete list of supported genomes can be found below):
-    ```
+    ```python
     $ python
     >> from SigProfilerMatrixGenerator import install as genInstall
     >> genInstall.install('GRCh37', rsync=False, bash=True)
     ```
         This will install the human 37 assembly as a reference genome. You may install as many genomes as you wish. If you have a firewall on your server, you may need to install rsync and use the rsync=True parameter. Similarly, if you do not have bash,
         use bash=False.
-    b. To install a reference genome that you have saved locally, you can do the following:
-    ```
+    b. To install a reference genome that is already downloaded locally, you can do the following:
+    ```python
     $ python
     >> from SigProfilerMatrixGenerator import install as genInstall
     >> genInstall.install('GRCh37', offline_files_path='path/to/directory/containing/GRCh37.tar.gz')
     ```
 3. Place your vcf files in your desired output folder. It is recommended that you name this folder based on your project's name
 4. From within a python session, you can now generate the matrices as follows:
-```
+```python
 $ python3
 >>from SigProfilerMatrixGenerator.scripts import SigProfilerMatrixGeneratorFunc as matGen
 >>matrices = matGen.SigProfilerMatrixGeneratorFunc("test", "GRCh37", "/Users/ebergstr/Desktop/test",plot=True, exome=False, bed_file=None, chrom_based=False, tsb_stat=False, seqInfo=False, cushion=100)
@@ -186,9 +186,9 @@ WBcel235 [c_elegans] GCA_000002985.3, Oct 2014. Last updated Jan 2019. This geno
 All errors and progress checkpoints are saved into *sigProfilerMatrixGenerator_[project]_[genome].err* and *sigProfilerMatrixGenerator_[project]_[genome].out*, respectively.
 For all errors, please email the error and progress log files to the primary contact under CONTACT INFORMATION.
 
-UNIT TESTS
+**UNIT TESTS**
 
-unit tests can be run with
+Unit tests can be run with the following commands:
 
 ```bash
 python setup.py sdist
@@ -196,7 +196,7 @@ pip install .[tests]
 pytest tests
 ```
 
-END-TO-END tests
+**END-TO-END tests**
 
 An integration test can be run with the following commands:
 
