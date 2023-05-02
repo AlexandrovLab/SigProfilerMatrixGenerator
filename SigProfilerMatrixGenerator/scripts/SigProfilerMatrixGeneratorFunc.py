@@ -29,6 +29,7 @@ from SigProfilerMatrixGenerator import install
 from SigProfilerMatrixGenerator.scripts import (
     convert_input_to_simple_files as convertIn,
 )
+from SigProfilerMatrixGenerator.scripts import ref_install
 
 from . import SigProfilerMatrixGenerator as matGen
 
@@ -1193,7 +1194,8 @@ def SigProfilerMatrixGeneratorFunc(
     contexts = ["6144"]
 
     # Organizes all of the reference directories for later reference:
-    ref_dir, tail = os.path.split(os.path.dirname(os.path.abspath(__file__)))
+    reference_dir = ref_install.reference_dir()
+    ref_dir = str(reference_dir.path)
     chrom_path = ref_dir + "/references/chromosomes/tsb/" + reference_genome + "/"
     if "havana" in reference_genome:
         reference_genome = reference_genome.split("_")[0]

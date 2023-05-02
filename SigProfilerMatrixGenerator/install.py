@@ -699,9 +699,9 @@ def install_chromosomes_tsb_BED(genomes, ref_dir, custom):
 
 
 def benchmark(genome, ref_dir):
-    # current_dir = os.path.realpath(__file__)
-    # ref_dir = re.sub('\/install.py$', '', current_dir)
-    ref_dir = os.path.dirname(os.path.abspath(__file__))
+    # NOTE: ref_dir is overridden, so its value is currently ignored.
+    reference_dir = ref_install.reference_dir()
+    ref_dir = str(reference_dir.path)
     vcf_path = ref_dir + "/references/vcf_files/" + genome + "_bench/"
 
     start_time = time.time()
@@ -995,7 +995,6 @@ def install(
     else:
         print("Beginning installation. This may take up to 20 minutes to complete.")
         first_path = os.getcwd()
-        ref_dir = os.path.dirname(os.path.abspath(__file__))
         os.chdir(ref_dir)
 
         print(

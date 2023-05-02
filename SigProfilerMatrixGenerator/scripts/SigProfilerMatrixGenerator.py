@@ -24,6 +24,8 @@ import sigProfilerPlotting as sigPlt
 import statsmodels.stats.multitest as sm
 from scipy import stats
 
+from SigProfilerMatrixGenerator.scripts import ref_install
+
 
 ################# Functions and references ###############################################
 def df2csv(df, fname, formats=[], sep="\t"):
@@ -93,9 +95,8 @@ def reference_paths(genome):
     Returns:
             chrom_path  -> path to the reference genome's chromosome files
     """
-    # current_dir = os.path.realpath(__file__)
-    # ref_dir = re.sub('\/scripts/SigProfilerMatrixGenerator.py$', '', current_dir)
-    ref_dir, tail = os.path.split(os.path.dirname(os.path.abspath(__file__)))
+    reference_dir = ref_install.reference_dir()
+    ref_dir = str(reference_dir.path)
     chrom_path = ref_dir + "/references/chromosomes/tsb/" + genome + "/"
 
     return (chrom_path, ref_dir)
@@ -2037,7 +2038,8 @@ def exome_check(
 
     initial = True
     udpate_chrom = False
-    ref_dir, tail = os.path.split(os.path.dirname(os.path.abspath(__file__)))
+    reference_dir = ref_install.reference_dir()
+    ref_dir = str(reference_dir.path)
 
     exome_file = (
         ref_dir
@@ -2407,7 +2409,8 @@ def panel_check(
     # Instantiates the relevant variables/data structures
     base_cushion = cushion
     # samples = []
-    ref_dir = os.path.dirname(os.path.abspath(__file__))
+    reference_dir = ref_install.reference_dir()
+    ref_dir = str(reference_dir.path)
 
     romanNumeralConversion = {
         "I": 1,
@@ -2790,7 +2793,8 @@ def matrix_generator(
     """
 
     # Prepares all of the required data structures and files
-    ref_dir = os.path.dirname(os.path.abspath(__file__))
+    reference_dir = ref_install.reference_dir()
+    ref_dir = str(reference_dir.path)
 
     contexts = ["96", "384", "1536", "6", "24", "288", "4608", "18"]
     mut_count_all["6144"].index.name = "MutationType"
@@ -3360,9 +3364,8 @@ def matrix_generator_INDEL(
     """
 
     # Instantiates all of the required data structures and output files
-    # current_dir = os.getcwd()
-    # ref_dir = re.sub('\/scripts$', '', current_dir)
-    ref_dir = os.path.dirname(os.path.abspath(__file__))
+    reference_dir = ref_install.reference_dir()
+    ref_dir = str(reference_dir.path)
 
     bias_sort = {"T": 0, "U": 1, "N": 3, "B": 2, "Q": 4}
     col_sort = {"C": 0, "T": 1, "R": 2, "M": 3}
@@ -3731,7 +3734,9 @@ def matrix_generator_DINUC(
     if not os.path.exists(output_matrix_DINUC):
         os.mkdir(output_matrix_DINUC)
 
-    ref_dir = os.path.dirname(os.path.abspath(__file__))
+    reference_dir = ref_install.reference_dir()
+    ref_dir = str(reference_dir.path)
+
     file_prefix = project + ".DBS2976"
     if exome:
         output_file_matrix = output_matrix_DINUC + file_prefix + ".exome"
