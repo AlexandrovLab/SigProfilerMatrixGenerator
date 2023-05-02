@@ -10,7 +10,7 @@ before_install:
   fi
 
 install:
-  - pip install .
+  - pip install .[tests]
 
 cache:
   directories:
@@ -19,5 +19,9 @@ cache:
 before_script:
   - python3 install_genome.py $TRAVIS_BUILD_DIR/src/ GRCh37
 
-script: python3 test.py -t GRCh37
+script:
+  # run unit tests
+  - pytest tests
+  # run integration test
+  - python3 test.py -t GRCh37
 
