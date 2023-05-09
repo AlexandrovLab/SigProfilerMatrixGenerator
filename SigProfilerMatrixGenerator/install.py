@@ -21,7 +21,12 @@ import pandas as pd
 from scipy import spatial
 
 from SigProfilerMatrixGenerator.scripts import SigProfilerMatrixGeneratorFunc as matGen
-from SigProfilerMatrixGenerator.scripts import ref_install
+from SigProfilerMatrixGenerator.scripts import (
+    ref_install,
+    save_chrom_strings,
+    save_chrom_tsb_separate,
+    save_tsb_192,
+)
 
 BENCH_LIST = ["brca", "grch37", "grch38", "mm10", "mm9"]
 check_sum = {
@@ -336,18 +341,12 @@ def install_chromosomes(genomes, ref_dir, custom, rsync, bash):
         for genome in genomes:
             os.system("gzip -d references/chromosomes/fasta/" + genome + "/*.gz")
             chromosome_fasta_path = "references/chromosomes/fasta/" + genome + "/"
-            os.system(
-                "python scripts/save_chrom_strings.py -g "
-                + genome
-                + " -c "
-                + str(custom)
-            )
+            save_chrom_strings.save_chrom_strings(genome, custom)
             print(
                 "Chromosome string files for "
                 + genome
                 + " have been created. Continuing with installation."
             )
-            # os.system("rm -r " + chromosome_fasta_path)
     else:
         for genome in genomes:
             species = None
@@ -583,7 +582,7 @@ def install_chromosomes(genomes, ref_dir, custom, rsync, bash):
                     + genome
                     + " have been installed. Creating the chromosome string files now..."
                 )
-                os.system("python scripts/save_chrom_strings.py -g " + genome)
+                save_chrom_strings.save_chrom_strings(genome, custom)
                 print(
                     "Chromosome string files for "
                     + genome
@@ -646,7 +645,18 @@ def install_chromosomes_tsb(genomes, ref_dir, custom):
                 + genome
                 + " has not been saved. Creating these files now"
             )
-            os.system("python scripts/save_tsb_192.py -g " + genome)
+
+            chromosome_string_path = (
+                ref_dir + "/references/chromosomes/chrom_string/" + genome + "/"
+            )
+            transcript_path = (
+                ref_dir + "/references/chromosomes/transcripts/" + genome + "/"
+            )
+            output_path = ref_dir + "/references/chromosomes/tsb/" + genome + "/"
+            if os.path.exists(output_path) == False:
+                os.makedirs(output_path)
+
+            save_tsb_192.save_tsb(chromosome_string_path, transcript_path, output_path)
 
         if not custom:
             corrupt = False
@@ -689,12 +699,7 @@ def install_chromosomes_tsb_BED(genomes, ref_dir, custom):
             is_custom = False
             if custom:
                 is_custom = True
-            os.system(
-                "python scripts/save_chrom_tsb_separate.py -g "
-                + genome
-                + " -c "
-                + str(is_custom)
-            )
+            save_chrom_tsb_separate.save_chrom_tsb_separate(genome, ref_dir, is_custom)
             print("The TSB BED files for " + genome + " have been saved.")
 
 
