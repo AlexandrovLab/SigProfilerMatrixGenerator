@@ -14,7 +14,7 @@ import sys
 from SigProfilerMatrixGenerator.scripts import ref_install
 
 
-def save_chrom_strings(genome, custom):
+def save_chrom_strings(genome, custom=False):
     """
     Saves the fasta files for each chromosome as single strings. This
     is required to generate the reference files.
