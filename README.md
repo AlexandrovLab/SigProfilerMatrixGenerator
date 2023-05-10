@@ -37,7 +37,7 @@ This section will guide you through the minimum steps required to create mutatio
     ```
         This will install the human 37 assembly as a reference genome. You may install as many genomes as you wish. If you have a firewall on your server, you may need to install rsync and use the rsync=True parameter. Similarly, if you do not have bash,
         use bash=False.
-    b. To install a reference genome that is already downloaded locally, you can do the following:
+    b. To install a reference genome that has been downloaded locally from the [Alexandrov Lab's ftp server](ftp://alexandrovlab-ftp.ucsd.edu/pub/tools/SigProfilerMatrixGenerator/), you can do the following:
     ```python
     $ python
     >> from SigProfilerMatrixGenerator import install as genInstall
@@ -50,20 +50,27 @@ $ python3
 >>from SigProfilerMatrixGenerator.scripts import SigProfilerMatrixGeneratorFunc as matGen
 >>matrices = matGen.SigProfilerMatrixGeneratorFunc("test", "GRCh37", "/Users/ebergstr/Desktop/test",plot=True, exome=False, bed_file=None, chrom_based=False, tsb_stat=False, seqInfo=False, cushion=100)
 ```
-  The layout of the required parameters are as follows:
+  The required parameters are as follows:
 
       SigProfilerMatrixGeneratorFunc(project, reference_genome, path_to_input_files)
 
-  where project, reference_genome, and path_to_input_files must be strings (surrounded by quotation marks, ex: "test"). Optional parameters include:
+View the table below for the full list of parameters.
 
-      exome=False:       [boolean] Downsamples mutational matrices to the exome regions of the genome
-      bed_file=None      [string path to bed_file] Downsamples mutational matrices to custom regions of the genome. Requires the full path to the BED file.
-      chrom_based=False  [boolean] Outputs chromosome-based matrices
-      plot=False         [boolean] Integrates with SigProfilerPlotting to output all available visualizations for each matrix.
-      tsb_stat=False     [boolean] Outputs the results of a transcriptional strand bias test for the respective matrices.
-      seqInfo=True      [boolean] Ouputs original mutations into a text file that contains the SigProfilerMatrixGenerator classificaiton for each mutation.
-      cushion=100 [integer] Adds an Xbp cushion to the exome/bed_file ranges for downsampling the mutations.
-
+**PARAMETERS**
+| Category | Parameter | Variable Type | Parameter Description |
+| ------ | ----------- | ----------- | ----------- |
+| Required |  |  |  |
+|  | project | String | The name of the project. |
+|  | reference_genome | String | The name of the reference genome. Full list of genomes under **Supported Genomes** section. Supported values include the following: {c_elegans, dog, ebv, GRCh37, GRCh38, mm9, mm10, mm39, rn6, yeast} |
+|  | path_to_input_files | String | The path to the input files. |
+| Optional |  |  |  |
+|  | exome | Boolean | Downsamples mutational matrices to the exome regions of the genome. Default value False. |
+|  | bed_file | String | Downsamples mutational matrices to custom regions of the genome. Requires the full path to the BED file. Default value None. Note: BED file header is required. |
+|  | chrom_based | Boolean | Outputs chromosome-based matrices. Default value False. |
+|  | plot | Boolean | Integrates with SigProfilerPlotting to output all available visualizations for each matrix. Default value False. |
+|  | tsb_stat | Boolean | Outputs the results of a transcriptional strand bias test for the respective matrices. Default value False. |
+|  | seqInfo | Boolean | Ouputs original mutations into a text file that contains the SigProfilerMatrixGenerator classificaiton for each mutation. Default value True. |
+|  | cushion | Integer | Adds an Xbp cushion to the exome/bed_file ranges for downsampling the mutations. Default value 100. |
 
 
 **INPUT FILE FORMAT**
@@ -71,7 +78,7 @@ $ python3
 This tool currently supports maf, vcf, simple text file, and ICGC formats. The user must provide variant data adhering to one of these four formats. If the user’s files are in vcf format, each sample must be saved as a separate files.
 
 
-**Output File Structure**
+**OUTPUT FILE STRUCTURE**
 
 The output structure is divided into three folders: input, output, and logs. The input folder contains copies of the user-provided input files. The outputfolder contains
 a DBS, SBS, ID, and TSB folder (there will also be a plots folder if this parameter is chosen). The matrices are saved into the appropriate folders. The logs folder contains the error and log files for the submitted job.
