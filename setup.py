@@ -23,7 +23,7 @@ def write_version_py(filename="SigProfilerMatrixGenerator/version.py"):
 # THIS FILE IS GENERATED FROM SIGPROFILEMATRIXGENERATOR SETUP.PY
 short_version = '%(version)s'
 version = '%(version)s'
-Update = 'v1.2.14: Resolve issues with rn6 and yeast. Add basic SBS tests.'
+Update = 'v1.2.15: Add object for installation directory, unit tests, and README formatting.'
 
 	"""
     fh = open(filename, "w")
