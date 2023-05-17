@@ -1,8 +1,21 @@
-recursive-include SigProfilerMatrixGenerator/references/vcf_files/* *.vcf
-recursive-include SigProfilerMatrixGenerator/references/chromosomes/transcripts/* *.txt
-include SigProfilerMatrixGenerator/references/chromosomes/exome/*
-include SigProfilerMatrixGenerator/references/CNV/*
-include SigProfilerMatrixGenerator/references/chromosomes/tsb_BED/*
-include SigProfilerMatrixGenerator/references/chromosomes/context_distributions/*
-include SigProfilerMatrixGenerator/scripts/Benchmark/*
+# Documentation
+include README.md
+
+# CNV/SV
+recursive-include SigProfilerMatrixGenerator/references/CNV *
+recursive-include SigProfilerMatrixGenerator/references/SV *
+
+# VCF Files
+recursive-include SigProfilerMatrixGenerator/references/vcf_files *
+
+# Transcripts
+recursive-include SigProfilerMatrixGenerator/references/chromosomes/exome *
+recursive-include SigProfilerMatrixGenerator/references/chromosomes/transcripts *
+recursive-include SigProfilerMatrixGenerator/references/chromosomes/tsb_BED *
+
+# Scripts
 include SigProfilerMatrixGenerator/scripts/*
+
+# Other
+recursive-include SigProfilerMatrixGenerator/references/chromosomes/context_distributions *
+include SigProfilerMatrixGenerator/scripts/Benchmark/*

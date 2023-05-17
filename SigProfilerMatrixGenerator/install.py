@@ -487,7 +487,6 @@ def install_chromosomes(genomes, ref_dir, custom, rsync, bash):
                                             + "/dna/ 2>> install.log"
                                         )
 
-                                # os.system("gunzip references/chromosomes/fasta/" + genome + "/*.gz")
                                 os.system(
                                     "gzip -d references/chromosomes/fasta/"
                                     + genome
@@ -588,8 +587,6 @@ def install_chromosomes(genomes, ref_dir, custom, rsync, bash):
                     + genome
                     + " have been created. Continuing with installation."
                 )
-                # os.system("rm -r " + chromosome_fasta_path)
-                # os.remove(chromosome_fasta_path)
                 shutil.rmtree(chromosome_fasta_path)
 
             else:
@@ -703,8 +700,7 @@ def install_chromosomes_tsb_BED(genomes, ref_dir, custom):
             print("The TSB BED files for " + genome + " have been saved.")
 
 
-def benchmark(genome, ref_dir):
-    # NOTE: ref_dir is overridden, so its value is currently ignored.
+def benchmark(genome):
     reference_dir = ref_install.reference_dir()
     ref_dir = str(reference_dir.path)
     vcf_path = ref_dir + "/references/vcf_files/" + genome + "_bench/"
@@ -719,8 +715,6 @@ def benchmark(genome, ref_dir):
     )
     new_matrix_96 = vcf_path + "output/SBS/" + genome + "_bench.SBS96.all"
     new_matrix_3072 = vcf_path + "output/SBS/" + genome + "_bench.SBS6144.all"
-
-    # genome = "GRCh37"
 
     ############# Cosine Test ###################################################
     data_orig = pd.read_csv(original_matrix_96, sep="\t", header=0)
@@ -912,16 +906,6 @@ def install(
         else:
             print("Direct download for RSYNC is not yet supported")
             sys.exit()
-            # try:
-            #     if bash:
-            #         os.system("bash -c '" + "rsync -av -m --include='*/' rsync://ftp.ngs.sanger.ac.uk/scratch/project/mutographs/SigProf/" + genome + ".tar.gz " + chromosome_fasta_path + " 2>&1>> install.log" + "'")
-            #     else:
-            #         os.system("rsync -av -m rsync://ftp://ngs.sanger.ac.uk/scratch/project/mutographs/SigProf/" + genome + ".tar.gz " + chromosome_fasta_path + " 2>&1>> install.log")
-            #     os.system("tar -xzf " + ref_dir + "/references/chromosomes/tsb/" + genome + ".tar.gz -C " + ref_dir + "/references/chromosomes/tsb/")
-            #     os.remove(ref_dir + "/references/chromosomes/tsb/" + genome + ".tar.gz")
-            # except:
-            #     print("The ensembl ftp site is not currently responding.")
-            #     sys.exit()
 
         chromosome_TSB_path = chromosome_fasta_path + genome + "/"
         corrupt = False
@@ -1029,7 +1013,7 @@ def install(
         genome = genome.split("_")[0]
     if genome.lower() in BENCH_LIST and not custom:
         print("Verifying and benchmarking installation now...")
-        benchmark(genome, ref_dir)
+        benchmark(genome)
 
     print(
         "To proceed with matrix_generation, please provide the path to your vcf files and an appropriate output path."
@@ -1043,7 +1027,6 @@ def main():
     first_path = os.getcwd()
     os.chdir(first_path + "/sigProfilerMatrixGenerator/")
     genomes = ["mm9", "mm10", "GRCh37", "GRCh38"]
-    # genomes = ['GRCh37']
     custom = False
     parser = argparse.ArgumentParser(
         description="Provide the necessary arguments to install the reference files."
@@ -1070,7 +1053,8 @@ def main():
     if os.path.exists("install.log"):
         os.system("rm install.log")
 
-    ref_dir = "references/"
+    reference_dir = ref_install.reference_dir()
+    ref_dir = str(reference_dir.path / "references/")
     chrom_string_dir = ref_dir + "chromosomes/chrom_string/"
     chrom_fasta_dir = ref_dir + "chromosomes/fasta/"
     chrom_tsb_dir = ref_dir + "chromosomes/tsb/"
@@ -1096,7 +1080,6 @@ def main():
 
     install_chromosomes(genomes, ref_dir, custom)
     install_chromosomes_tsb(genomes, ref_dir, custom)
-    # install_chromosomes_tsb_BED (genomes, custom, ref_dir)
     if os.path.exists("BRCA_example/"):
         os.system("mv BRCA_example/ references/vcf_files/")
     if os.path.exists("example_test"):
@@ -1108,13 +1091,14 @@ def main():
         print(
             "All reference files have been created.\nVerifying and benchmarking installation now..."
         )
+        # This is unexpected. function `benchmark` should take a genome, not
+        # a ref_dir. Maybe this part of the code never runs?
         benchmark(ref_dir)
     else:
         print("All reference files have been created.")
     print(
         "Please place your vcf files for each sample into the 'references/vcf_files/[test]/[mutation_type]/' directory. Once you have done that, you can proceed with the matrix generation."
     )
-    # os.system("rm -r " + chrom_string_dir)
     print("Installation complete.")
     os.chdir(first_path)
 
