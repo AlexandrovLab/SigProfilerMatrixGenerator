@@ -11,7 +11,7 @@ recursive-include SigProfilerMatrixGenerator/references/vcf_files *
 # Transcripts
 recursive-include SigProfilerMatrixGenerator/references/chromosomes/exome *
 recursive-include SigProfilerMatrixGenerator/references/chromosomes/transcripts *
-recursive-include SigProfilerMatrixGenerator/references/chromosomes/tsb_BED/*
+recursive-include SigProfilerMatrixGenerator/references/chromosomes/tsb_BED *
 
 # Scripts
 include SigProfilerMatrixGenerator/scripts/*
