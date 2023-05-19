@@ -44,8 +44,9 @@ def context_distribution(
 
     Requires:
             Chromosomes saved in individual text files ('X.txt','Y.txt', '1.txt', etc)
-            Transcriptional data saved in binary files for each chromosome. These files
-                    can be created using the script: "save_tsb_192.py"
+            Transcriptional data saved in binary files for each chromosome.
+            These files can be created using the function:
+            "save_tsb_192.save_tsb"
 
     Parameters:
                       context_input  -> simulation context of interest (ex: 96, 192, 1536, 3072, DINUC, INDEL)
@@ -275,8 +276,9 @@ def context_distribution_BED(
 
     Requires:
             Chromosomes saved in individual text files ('X.txt','Y.txt', '1.txt', etc)
-            Transcriptional data saved in binary files for each chromosome. These files
-                    can be created using the script: "save_tsb_192.py"
+            Transcriptional data saved in binary files for each chromosome.
+            These files can be created using the function:
+            "save_tsb_192.save_tsb"
 
     Parameters:
                       context_input  -> simulation context of interest (ex: 96, 192, 1536, 3072, DINUC, INDEL)
