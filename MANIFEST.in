@@ -16,6 +16,7 @@ recursive-include SigProfilerMatrixGenerator/references/chromosomes/tsb_BED *
 
 # Scripts
 include SigProfilerMatrixGenerator/scripts/*
+include SigProfilerMatrixGenerator/controllers/*
 
 # Other
 recursive-include SigProfilerMatrixGenerator/references/chromosomes/context_distributions *

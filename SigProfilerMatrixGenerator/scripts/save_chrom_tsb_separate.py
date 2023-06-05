@@ -195,30 +195,3 @@ def save_chrom_tsb_separate(genome, ref_dir, custom):
             print("chromosome ", chrom, "done")
         except:
             print("chromosome ", chrom, "file not found for this species.")
-
-
-def main():
-    parser = argparse.ArgumentParser(
-        description="Provide the necessary arguments to install the reference files."
-    )
-    parser.add_argument(
-        "-g",
-        "--genome",
-        nargs="?",
-        help="Optional parameter instructs script to install the custom genome.",
-    )
-    parser.add_argument(
-        "-c", "--custom", help="custom genome?. (True or False)", default=False
-    )
-    args = parser.parse_args()
-    genome = args.genome
-    custom = bool(args.custom)
-
-    current_dir = os.getcwd()
-    ref_dir = re.sub("\/scripts$", "", current_dir)
-
-    save_chrom_tsb_separate(genome, ref_dir, custom)
-
-
-if __name__ == "__main__":
-    main()

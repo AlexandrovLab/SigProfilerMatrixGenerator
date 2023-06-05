@@ -447,31 +447,3 @@ def save_tsb(chromosome_string_path, transcript_path, output_path):
 
     end_time = time.time()
     print("Transcript files created.\n Job took: ", end_time - start_time, " seconds")
-
-
-def main():
-    parser = argparse.ArgumentParser(
-        description="Provide the necessary arguments to create the transcriptional strand bias reference strings."
-    )
-    parser.add_argument(
-        "--genome", "-g", help="Provide a reference genome. (ex: GRCh37, GRCh38, mm10)"
-    )
-    args = parser.parse_args()
-    genome = args.genome
-
-    reference_dir = ref_install.reference_dir()
-    ref_dir = str(reference_dir.path)
-
-    chromosome_string_path = (
-        ref_dir + "/references/chromosomes/chrom_string/" + genome + "/"
-    )
-    transcript_path = ref_dir + "/references/chromosomes/transcripts/" + genome + "/"
-    output_path = ref_dir + "/references/chromosomes/tsb/" + genome + "/"
-    if os.path.exists(output_path) == False:
-        os.makedirs(output_path)
-
-    save_tsb(chromosome_string_path, transcript_path, output_path)
-
-
-if __name__ == "__main__":
-    main()
