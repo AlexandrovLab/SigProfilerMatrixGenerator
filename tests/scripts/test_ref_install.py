@@ -1,5 +1,4 @@
 import pathlib
-import unittest
 
 import pkg_resources
 
@@ -7,7 +6,7 @@ import SigProfilerMatrixGenerator
 from SigProfilerMatrixGenerator.scripts import ref_install
 
 
-class TestReferenceDir(unittest.TestCase):
+class TestReferenceDir:
     def test_reference_dir_default(self):
         refdir = ref_install.reference_dir(None)
         # using deprecated pkg_resources for compatibility with python 3.8
@@ -15,9 +14,9 @@ class TestReferenceDir(unittest.TestCase):
             pkg_resources.resource_filename(SigProfilerMatrixGenerator.__name__, "")
         )
         observed = refdir.path
-        self.assertEqual(expected, observed)
+        assert expected == observed
         # check path is absolute
-        self.assertEqual(observed, observed.resolve())
+        assert observed == observed.resolve()
 
     def test_reference_dir_custom(self):
         paths = ["/somewhere", pathlib.Path("/somewhere")]
@@ -25,7 +24,7 @@ class TestReferenceDir(unittest.TestCase):
             expected = pathlib.Path("/somewhere")
             refdir = ref_install.reference_dir(provided)
             observed = refdir.path
-            self.assertEqual(expected, observed)
+            assert expected == observed
 
     def test_path_relative(self):
         provided = pathlib.Path("relative/to/here")
@@ -33,4 +32,4 @@ class TestReferenceDir(unittest.TestCase):
 
         refdir = ref_install.ReferenceDir(provided)
         observed = refdir.path
-        self.assertEqual(expected, observed)
+        assert expected == observed

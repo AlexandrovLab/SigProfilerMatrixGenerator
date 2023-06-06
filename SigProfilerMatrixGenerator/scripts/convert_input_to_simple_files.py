@@ -58,12 +58,13 @@ def convertVCF(project, vcf_path, genome, output_path, ncbi_chrom, log_file):
 
     # Iterates through each file
     for file in files:
+        # Skip hidden files
+        if file[0] == ".":
+            continue
         file_name = file.split(".")
         sample = file_name[0]
         if sample not in samples:
             samples.append(sample)
-        if file[0] == ".":
-            continue
         with open(vcf_path + file) as f:
             for lines in f:
                 # Skips any header lines
