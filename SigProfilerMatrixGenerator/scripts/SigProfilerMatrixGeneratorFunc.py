@@ -101,8 +101,8 @@ def SigProfilerMatrixGeneratorFunc(
     reference_dir = ref_install.reference_dir()
     lib_loc = str(reference_dir.path)
 
-    tsb_path = os.path.join("references/chromosomes/tsb/", reference_genome)
-    if not os.path.exists(os.path.join(lib_loc, tsb_path)):
+    absolute_tsb_path = str(reference_dir.get_tsb_dir() / reference_genome)
+    if not os.path.exists(absolute_tsb_path):
         raise Exception(
             "The specified genome "
             + reference_genome
@@ -119,7 +119,7 @@ def SigProfilerMatrixGeneratorFunc(
     if reference_genome in list(install.check_sum.keys()):
         for chrom_file_name in check_files:
             chrom_path = os.path.join(
-                lib_loc, tsb_path, chrom_file_name.replace("_transcripts", "")
+                absolute_tsb_path, chrom_file_name.replace("_transcripts", "")
             )
             chrom_val = chrom_file_name.strip("_transcripts.txt")
             chrom_md5 = install.md5(chrom_path)
@@ -1199,7 +1199,7 @@ def SigProfilerMatrixGeneratorFunc(
     # Organizes all of the reference directories for later reference:
     reference_dir = ref_install.reference_dir()
     ref_dir = str(reference_dir.path)
-    chrom_path = ref_dir + "/references/chromosomes/tsb/" + reference_genome + "/"
+    chrom_path = str(reference_dir.get_tsb_dir() / reference_genome) + "/"
     if "havana" in reference_genome:
         reference_genome = reference_genome.split("_")[0]
     transcript_path = (

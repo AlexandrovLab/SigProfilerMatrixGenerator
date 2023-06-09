@@ -97,7 +97,7 @@ def reference_paths(genome):
     """
     reference_dir = ref_install.reference_dir()
     ref_dir = str(reference_dir.path)
-    chrom_path = ref_dir + "/references/chromosomes/tsb/" + genome + "/"
+    chrom_path = str(reference_dir.get_tsb_dir() / genome) + "/"
 
     return (chrom_path, ref_dir)
 

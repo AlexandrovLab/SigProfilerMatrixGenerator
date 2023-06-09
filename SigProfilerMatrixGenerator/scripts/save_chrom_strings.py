@@ -34,7 +34,7 @@ def save_chrom_strings(genome, custom=False):
 
     reference_dir = ref_install.reference_dir()
     ref_dir = str(reference_dir.path)
-    chrom_fasta_path = ref_dir + "/references/chromosomes/fasta/" + genome + "/"
+    chrom_fasta_path = str(reference_dir.get_fasta_root_dir()) + genome + "/"
     chrom_string_path = ref_dir + "/references/chromosomes/chrom_string/" + genome + "/"
     chrom_fasta_files = os.listdir(chrom_fasta_path)
     if not os.path.exists(chrom_string_path):
