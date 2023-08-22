@@ -29,12 +29,14 @@ def save_chrom_tsb_separate(genome, reference_dir: ref_install.ReferenceDir, cus
     Outputs:
             BED files that contain the TSB information and their associated ranges.
     """
-    ref_dir = reference_dir.path
+    ref_dir = str(reference_dir.path)
 
     # Instantiates all of the relevant path and reference varibales
-    chromosome_path = str(reference_dir.get_tsb_dir()) + genome + "/"
+    chromosome_path = os.path.join(str(reference_dir.get_tsb_dir() / genome), "")
 
-    chromosome_BED_path = ref_dir + "/references/chromosomes/tsb_BED/" + genome + "/"
+    chromosome_BED_path = os.path.join(
+        ref_dir, "references/chromosomes/tsb_BED/", genome, ""
+    )
     chromosomes = [
         "X",
         "Y",

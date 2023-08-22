@@ -340,7 +340,7 @@ def install_chromosomes(
     genomes, reference_dir: ref_install.ReferenceDir, custom, rsync, bash
 ):
     ref_dir = str(reference_dir.path)
-    absolute_fasta_root_dir = str(reference_dir.get_fasta_root_dir())
+    absolute_fasta_root_dir = str(reference_dir.get_fasta_dir())
     if custom:
         for genome in genomes:
             os.system("gzip -d " + absolute_fasta_root_dir + "/" + genome + "/*.gz")
@@ -692,7 +692,9 @@ def install_chromosomes_tsb_BED(
             is_custom = False
             if custom:
                 is_custom = True
-            save_chrom_tsb_separate.save_chrom_tsb_separate(genome, ref_dir, is_custom)
+            save_chrom_tsb_separate.save_chrom_tsb_separate(
+                genome, reference_dir, is_custom
+            )
             print("The TSB BED files for " + genome + " have been saved.")
 
 
@@ -892,7 +894,7 @@ def install(
                     + ".tar.gz -C "
                     + str(reference_dir.get_tsb_dir())
                 )
-                os.remove(str(reference_dir.get_tsb_dir() / genome + ".tar.gz"))
+                os.remove(str(reference_dir.get_tsb_dir() / genome) + ".tar.gz")
             except:
                 print("The ensembl ftp site is not currently responding.")
                 sys.exit()
@@ -900,7 +902,7 @@ def install(
             print("Direct download for RSYNC is not yet supported")
             sys.exit()
 
-        chromosome_TSB_path = chromosome_fasta_path + genome + "/"
+        chromosome_TSB_path = os.path.join(chromosome_fasta_path, genome, "")
         corrupt = False
         for files in os.listdir(chromosome_TSB_path):
             if "proportions" in files:
