@@ -13,6 +13,8 @@ import os
 import re
 import sys
 
+from SigProfilerMatrixGenerator.scripts import ref_install
+
 revcompl = lambda x: "".join(
     [{"A": "T", "C": "G", "G": "C", "T": "A", "N": "N"}[B] for B in x][::-1]
 )
@@ -328,10 +330,8 @@ def context_distribution_BED(
     first_line = True
     chrom_length = 0
     if exome:
-        # file_to_open = ref_dir + "/references/chromosomes/exome/" + genome + "/" + exome_file
         file_to_open = exome_file
     else:
-        # file_to_open = ref_dir + "/references/vcf_files/BED/" + bed_file
         file_to_open = bed_file
 
     chromosomes_sort = chromosomes
@@ -675,10 +675,9 @@ def main():
         chromosomes = chromosomes[:22]
 
     script_dir = os.getcwd()
-    ref_dir = re.sub("\/scripts$", "", script_dir)
-    # chromosome_path = ref_dir + "/references/chromosomes/chrom_string/" + genome + "/"
-    # chromosome_path = "/Users/ebergstr/Desktop/test_bi/references/chromosomes/tsb/GRCh37/"
-    chromosome_path = ref_dir + "/references/chromosomes/tsb/" + genome + "/"
+    reference_dir = ref_install.reference_dir()
+    ref_dir = reference_dir.path
+    chromosome_path = str(reference_dir.get_tsb_dir() / genome) + "/"
 
     output_path = ref_dir + "/references/chromosomes/context_distributions/"
     if not os.path.exists(output_path):
