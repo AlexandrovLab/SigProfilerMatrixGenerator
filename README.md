@@ -71,6 +71,7 @@ View the table below for the full list of parameters.
 |  | tsb_stat | Boolean | Outputs the results of a transcriptional strand bias test for the respective matrices. Default value False. |
 |  | seqInfo | Boolean | Ouputs original mutations into a text file that contains the SigProfilerMatrixGenerator classificaiton for each mutation. Default value True. |
 |  | cushion | Integer | Adds an Xbp cushion to the exome/bed_file ranges for downsampling the mutations. Default value 100. |
+|  | volume | String | Path to SigProfilerMatrixGenerator's volume where reference genomes will be saved and loaded from. Useful for docker installations. Default is None. |
 
 
 **INPUT FILE FORMAT**
@@ -210,7 +211,7 @@ An integration test can be run with the following commands:
 ```bash
 wget ftp://alexandrovlab-ftp.ucsd.edu/pub/tools/SigProfilerMatrixGenerator/GRCh37.tar.gz -P ./src/
 pip install .
-python3 install_genome.py src/ GRCh37
+SigProfilerMatrixGenerator install GRCh37
 python3 test.py -t GRCh37
 ```
 

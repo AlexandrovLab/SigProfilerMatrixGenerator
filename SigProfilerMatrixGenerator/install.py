@@ -698,13 +698,19 @@ def install_chromosomes_tsb_BED(
             print("The TSB BED files for " + genome + " have been saved.")
 
 
-def benchmark(genome):
-    reference_dir = ref_install.reference_dir()
+def benchmark(genome, volume=None):
+    # IMPORTANT: this currently runs in site-packages (this is a problem for docker)
+    # so for now, skip this test if volume is not None
+    if volume is not None:
+        return
+    reference_dir = ref_install.reference_dir(secondary_chromosome_install_dir=volume)
     ref_dir = str(reference_dir.path)
     vcf_path = ref_dir + "/references/vcf_files/" + genome + "_bench/"
 
     start_time = time.time()
-    matGen.SigProfilerMatrixGeneratorFunc(genome + "_bench", genome, vcf_path)
+    matGen.SigProfilerMatrixGeneratorFunc(
+        genome + "_bench", genome, vcf_path, volume=volume
+    )
     end_time = time.time()
 
     original_matrix_96 = ref_dir + "/scripts/Benchmark/" + genome + "_bench_orig_96.txt"
@@ -763,11 +769,12 @@ def install(
     transcriptPath=None,
     exomePath=None,
     offline_files_path=None,
+    volume=None,
 ):
     if custom or offline_files_path is not None:
         ftp = False
     first_path = os.getcwd()
-    reference_dir = ref_install.reference_dir()
+    reference_dir = ref_install.reference_dir(secondary_chromosome_install_dir=volume)
     ref_dir = str(reference_dir.path)
     os.chdir(ref_dir)
 
@@ -817,7 +824,6 @@ def install(
             os.makedirs(dirs)
 
     if custom:
-        transcript_files = "references/chromosomes/transcripts/" + genome + "/"
         if os.path.exists(chrom_fasta_dir + genome + "/"):
             shutil.rmtree(chrom_fasta_dir + genome + "/")
         os.makedirs(chrom_fasta_dir + genome + "/")
@@ -1007,7 +1013,7 @@ def install(
         genome = genome.split("_")[0]
     if genome.lower() in BENCH_LIST and not custom:
         print("Verifying and benchmarking installation now...")
-        benchmark(genome)
+        benchmark(genome, volume=volume)
 
     print(
         "To proceed with matrix_generation, please provide the path to your vcf files and an appropriate output path."

@@ -23,22 +23,26 @@ class TestController:
 
     def test_dispatch_install(self, mock_install):
         controller = cli_controller.CliController()
-        controller.dispatch_install(["/somewhere", "GRCh37"])
-        mock_install.assert_called_with("GRCh37", offline_files_path="/somewhere")
+        controller.dispatch_install(["GRCh37", "--local_install_genome", "/somewhere"])
+        mock_install.assert_called_with(
+            "GRCh37", offline_files_path="/somewhere", volume=None
+        )
 
     genome_calls = [
         pytest.param(
             ["--test_genome", "GRCh37", "dog"],
-            [mock.call("GRCh37"), mock.call("dog")],
+            [mock.call("GRCh37", volume=None), mock.call("dog", volume=None)],
             id="two genomes",
         ),
         pytest.param(
-            ["--test_genome", "GRCh37"], [mock.call("GRCh37")], id="one genome"
+            ["--test_genome", "GRCh37"],
+            [mock.call("GRCh37", volume=None)],
+            id="one genome",
         ),
         pytest.param(["--test_genome", "unknown_genome"], [], id="no known genomes"),
         pytest.param(
             ["--test_genome", "all"],
-            [mock.call(genome) for genome in test_helpers.TEST_GENOMES],
+            [mock.call(genome, volume=None) for genome in test_helpers.TEST_GENOMES],
             id="all genomes",
         ),
     ]
@@ -73,4 +77,4 @@ class TestController:
         controller = cli_controller.CliController()
         controller.dispatch_test(provided)
         mock_install.assert_has_calls([mock.call("GRCh37")])
-        mock_test.assert_has_calls([mock.call("GRCh37")])
+        mock_test.assert_has_calls([mock.call("GRCh37", volume=None)])

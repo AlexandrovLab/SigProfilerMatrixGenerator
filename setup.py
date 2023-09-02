@@ -52,12 +52,17 @@ setup(
     python_requires=">=3.8",
     install_requires=[
         "matplotlib>=2.2.2",
-        "sigProfilerPlotting>=1.3.11",
+        "sigProfilerPlotting>=1.3.15",
         "statsmodels>=0.9.0",
         "scipy>=1.1.0",
         "numpy>=1.18.5",
         "pandas>=0.23.4,<2.0.0",
     ],
+    entry_points={
+        "console_scripts": [
+            "SigProfilerMatrixGenerator=SigProfilerMatrixGenerator.scripts.SigProfilerMatrixGenerator_CLI:main_function",
+        ],
+    },
     extras_require={
         "tests": [
             "pytest",

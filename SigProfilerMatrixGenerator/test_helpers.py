@@ -33,7 +33,7 @@ def load_and_compare(matrices, solution_dir):
         assert_frame_equal(matrices[key], solution_df)
 
 
-def test_one_genome(genome):
+def test_one_genome(genome, volume):
     matrices = matGen.SigProfilerMatrixGeneratorFunc(
         FILE_PREF,
         genome,
@@ -45,6 +45,7 @@ def test_one_genome(genome):
         tsb_stat=False,
         seqInfo=False,
         cushion=100,
+        volume=volume,
     )
 
     # load the results from the solution directory and compare them to the dataframes in matrices
@@ -70,13 +71,13 @@ def install_genomes(genome_install_list):
             genInstall.install(tmp_genome)
 
 
-def test_genomes(test_genome):
+def test_genomes(test_genome, volume=None):
     # Check for all test, otherwise test specific genomes
     if test_genome is None:
         print("No genomes specified for testing. Please specify a genome or all.")
     elif test_genome[0] == "all":
         for genome in TEST_GENOMES:
-            test_one_genome(genome)
+            test_one_genome(genome, volume=volume)
     else:
         for genome in test_genome:
             if genome not in TEST_GENOMES:
@@ -87,7 +88,7 @@ def test_genomes(test_genome):
                 )
                 continue
             try:
-                test_one_genome(genome)
+                test_one_genome(genome, volume=volume)
                 print("Completed test for " + genome)
             except Exception as e:
                 print("Test failed for " + genome + ":\n" + str(e))

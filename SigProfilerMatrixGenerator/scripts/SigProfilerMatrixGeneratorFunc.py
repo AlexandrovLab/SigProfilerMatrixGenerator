@@ -31,7 +31,7 @@ from SigProfilerMatrixGenerator.scripts import (
 )
 from SigProfilerMatrixGenerator.scripts import ref_install
 
-from . import SigProfilerMatrixGenerator as matGen
+from SigProfilerMatrixGenerator.scripts import MutationMatrixGenerator as matGen
 
 
 def perm(n, seq):
@@ -63,6 +63,7 @@ def SigProfilerMatrixGeneratorFunc(
     seqInfo=True,
     cushion=100,
     gs=False,
+    volume=None,
 ):
     """
     Allows for the import of the sigProfilerMatrixGenerator.py function. Returns a dictionary
@@ -98,8 +99,8 @@ def SigProfilerMatrixGeneratorFunc(
     # 1. get list of all files that were downloaded
     # Terminates the code if the genome reference files have not been created/installed
 
-    reference_dir = ref_install.reference_dir()
-    lib_loc = str(reference_dir.path)
+    reference_dir = ref_install.reference_dir(secondary_chromosome_install_dir=volume)
+    ref_dir = str(reference_dir.path)
 
     absolute_tsb_path = str(reference_dir.get_tsb_dir() / reference_genome)
     if not os.path.exists(absolute_tsb_path):
@@ -111,7 +112,7 @@ def SigProfilerMatrixGeneratorFunc(
     genome_loc = os.path.join("references/chromosomes/transcripts/", reference_genome)
     check_files = [
         tmp_f
-        for tmp_f in os.listdir(os.path.join(lib_loc, genome_loc))
+        for tmp_f in os.listdir(os.path.join(ref_dir, genome_loc))
         if not tmp_f.startswith(".")
     ]
 
@@ -1196,9 +1197,6 @@ def SigProfilerMatrixGeneratorFunc(
     # Instantiates the initial contexts to generate matrices for
     contexts = ["6144"]
 
-    # Organizes all of the reference directories for later reference:
-    reference_dir = ref_install.reference_dir()
-    ref_dir = str(reference_dir.path)
     chrom_path = str(reference_dir.get_tsb_dir() / reference_genome) + "/"
     if "havana" in reference_genome:
         reference_genome = reference_genome.split("_")[0]
@@ -1487,6 +1485,7 @@ def SigProfilerMatrixGeneratorFunc(
                     seqInfo,
                     gs,
                     log_file,
+                    volume=volume,
                 )
 
                 if chrom_based and not exome and not bed:
@@ -1504,6 +1503,7 @@ def SigProfilerMatrixGeneratorFunc(
                         functionFlag,
                         plot,
                         tsb_stat,
+                        volume=volume,
                     )
                     mutation_pd = {}
                     mutation_pd["6144"] = pd.DataFrame(
@@ -1520,6 +1520,7 @@ def SigProfilerMatrixGeneratorFunc(
                         bed,
                         chrom,
                         plot,
+                        volume=volume,
                     )
                     mutation_dinuc_pd_all = pd.DataFrame(
                         0, index=mutation_types_tsb_context, columns=samples
@@ -1628,6 +1629,7 @@ def SigProfilerMatrixGeneratorFunc(
                     project,
                     "SNV",
                     cushion,
+                    volume=volume,
                 )
 
             if bed:
@@ -1728,6 +1730,7 @@ def SigProfilerMatrixGeneratorFunc(
                     project,
                     "SNV",
                     cushion,
+                    volume=volume,
                 )
 
             if not chrom_based:
@@ -1746,6 +1749,7 @@ def SigProfilerMatrixGeneratorFunc(
                         functionFlag,
                         plot,
                         tsb_stat,
+                        volume=volume,
                     )
 
             if analyzed_muts[1] > 0:
@@ -1847,6 +1851,7 @@ def SigProfilerMatrixGeneratorFunc(
                         project,
                         "DBS",
                         cushion,
+                        volume=volume,
                     )
 
                 if bed:
@@ -1948,6 +1953,7 @@ def SigProfilerMatrixGeneratorFunc(
                         project,
                         "DBS",
                         cushion,
+                        volume=volume,
                     )
 
                 if not chrom_based:
@@ -1963,6 +1969,7 @@ def SigProfilerMatrixGeneratorFunc(
                             bed,
                             chrom_start,
                             plot,
+                            volume=volume,
                         )
                         matrices["DINUC"] = dinuc_mat
 
@@ -2022,6 +2029,7 @@ def SigProfilerMatrixGeneratorFunc(
                         bed,
                         chrom,
                         plot,
+                        volume=volume,
                     )
                     mutation_ID["ID"] = pd.DataFrame(
                         0, index=indel_types, columns=samples
@@ -2139,6 +2147,7 @@ def SigProfilerMatrixGeneratorFunc(
                     "ID",
                     cushion,
                     "83",
+                    volume=volume,
                 )
 
                 with open(vcf_path + "exome_temp_simple.txt") as f:
@@ -2239,6 +2248,7 @@ def SigProfilerMatrixGeneratorFunc(
                     "ID",
                     cushion,
                     "simple",
+                    volume=volume,
                 )
 
                 with open(vcf_path + "exome_temp_tsb.txt") as f:
@@ -2339,6 +2349,7 @@ def SigProfilerMatrixGeneratorFunc(
                     "ID",
                     cushion,
                     "tsb",
+                    volume=volume,
                 )
                 mutation_ID["complete"] = pd.DataFrame(
                     0, index=indel_complete, columns=samples
@@ -2443,6 +2454,7 @@ def SigProfilerMatrixGeneratorFunc(
                     "ID",
                     cushion,
                     "83",
+                    volume=volume,
                 )
 
                 with open(vcf_path + "bed_temp_simple.txt") as f:
@@ -2667,6 +2679,7 @@ def SigProfilerMatrixGeneratorFunc(
                     bed,
                     chrom_start,
                     plot,
+                    volume=volume,
                 )
                 matrices["ID"] = mutation_ID["ID"].iloc[0:83, :]
 
