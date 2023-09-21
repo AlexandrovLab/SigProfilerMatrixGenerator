@@ -17,7 +17,7 @@ cache:
     - $TRAVIS_BUILD_DIR/src/
 
 before_script:
-  - python3 install_genome.py $TRAVIS_BUILD_DIR/src/ GRCh37
+  - python install_genome.py -l $TRAVIS_BUILD_DIR/src/ GRCh37
 
 script:
   # run unit tests

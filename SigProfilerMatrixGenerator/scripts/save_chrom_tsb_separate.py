@@ -11,15 +11,17 @@ import os
 import pickle
 import re
 
+from SigProfilerMatrixGenerator.scripts import ref_install
 
-def save_chrom_tsb_separate(genome, ref_dir, custom):
+
+def save_chrom_tsb_separate(genome, reference_dir: ref_install.ReferenceDir, custom):
     """
     Saves the transcriptional strand bias information for a given genome
     into a BED file.
 
     Parameters:
-             genome  -> reference genome
-            ref_dir  -> directory from which the parent script is being called.
+            genome  -> reference genome
+            reference_dir  -> ReferenceDir object from which the parent script is being called.
 
     Returns:
               None
@@ -27,10 +29,14 @@ def save_chrom_tsb_separate(genome, ref_dir, custom):
     Outputs:
             BED files that contain the TSB information and their associated ranges.
     """
+    ref_dir = str(reference_dir.path)
 
     # Instantiates all of the relevant path and reference varibales
-    chromosome_path = ref_dir + "/references/chromosomes/tsb/" + genome + "/"
-    chromosome_BED_path = ref_dir + "/references/chromosomes/tsb_BED/" + genome + "/"
+    chromosome_path = os.path.join(str(reference_dir.get_tsb_dir() / genome), "")
+
+    chromosome_BED_path = os.path.join(
+        ref_dir, "references/chromosomes/tsb_BED/", genome, ""
+    )
     chromosomes = [
         "X",
         "Y",

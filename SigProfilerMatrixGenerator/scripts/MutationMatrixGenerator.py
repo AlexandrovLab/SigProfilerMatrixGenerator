@@ -97,7 +97,7 @@ def reference_paths(genome):
     """
     reference_dir = ref_install.reference_dir()
     ref_dir = str(reference_dir.path)
-    chrom_path = ref_dir + "/references/chromosomes/tsb/" + genome + "/"
+    chrom_path = str(reference_dir.get_tsb_dir() / genome) + "/"
 
     return (chrom_path, ref_dir)
 
@@ -251,6 +251,7 @@ def catalogue_generator_single(
     seqInfo,
     gs,
     log_file,
+    volume=None,
 ):
     """
     Generates the mutational matrix for 96, 1536, 384, and 6144 context using a single vcf file with all samples of interest.
@@ -1996,6 +1997,7 @@ def exome_check(
     context,
     cushion,
     subcontext=None,
+    volume=None,
 ):
     """
     Filters the variants for those present within the exome.
@@ -2126,6 +2128,7 @@ def exome_check(
                                 bed,
                                 save_chrom,
                                 plot,
+                                volume=volume,
                             )
                         elif context == "simple":
                             mut_count_all["simple"] = mutation_pd
@@ -2145,6 +2148,7 @@ def exome_check(
                                 bed,
                                 save_chrom,
                                 plot,
+                                volume=volume,
                             )
                         elif context == "tsb":
                             mut_count_all["tsb"] = mutation_pd
@@ -2164,6 +2168,7 @@ def exome_check(
                                 bed,
                                 save_chrom,
                                 plot,
+                                volume=volume,
                             )
                         elif context == "SNV":
                             mut_count_all["6144"] = mutation_pd
@@ -2181,6 +2186,7 @@ def exome_check(
                                 functionFlag,
                                 plot,
                                 tsb_stat,
+                                volume=volume,
                             )
                         elif context == "DBS":
                             dinuc_mat = matrix_generator_DINUC(
@@ -2194,6 +2200,7 @@ def exome_check(
                                 bed,
                                 save_chrom,
                                 plot,
+                                volume=volume,
                             )
 
                         mutation_pd = {}
@@ -2295,6 +2302,7 @@ def exome_check(
                 bed,
                 save_chrom,
                 plot,
+                volume=volume,
             )
         elif context == "simple":
             mut_count_all["simple"] = mutation_pd
@@ -2314,6 +2322,7 @@ def exome_check(
                 bed,
                 save_chrom,
                 plot,
+                volume=volume,
             )
         elif context == "tsb":
             mut_count_all["tsb"] = mutation_pd
@@ -2333,6 +2342,7 @@ def exome_check(
                 bed,
                 save_chrom,
                 plot,
+                volume=volume,
             )
         elif context == "SNV":
             mut_count_all["6144"] = mutation_pd
@@ -2350,6 +2360,7 @@ def exome_check(
                 functionFlag,
                 plot,
                 tsb_stat,
+                volume=volume,
             )
         elif context == "DBS":
             dinuc_mat = matrix_generator_DINUC(
@@ -2363,6 +2374,7 @@ def exome_check(
                 bed,
                 save_chrom,
                 plot,
+                volume=volume,
             )
 
     return (mutation_pd, samples)
@@ -2388,6 +2400,7 @@ def panel_check(
     context,
     cushion,
     subcontext=None,
+    volume=None,
 ):
     """
     Filters the variants for those present within the exome.
@@ -2508,6 +2521,7 @@ def panel_check(
                                 bed,
                                 save_chrom,
                                 plot,
+                                volume=volume,
                             )
                         elif context == "simple":
                             mut_count_all["simple"] = mutation_pd
@@ -2527,6 +2541,7 @@ def panel_check(
                                 bed,
                                 save_chrom,
                                 plot,
+                                volume=volume,
                             )
                         elif context == "tsb":
                             mut_count_all["tsb"] = mutation_pd
@@ -2546,6 +2561,7 @@ def panel_check(
                                 bed,
                                 save_chrom,
                                 plot,
+                                volume=volume,
                             )
                         elif context == "SNV":
                             mut_count_all["6144"] = mutation_pd
@@ -2563,6 +2579,7 @@ def panel_check(
                                 functionFlag,
                                 plot,
                                 tsb_stat,
+                                volume=volume,
                             )
                         elif context == "DBS":
                             dinuc_mat = matrix_generator_DINUC(
@@ -2576,6 +2593,7 @@ def panel_check(
                                 bed,
                                 save_chrom,
                                 plot,
+                                volume=volume,
                             )
                         mutation_pd = {}
                         mutation_pd = pd.DataFrame(0, index=mut_types, columns=samples)
@@ -2675,6 +2693,7 @@ def panel_check(
                 bed,
                 save_chrom,
                 plot,
+                volume=volume,
             )
         elif context == "simple":
             mut_count_all["simple"] = mutation_pd
@@ -2694,6 +2713,7 @@ def panel_check(
                 bed,
                 save_chrom,
                 plot,
+                volume=volume,
             )
         elif context == "tsb":
             mut_count_all["tsb"] = mutation_pd
@@ -2713,6 +2733,7 @@ def panel_check(
                 bed,
                 save_chrom,
                 plot,
+                volume=volume,
             )
         elif context == "SNV":
             mut_count_all["6144"] = mutation_pd
@@ -2730,6 +2751,7 @@ def panel_check(
                 functionFlag,
                 plot,
                 tsb_stat,
+                volume=volume,
             )
         elif context == "DBS":
             dinuc_mat = matrix_generator_DINUC(
@@ -2743,6 +2765,7 @@ def panel_check(
                 bed,
                 save_chrom,
                 plot,
+                volume=volume,
             )
 
     return (mutation_pd, samples)
@@ -2762,6 +2785,7 @@ def matrix_generator(
     functionFlag=False,
     plot=False,
     tsb_stat=False,
+    volume=None,
 ):
     """
     Writes the final mutational matrix given a dictionary of samples, mutation types, and counts
@@ -3273,42 +3297,72 @@ def matrix_generator(
             if cont == "96":
                 try:
                     sigPlt.plotSBS(
-                        output_file_matrix, output_path, file_name, "96", False
+                        output_file_matrix,
+                        output_path,
+                        file_name,
+                        "96",
+                        False,
+                        volume=volume,
                     )
                 except:
                     pass
             elif cont == "384":
                 try:
                     sigPlt.plotSBS(
-                        output_file_matrix, output_path, file_name, "384", False
+                        output_file_matrix,
+                        output_path,
+                        file_name,
+                        "384",
+                        False,
+                        volume=volume,
                     )
                 except:
                     pass
             elif cont == "6":
                 try:
                     sigPlt.plotSBS(
-                        output_file_matrix, output_path, file_name, "6", False
+                        output_file_matrix,
+                        output_path,
+                        file_name,
+                        "6",
+                        False,
+                        volume=volume,
                     )
                 except:
                     pass
             elif cont == "24":
                 try:
                     sigPlt.plotSBS(
-                        output_file_matrix, output_path, file_name, "24", False
+                        output_file_matrix,
+                        output_path,
+                        file_name,
+                        "24",
+                        False,
+                        volume=volume,
                     )
                 except:
                     pass
             elif cont == "1536":
                 try:
                     sigPlt.plotSBS(
-                        output_file_matrix, output_path, file_name, "1536", False
+                        output_file_matrix,
+                        output_path,
+                        file_name,
+                        "1536",
+                        False,
+                        volume=volume,
                     )
                 except:
                     pass
             elif cont == "288":
                 try:
                     sigPlt.plotSBS(
-                        output_file_matrix, output_path, file_name, "288", False
+                        output_file_matrix,
+                        output_path,
+                        file_name,
+                        "288",
+                        False,
+                        volume=volume,
                     )
                 except:
                     pass
@@ -3334,6 +3388,7 @@ def matrix_generator_INDEL(
     bed,
     initial_chrom=None,
     plot=False,
+    volume=None,
 ):
     """
     Writes the final mutational matrix for INDELS given a dictionary of samples, INDEL types, and counts
@@ -3532,16 +3587,30 @@ def matrix_generator_INDEL(
             file_name += "_chr" + initial_chrom
 
         try:
-            sigPlt.plotID(output_file_matrix, output_path, file_name, "94", False)
-        except:
-            pass
-        try:
-            sigPlt.plotID(output_file_matrix_tsb, output_path, file_name, "96ID", False)
+            sigPlt.plotID(
+                output_file_matrix, output_path, file_name, "94", False, volume=volume
+            )
         except:
             pass
         try:
             sigPlt.plotID(
-                output_file_matrix_simple, output_path, file_name, "ID_simple", False
+                output_file_matrix_tsb,
+                output_path,
+                file_name,
+                "96ID",
+                False,
+                volume=volume,
+            )
+        except:
+            pass
+        try:
+            sigPlt.plotID(
+                output_file_matrix_simple,
+                output_path,
+                file_name,
+                "ID_simple",
+                False,
+                volume=volume,
             )
         except:
             pass
@@ -3558,6 +3627,7 @@ def matrix_generator_DINUC(
     bed,
     chrom_start=None,
     plot=False,
+    volume=None,
 ):
     """
     Writes the final mutational matrix for INDELS given a dictionary of samples, INDEL types, and counts
@@ -3795,7 +3865,12 @@ def matrix_generator_DINUC(
             try:
                 if cont == "78" or cont == "186":
                     sigPlt.plotDBS(
-                        output_file_matrix, output_path, file_name, cont, False
+                        output_file_matrix,
+                        output_path,
+                        file_name,
+                        cont,
+                        False,
+                        volume=volume,
                     )
             except:
                 pass

@@ -11,7 +11,7 @@ import pdb
 import re
 import sys
 
-from SigProfilerMatrixGenerator.scripts import SigProfilerMatrixGenerator as spm
+from SigProfilerMatrixGenerator.scripts import MutationMatrixGenerator as spm
 
 
 def convertVCF(project, vcf_path, genome, output_path, ncbi_chrom, log_file):
