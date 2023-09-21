@@ -3,7 +3,7 @@ import shutil
 
 from setuptools import setup
 
-VERSION = "1.2.17"
+VERSION = "1.2.18"
 
 # remove the dist folder first if exists
 if os.path.exists("dist"):
@@ -23,7 +23,7 @@ def write_version_py(filename="SigProfilerMatrixGenerator/version.py"):
 # THIS FILE IS GENERATED FROM SIGPROFILEMATRIXGENERATOR SETUP.PY
 short_version = '%(version)s'
 version = '%(version)s'
-Update = 'v1.2.17: Skip hidden files, CliController update, pytesting, and organization.'
+Update = 'v1.2.18: Add CLI entry point (view PR #156 for more details)'
 
 	"""
     fh = open(filename, "w")
@@ -52,7 +52,7 @@ setup(
     python_requires=">=3.8",
     install_requires=[
         "matplotlib>=2.2.2",
-        "sigProfilerPlotting>=1.3.15",
+        "sigProfilerPlotting>=1.3.16",
         "statsmodels>=0.9.0",
         "scipy>=1.1.0",
         "numpy>=1.18.5",
