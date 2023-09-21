@@ -1,7 +1,8 @@
 [![Docs](https://img.shields.io/badge/docs-latest-blue.svg)](https://osf.io/s93d5/wiki/home/) [![License](https://img.shields.io/badge/License-BSD\%202--Clause-orange.svg)](https://opensource.org/licenses/BSD-2-Clause) [![Build Status](https://travis-ci.com/AlexandrovLab/SigProfilerMatrixGenerator.svg?branch=master)](https://app.travis-ci.com/AlexandrovLab/SigProfilerMatrixGenerator)
+[![Uptime Robot status](https://img.shields.io/uptimerobot/status/m795312784-02766a79f207f67626cef289)](https://stats.uptimerobot.com/jjqW4Ulymx)
 
 # SigProfilerMatrixGenerator
-SigProfilerMatrixGenerator creates mutational matrices for all types of somatic mutations. It allows downsizing the generated mutations only to parts for the genome (e.g., exome or a custom BED file). The tool seamlessly integrates with other SigProfiler tools.
+SigProfilerMatrixGenerator creates mutational matrices for all types of somatic mutations. It allows downsizing the generated mutations only to parts of the genome (e.g., exome or a custom BED file). The tool seamlessly integrates with other SigProfiler tools.
 
 **INTRODUCTION**
 
@@ -23,13 +24,13 @@ assemblies (GRCh37, GRCH38, mm10, mm9, rn6). As a result, ~3 Gb of storage must 
 
 **QUICK START GUIDE**
 
+#### Using Python Interface:
 This section will guide you through the minimum steps required to create mutational matrices:
 1. Install the python package using pip:
-```bash
-                          pip install SigProfilerMatrixGenerator
-```
-2.
-    a. Install your desired reference genome from the command line/terminal as follows (a complete list of supported genomes can be found below):
+    ```bash
+    pip install SigProfilerMatrixGenerator
+    ```
+2. Install your desired reference genome from the command line/terminal as follows (a complete list of supported genomes can be found below):
     ```python
     $ python
     >> from SigProfilerMatrixGenerator import install as genInstall
@@ -37,22 +38,34 @@ This section will guide you through the minimum steps required to create mutatio
     ```
         This will install the human 37 assembly as a reference genome. You may install as many genomes as you wish. If you have a firewall on your server, you may need to install rsync and use the rsync=True parameter. Similarly, if you do not have bash,
         use bash=False.
-    b. To install a reference genome that has been downloaded locally from the [Alexandrov Lab's ftp server](ftp://alexandrovlab-ftp.ucsd.edu/pub/tools/SigProfilerMatrixGenerator/), you can do the following:
-    ```python
-    $ python
-    >> from SigProfilerMatrixGenerator import install as genInstall
-    >> genInstall.install('GRCh37', offline_files_path='path/to/directory/containing/GRCh37.tar.gz')
-    ```
 3. Place your vcf files in your desired output folder. It is recommended that you name this folder based on your project's name
 4. From within a python session, you can now generate the matrices as follows:
-```python
-$ python3
->>from SigProfilerMatrixGenerator.scripts import SigProfilerMatrixGeneratorFunc as matGen
->>matrices = matGen.SigProfilerMatrixGeneratorFunc("test", "GRCh37", "/Users/ebergstr/Desktop/test",plot=True, exome=False, bed_file=None, chrom_based=False, tsb_stat=False, seqInfo=False, cushion=100)
-```
+    ```python
+    $ python3
+    >>from SigProfilerMatrixGenerator.scripts import SigProfilerMatrixGeneratorFunc as matGen
+    >>matrices = matGen.SigProfilerMatrixGeneratorFunc("test", "GRCh37", "/Users/ebergstr/Desktop/test",plot=True, exome=False, bed_file=None, chrom_based=False, tsb_stat=False, seqInfo=False, cushion=100)
+    ```
   The required parameters are as follows:
+  ```python
+  SigProfilerMatrixGeneratorFunc(project, reference_genome, path_to_input_files)
+  ```
 
-      SigProfilerMatrixGeneratorFunc(project, reference_genome, path_to_input_files)
+#### Using Command Line Interface (CLI):
+1. After installing the package, you can directly call the tool using:
+    ```bash
+    SigProfilerMatrixGenerator <function-name> <arguments>
+    ```
+    Currently supported functions are 'install' and 'matrix_generator'.
+
+2. For example, to install a reference genome:
+    ```bash
+    SigProfilerMatrixGenerator install GRCh37
+    ```
+
+3. To generate SBS, DBS, or INDEL matrices:
+    ```bash
+    SigProfilerMatrixGenerator matrix_generator <project> <reference_genome> <path_to_input_files>
+    ```
 
 View the table below for the full list of parameters.
 
@@ -93,7 +106,6 @@ a DBS, SBS, ID, and TSB folder (there will also be a plots folder if this parame
 
 ### Example with SV class present (tsv or csv file):
 
-
 | chrom1 | start1 | end1 | chrom2 | start2 | end2 | svclass |
 | :-----: | :-: | :-: | :-: | :-: | :-: | :-: |
 | 19 | 21268384 | 21268385 | 19 | 21327858 | 21327859 | deletion
@@ -123,7 +135,6 @@ python3 ./SigProfilerMatrixGenerator/scripts/SVMatrixGenerator.py ./SigProfilerM
 1. Annotated bedpe file - a file with each SV annotated with its type, size bin, and clustered/non-clustered status
 2. Aggregate SV plot - a summary plot showing the average number of events in each channel for the whole cohort of samples
 3. SV Matrix - a 32 X n matrix (where n is the number of samples) that can be used to perform signature decomposition, clustering, etc.
-
 
 ## COPY NUMBER MATRIX GENERATION
 
@@ -157,8 +168,8 @@ $ python3
 
 ```
 python ./SigProfilerMatrixGenerator/scripts/CNVMatrixGenerator.py BATTENBERG ./SigProfilerMatrixGenerator/references/CNV/example_input/Battenberg_test.tsv BATTENBERG-TEST ./SigProfilerMatrixGenerator/references/CNV/example_output/
-
 ```
+
 **SUPPORTED GENOMES**
 
 This tool currently supports the following genomes:
@@ -204,7 +215,7 @@ pip install .[tests]
 pytest tests
 ```
 
-**END-TO-END tests**
+**END-TO-END TESTS**
 
 An integration test can be run with the following commands:
 
@@ -217,9 +228,15 @@ python3 test.py -t GRCh37
 
 **CITATION**
 
+For SBSs, DBSs, and INDELs, please cite the following paper:
+
 Bergstrom EN, Huang MN, Mahto U, Barnes M, Stratton MR, Rozen SG, and Alexandrov LB (2019) SigProfilerMatrixGenerator: a tool for visualizing and exploring patterns of small mutational events. **BMC Genomics** 20, Article number: 685.
 https://bmcgenomics.biomedcentral.com/articles/10.1186/s12864-019-6041-2
 
+For SVs and CNVs, please cite the following paper:
+
+Khandekar A, Vangara R, Barnes M, Díaz-Gay M, Abbasi A, Bergstrom EN, Steele CD, Pillay N, and Alexandrov LB (2023) Visualizing and exploring patterns of large mutational events with SigProfilerMatrixGenerator. **BMC Genomics** 24, Article number: 469.
+https://doi.org/10.1186/s12864-023-09584-y
 
 **COPYRIGHT**
 
