@@ -602,14 +602,14 @@ def install_chromosomes_tsb(genomes, reference_dir: ref_install.ReferenceDir, cu
                 [
                     x
                     for x in os.listdir(
-                        "references/chromosomes/chrom_string/" + genome + "/"
+                        ref_dir + "/references/chromosomes/chrom_string/" + genome + "/"
                     )
                     if x != ".DS_Store"
                 ]
             )
 
         chromosome_TSB_path = str(reference_dir.get_tsb_dir() / genome) + "/"
-        transcript_files = "references/chromosomes/transcripts/" + genome + "/"
+        transcript_files = ref_dir + "/references/chromosomes/transcripts/" + genome + "/"
         print("[DEBUG] Chromosome tsb files found at: " + chromosome_TSB_path)
 
         if (
@@ -758,6 +758,24 @@ def benchmark(genome, volume=None):
         + " seconds to complete."
     )
 
+# Helper function for install()
+# This function resets (removes and recreates) the specified directory.
+# Optionally, it can also copy a file to the newly created directory.
+def reset_directory(path, file_to_copy=None):
+    if os.path.exists(path):
+        # Prompt the user for confirmation
+        proceed = input(f"Are you sure you want to delete {path}? (yes/no): ")
+        if proceed.lower() == "yes":
+            shutil.rmtree(path)
+        else:
+            print(f"Directory {path} was not deleted.")
+            return  # Exit the function if user says "no"
+
+    os.makedirs(path)
+
+    if file_to_copy:
+        shutil.copy(file_to_copy, path)
+
 
 def install(
     genome,
@@ -776,7 +794,6 @@ def install(
     first_path = os.getcwd()
     reference_dir = ref_install.reference_dir(secondary_chromosome_install_dir=volume)
     ref_dir = str(reference_dir.path)
-    os.chdir(ref_dir)
 
     if not custom and offline_files_path is None:
         wget_install = shutil.which("wget") is not None
@@ -832,25 +849,12 @@ def install(
             if os.path.isfile(file):
                 shutil.copy(file, chrom_fasta_dir + genome + "/")
 
-        if os.path.exists(
-            ref_dir + "/references/chromosomes/transcripts/" + genome + "/"
-        ):
-            shutil.rmtree(
-                ref_dir + "/references/chromosomes/transcripts/" + genome + "/"
-            )
-        os.makedirs(ref_dir + "/references/chromosomes/transcripts/" + genome + "/")
-        shutil.copy(
-            transcriptPath,
-            ref_dir + "/references/chromosomes/transcripts/" + genome + "/",
-        )
+        transcript_dir = os.path.join(ref_dir, "references", "chromosomes", "transcripts", genome)
+        exome_dir = os.path.join(ref_dir, "references", "chromosomes", "exome", genome)
 
-        if os.path.exists(ref_dir + "/references/chromosomes/exome/" + genome + "/"):
-            shutil.rmtree(ref_dir + "/references/chromosomes/exome/" + genome + "/")
-        os.makedirs(ref_dir + "/references/chromosomes/exome/" + genome + "/")
-        if exomePath is not None:
-            shutil.copy(
-                exomePath, ref_dir + "/references/chromosomes/exome/" + genome + "/"
-            )
+        reset_directory(transcript_dir, transcriptPath)
+        reset_directory(exome_dir, exomePath)
+
 
     if ftp:
         chromosome_fasta_path = str(reference_dir.get_tsb_dir())
@@ -942,12 +946,11 @@ def install(
         print("Beginning installation using locally provided files.")
 
         # unpack user provided tar file into environment
-        cur_dir = os.getcwd()
-        os.chdir(first_path)
         shutil.unpack_archive(
-            offline_files_path + genome + ".tar.gz", str(reference_dir.get_tsb_dir())
+            os.path.join(offline_files_path, genome + ".tar.gz"), 
+            str(reference_dir.get_tsb_dir())
         )
-        os.chdir(cur_dir)
+
 
         chromosome_fasta_path = reference_dir.get_tsb_dir()
         chromosome_TSB_path = str(reference_dir.get_tsb_dir() / genome) + "/"
@@ -984,7 +987,6 @@ def install(
     else:
         print("Beginning installation. This may take up to 20 minutes to complete.")
         first_path = os.getcwd()
-        os.chdir(ref_dir)
 
         print(
             "[DEBUG] Path to SigProfilerMatrixGenerator used for the install: ", ref_dir
@@ -1020,4 +1022,3 @@ def install(
     )
     shutil.rmtree(chrom_string_dir)
     print("Installation complete.")
-    os.chdir(first_path)
