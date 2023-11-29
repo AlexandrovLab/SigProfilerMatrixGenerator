@@ -598,18 +598,17 @@ def install_chromosomes_tsb(genomes, reference_dir: ref_install.ReferenceDir, cu
             chrom_number = 22
 
         if custom:
-            chrom_number = len(
-                [
-                    x
-                    for x in os.listdir(
-                        ref_dir + "/references/chromosomes/chrom_string/" + genome + "/"
-                    )
-                    if x != ".DS_Store"
-                ]
+            chrom_string_path = os.path.join(
+                ref_dir, "references", "chromosomes", "chrom_string", genome, ""
             )
-
-        chromosome_TSB_path = str(reference_dir.get_tsb_dir() / genome) + "/"
-        transcript_files = ref_dir + "/references/chromosomes/transcripts/" + genome + "/"
+            chrom_number = len(
+                [x for x in os.listdir(chrom_string_path) if x != ".DS_Store"]
+            )
+        chromosome_TSB_pathlib = reference_dir.get_tsb_dir() / genome / ""
+        chromosome_TSB_path = f"{chromosome_TSB_pathlib}{os.sep}"
+        transcript_files = os.path.join(
+            ref_dir, "references", "chromosomes", "transcripts", genome, ""
+        )
         print("[DEBUG] Chromosome tsb files found at: " + chromosome_TSB_path)
 
         if (
@@ -634,12 +633,20 @@ def install_chromosomes_tsb(genomes, reference_dir: ref_install.ReferenceDir, cu
             )
 
             chromosome_string_path = (
-                ref_dir + "/references/chromosomes/chrom_string/" + genome + "/"
+                os.path.join(
+                    ref_dir, "references", "chromosomes", "chrom_string", genome
+                )
+                + os.sep
             )
             transcript_path = (
-                ref_dir + "/references/chromosomes/transcripts/" + genome + "/"
+                os.path.join(
+                    ref_dir, "references", "chromosomes", "transcripts", genome
+                )
+                + os.sep
             )
-            output_path = str(reference_dir.get_tsb_dir() / genome) + "/"
+
+            output_pathlib = reference_dir.get_tsb_dir() / genome / ""
+            output_path = f"{output_pathlib}{os.sep}"
             if os.path.exists(output_path) == False:
                 os.makedirs(output_path)
 
@@ -681,13 +688,14 @@ def install_chromosomes_tsb_BED(
     genomes, reference_dir: ref_install.ReferenceDir, custom
 ):
     ref_dir = str(reference_dir.path)
+    tsb_bed_genome_dir = os.path.join(ref_dir, "chromosomes", "tsb_BED", genome, "")
     for genome in genomes:
         # this `if` statement is strange. Usually the "chromosomes" folder is in
         # ref_dir + "references", not directly in ref_dir, so I would expect
         # the first clause to always be True
         if (
-            not os.path.exists(ref_dir + "chromosomes/tsb_BED/" + genome + "/")
-            or len(os.listdir(ref_dir + "chromosomes/tsb_BED/" + genome + "/")) < 19
+            not os.path.exists(tsb_bed_genome_dir)
+            or len(os.listdir(tsb_bed_genome_dir)) < 19
         ):
             is_custom = False
             if custom:
@@ -758,6 +766,7 @@ def benchmark(genome, volume=None):
         + " seconds to complete."
     )
 
+
 # Helper function for install()
 # This function resets (removes and recreates) the specified directory.
 # Optionally, it can also copy a file to the newly created directory.
@@ -777,6 +786,104 @@ def reset_directory(path, file_to_copy=None):
         shutil.copy(file_to_copy, path)
 
 
+def check_required_tools():
+    """
+    Checks for the presence of required tools (wget, rsync, tar) and
+    prints the status of each tool in a table format.
+    Exits the script if any of the tools are not installed.
+    """
+    required_tools = ["wget", "rsync", "tar"]
+    all_tools_installed = True
+
+    print("{:<10} | {:<10}".format("Tool", "Status"))
+    print("-" * 23)
+
+    for tool in required_tools:
+        if shutil.which(tool):
+            print("{:<10} | {:<10}".format(tool, "Installed"))
+        else:
+            print("{:<10} | {:<10}".format(tool, "Missing"))
+            all_tools_installed = False
+
+    if not all_tools_installed:
+        logging.error(
+            "One or more required tools are missing. Please install them and retry."
+        )
+        sys.exit(1)
+    else:
+        logging.info("All required tools are installed.")
+
+
+def install_via_ftp(genome, reference_dir, check_sum):
+    """
+    Handles downloading genome data from an FTP server.
+
+    :param genome: Genome identifier.
+    :param reference_dir: Reference directory object with necessary path methods.
+    :param check_sum: Dictionary containing checksums for verification.
+    """
+    chromosome_fasta_path = str(reference_dir.get_tsb_dir())
+    logging.info("Beginning FTP installation. This may take some time.")
+
+    ftp_urls = [
+        "ftp://alexandrovlab-ftp.ucsd.edu/pub/tools/SigProfilerMatrixGenerator/"
+        + genome
+        + ".tar.gz",
+        "ftp://ngs.sanger.ac.uk/scratch/project/mutographs/SigProf/"
+        + genome
+        + ".tar.gz",
+    ]
+
+    for url in ftp_urls:
+        try:
+            subprocess.run(
+                [
+                    "wget",
+                    "-r",
+                    "-l1",
+                    "-c",
+                    "-nc",
+                    "--no-parent",
+                    "-nd",
+                    "-P",
+                    chromosome_fasta_path,
+                    url,
+                ],
+                check=True,
+            )
+            break  # Exit the loop if download is successful
+        except subprocess.CalledProcessError:
+            logging.warning(
+                f"Failed to download from {url}. Trying next URL if available."
+            )
+
+    # Extract the downloaded file
+    tar_file = os.path.join(chromosome_fasta_path, genome + ".tar.gz")
+    try:
+        subprocess.run(
+            ["tar", "-xzf", tar_file, "-C", chromosome_fasta_path], check=True
+        )
+        os.remove(tar_file)
+    except subprocess.CalledProcessError:
+        logging.error("Failed to extract the downloaded genome data.")
+        raise
+
+    # Checksum verification
+    chromosome_TSB_path = os.path.join(chromosome_fasta_path, genome, "")
+    for file in os.listdir(chromosome_TSB_path):
+        if file.endswith("proportions.txt") or file in [".DS_Store"]:
+            continue
+        chrom = file.split(".")[0]
+        check = md5(os.path.join(chromosome_TSB_path, file))
+        if check_sum[genome].get(chrom) != check:
+            logging.error(f"Checksum mismatch for {file}. Data might be corrupted.")
+            raise Exception("Checksum mismatch. Data corruption suspected.")
+
+    logging.info(
+        f"The transcriptional reference data for {genome} has been successfully saved."
+    )
+
+
 def install(
     genome,
     custom=False,
@@ -789,42 +896,28 @@ def install(
     offline_files_path=None,
     volume=None,
 ):
+    # Genome installation is using locally provided files
     if custom or offline_files_path is not None:
         ftp = False
-    first_path = os.getcwd()
     reference_dir = ref_install.reference_dir(secondary_chromosome_install_dir=volume)
     ref_dir = str(reference_dir.path)
 
     if not custom and offline_files_path is None:
-        wget_install = shutil.which("wget") is not None
-        rsync_install = shutil.which("rsync") is not None
-        if not wget_install and not rsync_install:
-            print(
-                "You do not have wget nor rsync installed. Please install wget or rsync and then reattempt to install your desired genome."
-            )
-            sys.exit()
-        elif not wget_install and rsync_install:
-            print(
-                "You do not have wget installed. Please install wget and then reattempt to install your desired genome."
-            )
-            sys.exit()
-    tar_install = shutil.which("tar") is not None
-    if not tar_install:
-        print(
-            "You do not have tar installed. Please install tar and then reattempt to install your desired genome."
-        )
-        sys.exit()
+        # 1. Check for required tools
+        check_required_tools()
 
     if os.path.exists("install.log"):
         os.remove("install.log")
 
-    chrom_string_dir = ref_dir + "/references/chromosomes/chrom_string/"
-    chrom_fasta_dir = ref_dir + "/references/chromosomes/fasta/"
+    chrom_string_dir = os.path.join(
+        ref_dir, "references", "chromosomes", "chrom_string"
+    )
+    chrom_fasta_dir = os.path.join(ref_dir, "references", "chromosomes", "fasta")
     chrom_tsb_dir = str(reference_dir.get_tsb_dir())
-    matrix_dir = ref_dir + "/references/matrix/"
-    vcf_dir = ref_dir + "/references/vcf_files/"
-    bed_dir = ref_dir + "/references/vcf_files/BED/"
-    log_dir = "logs/"
+    matrix_dir = os.path.join(ref_dir, "references", "matrix")
+    vcf_dir = os.path.join(ref_dir, "references", "vcf_files")
+    bed_dir = os.path.join(vcf_dir, "BED")
+    log_dir = "logs"
     new_dirs = [
         ref_dir,
         chrom_string_dir,
@@ -836,124 +929,44 @@ def install(
         log_dir,
     ]
 
+    # 2. Make necessary directories for installation
     for dirs in new_dirs:
         if not os.path.exists(dirs):
             os.makedirs(dirs)
 
+    # 3. Install a custom genome with user provided files (FASTA, transcripts, exome interval list)
     if custom:
-        if os.path.exists(chrom_fasta_dir + genome + "/"):
-            shutil.rmtree(chrom_fasta_dir + genome + "/")
-        os.makedirs(chrom_fasta_dir + genome + "/")
+        chrom_fasta_genome_dir = os.path.join(chrom_fasta_dir, genome, "")
+        if os.path.exists(chrom_fasta_genome_dir):
+            shutil.rmtree(chrom_fasta_genome_dir)
+        os.makedirs(chrom_fasta_genome_dir)
         fastaFiles = glob.iglob(os.path.join(fastaPath, "*.gz"))
         for file in fastaFiles:
             if os.path.isfile(file):
-                shutil.copy(file, chrom_fasta_dir + genome + "/")
+                shutil.copy(file, chrom_fasta_genome_dir)
 
-        transcript_dir = os.path.join(ref_dir, "references", "chromosomes", "transcripts", genome)
+        transcript_dir = os.path.join(
+            ref_dir, "references", "chromosomes", "transcripts", genome
+        )
         exome_dir = os.path.join(ref_dir, "references", "chromosomes", "exome", genome)
 
         reset_directory(transcript_dir, transcriptPath)
         reset_directory(exome_dir, exomePath)
 
-
     if ftp:
-        chromosome_fasta_path = str(reference_dir.get_tsb_dir())
-        print("Beginning installation. This may take up to 40 minutes to complete.")
-        if not rsync:
-            try:
-                if bash:
-                    try:
-                        os.system(
-                            "bash -c '"
-                            + "wget -r -l1 -c -nc --no-parent -nd -P "
-                            + chromosome_fasta_path
-                            + " ftp://alexandrovlab-ftp.ucsd.edu/pub/tools/SigProfilerMatrixGenerator/"
-                            + genome
-                            + ".tar.gz 2>> install.log"
-                            + "'"
-                        )
-                    except:
-                        print(
-                            "The UCSD ftp site is not responding...pulling from sanger ftp now."
-                        )
-                    try:
-                        os.system(
-                            "bash -c '"
-                            + "wget -r -l1 -c -nc --no-parent -nd -P "
-                            + chromosome_fasta_path
-                            + " ftp://ngs.sanger.ac.uk/scratch/project/mutographs/SigProf/"
-                            + genome
-                            + ".tar.gz 2>> install.log"
-                            + "'"
-                        )
-                    except:
-                        print(
-                            "The Sanger ftp site is not responding. Please check your internet connection/try again later."
-                        )
-                else:
-                    os.system(
-                        "wget -r -l1 -c -nc --no-parent -nd -P "
-                        + chromosome_fasta_path
-                        + " ftp://ngs.sanger.ac.uk/scratch/project/mutographs/SigProf/"
-                        + genome
-                        + ".tar.gz 2>> install.log"
-                    )
-                os.system(
-                    "tar -xzf "
-                    + str(reference_dir.get_tsb_dir() / genome)
-                    + ".tar.gz -C "
-                    + str(reference_dir.get_tsb_dir())
-                )
-                os.remove(str(reference_dir.get_tsb_dir() / genome) + ".tar.gz")
-            except:
-                print("The ensembl ftp site is not currently responding.")
-                sys.exit()
-        else:
-            print("Direct download for RSYNC is not yet supported")
-            sys.exit()
-
-        chromosome_TSB_path = os.path.join(chromosome_fasta_path, genome, "")
-        corrupt = False
-        for files in os.listdir(chromosome_TSB_path):
-            if "proportions" in files:
-                continue
-            if ".DS_Store" in files:
-                continue
-            chrom = files.split(".")
-            chrom = chrom[0]
-            check = md5(chromosome_TSB_path + files)
-            if check_sum[genome][chrom] != check:
-                corrupt = True
-                os.remove(chromosome_TSB_path + files)
-                print(
-                    "[DEBUG] Chromosome "
-                    + chrom
-                    + " md5sum did not match => reference md5sum: "
-                    + str(check_sum[genome][chrom])
-                    + "    new file md5sum: "
-                    + str(check)
-                )
-        if corrupt:
-            print(
-                "The transcriptional reference data appears to be corrupted. Please reinstall the "
-                + genome
-                + " genome."
-            )
-            sys.exit()
-        print("The transcriptional reference data for " + genome + " has been saved.")
+        install_via_ftp(genome, reference_dir, check_sum)
 
     elif offline_files_path is not None:
         print("Beginning installation using locally provided files.")
 
         # unpack user provided tar file into environment
         shutil.unpack_archive(
-            os.path.join(offline_files_path, genome + ".tar.gz"), 
-            str(reference_dir.get_tsb_dir())
+            os.path.join(offline_files_path, genome + ".tar.gz"),
+            str(reference_dir.get_tsb_dir()),
         )
 
-
-        chromosome_fasta_path = reference_dir.get_tsb_dir()
-        chromosome_TSB_path = str(reference_dir.get_tsb_dir() / genome) + "/"
+        chromosome_TSB_pathlib = reference_dir.get_tsb_dir() / genome / ""
+        chromosome_TSB_path = f"{chromosome_TSB_pathlib}{os.sep}"
         corrupt = False
 
         for files in os.listdir(chromosome_TSB_path):
@@ -986,8 +999,6 @@ def install(
 
     else:
         print("Beginning installation. This may take up to 20 minutes to complete.")
-        first_path = os.getcwd()
-
         print(
             "[DEBUG] Path to SigProfilerMatrixGenerator used for the install: ", ref_dir
         )
