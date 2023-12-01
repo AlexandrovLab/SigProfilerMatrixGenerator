@@ -3,7 +3,7 @@ import shutil
 
 from setuptools import setup
 
-VERSION = "1.2.19"
+VERSION = "1.2.20"
 
 # remove the dist folder first if exists
 if os.path.exists("dist"):
@@ -23,7 +23,7 @@ def write_version_py(filename="SigProfilerMatrixGenerator/version.py"):
 # THIS FILE IS GENERATED FROM SIGPROFILEMATRIXGENERATOR SETUP.PY
 short_version = '%(version)s'
 version = '%(version)s'
-Update = 'v1.2.19: Relative path issue fixed for cli'
+Update = 'v1.2.20: Resolve path installation issue for Windows'
 
 	"""
     fh = open(filename, "w")
