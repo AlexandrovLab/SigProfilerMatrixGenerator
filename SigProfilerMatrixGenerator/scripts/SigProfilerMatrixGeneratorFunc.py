@@ -28,10 +28,10 @@ import SigProfilerMatrixGenerator as sig
 from SigProfilerMatrixGenerator import install
 from SigProfilerMatrixGenerator.scripts import (
     convert_input_to_simple_files as convertIn,
+    MutationMatrixGenerator as matGen,
+    ref_install,
+    reference_genome_manager,
 )
-from SigProfilerMatrixGenerator.scripts import ref_install
-
-from SigProfilerMatrixGenerator.scripts import MutationMatrixGenerator as matGen
 
 
 def perm(n, seq):
@@ -102,39 +102,15 @@ def SigProfilerMatrixGeneratorFunc(
     reference_dir = ref_install.reference_dir(secondary_chromosome_install_dir=volume)
     ref_dir = str(reference_dir.path)
 
-    absolute_tsb_path = str(reference_dir.get_tsb_dir() / reference_genome)
-    if not os.path.exists(absolute_tsb_path):
+    # 2. Check if genome is installed (if not print checksum report)
+    genome_manager = reference_genome_manager.ReferenceGenomeManager(volume)
+    if not genome_manager.is_genome_installed(reference_genome):
+        genome_manager.print_genome_checksum_verification_report(reference_genome)
         raise Exception(
             "The specified genome "
             + reference_genome
             + " has not been installed\nPlease refer to the SigProfilerMatrixGenerator README for installation instructions:\n\thttps://github.com/AlexandrovLab/SigProfilerMatrixGenerator"
         )
-    genome_loc = os.path.join("references/chromosomes/transcripts/", reference_genome)
-    check_files = [
-        tmp_f
-        for tmp_f in os.listdir(os.path.join(ref_dir, genome_loc))
-        if not tmp_f.startswith(".")
-    ]
-
-    # 2. compare list of downloaded files to md5sum reference
-    if reference_genome in list(install.check_sum.keys()):
-        for chrom_file_name in check_files:
-            chrom_path = os.path.join(
-                absolute_tsb_path, chrom_file_name.replace("_transcripts", "")
-            )
-            chrom_val = chrom_file_name.strip("_transcripts.txt")
-            chrom_md5 = install.md5(chrom_path)
-            ref_md5 = install.check_sum[reference_genome][chrom_val]
-            if chrom_md5 != ref_md5:
-                raise Exception(
-                    "ERROR: The reference genome installation for",
-                    reference_genome,
-                    "chromosome",
-                    str(chrom_val) + " is incomplete.",
-                    "Please run the genome installation script for",
-                    reference_genome,
-                    "to resolve this issue before proceeding.",
-                )
 
     # Instantiates all of the required variables and references
     if not os.path.exists(path_to_input_files):

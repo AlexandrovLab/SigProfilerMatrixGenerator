@@ -6,326 +6,19 @@
 
 from __future__ import print_function
 
-import argparse
 import glob
 import hashlib
-import logging
 import os
-import re
 import shutil
-import subprocess
 import sys
-import time
 
-import pandas as pd
-from scipy import spatial
-
-from SigProfilerMatrixGenerator.scripts import SigProfilerMatrixGeneratorFunc as matGen
 from SigProfilerMatrixGenerator.scripts import (
     ref_install,
     save_chrom_strings,
     save_chrom_tsb_separate,
     save_tsb_192,
+    reference_genome_manager,
 )
-
-BENCH_LIST = ["brca", "grch37", "grch38", "mm10", "mm9"]
-check_sum = {
-    "GRCh37": {
-        "1": "a7d51305e943cf06ff2029146bd91bca",
-        "2": "d24d0185af89356d44614ab0d6fd6a68",
-        "3": "ea5e033147dcaf77bfd4c70f50688d37",
-        "4": "00d7797c7184f1802367e33f6e2bc3da",
-        "5": "f74b1eeb329088242a9f22a16322b325",
-        "6": "b353cc4c4abc90340e7747509fe7b457",
-        "7": "bbadde91b3ef958c7d20e2b1088c8cd2",
-        "8": "0ff695692e3efebaf00c7905d0d536d7",
-        "9": "40b75a18acb66748a37888c53a76dcdb",
-        "10": "557881b744a932b4ceee8a06d6de85a4",
-        "11": "f8b8f118101d7cb04164b29a7acadca4",
-        "12": "52c18e9fefc3ed3e35c1d8771d1247de",
-        "13": "a241d1cdcadccfd94db792300ab000bf",
-        "14": "ed3907128336795669bc19d77c0aa409",
-        "15": "bfc66ad087c4e9025076d7571cffa30e",
-        "16": "bd251fddc42400bb54ef95d5e1002ece",
-        "17": "fcd36b1bf5c4bd74328dc4caaae244ae",
-        "18": "e015d4324c36374827582c5b1214a736",
-        "19": "5cfa7d47e2d73dbdbf8d68f97c8e8b23",
-        "20": "2fa0717bf4e8dddac64cd393f4134ff5",
-        "21": "ba5559776d4601b80ca42c82f02102a4",
-        "22": "ba762b6ae493df40d04d1ff63d9b2933",
-        "Y": "0303100be91874b966a998273cd7c8eb",
-        "X": "14e331d82736f6cfc177ff8c90f7bd78",
-        "MT": "dfd6db5743d399516d5c8dadee5bee78",
-    },
-    "GRCh37_havana": {
-        "1": "a954558ed4a92c33454f8539d5e47d43",
-        "2": "f2a1702c668d531656ffbeadb5bb1b66",
-        "3": "e6a4d10c433d8707a1a336e310a779bc",
-        "4": "709d6d8ab80b8f83f2f8892e23a9adba",
-        "5": "fa4fe82dce241cf4eeaf84ef9b44030f",
-        "6": "161d68063347fff0fe5d82a1c60cdef4",
-        "7": "5f866a10820d3d48d3b96fb8432ade8e",
-        "8": "585c7100d1de569df883910bbf01463c",
-        "9": "5667fc1a44a93b6f162bf60d4f6a21c1",
-        "10": "7684e3198ac4c484b56d6e91b8f2fc15",
-        "11": "e3b5501a11be7d5fcf9219933467c86a",
-        "12": "511a8b89d19e47df4633da5f277373b5",
-        "13": "7b621f0c18db0592c0f82db9b760ceef",
-        "14": "16b383fa1dbf30feb8a5d1d89a9ac7af",
-        "15": "f3295833a4dfd7a628ca9befe1972739",
-        "16": "9985d8cf725dcd29b3ded0a4eeb426e2",
-        "17": "9118e1200b7cd95a4d5c95ff0e039c7c",
-        "18": "116ae0ba70ea43b10983ddd07387d6dd",
-        "19": "930c568fe249b78a602a3400ce094b83",
-        "20": "fa24f27c160dffd5d8b7c6270dff4a0d",
-        "21": "4f6f61d43c698e2c66dc62f21f7ad6cd",
-        "22": "77661703e7b65ad2b6adcb75e7e3e53b",
-        "Y": "b86042fd443490fb0061478037392fc0",
-        "X": "02b7328d7d74704d571fd38149bbf814",
-    },
-    "GRCh38": {
-        "1": "ebe083105e7703a49581a36d73732a96",
-        "2": "cd65e36dbdf12a8ac3d2c70ebac8cad4",
-        "3": "6c20a7008394f2fa9c304d231a1f391b",
-        "4": "5c7443e1678868adadeac0e57558f6e8",
-        "5": "45573232c8097c679503a6598f61e60b",
-        "6": "cfc137c7434d3a9a872332d405b5c553",
-        "7": "9d8210c22c1962db837e7b62a578975c",
-        "8": "665134fd44f21915cbeef955addf89ba",
-        "9": "758d0c0c71d8bafbe1ede86587191730",
-        "10": "397bb21acff1ca3052ac802f2aee06e0",
-        "11": "07707ff8a2a964656469a7be7bb3e576",
-        "12": "506d02539075e080ee12ebdf63908080",
-        "13": "03ed22f01ab43145733c0b6a647e0560",
-        "14": "8b93447086549e476c65699ed813a567",
-        "15": "cd0dfe9fa78cae2fc7becf8f8ec6c693",
-        "16": "e17bbb66eb4d6b62b7b0e2fbf062b6a6",
-        "17": "8fc95bb3101d024d890aa3543eb454c5",
-        "18": "a4870628045bb033a90e8c89f818e24d",
-        "19": "6a9d0c8298f0ba2fa13180e02b969f16",
-        "20": "aa75d35969cf3956bb4ace7bdc57b34e",
-        "21": "5d55f5ad6271d6a0d8806876924990f7",
-        "22": "efdb4e1d23ab7964302b828062a33447",
-        "Y": "3b38c639ad164d60f1a055b46fcd2748",
-        "X": "d5edbea3cf5d1716765dd4a7b41b7656",
-        "MT": "dfd6db5743d399516d5c8dadee5bee78",
-    },
-    "GRCh38_havana": {
-        "1": "c4ef4ee14a4f0f7b319e9ed01f2a9742",
-        "2": "189cb33da673afcf161b7724d78d314b",
-        "3": "19fb72b2f4bebca66969d9eaaab0b06b",
-        "4": "04069627d35462add3095cd14299c181",
-        "5": "e3fbab13e69a5ba48c9bf706215aef19",
-        "6": "7de52b0136f65c25b2f3652e8888449a",
-        "7": "0071cc7e4024b0d81941df353ce99fdc",
-        "8": "c19f322ee6a786e94e665b1ab3f459ea",
-        "9": "00920f091df48d3dba8b270432bb38a8",
-        "10": "dfcdfcc0a2524888e91f9a40aa2289e5",
-        "11": "01118568e33f876f31f4d0585085b844",
-        "12": "11b6ffc45b5d198344e8d0f2e51fa08a",
-        "13": "e1241284e80f9a3afe204131c9eb6192",
-        "14": "b8d68bd919dc87483679314d0dae9514",
-        "15": "ca2c6d19dadc4d905013b37dfaa75fa6",
-        "16": "ccf7fe495c7ff7c11c430a935050bb4d",
-        "17": "ec09c6c67cc0496117da52bc584cab8f",
-        "18": "e8edcd9275c659101745570b0ddc436d",
-        "19": "293befa3316b6bb8b5a2a2c75e5e8030",
-        "20": "4065b4403e1b9659f9f049c4c886ed7f",
-        "21": "3f661bcfd29bf7153b4bfb95e8d112d8",
-        "22": "ea31a6d2cdac7d8aeb2e3be0688b4159",
-        "Y": "a68939c10c3ebc16340785bf99366328",
-        "X": "57623734b88f441f5499955d2c83a6f9",
-    },
-    "mm9": {
-        "1": "c5afc4b3f7f2119696214511d7a04341",
-        "2": "a7b467475a1b032d2c893dac1c419a28",
-        "3": "f922bc529a17324f1cd858f9a8723d65",
-        "4": "f3d6b74e3c04dbd229e2f1e363607506",
-        "5": "5fee4f1889c9fe20f7f8562c62bbeb0a",
-        "6": "481d47b87da45f3a20181c780fd796c2",
-        "7": "454ef2bf49a5ba8cfea3d16dfcfc7f25",
-        "8": "2f4162d4c824db78a2a2a820cb4fec81",
-        "9": "0649e6aec61af1ab8ab4797ea8e54119",
-        "10": "38296256bcfe886c8ae771418e4fd824",
-        "11": "b31cb0ce693e35eaa77031d44b12e474",
-        "12": "d2b3e4b015742b6aea30ceec5a972968",
-        "13": "df77b6d0ed1b133224b128c189736372",
-        "14": "0ec3c0e6b3fa2cdb957541f19792e130",
-        "15": "44fcaf2ec9b82dae910f85ce41c3cfad",
-        "16": "ad7a8dbdf46fa7077e0982a54eab70b7",
-        "17": "71aee1dee3cd2078e4619c485d88817e",
-        "18": "727ec4ed3128ecacd6cd2f7558083553",
-        "19": "461a7119781ab7f4b654fdd9ef76e0ec",
-        "Y": "471ff3bbb4520c020cfaa7ca8371c543",
-        "X": "9ccadf96cd3aa0ed9d299894a3d7fde0",
-        "MT": "a1d56043ed8308908965dd080a4d0c8d",
-    },
-    "mm10": {
-        "1": "ef88c5ac276a32a2865c0408f92acd55",
-        "2": "ced7325ef9e2dfedea3fbe26428a6059",
-        "3": "9cd1794eeea27553077a018038303908",
-        "4": "da616d7ed6c67f824487eb2ed09cd33b",
-        "5": "b327b82da6986bf947105d07c0ad6d2e",
-        "6": "fb9a8fa0b85561f8d4de633c22d5157a",
-        "7": "12457fd80f6806779fc0d4cc8d36fbad",
-        "8": "5d98d86bd22bee1cb226406f49ee7caf",
-        "9": "b2f26613fcc622a4003e4c945ae55e25",
-        "10": "e9f3589529e258ede66d2e77bb87d21d",
-        "11": "76bcd285c3c66471ad6fccfabe42294c",
-        "12": "ac34fc3616c9609d8e75a59069e9007a",
-        "13": "f81b976e4e4617b25945d06f9aa30846",
-        "14": "95dc042eb2aa7d4cc0abe071d4d7966e",
-        "15": "fbf2477833aff73ae085537cd7ee0f85",
-        "16": "77cbcd009ba50891571f785595717ec1",
-        "17": "cd9e4dfdd168ed3de05dac4d44c6e692",
-        "18": "945e83694c7c8f69d6186e1a2abc9771",
-        "19": "e57b25f8869de31a9dbce06510711db6",
-        "Y": "c2146ba4ab1ec262f5e38b2a1ebc5f5b",
-        "X": "9af543088be046fdc63976c2d41de94c",
-        "MT": "a1d56043ed8308908965dd080a4d0c8d",
-    },
-    "mm39": {
-        "1": "57c0e2508c3f8fe66a792be344f494d9",
-        "2": "8e69643ce8f9ff048eae0113f64ce8b7",
-        "3": "0a1f33496316ecc245868ca72dc4ac95",
-        "4": "15f59279c79b0b23cda1cac00aec9b2f",
-        "5": "cd6709c54421184266eea49be266378c",
-        "6": "916484773b14295b4711e9f13efd1c94",
-        "7": "04a6a77f0754a0b6badd825c0e8729ff",
-        "8": "2f68f81e848940f3e8e5e4e2e9f5c6bc",
-        "9": "f2cefa27e8d26e588d32212c78c5b840",
-        "10": "5f877fd57657884cdc3c09036a365314",
-        "11": "1b7b5162cc876b2fb0502e010daf1a50",
-        "12": "cfccf49fc2034eebd66ea40e2410c482",
-        "13": "a411479e72e6ee2fc9b1667a7598de0d",
-        "14": "11dfe2f88d544c1402be18bc732a7b80",
-        "15": "9d71bd08f73fe51d24856c804cb86b38",
-        "16": "9b97d374745941c370e35596846e2738",
-        "17": "4a698fcd2e16eea7d7a718c94747e85d",
-        "18": "fe0a2d35beb0407114a9e61b6ed646f2",
-        "19": "c51fa76818b0447e13047095251796eb",
-        "Y": "554d0a9f1062fb12903e521c866e2600",
-        "X": "ce0f276bc6eab955c22a0111bc436ad7",
-    },
-    "mm10_havana": {
-        "1": "8351fa274b2e49b159fdfd1a17b8e522",
-        "2": "afa7459e3fa1a40f96279d318e3f6fc4",
-        "3": "106064694826ed8b9cfd29c5cfe39f1d",
-        "4": "807aafbf65a28995b2ff64c040f54ff8",
-        "5": "afc3c4640788db5b8866d7644be4c49d",
-        "6": "2eff5f397f61735e90dc4089705751bc",
-        "7": "f62fe7d720c219bacbe91fb0624fdb33",
-        "8": "1e523de22029fc4feea1e3222638d3ec",
-        "9": "3b75a1f2360ef49cbdc3da16a1e40d23",
-        "10": "2d3cbd3aa1b5f6c78a11bc799787d226",
-        "11": "9b5e62ac65c2e05e7c09d7b3ac9aa507",
-        "12": "07e2bfe001933efb9052458f203fd8d4",
-        "13": "4df084dfa4d2ea80519da4fa825d7c6e",
-        "14": "c4c01a321c2e8b67ed619dc91588d1cc",
-        "15": "6ccda29f891ac9d17567c69a1b47a40a",
-        "16": "7df7554d6b3d7ca8331fe163e4930a64",
-        "17": "60ecd93b145f36226c246356701422f2",
-        "18": "b52767b6bbc3a293993652e78db7ddac",
-        "19": "5a246e5963dc0a300765b5cdd87e07d9",
-        "Y": "da73d749cd65735db5fd10556ae2376a",
-        "X": "ab9c1ad518e71b15ff543cda415a463f",
-    },
-    "rn6": {
-        "1": "003723513cbdb3708fcc5d737c05199c",
-        "2": "53e52c5facc7f05462be533845f37425",
-        "3": "8d157a9b71fe9770cf783ea5459b19d7",
-        "4": "a66dc1999bcc960ff11fe0b24c0d7b14",
-        "5": "601cf83411234adbdd9f911b89509564",
-        "6": "03b1f4af58fffdf213466ea85b570b3d",
-        "7": "4ed05ddf9502ef79e121c02e391660e6",
-        "8": "3e2458daaf1b3e8ab4d0e0a9e60c067b",
-        "9": "8f83caeccec7ea6e35e404737138ee67",
-        "10": "9c1af453a5facc9bfa821457bcfc4d30",
-        "11": "ef0480a905c55d76a3c58e295a85bc75",
-        "12": "643b6fe4a3a6363ffe64a6c316fa3e1a",
-        "13": "102bb3fb420a4104c216bcdf99870374",
-        "14": "e26b8b63fba0ea7ced4f0330e93a8cdc",
-        "15": "da747616a1362d374d4786102fab6f9f",
-        "16": "54e4f932eb0eda4cbf31156f96ef7235",
-        "17": "46c2facf5415e4eff8b0804161db722d",
-        "18": "f1cb84f002967854b83bf266ec59a7a3",
-        "19": "b85ca155fd1780fe5c327a4589c212a6",
-        "20": "1f7efe08722aa6a87e49b23e8e1a94c2",
-        "Y": "6a7a3539c329dc540dfa6db006003bb1",
-        "X": "7a06bafab97c59a819f03633f0a6b7a2",
-        "MT": "cb841662629aa1b6c1b7b0b3a8f689d1",
-    },
-    "c_elegans": {
-        "I": "5a3ea8cf3dfbc641716b7bc805edcaae",
-        "II": "bf82edaa92809dd2fea2b791c38c9728",
-        "III": "d2df34b6743f41d3964549fc76c5f1a2",
-        "IV": "23396bb57145d3acde2888947b5b8c3a",
-        "V": "09df3c53b12e5fd7d9035cc98ca221a3",
-        "X": "988046456f1409dfdb5e26444d84d238",
-        "MtDNA": "48983f530959780de0125f74a87d4fc1",
-    },
-    "dog": {
-        "1": "bef8283c1a36f9aef0e407de2ff6af00",
-        "2": "9cc961192bb5e58b3847060c3e9c1cfc",
-        "3": "d33263fa2de6666b41e140cb7a8da66c",
-        "4": "cd4ed39ebac1c04800ccf30466ec69f5",
-        "5": "c0f48a4a764e58388b48835aca2ec0a4",
-        "6": "4b472a2f8d0a53ac75cce04e7dc9279a",
-        "7": "12a61573a0da2c9306fff705bb1c39c1",
-        "8": "e22cf22a27560aa8523dc959ddcf6e25",
-        "9": "c079a73d719145cdd5c7c93969a1c392",
-        "10": "45805a518147f7846bd0457ca038c8df",
-        "11": "f38cda8508463a7607dff14a581ee7b0",
-        "12": "adb5de197f58bb827fa01fe924eb3a1d",
-        "13": "055a845ba97baad3b13d4d3359f88290",
-        "14": "27f0ba8e47996a058807a3827cf8e4a8",
-        "15": "2e9565c687a593eb0acbdd0962bb9255",
-        "16": "89b2225bb78d88b0fd1d38d9514ab0cb",
-        "17": "f0378253e2f083e42b665ea202fde3b0",
-        "18": "04d124e273f3b54a685ad6526223cd03",
-        "19": "67bae093919e6bb5ab6b9806c739d539",
-        "20": "5588387165a2e19c4533012cfb4998f3",
-        "21": "371cdf18a545728f7964b9db2fc72d5e",
-        "22": "fbf76865f88a018d93506e036f6a68bc",
-        "23": "085145e01d9fd9f0f999fb9e8e8d4400",
-        "24": "69b75a9962fb766b447e7d1252cb31ac",
-        "25": "12d5c6677b3e17170c317c1f5532d2a8",
-        "26": "13937d18e56b2b93d12fa5fcba48a138",
-        "27": "1d03d8ca5f201f4d156f5e1b38f7a67c",
-        "28": "c33395dec7fdc13e9d8f10afaa946f8c",
-        "29": "174f2db104ecaa5efef770f44241e3b0",
-        "30": "047d420ef9aecb933a7d83b6af820b23",
-        "31": "5be61f0c9944a5f2d7d1a5b2e75fb000",
-        "32": "212dcb867e95a642277a243fed8d8e41",
-        "33": "08a217b02cdd778cfdb0005dff4828b1",
-        "34": "4245d6fc370d9049ef4c25314fbef239",
-        "35": "1344aba8755b8a4e304629180fc0591a",
-        "36": "e4fff6ed84777905dc999ca6d6bc2557",
-        "37": "60d51ea6ae9e3f2fa316e3d03aff96b2",
-        "38": "4090ff76d94e6b38920916ae3ff2441c",
-        "X": "bce1372df64037d79b0995311d8ff971",
-    },
-    "ebv": {"gi_82503188_ref_NC_007605": "7f8894e52b0cac1f968c0402838bea07"},
-    "yeast": {
-        "I": "49fe0862d533d1c6ad66d534216e8ab9",
-        "II": "d8f6151b5cc080601fd759267f674fba",
-        "III": "4c80933f7958261369d68ed84bfa8d5f",
-        "IV": "afdb839d9289c33cea42f3bc53f978b1",
-        "V": "48e5530f587b97fcfbc4742261ded994",
-        "VI": "0cc51e4f21f3d3f89b98061428002f95",
-        "VII": "c9566b7a2264909ea0cee9202ef93e55",
-        "VIII": "66193457ece167d15330dc3be2fbb0ef",
-        "IX": "b3f57177000e0322c824ffdab69cb7ed",
-        "X": "ad715c5261132608d27e79d8e8bc68a7",
-        "XI": "5d84fe013b962aafade20413bb82758a",
-        "XII": "740b5b5dc0dd3f30bc67d391b15bf639",
-        "XIII": "87691656b7200080f728f990d4f74877",
-        "XIV": "270346a6575023f7bc9e7f4f8e750fd1",
-        "XV": "89ee60c9779424d666268508df34bad9",
-        "XVI": "3d72cbd3bc4bb1bff109e5ecea70fd2d",
-        "M": "64b4f865366c9cee76635019f30712c0",
-    },
-}
 
 
 def md5(fname):
@@ -662,14 +355,14 @@ def install_chromosomes_tsb(genomes, reference_dir: ref_install.ReferenceDir, cu
                 chrom = files.split(".")
                 chrom = chrom[0]
                 check = md5(chromosome_TSB_path + files)
-                if check_sum[genome][chrom] != check:
+                if reference_genome_manager.CHECKSUMS[genome][chrom] != check:
                     corrupt = True
                     os.remove(chromosome_TSB_path + files)
                     print(
                         "[DEBUG] Chromosome "
                         + chrom
                         + " md5sum did not match => reference md5sum: "
-                        + str(check_sum[genome][chrom])
+                        + str(reference_genome_manager.CHECKSUMS[genome][chrom])
                         + "    new file md5sum: "
                         + str(check)
                     )
@@ -706,67 +399,6 @@ def install_chromosomes_tsb_BED(
             print("The TSB BED files for " + genome + " have been saved.")
 
 
-def benchmark(genome, volume=None):
-    # IMPORTANT: this currently runs in site-packages (this is a problem for docker)
-    # so for now, skip this test if volume is not None
-    if volume is not None:
-        return
-    reference_dir = ref_install.reference_dir(secondary_chromosome_install_dir=volume)
-    ref_dir = str(reference_dir.path)
-    vcf_path = ref_dir + "/references/vcf_files/" + genome + "_bench/"
-
-    start_time = time.time()
-    matGen.SigProfilerMatrixGeneratorFunc(
-        genome + "_bench", genome, vcf_path, volume=volume
-    )
-    end_time = time.time()
-
-    original_matrix_96 = ref_dir + "/scripts/Benchmark/" + genome + "_bench_orig_96.txt"
-    original_matrix_3072 = (
-        ref_dir + "/scripts/Benchmark/" + genome + "_bench_orig_3072.txt"
-    )
-    new_matrix_96 = vcf_path + "output/SBS/" + genome + "_bench.SBS96.all"
-    new_matrix_3072 = vcf_path + "output/SBS/" + genome + "_bench.SBS6144.all"
-
-    ############# Cosine Test ###################################################
-    data_orig = pd.read_csv(original_matrix_96, sep="\t", header=0)
-    data_new = pd.read_csv(new_matrix_96, sep="\t", header=0)
-    count = 0
-    range_count = min(len(data_orig.loc[0]), len(data_new.loc[0]))
-    for i in range(1, range_count, 1):
-        orig_list = list(data_orig[data_orig.columns[i]])
-        new_list = list(data_new[data_new.columns[i]])
-        cosine_result = 1 - spatial.distance.cosine(orig_list, new_list)
-        if cosine_result != 1:
-            count += 1
-    if count != 0:
-        print(
-            "There seems to be some errors in the newly generated matrix. The installation may not have been successful."
-        )
-
-    data_orig = pd.read_csv(original_matrix_3072, sep="\t", header=0)
-    data_new = pd.read_csv(new_matrix_3072, sep="\t", header=0)
-    count = 0
-    range_count = min(len(data_orig.loc[0]), len(data_new.loc[0]))
-    for i in range(1, range_count, 1):
-        orig_list = data_orig[data_orig.columns[i]]
-        new_list = data_new[data_new.columns[i]]
-        cosine_result = 1 - spatial.distance.cosine(orig_list, new_list)
-        if cosine_result <= 0.85:
-            count += 1
-    if count != 0:
-        print(
-            "There seems to be some errors in the newly generated matrix. The installation may not have been successful."
-        )
-
-    end_time = time.time()
-    print(
-        "Installation was succesful.\nSigProfilerMatrixGenerator took "
-        + str(end_time - start_time)
-        + " seconds to complete."
-    )
-
-
 # Helper function for install()
 # This function resets (removes and recreates) the specified directory.
 # Optionally, it can also copy a file to the newly created directory.
@@ -786,102 +418,24 @@ def reset_directory(path, file_to_copy=None):
         shutil.copy(file_to_copy, path)
 
 
-def check_required_tools():
+def print_available_tools():
     """
-    Checks for the presence of required tools (wget, rsync, tar) and
+    Checks for the presence of required tools (curl, wget, rsync) and
     prints the status of each tool in a table format.
-    Exits the script if any of the tools are not installed.
     """
-    required_tools = ["wget", "rsync", "tar"]
-    all_tools_installed = True
+    # Update the list of required tools
+    required_tools = ["curl", "wget", "rsync"]
 
-    print("{:<10} | {:<10}".format("Tool", "Status"))
+    # Print the table header
+    print("{:<10} | {:<10}".format("Tool", "Installed"))
     print("-" * 23)
 
+    # Check each tool and print its status
     for tool in required_tools:
         if shutil.which(tool):
-            print("{:<10} | {:<10}".format(tool, "Installed"))
+            print("{:<10} | {:<10}".format(tool, "True"))
         else:
-            print("{:<10} | {:<10}".format(tool, "Missing"))
-            all_tools_installed = False
-
-    if not all_tools_installed:
-        logging.error(
-            "One or more required tools are missing. Please install them and retry."
-        )
-        sys.exit(1)
-    else:
-        logging.info("All required tools are installed.")
-
-
-def install_via_ftp(genome, reference_dir, check_sum):
-    """
-    Handles downloading genome data from an FTP server.
-
-    :param genome: Genome identifier.
-    :param reference_dir: Reference directory object with necessary path methods.
-    :param check_sum: Dictionary containing checksums for verification.
-    """
-    chromosome_fasta_path = str(reference_dir.get_tsb_dir())
-    logging.info("Beginning FTP installation. This may take some time.")
-
-    ftp_urls = [
-        "ftp://alexandrovlab-ftp.ucsd.edu/pub/tools/SigProfilerMatrixGenerator/"
-        + genome
-        + ".tar.gz",
-        "ftp://ngs.sanger.ac.uk/scratch/project/mutographs/SigProf/"
-        + genome
-        + ".tar.gz",
-    ]
-
-    for url in ftp_urls:
-        try:
-            subprocess.run(
-                [
-                    "wget",
-                    "-r",
-                    "-l1",
-                    "-c",
-                    "-nc",
-                    "--no-parent",
-                    "-nd",
-                    "-P",
-                    chromosome_fasta_path,
-                    url,
-                ],
-                check=True,
-            )
-            break  # Exit the loop if download is successful
-        except subprocess.CalledProcessError:
-            logging.warning(
-                f"Failed to download from {url}. Trying next URL if available."
-            )
-
-    # Extract the downloaded file
-    tar_file = os.path.join(chromosome_fasta_path, genome + ".tar.gz")
-    try:
-        subprocess.run(
-            ["tar", "-xzf", tar_file, "-C", chromosome_fasta_path], check=True
-        )
-        os.remove(tar_file)
-    except subprocess.CalledProcessError:
-        logging.error("Failed to extract the downloaded genome data.")
-        raise
-
-    # Checksum verification
-    chromosome_TSB_path = os.path.join(chromosome_fasta_path, genome, "")
-    for file in os.listdir(chromosome_TSB_path):
-        if file.endswith("proportions.txt") or file in [".DS_Store"]:
-            continue
-        chrom = file.split(".")[0]
-        check = md5(os.path.join(chromosome_TSB_path, file))
-        if check_sum[genome].get(chrom) != check:
-            logging.error(f"Checksum mismatch for {file}. Data might be corrupted.")
-            raise Exception("Checksum mismatch. Data corruption suspected.")
-
-    logging.info(
-        f"The transcriptional reference data for {genome} has been successfully saved."
-    )
+            print("{:<10} | {:<10}".format(tool, "False"))
 
 
 def install(
@@ -904,7 +458,7 @@ def install(
 
     if not custom and offline_files_path is None:
         # 1. Check for required tools
-        check_required_tools()
+        print_available_tools()
 
     if os.path.exists("install.log"):
         os.remove("install.log")
@@ -953,9 +507,12 @@ def install(
         reset_directory(transcript_dir, transcriptPath)
         reset_directory(exome_dir, exomePath)
 
+    # 4. Install a genome using from ftp server using ftlib or curl
     if ftp:
-        install_via_ftp(genome, reference_dir, check_sum)
+        genome_manager = reference_genome_manager.ReferenceGenomeManager(volume)
+        genome_manager.download_genome(genome)
 
+    # 5. Install a genome using locally provided files
     elif offline_files_path is not None:
         print("Beginning installation using locally provided files.")
 
@@ -977,14 +534,14 @@ def install(
             chrom = files.split(".")
             chrom = chrom[0]
             check = md5(chromosome_TSB_path + files)
-            if check_sum[genome][chrom] != check:
+            if reference_genome_manager.CHECKSUMS[genome][chrom] != check:
                 corrupt = True
                 os.remove(chromosome_TSB_path + files)
                 print(
                     "[DEBUG] Chromosome "
                     + chrom
                     + " md5sum did not match => reference md5sum: "
-                    + str(check_sum[genome][chrom])
+                    + str(reference_genome_manager.CHECKSUMS[genome][chrom])
                     + "    new file md5sum: "
                     + str(check)
                 )
@@ -997,6 +554,8 @@ def install(
             sys.exit()
         print("The transcriptional reference data for " + genome + " has been saved.")
 
+    # 6. Install a genome using rsync or wget
+    #   linux legacy installer supports just GRCh37, GRCh38, mm9, mm10, rn6
     else:
         print("Beginning installation. This may take up to 20 minutes to complete.")
         print(
@@ -1014,19 +573,12 @@ def install(
         if custom:
             install_chromosomes_tsb_BED(genomes, reference_dir, custom)
 
-    if os.path.exists("BRCA_example/"):
-        shutil.copy("BRCA_example/", "references/vcf_files/")
-    if os.path.exists("example_test"):
-        shutil.copy("example_test/", "references/vcf_files/")
     if os.path.exists("context_distributions/"):
         shutil.copy("context_distributions/", "references/chromosomes/")
 
     print("All reference files have been created.")
     if "havana" in genome:
         genome = genome.split("_")[0]
-    if genome.lower() in BENCH_LIST and not custom:
-        print("Verifying and benchmarking installation now...")
-        benchmark(genome, volume=volume)
 
     print(
         "To proceed with matrix_generation, please provide the path to your vcf files and an appropriate output path."
