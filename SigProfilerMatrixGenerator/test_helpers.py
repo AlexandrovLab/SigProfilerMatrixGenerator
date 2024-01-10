@@ -3,10 +3,11 @@ import os
 import pandas as pd
 from pandas.testing import assert_frame_equal
 
-import SigProfilerMatrixGenerator as spmg
 from SigProfilerMatrixGenerator import install as genInstall
-from SigProfilerMatrixGenerator.scripts import SigProfilerMatrixGeneratorFunc as matGen
-from SigProfilerMatrixGenerator.scripts import ref_install
+from SigProfilerMatrixGenerator.scripts import (
+    SigProfilerMatrixGeneratorFunc as matGen,
+    ref_install,
+)
 
 reference_dir = ref_install.reference_dir()
 TEST_INPUT_DIR = str(reference_dir.path / "references/tests/")
@@ -91,4 +92,4 @@ def test_genomes(test_genome, volume=None):
                 test_one_genome(genome, volume=volume)
                 print("Completed test for " + genome)
             except Exception as e:
-                print("Test failed for " + genome + ":\n" + str(e))
+                assert False, "Test failed for " + genome + ":\n" + str(e)
