@@ -7,6 +7,7 @@ import shutil
 import logging
 import time
 
+from pathlib import Path
 from SigProfilerMatrixGenerator.scripts import ref_install
 
 # Constants
@@ -378,6 +379,39 @@ class ReferenceGenomeManager:
         self._unzip_file(local_filepath)
         local_filepath.unlink()
         logging.info(f"{genome_name} has been successfully installed.")
+
+    def install_local_genome(self, genome_name, local_genome_dir):
+        """
+        Install a reference genome originating from the FTP server that is stored locally.
+
+        - genome_name (str): The name of the genome.
+        - local_genome_dir (Path or str): The local directory path where the genome archive is stored.
+        """
+
+        local_genome_dir = Path(local_genome_dir)
+        archive_file_path = local_genome_dir / f"{genome_name}.tar.gz"
+
+        # Verify that the local genome file exists
+        if not archive_file_path.exists():
+            logging.error(f"Local genome file {archive_file_path} does not exist.")
+            return
+
+        # Extract the archive
+        try:
+            self._unzip_file(archive_file_path)
+        except tarfile.TarError as e:
+            logging.error(f"Error extracting the archive: {e}")
+            return
+
+        # Verify that all necessary files are extracted and have correct checksums
+        if not self.is_genome_installed(genome_name):
+            logging.error(f"Installation verification failed for {genome_name}.")
+            self.print_genome_checksum_verification_report(genome_name)
+            return
+
+        logging.info(
+            f"{genome_name} has been successfully installed from the local file."
+        )
 
     def is_genome_installed(self, genome_name):
         """

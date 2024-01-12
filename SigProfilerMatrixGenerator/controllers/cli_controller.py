@@ -1,8 +1,11 @@
 import argparse
 from typing import List
 
-from SigProfilerMatrixGenerator import install, test_helpers
-from SigProfilerMatrixGenerator.scripts import SigProfilerMatrixGeneratorFunc as mg
+from SigProfilerMatrixGenerator import test_helpers
+from SigProfilerMatrixGenerator.scripts import (
+    SigProfilerMatrixGeneratorFunc as mg,
+    reference_genome_manager,
+)
 
 
 def parse_arguments_test(args: List[str]) -> argparse.Namespace:
@@ -42,11 +45,11 @@ def parse_arguments_install(args: List[str]) -> argparse.Namespace:
     )
     parser.add_argument(
         "-l",
-        "--local_install_genome",
+        "--local_genome",
         help="""
             Install an offline reference genome downloaded from the Alexandrov Lab's FTP server.
             Provide the absolute path to the locally-stored genome file.
-            For downloads, visit AlexandrovLab's server:
+            For downloads, visit AlexandrovLab's ftp server:
             ftp://alexandrovlab-ftp.ucsd.edu/pub/tools/SigProfilerMatrixGenerator/
             """,
         default=None,
@@ -129,11 +132,13 @@ def parse_arguments_matrix_generator(args: List[str]) -> argparse.Namespace:
 class CliController:
     def dispatch_install(self, user_args: List[str]) -> None:
         parsed_args = parse_arguments_install(user_args)
-        install.install(
-            parsed_args.genome,
-            offline_files_path=parsed_args.local_install_genome,
-            volume=parsed_args.volume,
-        )
+        rgm = reference_genome_manager.ReferenceGenomeManager(parsed_args.volume)
+        # ftp genome installation (default)
+        if parsed_args.local_genome is None:
+            rgm.download_genome(parsed_args.genome)
+        # local genome installation
+        else:
+            rgm.install_local_genome(parsed_args.genome, parsed_args.local_genome)
 
     def dispatch_test(self, user_args: List[str]) -> None:
         parsed_args = parse_arguments_test(user_args)

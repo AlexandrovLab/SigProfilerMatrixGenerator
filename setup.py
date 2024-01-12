@@ -3,7 +3,7 @@ import shutil
 
 from setuptools import setup
 
-VERSION = "1.2.21"
+VERSION = "1.2.22"
 
 # remove the dist folder first if exists
 if os.path.exists("dist"):
@@ -23,7 +23,7 @@ def write_version_py(filename="SigProfilerMatrixGenerator/version.py"):
 # THIS FILE IS GENERATED FROM SIGPROFILEMATRIXGENERATOR SETUP.PY
 short_version = '%(version)s'
 version = '%(version)s'
-Update = 'v1.2.21: Add reference_genome_manager and remove site-package benchmarking.'
+Update = 'v1.2.22: CLI calls ReferenceGenomeManager to download reference genomes and not install.py'
 
 	"""
     fh = open(filename, "w")
