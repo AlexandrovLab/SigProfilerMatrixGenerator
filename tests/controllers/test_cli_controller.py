@@ -2,11 +2,26 @@ from unittest import mock
 
 import pytest
 
-from SigProfilerMatrixGenerator import install, test_helpers
+from SigProfilerMatrixGenerator import test_helpers
+from SigProfilerMatrixGenerator import install
 from SigProfilerMatrixGenerator.controllers import cli_controller
+from SigProfilerMatrixGenerator.scripts import reference_genome_manager
 
 
 class TestController:
+    @pytest.fixture
+    def mock_ref_gen_manager(self, monkeypatch):
+        """Mock ReferenceGenomeManager for testing."""
+        mock_manager = mock.create_autospec(
+            reference_genome_manager.ReferenceGenomeManager, instance=True
+        )
+        monkeypatch.setattr(
+            reference_genome_manager,
+            "ReferenceGenomeManager",
+            lambda volume: mock_manager,
+        )
+        return mock_manager
+
     @pytest.fixture
     def mock_install(self, monkeypatch):
         """Temporarily change install.install with a mock object for testing"""
@@ -21,11 +36,16 @@ class TestController:
         monkeypatch.setattr(test_helpers, "test_one_genome", mock_test)
         return mock_test
 
-    def test_dispatch_install(self, mock_install):
+    def test_dispatch_download_ftp_genome(self, mock_ref_gen_manager):
         controller = cli_controller.CliController()
-        controller.dispatch_install(["GRCh37", "--local_install_genome", "/somewhere"])
-        mock_install.assert_called_with(
-            "GRCh37", offline_files_path="/somewhere", volume=None
+        controller.dispatch_install(["GRCh37"])
+        mock_ref_gen_manager.download_genome.assert_called_with("GRCh37")
+
+    def test_dispatch_install_local_genome(self, mock_ref_gen_manager):
+        controller = cli_controller.CliController()
+        controller.dispatch_install(["yeast", "--local_genome", "/somewhere"])
+        mock_ref_gen_manager.install_local_genome.assert_called_with(
+            "yeast", "/somewhere"
         )
 
     genome_calls = [
