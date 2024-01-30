@@ -85,7 +85,7 @@ def perm(n, seq):
     return permus
 
 
-def reference_paths(genome):
+def reference_paths(genome, volume=None):
     """
     Returns the path to the reference genomes installed with SigProfilerMatrixGenerator
 
@@ -95,7 +95,7 @@ def reference_paths(genome):
     Returns:
             chrom_path  -> path to the reference genome's chromosome files
     """
-    reference_dir = ref_install.reference_dir()
+    reference_dir = ref_install.reference_dir(secondary_chromosome_install_dir=volume)
     ref_dir = str(reference_dir.path)
     chrom_path = str(reference_dir.get_tsb_dir() / genome) + "/"
 
