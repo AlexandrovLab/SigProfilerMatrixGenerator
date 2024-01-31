@@ -4,6 +4,8 @@ from typing import List
 from SigProfilerMatrixGenerator import test_helpers
 from SigProfilerMatrixGenerator.scripts import (
     SigProfilerMatrixGeneratorFunc as mg,
+    SVMatrixGenerator as sv_mg,
+    CNVMatrixGenerator as cnv_mg,
     reference_genome_manager,
 )
 
@@ -129,6 +131,54 @@ def parse_arguments_matrix_generator(args: List[str]) -> argparse.Namespace:
     return result
 
 
+def parse_arguments_sv_matrix_generator(args: List[str]) -> argparse.Namespace:
+    parser = argparse.ArgumentParser(
+        description="Generate a structural variant (SV) matrix from input data."
+    )
+
+    # Mandatory arguments
+    parser.add_argument("input_dir", help="The directory containing the input files.")
+    parser.add_argument("project", help="The name of the project.")
+    parser.add_argument(
+        "output_dir", help="The directory where the output matrix will be stored."
+    )
+
+    result = parser.parse_args(args)
+    return result
+
+
+def parse_arguments_cnv_matrix_generator(args: List[str]) -> argparse.Namespace:
+    parser = argparse.ArgumentParser(
+        description="Generate a Copy Number Variation (CNV) matrix."
+    )
+
+    # Mandatory arguments
+    parser.add_argument(
+        "file_type",
+        choices=[
+            "ASCAT",
+            "ASCAT_NGS",
+            "SEQUENZA",
+            "ABSOLUTE",
+            "BATTENBERG",
+            "FACETS",
+            "PURPLE",
+            "TCGA",
+        ],
+        help="The type of the input file based on the CNV calling tool used (e.g., 'ASCAT').",
+    )
+    parser.add_argument(
+        "input_file", help="The absolute path to the multi-sample segmentation file."
+    )
+    parser.add_argument("project", help="The name of the project.")
+    parser.add_argument(
+        "output_path", help="The path where the output CNV matrix will be stored."
+    )
+
+    result = parser.parse_args(args)
+    return result
+
+
 class CliController:
     def dispatch_install(self, user_args: List[str]) -> None:
         parsed_args = parse_arguments_install(user_args)
@@ -160,4 +210,21 @@ class CliController:
             seqInfo=parsed_args.seqInfo,
             cushion=parsed_args.cushion,
             volume=parsed_args.volume,
+        )
+
+    def dispatch_sv_matrix_generator(self, user_args: List[str]) -> None:
+        parsed_args = parse_arguments_sv_matrix_generator(user_args)
+        sv_mg.generateSVMatrix(
+            input_dir=parsed_args.input_dir,
+            project=parsed_args.project,
+            output_dir=parsed_args.output_dir,
+        )
+
+    def dispatch_cnv_matrix_generator(self, user_args: List[str]) -> None:
+        parsed_args = parse_arguments_cnv_matrix_generator(user_args)
+        cnv_mg.generateCNVMatrix(
+            file_type=parsed_args.file_type,
+            input_file=parsed_args.input_file,
+            project=parsed_args.project,
+            output_path=parsed_args.output_path,
         )
