@@ -7,9 +7,6 @@
 from __future__ import print_function
 
 import os
-import pdb
-import re
-import sys
 
 from SigProfilerMatrixGenerator.scripts import MutationMatrixGenerator as spm
 
@@ -76,7 +73,7 @@ def convertVCF(project, vcf_path, genome, output_path, ncbi_chrom, log_file):
                         if len(line) == 0:
                             continue
                         chrom = line[0]
-                        if len(chrom) > 2:
+                        if len(chrom) > 2 and genome.lower() != "ebv":
                             chrom = chrom[3:]
                         if chrom in ncbi_chrom:
                             chrom = ncbi_chrom[chrom]

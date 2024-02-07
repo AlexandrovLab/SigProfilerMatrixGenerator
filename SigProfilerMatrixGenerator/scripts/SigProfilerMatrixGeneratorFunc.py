@@ -1417,11 +1417,12 @@ def SigProfilerMatrixGeneratorFunc(
             chrom_start = None
         if i != 1:
             for file in vcf_files:
-                chrom = file.split("_")[0]
+                if reference_genome.lower() != "ebv":
+                    chrom = file.split("_")[0]
+                else:
+                    chrom = "gi_82503188_ref_NC_007605"
                 if not os.path.exists(chrom_path + chrom + ".txt"):
                     continue
-                if reference_genome == "ebv":
-                    chrom = "_".join([x for x in file.split("_")[:-1]])
                 with open(vcf_path + file) as f:
                     lines = [line.strip().split() for line in f]
                 lines = sorted(lines, key=lambda x: (x[0], int(x[2])))
@@ -1953,7 +1954,7 @@ def SigProfilerMatrixGeneratorFunc(
             for file in vcf_files:
                 chrom = file.split("_")[0]
                 if reference_genome == "ebv":
-                    chrom = "_".join([x for x in file.split("_")[:-1]])
+                    chrom = "gi_82503188_ref_NC_007605"
                 with open(vcf_path + file) as f:
                     lines = [line.strip().split() for line in f]
                 lines = sorted(lines, key=lambda x: (x[0], int(x[2])))
