@@ -380,9 +380,9 @@ def install_chromosomes_tsb(genomes, reference_dir: ref_install.ReferenceDir, cu
 def install_chromosomes_tsb_BED(
     genomes, reference_dir: ref_install.ReferenceDir, custom
 ):
-    ref_dir = str(reference_dir.path)
-    tsb_bed_genome_dir = os.path.join(ref_dir, "chromosomes", "tsb_BED", genome, "")
     for genome in genomes:
+        ref_dir = str(reference_dir.path)
+        tsb_bed_genome_dir = os.path.join(ref_dir, "chromosomes", "tsb_BED", genome, "")
         # this `if` statement is strange. Usually the "chromosomes" folder is in
         # ref_dir + "references", not directly in ref_dir, so I would expect
         # the first clause to always be True
