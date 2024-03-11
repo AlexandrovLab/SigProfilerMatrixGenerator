@@ -1,0 +1,8 @@
+sample	chrom1	start1	end1	chrom2	start2	end2	svclass
+delly	chr1	99991	100068	chr1	599961	600038	deletion
+delly	chr1	200011	200048	chr1	299831	300008	deletion
+delly	chr1	999961	1000038	chr1	1999961	2000038	deletion
+delly	chr1	1999941	2000058	chr1	2999901	3000098	deletion
+delly	chr2	99988	100051	chr2	200018	200141	tandem-duplication
+delly	chr2	100330	100569	chr2	200360	200599	tandem-duplication
+delly	chr2	999880	1000119	chr2	1999880	2000119	tandem-duplication
