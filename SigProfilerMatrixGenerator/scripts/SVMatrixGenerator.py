@@ -19,7 +19,7 @@ from matplotlib.ticker import LinearLocator
 from numpy import matlib
 from scipy import signal as scisig
 from scipy.stats import binom
-from vcfToBedpe import vcfToBedpe
+from SigProfilerMatrixGenerator.scripts.vcfToBedpe import vcfToBedpe
 
 matplotlib.use("Agg")
 pd.options.mode.chained_assignment = None

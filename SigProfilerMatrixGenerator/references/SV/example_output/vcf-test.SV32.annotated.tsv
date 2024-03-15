@@ -478,6 +478,14 @@ chrom1	start1	end1	chrom2	start2	end2	sample	svclass	size_bin	length	is_clustere
 2	99969	100030	2	199968	200031	manta	tandem-duplication	10-100Kb	99999	False
 2	100448	100552	2	200448	200552	manta	tandem-duplication	10-100Kb	100000	False
 2	199948	200052	2	299948	300052	manta	tandem-duplication	10-100Kb	100000	False
+1	9999	10000	1	295665	295666	gnomad2	tandem-duplication	100Kb-1Mb	285666	False
+1	10999	11000	1	50999	51000	gnomad2	tandem-duplication	10-100Kb	40000	False
+1	21999	22000	1	29999	30000	gnomad2	deletion	1-10Kb	8000	False
+1	39999	40000	1	46999	47000	gnomad2	deletion	1-10Kb	7000	False
+1	47999	48000	1	127999	128000	gnomad2	tandem-duplication	10-100Kb	80000	False
+1	63999	64000	1	73999	74000	gnomad2	tandem-duplication	1-10Kb	10000	True
+1	79085	79086	1	88117	88118	gnomad2	deletion	1-10Kb	9032	True
+1	127999	128000	1	133999	134000	gnomad2	deletion	1-10Kb	6000	False
 1	300010	300028	1	399994	400012	lumpy	deletion	10-100Kb	99984	False
 1	1000010	1000028	1	2000020	2000038	lumpy	deletion	1Mb-10Mb	1000010	False
 1	2999948	3000051	1	3999960	4000098	lumpy	deletion	1Mb-10Mb	1000012	False
