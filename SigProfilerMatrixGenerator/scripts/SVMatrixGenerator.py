@@ -939,7 +939,7 @@ def annotateBedpe(sv_bedpe):
     return result
 
 
-def generateSVMatrix(input_dir, project, file_type, output_dir, skip=False):
+def generateSVMatrix(input_dir, project, output_dir, skip=False):
 
     print("Performed conversion of VCF to BEDPE and outputted bedpe file to " + str(input_dir))
     # create output_dir if it does not yet exist
@@ -950,7 +950,13 @@ def generateSVMatrix(input_dir, project, file_type, output_dir, skip=False):
     all_samples = []  # list of dataframes for each sample
 
 
-    if file_type == "VCF":
+    flag=True
+    for file in os.listdir(input_dir):
+        if file.endswith(".vcf"):
+            flag=False
+            break
+
+    if not flag: #dealing with VCF
         for f in os.listdir(input_dir):
             if f.endswith(".vcf"): 
                 print("Converting " + f + " to bedpe format")
@@ -1692,5 +1698,5 @@ def plotSV(
 
 if __name__ == "__main__":
     if len(sys.argv) > 1:
-        input_dir, project, file_type, output_dir = sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4]
-    generateSVMatrix(input_dir, project, file_type, output_dir)
+        input_dir, project, output_dir = sys.argv[1], sys.argv[2], sys.argv[3]
+    generateSVMatrix(input_dir, project, output_dir)
