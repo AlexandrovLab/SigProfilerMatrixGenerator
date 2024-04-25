@@ -23,7 +23,7 @@ def write_version_py(filename="SigProfilerMatrixGenerator/version.py"):
 # THIS FILE IS GENERATED FROM SIGPROFILEMATRIXGENERATOR SETUP.PY
 short_version = '%(version)s'
 version = '%(version)s'
-Update = 'v1.2.26: Update Scipy dependency for python>3.9'
+Update = 'v1.2.26: Update Scipy dependency for python>3.9 and removed duplicate plotSV code.'
 
 	"""
     fh = open(filename, "w")
