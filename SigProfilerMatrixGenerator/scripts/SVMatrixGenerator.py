@@ -11,6 +11,7 @@ import pandas as pd
 from numpy import matlib
 from scipy import signal as scisig
 from scipy.stats import binom
+from SigProfilerMatrixGenerator.scripts.vcfToBedpe import vcfToBedpe
 
 
 pd.options.mode.chained_assignment = None
@@ -931,14 +932,34 @@ def annotateBedpe(sv_bedpe):
 
 
 def generateSVMatrix(input_dir, project, output_dir, skip=False):
+
+    print("Performed conversion of VCF to BEDPE and outputted bedpe file to " + str(input_dir))
     # create output_dir if it does not yet exist
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
     if input_dir[-1] != "/":
         input_dir = input_dir + "/"
     all_samples = []  # list of dataframes for each sample
+
+
+    flag=True
+    for file in os.listdir(input_dir):
+        if file.endswith(".vcf"):
+            flag=False
+            break
+
+    if not flag: #dealing with VCF
+        for f in os.listdir(input_dir):
+            if f.endswith(".vcf"): 
+                print("Converting " + f + " to bedpe format")
+                sample = f.split(".")[0]
+                bedpe = vcfToBedpe(input_dir+f, input_dir)
+                bedpe.to_csv(input_dir+sample+".SPMG.bedpe", sep="\t", index=None)
+                print("Performed conversion of VCF to BEDPE and outputted bedpe file to " + str(input_dir+sample+".SPMG.bedpe"))
+
+
     for f in os.listdir(input_dir):
-        if os.path.isfile(input_dir + f):
+        if os.path.isfile(input_dir + f) and f.endswith(".SPMG.bedpe"):
             print("Generating count vector for " + f)
             data = pd.read_csv(input_dir + f, sep="\t")
             if data.shape[0] == 0:
@@ -1196,6 +1217,7 @@ def tsv2matrix(sv_bedpe_list, project, output_dir):
     if len(sv_bedpe_list) <= 1:
         warnings.warn(
             "There seems to be <= 1 samples, please ensure the sample column contains a unique sample name"
+
         )
     df = pd.concat(sv_bedpe_list)  # one master table with all samples
     out_file = os.path.join(output_dir, project + ".SV32.annotated.tsv")

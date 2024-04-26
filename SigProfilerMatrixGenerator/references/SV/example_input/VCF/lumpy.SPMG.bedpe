@@ -1,0 +1,8 @@
+sample	chrom1	start1	end1	chrom2	start2	end2	svclass
+lumpy	chr1	9990	10008	chr1	10090	10108	deletion
+lumpy	chr1	300010	300028	chr1	399994	400012	deletion
+lumpy	chr1	1000010	1000028	chr1	2000020	2000038	deletion
+lumpy	chr1	2999948	3000051	chr1	3999960	4000098	deletion
+lumpy	chr2	100017	100102	chr2	200029	200140	tandem-duplication
+lumpy	chr2	200016	200103	chr2	300002	300127	tandem-duplication
+lumpy	chr2	999996	1000083	chr2	2000011	2000117	tandem-duplication
