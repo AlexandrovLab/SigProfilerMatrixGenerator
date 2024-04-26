@@ -892,7 +892,12 @@ def catalogue_generator_single(
                             sum_tran += counts
                         elif mut[0] == "U":
                             sum_untran += counts
-                    pvals.append(stats.binom_test([sum_tran, sum_untran]))
+                    n = sum_tran + sum_untran
+                    if n > 0:
+                        pval = stats.binomtest(x=sum_tran, n=n).pvalue
+                    else:
+                        pval = 1
+                    pvals.append(pval)
 
                     sum_tran_hot = 0
                     sum_untran_hot = 0
@@ -902,7 +907,12 @@ def catalogue_generator_single(
                                 sum_tran_hot += counts
                             elif mut[0] == "U":
                                 sum_untran_hot += counts
-                    pvals_hot.append(stats.binom_test([sum_tran_hot, sum_untran_hot]))
+                    n_hot = sum_tran_hot + sum_untran_hot
+                    if n_hot > 0:
+                        pval_hot = stats.binomtest(x=sum_tran_hot, n=n_hot).pvalue
+                    else:
+                        pval_hot = 1
+                    pvals_hot.append(pval_hot)
 
                 qvals = sm.fdrcorrection(pvals)[1]
                 qvals_hot = sm.fdrcorrection(pvals_hot)[1]
@@ -1886,7 +1896,12 @@ def catalogue_generator_INDEL_single(
                         sum_tran += counts
                     elif mut[0] == "U":
                         sum_untran += counts
-                pvals.append(stats.binom_test([sum_tran, sum_untran]))
+                n = sum_tran + sum_untran
+                if n > 0:
+                    pval = stats.binomtest(x=sum_tran, n=n).pvalue
+                else:
+                    pval = 1
+                pvals.append(pval)
 
                 sum_tran_hot = 0
                 sum_untran_hot = 0
@@ -1896,7 +1911,12 @@ def catalogue_generator_INDEL_single(
                             sum_tran_hot += counts
                         elif mut[0] == "U":
                             sum_untran_hot += counts
-                pvals_hot.append(stats.binom_test([sum_tran_hot, sum_untran_hot]))
+                n_hot = sum_tran_hot + sum_untran_hot
+                if n_hot > 0:
+                    pval_hot = stats.binomtest(x=sum_tran_hot, n=n_hot).pvalue
+                else:
+                    pval_hot = 1
+                pvals_hot.append(pval_hot)
 
             qvals = sm.fdrcorrection(pvals)[1]
             qvals_hot = sm.fdrcorrection(pvals_hot)[1]
@@ -3098,12 +3118,16 @@ def matrix_generator(
                 pvals = []
                 for mut_type in types:
                     if mut_type[0] == "T":
-                        pval = stats.binom_test(
-                            [
-                                current_tsb.loc[mut_type][sample],
-                                current_tsb.loc["U:" + mut_type[2:]][sample],
-                            ]
+                        successes = current_tsb.loc[mut_type][sample]
+                        total_trials = (
+                            successes + current_tsb.loc["U:" + mut_type[2:]][sample]
                         )
+
+                        if total_trials > 0:
+                            pval = stats.binomtest(x=successes, n=total_trials).pvalue
+                        else:
+                            pval = 1
+
                         if (
                             current_tsb.loc[mut_type][sample]
                             >= current_tsb.loc["U:" + mut_type[2:]][sample]
@@ -3163,18 +3187,32 @@ def matrix_generator(
                 enrichment_384 = list(enr[sample])
                 enrichment_24 = list(enr[sample])
 
-                for i in range(0, len(tsb_6144), 1):
-                    pvals.append(
-                        stats.binom_test([tsb_6144[sample][i], tsb_6144_U[sample][i]])
-                    )
-                for i in range(0, len(tsb_384), 1):
-                    pvals_384.append(
-                        stats.binom_test([tsb_384[sample][i], tsb_384_U[sample][i]])
-                    )
-                for i in range(0, len(tsb_24), 1):
-                    pvals_24.append(
-                        stats.binom_test([tsb_24[sample][i], tsb_24_U[sample][i]])
-                    )
+                for i in range(len(tsb_6144)):
+                    successes = tsb_6144[sample][i]
+                    total_trials = successes + tsb_6144_U[sample][i]
+                    if total_trials > 0:
+                        pval = stats.binomtest(x=successes, n=total_trials).pvalue
+                    else:
+                        pval = 1
+                    pvals.append(pval)
+
+                for i in range(len(tsb_384)):
+                    successes = tsb_384[sample][i]
+                    total_trials = successes + tsb_384_U[sample][i]
+                    if total_trials > 0:
+                        pval = stats.binomtest(x=successes, n=total_trials).pvalue
+                    else:
+                        pval = 1
+                    pvals_384.append(pval)
+
+                for i in range(len(tsb_24)):
+                    successes = tsb_24[sample][i]
+                    total_trials = successes + tsb_24_U[sample][i]
+                    if total_trials > 0:
+                        pval = stats.binomtest(x=successes, n=total_trials).pvalue
+                    else:
+                        pval = 1
+                    pvals_24.append(pval)
 
                 qvals = sm.fdrcorrection(pvals)[1]
                 qvals_384 = sm.fdrcorrection(pvals_384)[1]
