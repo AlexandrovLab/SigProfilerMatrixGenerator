@@ -5,14 +5,9 @@ import math, time, re
 import pandas as pd
 #import vcf
 
-__author__ = "Colby Chiang (cc2qe@virginia.edu)"
-__version__ = "$Revision: 0.0.1 $"
-__date__ = "$Date: 2014-04-23 14:31 $"
 
 # --------------------------------------
 # define functions
-
-
 class Vcf(object):
     def __init__(self):
         self.file_format = 'VCFv4.2'
@@ -358,14 +353,18 @@ def vcfToBedpe(vcf_path, output_path):
     mapping = {"DEL":"deletion", "BND":"unknown", "INS":"insertion", "DUP":"tandem-duplication", "CPX":"unknown", "INV":"inversion", "CNV":"unknown", 
 "CTX": "translocation"}
     df["svclass"] = df["svclass"].map(mapping)
-    df2 = df[df["svclass"] != "unknown"]
+    df2 = df[df["svclass"] != "unknown"] #classified confidently
+    unclassified = df[df["svclass"] == "unknown"] #not classified confidently
     dropped = int(df.shape[0] - df2.shape[0])
     print("Note that there were " + str(dropped) + " SV entries dropped from the VCF because they could not be confidently classified as deletion, translocation, tandem-duplication, or inversion")
     s = [sample for x in range(df2.shape[0])]
     df2.insert(0, column="sample", value=s)
 
+    #unclassified events
+    s = [sample for x in range(unclassified.shape[0])]
+    unclassified.insert(0, column="sample", value=s)
 
-    return df2
+    return df2, unclassified
 
 
 # --------------------------------------

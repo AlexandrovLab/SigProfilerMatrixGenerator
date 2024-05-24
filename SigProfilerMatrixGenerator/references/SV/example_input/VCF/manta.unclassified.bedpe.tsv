@@ -1,0 +1,3 @@
+sample	chrom1	start1	end1	chrom2	start2	end2	svclass
+manta	chr3	99899	100100	chr4	199999	200000	unknown
+manta	chr4	199899	200100	chr3	99999	100000	unknown

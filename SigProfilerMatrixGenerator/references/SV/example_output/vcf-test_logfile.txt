@@ -1,0 +1,17 @@
+Performed conversion of VCF to BEDPE and outputted bedpe file to ./SigProfilerMatrixGenerator/references/SV/example_input/VCF/
+Converting manta.vcf to bedpe format
+Performed conversion of VCF to BEDPE and outputted bedpe file to ./SigProfilerMatrixGenerator/references/SV/example_input/VCF/manta.SPMG.bedpe
+Note that events that could not be classified were outputted to ./SigProfilerMatrixGenerator/references/SV/example_input/VCF/manta.unclassified.bedpe.tsv
+Converting lumpy.vcf to bedpe format
+Performed conversion of VCF to BEDPE and outputted bedpe file to ./SigProfilerMatrixGenerator/references/SV/example_input/VCF/lumpy.SPMG.bedpe
+Note that events that could not be classified were outputted to ./SigProfilerMatrixGenerator/references/SV/example_input/VCF/lumpy.unclassified.bedpe.tsv
+Converting delly.vcf to bedpe format
+Performed conversion of VCF to BEDPE and outputted bedpe file to ./SigProfilerMatrixGenerator/references/SV/example_input/VCF/delly.SPMG.bedpe
+Note that events that could not be classified were outputted to ./SigProfilerMatrixGenerator/references/SV/example_input/VCF/delly.unclassified.bedpe.tsv
+Converting gnomad.vcf to bedpe format
+Performed conversion of VCF to BEDPE and outputted bedpe file to ./SigProfilerMatrixGenerator/references/SV/example_input/VCF/gnomad.SPMG.bedpe
+Note that events that could not be classified were outputted to ./SigProfilerMatrixGenerator/references/SV/example_input/VCF/gnomad.unclassified.bedpe.tsv
+Generating count vector for gnomad.SPMG.bedpe
+Generating count vector for delly.SPMG.bedpe
+Generating count vector for manta.SPMG.bedpe
+Generating count vector for lumpy.SPMG.bedpe

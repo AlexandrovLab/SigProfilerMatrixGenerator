@@ -940,82 +940,86 @@ def annotateBedpe(sv_bedpe):
 
 
 def generateSVMatrix(input_dir, project, output_dir, skip=False):
+    with open(os.path.join(output_dir, project + 'logfile.txt'), 'w') as fout:
+        # create output_dir if it does not yet exist
+        if not os.path.exists(output_dir):
+            os.makedirs(output_dir)
+        if input_dir[-1] != "/":
+            input_dir = input_dir + "/"
+        all_samples = []  # list of dataframes for each sample
 
-    print("Performed conversion of VCF to BEDPE and outputted bedpe file to " + str(input_dir))
-    # create output_dir if it does not yet exist
-    if not os.path.exists(output_dir):
-        os.makedirs(output_dir)
-    if input_dir[-1] != "/":
-        input_dir = input_dir + "/"
-    all_samples = []  # list of dataframes for each sample
 
+        vcf=False #assumes BEDPE
+        for file in os.listdir(input_dir):
+            if file.endswith(".vcf"):
+                vcf=True
+                break
 
-    flag=True
-    for file in os.listdir(input_dir):
-        if file.endswith(".vcf"):
-            flag=False
-            break
+        if vcf: #dealing with VCF
+            for f in os.listdir(input_dir):
+                if f.endswith(".vcf"): 
+                    fout.write("Converting " + f + " to bedpe format\n")
+                    sample = f.split(".")[0]
+                    bedpe, unclassified = vcfToBedpe(input_dir+f, input_dir)
+                    bedpe.to_csv(input_dir+sample+".SPMG.bedpe", sep="\t", index=None)
+                    unclassified.to_csv(output_dir+sample+".unclassified.bedpe", sep="\t", index=None)
+                    fout.write("Performed conversion of VCF to BEDPE and outputted bedpe file to " + str(input_dir+sample+".SPMG.bedpe" + "\n"))
+                    fout.write("Note that events that could not be classified were outputted to " + str(output_dir+sample+".unclassified.bedpe" + "\n"))
+        
 
-    if not flag: #dealing with VCF
         for f in os.listdir(input_dir):
-            if f.endswith(".vcf"): 
-                print("Converting " + f + " to bedpe format")
-                sample = f.split(".")[0]
-                bedpe = vcfToBedpe(input_dir+f, input_dir)
-                bedpe.to_csv(input_dir+sample+".SPMG.bedpe", sep="\t", index=None)
-                print("Performed conversion of VCF to BEDPE and outputted bedpe file to " + str(input_dir+sample+".SPMG.bedpe"))
+            if os.path.isfile(input_dir + f) and "bedpe" in f:
+                fout.write("Generating count vector for " + f + "\n")
+                data = pd.read_csv(input_dir + f, sep="\t")
+                if data.shape[0] == 0:
+                    fout.write("SKIPPING " + str(f) + "because it has 0 SVs")
+                    continue
+                elif (
+                    "sample" not in data.columns
+                    or len(data["sample"].iloc[0]) <= 1
+                    or "chrom1" not in data.columns
+                    or "chrom2" not in data.columns
+                    or "start1" not in data.columns
+                    or "start2" not in data.columns
+                    or "end1" not in data.columns
+                    or "end2" not in data.columns
+                ) and skip == False:
+                    raise Exception(
+                        "Please ensure that there is a sample column containing the name of the sample"
+                    )
+                elif (
+                    "sample" not in data.columns
+                    or len(data["sample"].iloc[0]) <= 1
+                    or "chrom1" not in data.columns
+                    or "chrom2" not in data.columns
+                    or "start1" not in data.columns
+                    or "start2" not in data.columns
+                    or "end1" not in data.columns
+                    or "end2" not in data.columns
+                ) and skip == True:
+                    print(
+                        "Warning: it appears that "
+                        + str(f)
+                        + " may not have the correct input format, please check for required columns that are missing"
+                    )
+                    continue
+                else:
+                    # get annotated bedpe for a single sample
+                    result = annotateBedpe(data)
 
+                all_samples.append(result["sv_bedpe"])
 
-    for f in os.listdir(input_dir):
-        if os.path.isfile(input_dir + f) and f.endswith(".SPMG.bedpe"):
-            print("Generating count vector for " + f)
-            data = pd.read_csv(input_dir + f, sep="\t")
-            if data.shape[0] == 0:
-                print("SKIPPING " + str(f) + "because it has 0 SVs")
-                continue
-            elif (
-                "sample" not in data.columns
-                or len(data["sample"].iloc[0]) <= 1
-                or "chrom1" not in data.columns
-                or "chrom2" not in data.columns
-                or "start1" not in data.columns
-                or "start2" not in data.columns
-                or "end1" not in data.columns
-                or "end2" not in data.columns
-            ) and skip == False:
-                raise Exception(
-                    "Please ensure that there is a sample column containing the name of the sample"
-                )
-            elif (
-                "sample" not in data.columns
-                or len(data["sample"].iloc[0]) <= 1
-                or "chrom1" not in data.columns
-                or "chrom2" not in data.columns
-                or "start1" not in data.columns
-                or "start2" not in data.columns
-                or "end1" not in data.columns
-                or "end2" not in data.columns
-            ) and skip == True:
-                print(
-                    "Warning: it appears that "
-                    + str(f)
-                    + " may not have the correct input format, please check for required columns that are missing"
-                )
-                continue
-            else:
-                # get annotated bedpe for a single sample
-                result = annotateBedpe(data)
-
-            all_samples.append(result["sv_bedpe"])
     matrix = tsv2matrix(all_samples, project, output_dir)
     out_file = os.path.join(output_dir, project + ".SV32.matrix.tsv")
     matrix.to_csv(out_file, sep="\t")
     print("Saved matrix to " + out_file)
+    #fout.write("Saved matrix to " + out_file)
     plotSV(
         matrix, output_dir, project, plot_type="pdf", percentage=False, aggregate=True
     )
     plot_file_name = os.path.join(output_dir, project + "_RS32_counts_aggregated.pdf")
     print("Saved aggregate SV32 plot to " + plot_file_name)
+    #fout.write("Saved aggregate SV32 plot to " + plot_file_name)
     return matrix
 
 
