@@ -136,6 +136,8 @@ python3 ./SigProfilerMatrixGenerator/scripts/SVMatrixGenerator.py ./SigProfilerM
 2. Aggregate SV plot - a summary plot showing the average number of events in each channel for the whole cohort of samples
 3. SV Matrix - a 32 X n matrix (where n is the number of samples) that can be used to perform signature decomposition, clustering, etc.
 
+**Note that VCF format is now supported. If using VCFs, please make sure the files in your input directory end with .vcf. The VCF to BEDPE conversion is performed internally and execution will proceeed as noted above (all aurguments remain the same)**
+
 ## COPY NUMBER MATRIX GENERATION
 
 In order to generate a copy number matrix, provide the an absolute path to a multi-sample segmentation file obtained from one of the following copy number calling tools (if you have individual sample files, please combine them into one file with the first column corresponding to the sample name):
