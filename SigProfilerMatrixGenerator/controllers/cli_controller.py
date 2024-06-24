@@ -1,6 +1,5 @@
 import argparse
 from typing import List
-
 from SigProfilerMatrixGenerator import test_helpers
 from SigProfilerMatrixGenerator.scripts import (
     SigProfilerMatrixGeneratorFunc as mg,
@@ -8,6 +7,17 @@ from SigProfilerMatrixGenerator.scripts import (
     CNVMatrixGenerator as cnv_mg,
     reference_genome_manager,
 )
+
+
+def str2bool(v):
+    if isinstance(v, bool):
+        return v
+    if v.lower() in ("yes", "true", "t", "y", "1"):
+        return True
+    elif v.lower() in ("no", "false", "f", "n", "0"):
+        return False
+    else:
+        raise argparse.ArgumentTypeError("Boolean value expected.")
 
 
 def parse_arguments_test(args: List[str]) -> argparse.Namespace:
@@ -97,19 +107,25 @@ def parse_arguments_matrix_generator(args: List[str]) -> argparse.Namespace:
     )
     parser.add_argument(
         "--plot",
-        type=bool,
+        type=str2bool,
+        nargs="?",
+        const=True,
         default=False,
         help="Integrates with SigProfilerPlotting to output visualizations for each matrix. Default is False.",
     )
     parser.add_argument(
         "--tsb_stat",
-        type=bool,
+        type=str2bool,
+        nargs="?",
+        const=True,
         default=False,
         help="Outputs the results of a transcriptional strand bias test for the respective matrices. Default is False.",
     )
     parser.add_argument(
         "--seqInfo",
-        type=bool,
+        type=str2bool,
+        nargs="?",
+        const=True,
         default=True,
         help="Outputs original mutations into a text file with the SigProfilerMatrixGenerator classification for each mutation. Default is True.",
     )
