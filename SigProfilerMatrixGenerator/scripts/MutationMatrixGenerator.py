@@ -894,7 +894,7 @@ def catalogue_generator_single(
                             sum_untran += counts
                     n = sum_tran + sum_untran
                     if n > 0:
-                        pval = stats.binomtest(x=sum_tran, n=n).pvalue
+                        pval = stats.binomtest(k=sum_tran, n=n).pvalue
                     else:
                         pval = 1
                     pvals.append(pval)
@@ -909,7 +909,7 @@ def catalogue_generator_single(
                                 sum_untran_hot += counts
                     n_hot = sum_tran_hot + sum_untran_hot
                     if n_hot > 0:
-                        pval_hot = stats.binomtest(x=sum_tran_hot, n=n_hot).pvalue
+                        pval_hot = stats.binomtest(k=sum_tran_hot, n=n_hot).pvalue
                     else:
                         pval_hot = 1
                     pvals_hot.append(pval_hot)
@@ -1898,7 +1898,7 @@ def catalogue_generator_INDEL_single(
                         sum_untran += counts
                 n = sum_tran + sum_untran
                 if n > 0:
-                    pval = stats.binomtest(x=sum_tran, n=n).pvalue
+                    pval = stats.binomtest(k=sum_tran, n=n).pvalue
                 else:
                     pval = 1
                 pvals.append(pval)
@@ -1913,7 +1913,7 @@ def catalogue_generator_INDEL_single(
                             sum_untran_hot += counts
                 n_hot = sum_tran_hot + sum_untran_hot
                 if n_hot > 0:
-                    pval_hot = stats.binomtest(x=sum_tran_hot, n=n_hot).pvalue
+                    pval_hot = stats.binomtest(k=sum_tran_hot, n=n_hot).pvalue
                 else:
                     pval_hot = 1
                 pvals_hot.append(pval_hot)
@@ -3124,7 +3124,7 @@ def matrix_generator(
                         )
 
                         if total_trials > 0:
-                            pval = stats.binomtest(x=successes, n=total_trials).pvalue
+                            pval = stats.binomtest(k=successes, n=total_trials).pvalue
                         else:
                             pval = 1
 
@@ -3200,7 +3200,7 @@ def matrix_generator(
                     successes = tsb_384[sample][i]
                     total_trials = successes + tsb_384_U[sample][i]
                     if total_trials > 0:
-                        pval = stats.binomtest(x=successes, n=total_trials).pvalue
+                        pval = stats.binomtest(k=successes, n=total_trials).pvalue
                     else:
                         pval = 1
                     pvals_384.append(pval)
@@ -3209,7 +3209,7 @@ def matrix_generator(
                     successes = tsb_24[sample][i]
                     total_trials = successes + tsb_24_U[sample][i]
                     if total_trials > 0:
-                        pval = stats.binomtest(x=successes, n=total_trials).pvalue
+                        pval = stats.binomtest(k=successes, n=total_trials).pvalue
                     else:
                         pval = 1
                     pvals_24.append(pval)
