@@ -3,7 +3,7 @@ import shutil
 
 from setuptools import setup
 
-VERSION = "1.2.26"
+VERSION = "1.2.27"
 
 # remove the dist folder first if exists
 if os.path.exists("dist"):
@@ -23,7 +23,7 @@ def write_version_py(filename="SigProfilerMatrixGenerator/version.py"):
 # THIS FILE IS GENERATED FROM SIGPROFILEMATRIXGENERATOR SETUP.PY
 short_version = '%(version)s'
 version = '%(version)s'
-Update = 'v1.2.26: Update Scipy dependency for python>3.9 and removed duplicate plotSV code.'
+Update = 'v1.2.27: Add environment variable, fix binomtest, improve CLI boolean handling, update dependencies'
 
 	"""
     fh = open(filename, "w")
@@ -54,7 +54,7 @@ setup(
         "matplotlib>=2.2.2",
         "sigProfilerPlotting>=1.3.22",
         "statsmodels>=0.9.0",
-        "numpy>=1.18.5",
+        "numpy>=1.18.5,<2.0.0",
         "pandas>=0.23.4,<2.0.0",
         "scipy>=1.12.0; python_version>='3.9'",
         "scipy>=1.1.0, <1.12.0; python_version=='3.8'",

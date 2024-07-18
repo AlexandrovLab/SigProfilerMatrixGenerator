@@ -990,8 +990,7 @@ def generateSVMatrix(input_dir, project, output_dir, skip=False):
         percentage=False,
         aggregate=True,
     )
-    plot_file_name = os.path.join(output_dir, project + "_RS32_counts_aggregated.pdf")
-    print("Saved aggregate SV32 plot to " + plot_file_name)
+
     return matrix
 
 

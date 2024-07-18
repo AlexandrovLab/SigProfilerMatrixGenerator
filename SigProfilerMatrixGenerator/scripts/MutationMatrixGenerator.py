@@ -3191,7 +3191,7 @@ def matrix_generator(
                     successes = tsb_6144[sample][i]
                     total_trials = successes + tsb_6144_U[sample][i]
                     if total_trials > 0:
-                        pval = stats.binomtest(x=successes, n=total_trials).pvalue
+                        pval = stats.binomtest(k=successes, n=total_trials).pvalue
                     else:
                         pval = 1
                     pvals.append(pval)
