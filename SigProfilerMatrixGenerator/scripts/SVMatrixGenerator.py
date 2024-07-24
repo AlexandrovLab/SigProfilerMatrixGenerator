@@ -940,7 +940,7 @@ def annotateBedpe(sv_bedpe):
 
 
 def generateSVMatrix(input_dir, project, output_dir, skip=False):
-    with open(os.path.join(output_dir, project + 'logfile.txt'), 'w') as fout:
+    with open(os.path.join(output_dir, project + '_logfile.txt'), 'w') as fout:
         # create output_dir if it does not yet exist
         if not os.path.exists(output_dir):
             os.makedirs(output_dir)
@@ -968,7 +968,7 @@ def generateSVMatrix(input_dir, project, output_dir, skip=False):
         
 
         for f in os.listdir(input_dir):
-            if os.path.isfile(input_dir + f) and "bedpe" in f:
+            if os.path.isfile(input_dir + f) and f.endswith(".SPMG.bedpe"):
                 fout.write("Generating count vector for " + f + "\n")
                 data = pd.read_csv(input_dir + f, sep="\t")
                 if data.shape[0] == 0:
