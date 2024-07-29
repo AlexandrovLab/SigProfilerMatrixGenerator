@@ -1,4 +1,3 @@
-Performed conversion of VCF to BEDPE and outputted bedpe file to ./SigProfilerMatrixGenerator/references/SV/example_input/560-Breast
 Generating count vector for PD23566a.560_breast.rearrangements.n560.bedpe
 Generating count vector for PD11352a.560_breast.rearrangements.n560.bedpe
 Generating count vector for PD11389a.560_breast.rearrangements.n560.bedpe

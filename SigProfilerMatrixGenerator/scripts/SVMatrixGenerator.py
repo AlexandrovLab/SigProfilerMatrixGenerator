@@ -961,14 +961,14 @@ def generateSVMatrix(input_dir, project, output_dir, skip=False):
                     fout.write("Converting " + f + " to bedpe format\n")
                     sample = f.split(".")[0]
                     bedpe, unclassified = vcfToBedpe(input_dir+f, input_dir)
-                    bedpe.to_csv(input_dir+sample+".SPMG.bedpe", sep="\t", index=None)
+                    bedpe.to_csv(input_dir+sample+"bedpe", sep="\t", index=None)
                     unclassified.to_csv(output_dir+sample+".unclassified.bedpe", sep="\t", index=None)
-                    fout.write("Performed conversion of VCF to BEDPE and outputted bedpe file to " + str(input_dir+sample+".SPMG.bedpe" + "\n"))
-                    fout.write("Note that events that could not be classified were outputted to " + str(output_dir+sample+".unclassified.bedpe" + "\n"))
+                    fout.write("Performed conversion of VCF to BEDPE and outputted bedpe file to " + str(input_dir+sample+".bedpe" + "\n"))
+                    fout.write("Note that events that could not be classified were outputted to " + str(output_dir+sample+".unclassified.txt" + "\n"))
         
 
         for f in os.listdir(input_dir):
-            if os.path.isfile(input_dir + f) and f.endswith(".SPMG.bedpe"):
+            if os.path.isfile(input_dir + f) and f.endswith(".bedpe"):
                 fout.write("Generating count vector for " + f + "\n")
                 data = pd.read_csv(input_dir + f, sep="\t")
                 if data.shape[0] == 0:
@@ -1703,4 +1703,4 @@ def plotSV(
 if __name__ == "__main__":
     if len(sys.argv) > 1:
         input_dir, project, output_dir = sys.argv[1], sys.argv[2], sys.argv[3]
-    generateSVMatrix(input_dir, project, output_dir)
+    result_matrix = generateSVMatrix(input_dir, project, output_dir)
