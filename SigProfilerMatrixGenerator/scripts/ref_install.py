@@ -1,4 +1,4 @@
-"""Supports installation of reference genomes"""
+import os
 import pathlib
 from importlib import resources
 from typing import Optional, Union
@@ -12,10 +12,17 @@ def reference_dir(
     secondary_chromosome_install_dir: Optional[Union[str, pathlib.Path]] = None
 ) -> "ReferenceDir":
     """Small constructor for ReferenceDir"""
-    if secondary_chromosome_install_dir is not None:
+    # Check the environmental variable first
+    env_var_name = "SIGPROFILERMATRIXGENERATOR_VOLUME"
+    env_directory = os.getenv(env_var_name)
+
+    if env_directory:
+        install_dir = pathlib.Path(env_directory)
+    elif secondary_chromosome_install_dir is not None:
         install_dir = pathlib.Path(secondary_chromosome_install_dir)
     else:
         install_dir = None
+
     result = ReferenceDir(secondary_chromosome_install_dir=install_dir)
     return result
 

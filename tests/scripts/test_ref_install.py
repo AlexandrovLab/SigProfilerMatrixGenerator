@@ -73,3 +73,11 @@ class TestReferenceDir:
         refdir = ref_install.reference_dir()
         observed = refdir.get_tsb_dir()
         assert observed == default_tsb_dir
+
+    def test_tsb_dir_with_env_variable(self, monkeypatch):
+        test_dir = "/somewhere/else"
+        monkeypatch.setenv("SIGPROFILERMATRIXGENERATOR_VOLUME", test_dir)
+
+        refdir = ref_install.reference_dir()
+        observed_tsb_dir = refdir.get_tsb_dir()
+        assert observed_tsb_dir == pathlib.Path(test_dir, "tsb").resolve()

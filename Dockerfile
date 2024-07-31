@@ -5,7 +5,7 @@ FROM python:3.8-slim
 WORKDIR /usr/src/app
 
 # Install SigProfilerMatrixGenerator from PyPI
-RUN pip install SigProfilerMatrixGenerator==1.2.25
+RUN pip install SigProfilerMatrixGenerator==1.2.27
 
 # Create a non-root user named 'spm_user'
 RUN useradd -m -s /bin/bash spm_user

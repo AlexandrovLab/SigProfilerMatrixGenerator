@@ -84,7 +84,7 @@ View the table below for the full list of parameters.
 |  | tsb_stat | Boolean | Outputs the results of a transcriptional strand bias test for the respective matrices. Default value False. |
 |  | seqInfo | Boolean | Ouputs original mutations into a text file that contains the SigProfilerMatrixGenerator classificaiton for each mutation. Default value True. |
 |  | cushion | Integer | Adds an Xbp cushion to the exome/bed_file ranges for downsampling the mutations. Default value 100. |
-|  | volume | String | Path to SigProfilerMatrixGenerator's volume where reference genomes will be saved and loaded from. Useful for docker installations. Default is None. |
+|  | volume | String | Path to SigProfilerMatrixGenerator's volume where reference genomes will be saved and loaded from (for Docker/Singularity conatiners). The environmental variable 'SIGPROFILERMATRIXGENERATOR_VOLUME' takes precedence. Default value is None. |
 
 
 **INPUT FILE FORMAT**
