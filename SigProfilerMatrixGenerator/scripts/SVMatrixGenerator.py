@@ -5,12 +5,12 @@ import sys
 import warnings
 import sigProfilerPlotting as sigPlt
 from math import nan
-
 import numpy as np
 import pandas as pd
 from numpy import matlib
 from scipy import signal as scisig
 from scipy.stats import binom
+from SigProfilerMatrixGenerator.scripts.vcfToBedpe import vcfToBedpe
 
 
 pd.options.mode.chained_assignment = None
@@ -934,50 +934,83 @@ def generateSVMatrix(input_dir, project, output_dir, skip=False):
     # create output_dir if it does not yet exist
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
-    if input_dir[-1] != "/":
-        input_dir = input_dir + "/"
-    all_samples = []  # list of dataframes for each sample
-    for f in os.listdir(input_dir):
-        if os.path.isfile(input_dir + f):
-            print("Generating count vector for " + f)
-            data = pd.read_csv(input_dir + f, sep="\t")
-            if data.shape[0] == 0:
-                print("SKIPPING " + str(f) + "because it has 0 SVs")
-                continue
-            elif (
-                "sample" not in data.columns
-                or len(data["sample"].iloc[0]) <= 1
-                or "chrom1" not in data.columns
-                or "chrom2" not in data.columns
-                or "start1" not in data.columns
-                or "start2" not in data.columns
-                or "end1" not in data.columns
-                or "end2" not in data.columns
-            ) and skip == False:
-                raise Exception(
-                    "Please ensure that there is a sample column containing the name of the sample"
-                )
-            elif (
-                "sample" not in data.columns
-                or len(data["sample"].iloc[0]) <= 1
-                or "chrom1" not in data.columns
-                or "chrom2" not in data.columns
-                or "start1" not in data.columns
-                or "start2" not in data.columns
-                or "end1" not in data.columns
-                or "end2" not in data.columns
-            ) and skip == True:
-                print(
-                    "Warning: it appears that "
-                    + str(f)
-                    + " may not have the correct input format, please check for required columns that are missing"
-                )
-                continue
-            else:
-                # get annotated bedpe for a single sample
-                result = annotateBedpe(data)
+    with open(os.path.join(output_dir, project + '_logfile.txt'), 'w') as fout:
+        if input_dir[-1] != "/":
+            input_dir = input_dir + "/"
+        all_samples = []  # list of dataframes for each sample
 
-            all_samples.append(result["sv_bedpe"])
+
+        vcf=False #assumes BEDPE
+        for file in os.listdir(input_dir):
+            if file.endswith(".vcf"):
+                vcf=True
+                break
+
+        if vcf: #dealing with VCF
+            for f in os.listdir(input_dir):
+                if f.endswith(".vcf"): 
+                    fout.write("Converting " + f + " to bedpe format\n")
+                    sample = f.split(".")[0]
+                    try:
+                        bedpe, unclassified = vcfToBedpe(input_dir + f, input_dir)
+                        bedpe.to_csv(
+                            input_dir + sample + ".bedpe", sep="\t", index=None
+                        )
+                        unclassified.to_csv(
+                            output_dir + sample + ".unclassified.bedpe",
+                            sep="\t",
+                            index=None,
+                        )
+                    except Exception as e:
+                        print(
+                            f"Error in converting VCF to BEDPE for sample {sample}. The error was: {e}"
+                        )
+                    fout.write("Performed conversion of VCF to BEDPE and outputted bedpe file to " + str(input_dir+sample+".bedpe" + "\n"))
+                    fout.write("Note that events that could not be classified were outputted to " + str(output_dir+sample+".unclassified.txt" + "\n"))
+
+
+        for f in os.listdir(input_dir):
+            if os.path.isfile(input_dir + f) and f.endswith(".bedpe"):
+                fout.write("Generating count vector for " + f + "\n")
+                data = pd.read_csv(input_dir + f, sep="\t")
+                if data.shape[0] == 0:
+                    fout.write("SKIPPING " + str(f) + "because it has 0 SVs")
+                    continue
+                elif (
+                    "sample" not in data.columns
+                    or len(data["sample"].iloc[0]) <= 1
+                    or "chrom1" not in data.columns
+                    or "chrom2" not in data.columns
+                    or "start1" not in data.columns
+                    or "start2" not in data.columns
+                    or "end1" not in data.columns
+                    or "end2" not in data.columns
+                ) and skip == False:
+                    raise Exception(
+                        "Please ensure that there is a sample column containing the name of the sample"
+                    )
+                elif (
+                    "sample" not in data.columns
+                    or len(data["sample"].iloc[0]) <= 1
+                    or "chrom1" not in data.columns
+                    or "chrom2" not in data.columns
+                    or "start1" not in data.columns
+                    or "start2" not in data.columns
+                    or "end1" not in data.columns
+                    or "end2" not in data.columns
+                ) and skip == True:
+                    print(
+                        "Warning: it appears that "
+                        + str(f)
+                        + " may not have the correct input format, please check for required columns that are missing"
+                    )
+                    continue
+                else:
+                    # get annotated bedpe for a single sample
+                    result = annotateBedpe(data)
+
+                all_samples.append(result["sv_bedpe"])
+
     matrix = tsv2matrix(all_samples, project, output_dir)
     out_file = os.path.join(output_dir, project + ".SV32.matrix.tsv")
     matrix.to_csv(out_file, sep="\t")
@@ -1195,6 +1228,7 @@ def tsv2matrix(sv_bedpe_list, project, output_dir):
     if len(sv_bedpe_list) <= 1:
         warnings.warn(
             "There seems to be <= 1 samples, please ensure the sample column contains a unique sample name"
+
         )
     df = pd.concat(sv_bedpe_list)  # one master table with all samples
     out_file = os.path.join(output_dir, project + ".SV32.annotated.tsv")
@@ -1216,6 +1250,7 @@ def tsv2matrix(sv_bedpe_list, project, output_dir):
         nmf_matrix.at[channel, row.sample] += 1
     nmf_matrix.reindex([features])
     nmf_matrix.index.name = "MutationType"
+    # nmf_matrix.reindex([features]).reset_index()
 
     return nmf_matrix
 
@@ -1223,4 +1258,4 @@ def tsv2matrix(sv_bedpe_list, project, output_dir):
 if __name__ == "__main__":
     if len(sys.argv) > 1:
         input_dir, project, output_dir = sys.argv[1], sys.argv[2], sys.argv[3]
-    generateSVMatrix(input_dir, project, output_dir)
+    result_matrix = generateSVMatrix(input_dir, project, output_dir)

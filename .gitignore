@@ -21,3 +21,4 @@ SigProfilerMatrixGenerator/references/tests/*/input/
 SigProfilerMatrixGenerator/references/tests/*/logs/
 SigProfilerMatrixGenerator/references/tests/*/output/
 SigProfilerMatrixGenerator/install.log
+SigProfilerMatrixGenerator/references/SV/example_output/*

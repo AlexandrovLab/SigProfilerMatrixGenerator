@@ -1,0 +1,8 @@
+sample	chrom1	start1	end1	chrom2	start2	end2	svclass
+manta	chr1	99948	100052	chr1	199948	200052	deletion
+manta	chr1	199986	200013	chr1	299948	300052	deletion
+manta	chr1	299948	300052	chr1	399948	400052	deletion
+manta	chr1	399948	400052	chr1	499948	500052	deletion
+manta	chr2	99969	100030	chr2	199968	200031	tandem-duplication
+manta	chr2	100448	100552	chr2	200448	200552	tandem-duplication
+manta	chr2	199948	200052	chr2	299948	300052	tandem-duplication

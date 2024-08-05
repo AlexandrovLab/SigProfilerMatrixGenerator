@@ -123,7 +123,7 @@ a DBS, SBS, ID, and TSB folder (there will also be a plots folder if this parame
 
 from SigProfilerMatrixGenerator.scripts import SVMatrixGenerator as sv
 input_dir = "./SigProfilerMatrixGenerator/references/SV/example_input/560-Breast" #directory which contains collection of bedpe files (one per sample)
-output_dir = "./SigProfilerMatrixGenerator/references/SV/"
+output_dir = "./SigProfilerMatrixGenerator/references/SV/example_output/"
 project = "560-Breast"
 sv.generateSVMatrix(input_dir, project, output_dir)
 ```
@@ -135,6 +135,25 @@ python3 ./SigProfilerMatrixGenerator/scripts/SVMatrixGenerator.py ./SigProfilerM
 1. Annotated bedpe file - a file with each SV annotated with its type, size bin, and clustered/non-clustered status
 2. Aggregate SV plot - a summary plot showing the average number of events in each channel for the whole cohort of samples
 3. SV Matrix - a 32 X n matrix (where n is the number of samples) that can be used to perform signature decomposition, clustering, etc.
+
+### VCF INPUT FORMAT:
+
+**Note that VCF format (4.1, 4.2 and 4.3) is now supported. If using VCFs, please make sure the files in your input directory end with .vcf. Manta, Delly, Lumpy and GRIDSS are supported and example test files can be found in the references/SV/ folder**
+
+### Quick Start Example: ###
+
+```
+#navigate to SVMatrixGenerator directory and start python3 interpreter
+
+from SigProfilerMatrixGenerator.scripts import SVMatrixGenerator as sv
+input_dir = "./SigProfilerMatrixGenerator/references/SV/example_input/VCF/" #directory which contains collection of VCF files (one per sample)
+output_dir = "./SigProfilerMatrixGenerator/references/SV/example_output/"
+project = "vcf-test" #test manta, delly, lumpy, and gridss vcf files
+sv.generateSVMatrix(input_dir, project, output_dir)
+```
+**Alternatively, you can run directly from the command line:**
+```
+python3 ./SigProfilerMatrixGenerator/scripts/SVMatrixGenerator.py ./SigProfilerMatrixGenerator/references/SV/example_input/VCF/ vcf-test ./SigProfilerMatrixGenerator/references/SV/example_output/
 
 ## COPY NUMBER MATRIX GENERATION
 
