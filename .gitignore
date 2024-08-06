@@ -21,4 +21,8 @@ SigProfilerMatrixGenerator/references/tests/*/input/
 SigProfilerMatrixGenerator/references/tests/*/logs/
 SigProfilerMatrixGenerator/references/tests/*/output/
 SigProfilerMatrixGenerator/install.log
+
+# SV Example Files
 SigProfilerMatrixGenerator/references/SV/example_output/*
+SigProfilerMatrixGenerator/references/SV/example_input/VCF/*.tsv
+SigProfilerMatrixGenerator/references/SV/example_input/VCF/*.bedpe

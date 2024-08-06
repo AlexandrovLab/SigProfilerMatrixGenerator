@@ -6,6 +6,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+## [1.2.28] - 2024-08-06
+
+### Added
+- Added support for processing SV input for VCF versions 4.1, 4.2, and 4.3. The tool now supports both the previous input format (requiring the first six columns and either the "svclass" column or the "strand1" & "strand2" columns) and VCF files.
+
+### Changed
+- Updated the README command line examples to use CLI instead of calling the script directly.
+
 ## [1.2.27] - 2024-07-18
 
 ### Added

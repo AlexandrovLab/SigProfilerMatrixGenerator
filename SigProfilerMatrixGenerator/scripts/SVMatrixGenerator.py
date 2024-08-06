@@ -934,30 +934,31 @@ def generateSVMatrix(input_dir, project, output_dir, skip=False):
     # create output_dir if it does not yet exist
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
-    with open(os.path.join(output_dir, project + '_logfile.txt'), 'w') as fout:
+    with open(os.path.join(output_dir, project + "_logfile.txt"), "w") as fout:
         if input_dir[-1] != "/":
             input_dir = input_dir + "/"
         all_samples = []  # list of dataframes for each sample
 
-
-        vcf=False #assumes BEDPE
+        vcf = False  # assumes BEDPE
         for file in os.listdir(input_dir):
             if file.endswith(".vcf"):
-                vcf=True
+                vcf = True
                 break
 
-        if vcf: #dealing with VCF
+        if vcf:  # dealing with VCF
             for f in os.listdir(input_dir):
-                if f.endswith(".vcf"): 
+                if f.endswith(".vcf"):
                     fout.write("Converting " + f + " to bedpe format\n")
                     sample = f.split(".")[0]
                     try:
                         bedpe, unclassified = vcfToBedpe(input_dir + f, input_dir)
                         bedpe.to_csv(
-                            input_dir + sample + ".bedpe", sep="\t", index=None
+                            os.path.join(input_dir, sample + ".bedpe"),
+                            sep="\t",
+                            index=None,
                         )
                         unclassified.to_csv(
-                            output_dir + sample + ".unclassified.bedpe",
+                            os.path.join(output_dir, sample + ".unclassified.bedpe"),
                             sep="\t",
                             index=None,
                         )
@@ -965,9 +966,14 @@ def generateSVMatrix(input_dir, project, output_dir, skip=False):
                         print(
                             f"Error in converting VCF to BEDPE for sample {sample}. The error was: {e}"
                         )
-                    fout.write("Performed conversion of VCF to BEDPE and outputted bedpe file to " + str(input_dir+sample+".bedpe" + "\n"))
-                    fout.write("Note that events that could not be classified were outputted to " + str(output_dir+sample+".unclassified.txt" + "\n"))
-
+                    fout.write(
+                        "Performed conversion of VCF to BEDPE and outputted bedpe file to "
+                        + str(input_dir + sample + ".bedpe" + "\n")
+                    )
+                    fout.write(
+                        "Note that events that could not be classified were outputted to "
+                        + str(output_dir + sample + ".unclassified.txt" + "\n")
+                    )
 
         for f in os.listdir(input_dir):
             if os.path.isfile(input_dir + f) and f.endswith(".bedpe"):
@@ -1228,7 +1234,6 @@ def tsv2matrix(sv_bedpe_list, project, output_dir):
     if len(sv_bedpe_list) <= 1:
         warnings.warn(
             "There seems to be <= 1 samples, please ensure the sample column contains a unique sample name"
-
         )
     df = pd.concat(sv_bedpe_list)  # one master table with all samples
     out_file = os.path.join(output_dir, project + ".SV32.annotated.tsv")
@@ -1250,12 +1255,5 @@ def tsv2matrix(sv_bedpe_list, project, output_dir):
         nmf_matrix.at[channel, row.sample] += 1
     nmf_matrix.reindex([features])
     nmf_matrix.index.name = "MutationType"
-    # nmf_matrix.reindex([features]).reset_index()
 
     return nmf_matrix
-
-
-if __name__ == "__main__":
-    if len(sys.argv) > 1:
-        input_dir, project, output_dir = sys.argv[1], sys.argv[2], sys.argv[3]
-    result_matrix = generateSVMatrix(input_dir, project, output_dir)
