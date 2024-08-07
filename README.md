@@ -1,4 +1,4 @@
-[![Docs](https://img.shields.io/badge/docs-latest-blue.svg)](https://osf.io/s93d5/wiki/home/) [![License](https://img.shields.io/badge/License-BSD\%202--Clause-orange.svg)](https://opensource.org/licenses/BSD-2-Clause) [![Build Status](https://travis-ci.com/AlexandrovLab/SigProfilerMatrixGenerator.svg?branch=master)](https://app.travis-ci.com/AlexandrovLab/SigProfilerMatrixGenerator)
+[![Docs](https://img.shields.io/badge/docs-latest-blue.svg)](https://osf.io/s93d5/wiki/home/) [![License](https://img.shields.io/badge/License-BSD\%202--Clause-orange.svg)](https://opensource.org/licenses/BSD-2-Clause) [![Build Status](https://app.travis-ci.com/AlexandrovLab/SigProfilerMatrixGenerator.svg?branch=master)](https://app.travis-ci.com/AlexandrovLab/SigProfilerMatrixGenerator)
 [![Uptime Robot status](https://img.shields.io/uptimerobot/status/m795312784-02766a79f207f67626cef289)](https://stats.uptimerobot.com/jjqW4Ulymx)
 
 # SigProfilerMatrixGenerator
@@ -118,23 +118,44 @@ a DBS, SBS, ID, and TSB folder (there will also be a plots folder if this parame
 
 ### Quick Start Example: ###
 
-```
-#navigate to SVMatrixGenerator directory and start python3 interpreter
-
+```python
 from SigProfilerMatrixGenerator.scripts import SVMatrixGenerator as sv
 input_dir = "./SigProfilerMatrixGenerator/references/SV/example_input/560-Breast" #directory which contains collection of bedpe files (one per sample)
-output_dir = "./SigProfilerMatrixGenerator/references/SV/"
+output_dir = "./SigProfilerMatrixGenerator/references/SV/example_output/"
 project = "560-Breast"
 sv.generateSVMatrix(input_dir, project, output_dir)
 ```
 **Alternatively, you can run directly from the command line:**
-```
-python3 ./SigProfilerMatrixGenerator/scripts/SVMatrixGenerator.py ./SigProfilerMatrixGenerator/references/SV/example_input/560-Breast 560-Breast ./SigProfilerMatrixGenerator/references/SV/example_output/ #provide input_dir, project, output_dir as command-line arguments
+```bash
+SigProfilerMatrixGenerator sv_matrix_generator $input_dir $project $output_dir
 ```
 ## OUTPUT:
 1. Annotated bedpe file - a file with each SV annotated with its type, size bin, and clustered/non-clustered status
 2. Aggregate SV plot - a summary plot showing the average number of events in each channel for the whole cohort of samples
 3. SV Matrix - a 32 X n matrix (where n is the number of samples) that can be used to perform signature decomposition, clustering, etc.
+
+### VCF INPUT FORMAT:
+
+**Note that VCF format (4.1, 4.2 and 4.3) is now supported. If using VCFs, please make sure the files in your input directory end with .vcf. Manta, Delly, Lumpy and GRIDSS are supported and example test files can be found in the [references/SV/](https://github.com/AlexandrovLab/SigProfilerMatrixGenerator/tree/master/SigProfilerMatrixGenerator/references/SV) folder**
+
+### Quick Start Example: ###
+
+```python
+#navigate to SVMatrixGenerator directory and start python3 interpreter
+
+from SigProfilerMatrixGenerator.scripts import SVMatrixGenerator as sv
+input_dir = "./SigProfilerMatrixGenerator/references/SV/example_input/VCF/" #directory which contains collection of VCF files (one per sample)
+output_dir = "./SigProfilerMatrixGenerator/references/SV/example_output/"
+project = "vcf-test" #test manta, delly, lumpy, and gridss vcf files
+sv.generateSVMatrix(input_dir, project, output_dir)
+```
+**Alternatively, you can run directly from the command line:**
+```bash
+input_dir="./SigProfilerMatrixGenerator/references/SV/example_input/VCF/"
+project="vcf-test"
+output_dir="results"
+SigProfilerMatrixGenerator sv_matrix_generator $input_dir $project $output_dir
+```
 
 ## COPY NUMBER MATRIX GENERATION
 
@@ -166,8 +187,8 @@ $ python3
 
 **Alternatively, you can run directly from the command line:**
 
-```
-python ./SigProfilerMatrixGenerator/scripts/CNVMatrixGenerator.py BATTENBERG ./SigProfilerMatrixGenerator/references/CNV/example_input/Battenberg_test.tsv BATTENBERG-TEST ./SigProfilerMatrixGenerator/references/CNV/example_output/
+```bash
+SigProfilerMatrixGenerator cnv_matrix_generator BATTENBERG ./SigProfilerMatrixGenerator/references/CNV/example_input/Battenberg_test.tsv BATTENBERG-TEST ./SigProfilerMatrixGenerator/references/CNV/example_output/
 ```
 
 **SUPPORTED GENOMES**
