@@ -138,6 +138,148 @@ def BED_filtering(bed_file_path):
     return ranges_final
 
 
+def BED_sorting(bed_file_path, genome):
+    """
+    Sorts a BED file and writes the sorted content to a new file with a different name.
+
+    Parameters:
+        bed_file_path (str): Path to the input BED file.
+        genome (str): Name of the genome for sorting.
+
+    Returns:
+        str: Path to the new sorted BED file.
+    """
+    # Define the common chromosome lists and chrom_orders dictionary
+    common_chrom_list = [
+        "gi_82503188_ref_NC_007605",
+        "X",
+        "Y",
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8",
+        "9",
+        "10",
+        "11",
+        "12",
+        "13",
+        "14",
+        "15",
+        "16",
+        "17",
+        "18",
+        "19",
+        "20",
+        "21",
+        "22",
+        "23",
+        "24",
+        "25",
+        "26",
+        "27",
+        "28",
+        "29",
+        "30",
+        "31",
+        "32",
+        "33",
+        "34",
+        "35",
+        "36",
+        "37",
+        "38",
+        "39",
+        "MT",
+        "M",
+        "MtDNA",
+        "chrM",
+    ]
+    chrom_orders = {
+        "c_elegans": ["X", "I", "II", "III", "IV", "V", "M", "MT", "MtDNA"],
+        "yeast": [
+            "I",
+            "II",
+            "III",
+            "IV",
+            "V",
+            "VI",
+            "VII",
+            "VIII",
+            "IX",
+            "X",
+            "XI",
+            "XII",
+            "XIII",
+            "XIV",
+            "XV",
+            "XVI",
+            "M",
+            "MT",
+            "MtDNA",
+        ],
+        **{
+            g: common_chrom_list
+            for g in ["GRCh37", "GRCh38", "dog", "ebv", "mm10", "mm9", "mm39", "rn6"]
+        },
+    }
+
+    # Select the chromosome order based on the genome
+    chrom_order = chrom_orders[genome]
+
+    def remove_chr_prefix(line):
+        parts = line.split()
+        if parts[0].startswith("chr"):
+            parts[0] = parts[0][3:]  # Remove 'chr' prefix
+        return parts
+
+    # Read the lines from the input file
+    with open(bed_file_path, "r") as infile:
+        lines = infile.readlines()
+
+    # Determine if the first line is a header
+    header = None
+    if (
+        lines[0].startswith("@")
+        or lines[0].startswith("#")
+        or "chrom" in lines[0].lower()
+    ):
+        header = lines[0]
+        lines = lines[1:]
+
+    # Split the lines into columns for sorting and remove 'chr' prefix
+    lines_split = [remove_chr_prefix(line) for line in lines]
+
+    # Sort the lines based on the selected chromosome order and position
+    sorted_lines = sorted(
+        lines_split,
+        key=lambda x: (
+            (
+                chrom_order.index(x[0]) if x[0] in chrom_order else len(chrom_order)
+            ),  # Sort by chromosome order
+            int(x[1]),  # Then sort by position
+        ),
+    )
+
+    # Create new file name with hardcoded suffix
+    base, ext = os.path.splitext(bed_file_path)
+    new_file_name = f"{base}_sorted{ext}"
+
+    # Write the sorted output to the new file
+    with open(new_file_name, "w") as outfile:
+        if header:
+            outfile.write(header)
+        for line in sorted_lines:
+            outfile.write("\t".join(line) + "\n")
+
+    # print(f"Sorted BED file saved to: {new_file_name}")
+
+    return new_file_name
+
+
 def gene_range(files_path, indel=False):
     """
     Creates a dictionary of gene ranges and gene names across the
@@ -2466,7 +2608,7 @@ def panel_check(
 
     initial = True
     udpate_chrom = False
-    panel_file = bed_file_path
+    panel_file = BED_sorting(bed_file_path, genome=genome)
     panel_output_path = output_matrix + "vcf_files/" + context + "/"
 
     if context == "ID":
@@ -2501,19 +2643,27 @@ def panel_check(
             mut = line[5]
 
             # Saves a value for the x and y chromosomes as a numeric reference
-            if chrom == "X":
-                chrom_value = -1
-            elif chrom == "Y":
-                chrom_value = 0
-            elif chrom == "MT" or chrom == "M":
-                chrom_value = 100
-            elif chrom == "gi_82503188_ref_NC_007605":
-                chrom_value = -1
-            else:
-                try:
-                    chrom_value = int(chrom)
-                except:
+            if genome == "yeast":
+                if chrom == "X":
+                    chrom_value = 10  # Keep "X" as value 10
+                elif chrom == "MT" or chrom == "M" or chrom == "MtDNA":
+                    chrom_value = 100
+                else:
                     chrom_value = romanNumeralConversion[chrom]
+            else:
+                if chrom == "X":
+                    chrom_value = -1
+                elif chrom == "Y":
+                    chrom_value = 0
+                elif chrom == "MT" or chrom == "M" or chrom == "MtDNA":
+                    chrom_value = 100
+                elif chrom == "gi_82503188_ref_NC_007605":
+                    chrom_value = -1
+                else:
+                    try:
+                        chrom_value = int(chrom)
+                    except:
+                        chrom_value = romanNumeralConversion[chrom]
 
             if initial:
                 chrom_start = chrom
@@ -2642,22 +2792,39 @@ def panel_check(
                 else:
                     line2 = lines2.strip().split("\t")
                     chrom_ref = line2[0]
-                    if len(chrom_ref) > 2:
-                        chrom_ref = chrom_ref[3:]
+                    # if len(chrom_ref) > 2:
+                    #     chrom_ref = chrom_ref[3:]
                     start_ref = int(line2[1])
                     end_ref = int(line2[2])
-
-                    if chrom_ref == "X":
-                        ref_chrom_value = -1
-                    elif chrom_ref == "Y":
-                        ref_chrom_value = 0
-                    elif chrom_ref == "gi_82503188_ref_NC_007605":
-                        ref_chrom_value = -1
-                    else:
-                        try:
-                            ref_chrom_value = int(chrom_ref)
-                        except:
+                    if genome == "yeast":
+                        if chrom_ref == "X":
+                            ref_chrom_value = 10  # Keep "X" as value 10
+                        elif (
+                            chrom_ref == "MT"
+                            or chrom_ref == "M"
+                            or chrom_ref == "MtDNA"
+                        ):
+                            ref_chrom_value = 100
+                        else:
                             ref_chrom_value = romanNumeralConversion[chrom_ref]
+                    else:
+                        if chrom_ref == "X":
+                            ref_chrom_value = -1
+                        elif chrom_ref == "Y":
+                            ref_chrom_value = 0
+                        elif (
+                            chrom_ref == "MT"
+                            or chrom_ref == "M"
+                            or chrom_ref == "MtDNA"
+                        ):
+                            ref_chrom_value = 100
+                        elif chrom_ref == "gi_82503188_ref_NC_007605":
+                            ref_chrom_value = -1
+                        else:
+                            try:
+                                ref_chrom_value = int(chrom_ref)
+                            except:
+                                ref_chrom_value = romanNumeralConversion[chrom_ref]
 
                     if chrom == chrom_ref:
                         save_mat = True
