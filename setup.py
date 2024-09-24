@@ -3,7 +3,7 @@ import shutil
 
 from setuptools import setup
 
-VERSION = "1.2.28"
+VERSION = "1.2.29"
 
 # remove the dist folder first if exists
 if os.path.exists("dist"):
@@ -23,7 +23,7 @@ def write_version_py(filename="SigProfilerMatrixGenerator/version.py"):
 # THIS FILE IS GENERATED FROM SIGPROFILEMATRIXGENERATOR SETUP.PY
 short_version = '%(version)s'
 version = '%(version)s'
-Update = 'v1.2.28: Add support for processing SV input for VCF versions 4.1, 4.2, and 4.3'
+Update = 'v1.2.29: Resolve issue with non-sorted input and BED files.'
 
 	"""
     fh = open(filename, "w")

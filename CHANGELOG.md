@@ -6,6 +6,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+## [1.2.29] - 2024-09-24
+
+### Added
+- Added sort function to handle non-sorted input and BED files. This posed as an issue for when the BED file was not sorted by chromosome and start position in cases when certain reference genomes were used because of roman numerals and decimal (ie ChrX vs chr10).
+
+### Changed
+- Transcript files were modified to adopt the new sorting standard.
+
+
 ## [1.2.28] - 2024-08-06
 
 ### Added
