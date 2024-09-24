@@ -157,7 +157,3 @@ def test_all_genomes(volume=None):
             print(f"Completed test for {genome}\n")
         except Exception as e:
             print(f"Test failed for {genome}:\n{str(e)}\n")
-
-
-# Run the tests for all genomes
-test_all_genomes()
