@@ -2390,6 +2390,10 @@ def SigProfilerMatrixGeneratorFunc(
                     for line in sorted_lines:
                         print("\t".join(line), file=output)
 
+                mutation_ID["simple"] = pd.DataFrame(
+                    0, index=indel_types_simple, columns=samples
+                )
+
                 mutation_ID["simple"], samples2 = matGen.exome_check(
                     chrom_based,
                     samples,

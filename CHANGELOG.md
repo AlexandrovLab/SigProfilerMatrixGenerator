@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+## [1.2.30] - 2024-10-10
+
+### Fixed
+- Resolved a bug that caused the code to crash when running with `exome=True` during INDEL processing. The issue was due to incorrect indentation.
+
 ## [1.2.29] - 2024-09-24
 
 ### Added
