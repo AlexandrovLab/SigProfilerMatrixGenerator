@@ -2075,7 +2075,7 @@ def SigProfilerMatrixGeneratorFunc(
                             plot,
                             volume=volume,
                         )
-                        matrices["DINUC"] = dinuc_mat
+                matrices["DINUC"] = dinuc_mat
 
         else:
             for file in vcf_files:
@@ -2835,7 +2835,7 @@ def SigProfilerMatrixGeneratorFunc(
                     plot,
                     volume=volume,
                 )
-                matrices["ID"] = mutation_ID["ID"].iloc[0:83, :]
+            matrices["ID"] = mutation_ID["ID"].iloc[0:83, :]
 
         if i == 1:
             shutil.rmtree(output_matrix + "temp/")
