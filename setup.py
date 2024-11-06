@@ -3,7 +3,7 @@ import shutil
 
 from setuptools import setup
 
-VERSION = "1.2.30"
+VERSION = "1.2.31"
 
 # remove the dist folder first if exists
 if os.path.exists("dist"):
@@ -23,7 +23,7 @@ def write_version_py(filename="SigProfilerMatrixGenerator/version.py"):
 # THIS FILE IS GENERATED FROM SIGPROFILEMATRIXGENERATOR SETUP.PY
 short_version = '%(version)s'
 version = '%(version)s'
-Update = 'v1.2.30: Resolve exome=True issue caused by indentation.'
+Update = 'v1.2.31: Resolve issue of ID and DBS matrices not being returned in the output matrices when chrom_based is set to True.'
 
 	"""
     fh = open(filename, "w")

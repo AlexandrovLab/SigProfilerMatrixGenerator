@@ -6,6 +6,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+## [1.2.31] - 2024-11-6
+
+### Fixed
+- Resolved a bug where DBS and ID matrices were not being returned due to an indentation issue when the parameter 'chrom_based' was set as True.
+
+### Notice
+- Python 3.8 support will be phased out in future updates as we align with Python's ongoing release cycle. Users on Python 3.8 are encouraged to consider upgrading to Python 3.9 or newer.
+
 ## [1.2.30] - 2024-10-10
 
 ### Fixed
