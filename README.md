@@ -101,7 +101,7 @@ a DBS, SBS, ID, and TSB folder (there will also be a plots folder if this parame
 
 ### INPUT FORMAT:
 
-***First six columns are required, and either the column "svclass" (deletion, translocation, tandem-duplication, or inversion) or the columns "strand1" & "strand2" (BRASS convention) must also be present***
+***First six columns are required, and either the column "svclass" (deletion, translocation, tandem-duplication, or inversion) or the columns "strand1" & "strand2" (BRASS convention, see https://github.com/cancerit/BRASS/wiki/BEDPE) must also be present***
 
 
 ### Example with SV class present (tsv or csv file):
@@ -249,12 +249,12 @@ python3 test.py -t GRCh37
 
 **CITATION**
 
-For SBSs, DBSs, and INDELs, please cite the following paper:
+**For SBSs, DBSs, and INDELs, please cite the following paper:**
 
 Bergstrom EN, Huang MN, Mahto U, Barnes M, Stratton MR, Rozen SG, and Alexandrov LB (2019) SigProfilerMatrixGenerator: a tool for visualizing and exploring patterns of small mutational events. **BMC Genomics** 20, Article number: 685.
 https://bmcgenomics.biomedcentral.com/articles/10.1186/s12864-019-6041-2
 
-For SVs and CNVs, please cite the following paper:
+**For SVs and CNVs, please cite the following paper:**
 
 Khandekar A, Vangara R, Barnes M, Díaz-Gay M, Abbasi A, Bergstrom EN, Steele CD, Pillay N, and Alexandrov LB (2023) Visualizing and exploring patterns of large mutational events with SigProfilerMatrixGenerator. **BMC Genomics** 24, Article number: 469.
 https://doi.org/10.1186/s12864-023-09584-y
