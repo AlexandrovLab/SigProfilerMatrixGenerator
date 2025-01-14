@@ -213,6 +213,8 @@ Released Jan 2011. Last updated March 2012. This genome was downloaded from ENSE
 Rnor_6.0 [rn6] INSDC Assembly GCA_000001895.4, Jul 2014. Released Jun 2015. Last updated Jan 2017.
 This genome was downloaded from ENSEMBL database version 96.6.
 
+mRatBN7.2 [rn7] (Wellcome Sanger Institute Rat Genome Assembly), INSDC Assembly GCA_015227675.2, Nov 2020. Last updated March 31, 2021 (`rn7.fa.gz` from UCSC). Downloaded from UCSC: [rn7 bigZips](http://hgdownload.soe.ucsc.edu/goldenPath/rn7/bigZips/).
+
 Epstein-Barr Virus [EBV] NC_007605.1, Nov 2005. Last updated Aug 2018. This genome was downloaded from the NCBI database: https://www.ncbi.nlm.nih.gov/nuccore/82503188/.
 
 CanFam3.1 [dog] GCA_000002285.2, Sep 2011. Last updated Jun 2019. This genome was downloaded from ENSEMBL database version 100.
