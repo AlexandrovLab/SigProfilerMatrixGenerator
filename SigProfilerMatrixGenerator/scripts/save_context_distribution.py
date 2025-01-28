@@ -405,6 +405,8 @@ def context_distribution_BED(
                             f"Missing {overlap} base(s) due to boundary at the end of the chromosome.")
                         continue
 
+                    base = nuc[int(context / 2)]
+
                     # Skip the base if unknown
                     if "N" in nuc:
                         pass
