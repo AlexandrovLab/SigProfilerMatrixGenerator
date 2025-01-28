@@ -125,7 +125,6 @@ def context_distribution(
                 for l in range(i, i + context, 1):
                     nuc += tsb_ref[chromosome[l]][1]
                 base = nuc[int(context / 2)]
-
                 count += 1
                 if count == 1000000:
                     print(i)
@@ -394,11 +393,17 @@ def context_distribution_BED(
 
             if chrom == chrom_initial:
                 chrom_length += end - start
-                for i in range(start, end + 1 - context, 1):
+                for i in range(start, min(end + 1 - context, len(chromosome))):
                     nuc = ""
-                    for l in range(i, i + context, 1):
+                    for l in range(i, min(i + context, len(chromosome))):
                         nuc += tsb_ref[chromosome[l]][1]
-                    base = nuc[int(context / 2)]
+
+                    # Skip incomplete windows
+                    if len(nuc) != context:
+                        overlap = context - len(nuc)
+                        print(f"Skipping window at index {i}: expected context length {context}, but got {len(nuc)}. "
+                            f"Missing {overlap} base(s) due to boundary at the end of the chromosome.")
+                        continue
 
                     # Skip the base if unknown
                     if "N" in nuc:

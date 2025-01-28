@@ -1415,6 +1415,9 @@ def SigProfilerMatrixGeneratorFunc(
         # Sorts files based on chromosome, sample, and start position
         if not chrom_based:
             chrom_start = None
+
+        # initialize dinuc_mat to None
+        dinuc_mat = None
         if i != 1:
             for file in vcf_files:
                 if reference_genome.lower() != "ebv":
