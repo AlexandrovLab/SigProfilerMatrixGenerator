@@ -27,10 +27,6 @@ TEST_GENOMES = [
 
 def load_and_compare(matrices, solution_dir, exome=False, bed_file=True):
     for key in matrices:
-        # Only process keys that start with "SBS"
-        if not key.startswith("SBS"):
-            continue  # Skip non-SBS matrices
-
         # Determine the solution file path based on the exome flag
         if exome:
             solution_file = os.path.join(
@@ -101,7 +97,6 @@ def test_one_genome(genome, volume, exome=False, bed_file=True):
     # load the results from the solution directory and compare them to the dataframes in matrices
     if exome:
         solution_dir = os.path.join(TEST_INPUT_DIR, f"WES/solutions/{genome}/")
-        print("solution_dir", solution_dir)
     elif bed_file:
         solution_dir = os.path.join(TEST_INPUT_DIR, f"bed_file/solutions/{genome}/")
     else:

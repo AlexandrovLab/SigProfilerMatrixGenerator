@@ -9,6 +9,7 @@
 
 # Hidden files and directories
 *.DS_Store
+.vscode/
 
 # pypi build folder
 /build/

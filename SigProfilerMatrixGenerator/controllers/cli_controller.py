@@ -208,8 +208,12 @@ class CliController:
 
     def dispatch_test(self, user_args: List[str]) -> None:
         parsed_args = parse_arguments_test(user_args)
-        test_helpers.install_genomes(parsed_args.download_genomes)
-        test_helpers.test_genomes(parsed_args.test_genome, parsed_args.volume)
+
+        if parsed_args.download_genomes:
+            test_helpers.install_genomes(parsed_args.download_genomes)
+        if parsed_args.test_genome:
+            test_helpers.test_genomes(parsed_args.test_genome, parsed_args.volume)
+
 
     def dispatch_matrix_generator(self, user_args: List[str]) -> None:
         parsed_args = parse_arguments_matrix_generator(user_args)
