@@ -3,8 +3,6 @@ import pathlib
 from importlib import resources
 from typing import Optional, Union
 
-import pkg_resources
-
 import SigProfilerMatrixGenerator
 
 
@@ -58,12 +56,4 @@ class ReferenceDir:
         return result
 
     def _get_package_installation_folder(self):
-        try:
-            # python >= 3.9
-            result = resources.files(SigProfilerMatrixGenerator)
-        except AttributeError:
-            # python 3.8, deprecated
-            result = pathlib.Path(
-                pkg_resources.resource_filename(SigProfilerMatrixGenerator.__name__, "")
-            )
-        return result
+        return resources.files(SigProfilerMatrixGenerator)

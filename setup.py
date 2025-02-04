@@ -49,7 +49,7 @@ setup(
     author_email="ebergstr@eng.ucsd.edu",
     license="UCSD",
     packages=["SigProfilerMatrixGenerator"],
-    python_requires=">=3.8",
+    python_requires=">=3.9",
     install_requires=[
         "matplotlib>=2.2.2",
         "sigProfilerPlotting>=1.3.24",
