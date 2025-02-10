@@ -2820,6 +2820,16 @@ def SigProfilerMatrixGeneratorFunc(
                 )
 
             if not chrom_based:
+                # Ensure all required keys exist
+                for key, indel_set in [
+                    ("ID", indel_types),
+                    ("simple", indel_types_simple),
+                    ("tsb", indel_types),
+                    ("complete", indel_types)
+                ]:
+                    if key not in mutation_ID or not isinstance(mutation_ID[key], pd.DataFrame) or mutation_ID[key].empty:
+                        mutation_ID[key] = pd.DataFrame(0, index=indel_set, columns=samples)
+
                 matGen.matrix_generator_INDEL(
                     output_matrix,
                     samples,

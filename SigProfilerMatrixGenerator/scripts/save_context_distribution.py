@@ -405,13 +405,15 @@ def context_distribution_BED(
                             f"Missing {overlap} base(s) due to boundary at the end of the chromosome.")
                         continue
 
-                    base = nuc[int(context / 2)]
-
                     # Skip the base if unknown
                     if "N" in nuc:
                         pass
-
                     else:
+                        # Assign `base` to the middle nucleotide of the context
+                        if len(nuc) >= int(context / 2) + 1:  # Prevent IndexError
+                            base = nuc[int(context / 2)]
+                        else:
+                            continue  # Skip if `nuc` is too short
                         if context_input != "DINUC" and context_input != "DBS186":
                             # Only save the pyrimidine context (canonical)
                             if base == "A" or base == "G":
