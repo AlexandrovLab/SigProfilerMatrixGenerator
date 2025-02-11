@@ -23,7 +23,6 @@ import pandas as pd
 import sigProfilerPlotting as sigPlt
 import statsmodels.stats.multitest as sm
 from scipy import stats
-import pdb
 
 from SigProfilerMatrixGenerator.scripts import ref_install
 
