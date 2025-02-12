@@ -3108,11 +3108,10 @@ def matrix_generator(
     nontrans = mut_count_all["6144"][mut_count_all["6144"].index.str.contains("N:")]
     a = bitrans // 2
     b = bitrans % 2
-    trans = trans.append(a)
-    trans = trans.append(b)
+    trans = pd.concat([trans, a, b])
     trans = trans.groupby(trans.index.str[2:]).sum()
     trans = trans.rename(index=lambda s: "T:" + s)
-    untrans = untrans.append(a)
+    untrans = pd.concat([untrans, a])
     untrans = untrans.groupby(untrans.index.str[2:]).sum()
     untrans = untrans.rename(index=lambda s: "U:" + s)
     mut_count_all["4608"] = pd.concat([trans, untrans, nontrans])
@@ -3127,11 +3126,10 @@ def matrix_generator(
     nontrans = mut_count_all["384"][mut_count_all["384"].index.str.contains("N:")]
     a = bitrans // 2
     b = bitrans % 2
-    trans = trans.append(a)
-    trans = trans.append(b)
+    trans = pd.concat([trans, a, b])
     trans = trans.groupby(trans.index.str[2:]).sum()
     trans = trans.rename(index=lambda s: "T:" + s)
-    untrans = untrans.append(a)
+    untrans = pd.concat([untrans, a])
     untrans = untrans.groupby(untrans.index.str[2:]).sum()
     untrans = untrans.rename(index=lambda s: "U:" + s)
     mut_count_all["288"] = pd.concat([trans, untrans, nontrans])
@@ -3143,11 +3141,10 @@ def matrix_generator(
     nontrans = mut_count_all["24"][mut_count_all["24"].index.str.contains("N:")]
     a = bitrans // 2
     b = bitrans % 2
-    trans = trans.append(a)
-    trans = trans.append(b)
+    trans = pd.concat([trans, a, b])
     trans = trans.groupby(trans.index.str[2:]).sum()
     trans = trans.rename(index=lambda s: "T:" + s)
-    untrans = untrans.append(a)
+    untrans = pd.concat([untrans, a])
     untrans = untrans.groupby(untrans.index.str[2:]).sum()
     untrans = untrans.rename(index=lambda s: "U:" + s)
     mut_count_all["18"] = pd.concat([trans, untrans, nontrans])
@@ -3739,11 +3736,10 @@ def matrix_generator_INDEL(
         questionable = indel_tsb_dict[indel_tsb_dict.index.str.contains("Q:")]
         a = bitrans // 2
         b = bitrans % 2
-        trans = trans.append(a)
-        trans = trans.append(b)
+        trans = pd.concat([trans, a, b])
         trans = trans.groupby(trans.index.str[2:]).sum()
         trans = trans.rename(index=lambda s: "T:" + s)
-        untrans = untrans.append(a)
+        untrans = pd.concat([untrans, a])
         untrans = untrans.groupby(untrans.index.str[2:]).sum()
         untrans = untrans.rename(index=lambda s: "U:" + s)
         indel_tsb_dict_abbrev = pd.concat([trans, untrans, nontrans, questionable])
@@ -3954,11 +3950,10 @@ def matrix_generator_DINUC(
     questionable = mut_count_all["186"][mut_count_all["186"].index.str.contains("Q:")]
     a = bitrans // 2
     b = bitrans % 2
-    trans = trans.append(a)
-    trans = trans.append(b)
+    trans = pd.concat([trans, a, b])
     trans = trans.groupby(trans.index.str[2:]).sum()
     trans = trans.rename(index=lambda s: "T:" + s)
-    untrans = untrans.append(a)
+    untrans = pd.concat([untrans, a])
     untrans = untrans.groupby(untrans.index.str[2:]).sum()
     untrans = untrans.rename(index=lambda s: "U:" + s)
     mut_count_all["150"] = pd.concat([trans, untrans, nontrans, questionable])
@@ -3971,11 +3966,10 @@ def matrix_generator_DINUC(
     questionable = mut_4992[mut_4992.index.str.contains("Q:")]
     a = bitrans // 2
     b = bitrans % 2
-    trans = trans.append(a)
-    trans = trans.append(b)
+    trans = pd.concat([trans, a, b])
     trans = trans.groupby(trans.index.str[2:]).sum()
     trans = trans.rename(index=lambda s: "T:" + s)
-    untrans = untrans.append(a)
+    untrans = pd.concat([untrans, a])
     untrans = untrans.groupby(untrans.index.str[2:]).sum()
     untrans = untrans.rename(index=lambda s: "U:" + s)
     mut_count_all["2400"] = pd.concat([trans, untrans, nontrans, questionable])
