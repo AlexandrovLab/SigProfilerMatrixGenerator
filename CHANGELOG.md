@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+## [1.3.1] - 2025-03-10
+
+### Fixed
+- SV Matrix generation had remnant pandas and numpy < 2.0.0 syntax that was causing the code to crash. This has been fixed.
+
 ## [1.3.0] - 2025-02-11
 
 ### Changed

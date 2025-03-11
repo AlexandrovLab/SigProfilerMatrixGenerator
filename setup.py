@@ -3,7 +3,7 @@ import shutil
 
 from setuptools import setup
 
-VERSION = "1.3.0"
+VERSION = "1.3.1"
 
 # remove the dist folder first if exists
 if os.path.exists("dist"):
@@ -23,7 +23,7 @@ def write_version_py(filename="SigProfilerMatrixGenerator/version.py"):
 # THIS FILE IS GENERATED FROM SIGPROFILEMATRIXGENERATOR SETUP.PY
 short_version = '%(version)s'
 version = '%(version)s'
-Update = 'v1.3.0: Require Pandas and Numpy >= 2.0.0 and Python >= 3.9'
+Update = 'v1.3.1: Update SV matrix calls to pandas and numpy to use >= 2.0.0 syntax'
 
 	"""
     fh = open(filename, "w")
@@ -52,7 +52,7 @@ setup(
     python_requires=">=3.9",
     install_requires=[
         "matplotlib>=2.2.2",
-        "sigProfilerPlotting>=1.4.0",
+        "sigProfilerPlotting>=1.4.1",
         "statsmodels>=0.9.0",
         "numpy>=2.0.0",
         "pandas>=2.0.0",
