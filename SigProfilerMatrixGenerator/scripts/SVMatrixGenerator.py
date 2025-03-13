@@ -46,7 +46,7 @@ def calcIntermutDist2(subs_type, first_chrom_na=False):
         ]
 
         if first_chrom_na:
-            prevPos_arr_c = np.hstack((np.NAN, pos_array_im_c.flatten()[:-1]))
+            prevPos_arr_c = np.hstack((np.nan, pos_array_im_c.flatten()[:-1]))
         else:
             prevPos_arr_c = np.hstack((0, pos_array_im_c.flatten()[:-1]))
         distPrev_arr_c = pos_array_im_c - prevPos_arr_c
@@ -69,7 +69,7 @@ def calcIntermutDist(subs_type, first_chrom_na=False):
         subs_type_chrom = subs_type[subs_type["chr"] == c].sort_values("position")
         if first_chrom_na:
             subs_type_chrom["prevPos"] = np.hstack(
-                (np.NAN, subs_type_chrom["position"].values.flatten()[:-1])
+                (np.nan, subs_type_chrom["position"].values.flatten()[:-1])
             )
         else:
             subs_type_chrom["prevPos"] = np.hstack(
@@ -292,7 +292,7 @@ def calcIntermutDist(subs_type, first_chrom_na=False):
         subs_type_chrom = subs_type[subs_type["chr"] == c].sort_values("position")
         if first_chrom_na:
             subs_type_chrom["prevPos"] = np.hstack(
-                (np.NAN, subs_type_chrom["position"].values.flatten()[:-1])
+                (np.nan, subs_type_chrom["position"].values.flatten()[:-1])
             )
         else:
             subs_type_chrom["prevPos"] = np.hstack(
@@ -324,7 +324,7 @@ def calcIntermutDist2(subs_type, first_chrom_na=False):
         ]
 
         if first_chrom_na:
-            prevPos_arr_c = np.hstack((np.NAN, pos_array_im_c.flatten()[:-1]))
+            prevPos_arr_c = np.hstack((np.nan, pos_array_im_c.flatten()[:-1]))
         else:
             prevPos_arr_c = np.hstack((0, pos_array_im_c.flatten()[:-1]))
         distPrev_arr_c = pos_array_im_c - prevPos_arr_c
@@ -815,8 +815,8 @@ def annotateBedpe(sv_bedpe):
 
     sample_bps = pd.DataFrame(columns=cncd.columns)
     for chromi in unique_py(cncd["chr"]):
-        sample_bps = sample_bps.append(
-            cncd[cncd["chr"] == chromi].sort_values("position", kind="mergesort"),
+        sample_bps = pd.concat(
+            [sample_bps, cncd[cncd["chr"] == chromi].sort_values("position", kind="mergesort")],
             ignore_index=True,
         )
 
@@ -829,7 +829,7 @@ def annotateBedpe(sv_bedpe):
     exp_dist = genome_size / len(sample_bps)
     gamma_sdev = 25  #
     PEAK_FACTOR = 10
-    thresh_dist = np.NaN
+    thresh_dist = np.nan
 
     if logScale:
         sample_bps["intermut_dist"] = np.log10(
@@ -844,7 +844,7 @@ def annotateBedpe(sv_bedpe):
         if np.isnan(thresh_dist):
             thresh_dist = exp_dist / PEAK_FACTOR
 
-    gamma = np.NaN
+    gamma = np.nan
     if np.isnan(gamma) & ~np.isnan(gamma_sdev):
         # compute the mean absolute deviation
         sdev = getMad(sample_bps["intermut_dist"].values)
@@ -852,7 +852,7 @@ def annotateBedpe(sv_bedpe):
 
     sample_bps["is_clustered_single"] = False
     all_kat_regions = pd.DataFrame()
-    sample_bps["mean_intermut_dist"] = np.NaN
+    sample_bps["mean_intermut_dist"] = np.nan
     for chrom in unique_py(sample_bps["chr"]):  # loop over chromosomes
         sample_bps_flag = (
             sample_bps["chr"] == chrom
