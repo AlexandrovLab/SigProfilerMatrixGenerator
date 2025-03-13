@@ -6,10 +6,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
-## [1.3.1] - 2025-03-10
+## [1.3.1] - 2025-03-13
 
 ### Fixed
-- SV Matrix generation had remnant pandas and numpy < 2.0.0 syntax that was causing the code to crash. This has been fixed.
+- SV Matrix generation compatibility: Updated remnant Pandas and NumPy < 2.0.0 syntax to ensure compatibility with newer versions.
+- Indexing error in reference genome handling: Edge cases where BED file indices extended beyond the reference genome range caused crashes. Index accesses are now restricted to valid ranges, and cases where the genomic context extends beyond valid positions are skipped.
+- Uninitialized variable: The dinuc_mat variable was accessed before being initialized, causing a runtime error. It is now explicitly initialized to None before use.
 
 ## [1.3.0] - 2025-02-11
 
