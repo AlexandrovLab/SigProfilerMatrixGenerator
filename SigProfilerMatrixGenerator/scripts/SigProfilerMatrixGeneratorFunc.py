@@ -1415,6 +1415,9 @@ def SigProfilerMatrixGeneratorFunc(
         # Sorts files based on chromosome, sample, and start position
         if not chrom_based:
             chrom_start = None
+
+        # initialize dinuc_mat to None
+        dinuc_mat = None
         if i != 1:
             for file in vcf_files:
                 if reference_genome.lower() != "ebv":
@@ -2817,6 +2820,16 @@ def SigProfilerMatrixGeneratorFunc(
                 )
 
             if not chrom_based:
+                # Ensure all required keys exist
+                for key, indel_set in [
+                    ("ID", indel_types),
+                    ("simple", indel_types_simple),
+                    ("tsb", indel_types),
+                    ("complete", indel_types)
+                ]:
+                    if key not in mutation_ID or not isinstance(mutation_ID[key], pd.DataFrame) or mutation_ID[key].empty:
+                        mutation_ID[key] = pd.DataFrame(0, index=indel_set, columns=samples)
+
                 matGen.matrix_generator_INDEL(
                     output_matrix,
                     samples,
