@@ -1,0 +1,4 @@
+chrom1	start1	end1	chrom2	start2	end2	strand1	strand2	sample	project	donor	specimen
+11	85211659	85211660	7	107829249	107829250	+	-	SA413758	PBCA-DE	DO36021	Primary tumour - solid tissue
+5	81289142	81289143	X	11609055	11609056	+	+	SA413758	PBCA-DE	DO36021	Primary tumour - solid tissue
+7	138551814	138551815	7	140488372	140488373	-	+	SA413758	PBCA-DE	DO36021	Primary tumour - solid tissue

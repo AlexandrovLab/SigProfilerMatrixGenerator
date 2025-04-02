@@ -12,6 +12,8 @@ import argparse
 import os
 import re
 import sys
+import filecmp
+import uuid
 
 from SigProfilerMatrixGenerator.scripts import ref_install
 
@@ -34,6 +36,59 @@ revbias = lambda x: "".join(
         for B in x
     ][::-1]
 )
+
+
+# This function was introduced because this section of code caused file access errors when run in parallel.
+# The exome file was sorted (male/female sort) and overwritten in parallel. Introducing, temporary
+# files resolved this issue.
+def safe_sort_and_compare(file_to_open, chromosomes_sort):
+    # Generate a unique temp file using UUID
+    temp_output_file = f"{file_to_open}.tmp.{uuid.uuid4()}"
+
+    try:
+        # Perform sorting and write to temporary file
+        with open(file_to_open, "r") as f, open(temp_output_file, "w") as output:
+            lines = [line.strip().split() for line in f]
+            print("\t".join(lines[0]), file=output)
+
+            if len(lines) > 1:
+                if len(lines[1][0]) > 2:
+                    sorted_lines = sorted(
+                        lines[1:],
+                        key=lambda x: (
+                            chromosomes_sort.index(x[0][3:]),
+                            int(x[1]),
+                            int(x[2]),
+                        ),
+                    )
+                else:
+                    sorted_lines = sorted(
+                        lines[1:],
+                        key=lambda x: (
+                            chromosomes_sort.index(x[0]),
+                            int(x[1]),
+                            int(x[2]),
+                        ),
+                    )
+
+                for line in sorted_lines:
+                    print("\t".join(line), file=output)
+
+        # Check if the sorted output differs from the original
+        if filecmp.cmp(file_to_open, temp_output_file, shallow=False):
+            print(f"No changes detected in {file_to_open}. Discarding temporary file.")
+            os.remove(temp_output_file)
+            return file_to_open  # Return original file since no changes detected
+        else:
+            print(f"Changes detected. Using sorted file instead of {file_to_open}.")
+            return temp_output_file  # Return the temp file path for further use
+
+    except Exception as e:
+        print(f"Error during sorting and comparison: {e}")
+        if os.path.exists(temp_output_file):
+            os.remove(temp_output_file)
+        print("Temporary file removed. Original file remains intact.")
+        return file_to_open  # Return original if something goes wrong
 
 
 def context_distribution(
@@ -114,10 +169,6 @@ def context_distribution(
             chromosome = f.read().strip()
             chromosome_lengths.append(len(chromosome))
             print(chrom, len(chromosome))
-            # If desired context is for TSB, open the transcriptional file, too
-            # if context_input == '192' or context_input == '3072':
-            # 	with open (chromosome_TSB_path + chrom + "_192.txt", 'rb') as tsb:
-            # 		chromosome_tsb = tsb.read()
 
             # Iterate through the chromosome base by base
             for i in range(0, (len(chromosome) - context), 1):
@@ -134,7 +185,11 @@ def context_distribution(
                     pass
 
                 else:
-                    if context_input != "DINUC" and context_input != "DBS186":
+                    if (
+                        context_input != "DINUC"
+                        and context_input != "DBS186"
+                        and context_input != "DBS"
+                    ):
                         # Only save the pyrimidine context (canonical)
                         if base == "A" or base == "G":
                             nuc = revcompl(nuc)
@@ -177,23 +232,6 @@ def context_distribution(
                             probs[nuc][chrom] = 1
                         else:
                             probs[nuc][chrom] += 1
-
-                        # if context_input == 'DBS186':
-                        # 	bias = tsb_ref[chromosome[i+int(context/2)]][0]
-                        # 	nuc = bias + ":" + nuc
-                        # # Populate the dictionary if desired context is DINUC
-                        # for dinuc in dinuc_types:
-                        # 	if dinuc not in probs:
-                        # 		probs[dinuc] = {}
-
-                        # # Update the dictionary for the current nucleotide
-                        # if nuc not in probs:
-                        # 	nuc = revcompl(nuc)
-
-                        # if chrom not in probs[nuc]:
-                        # 	probs[nuc][chrom] = 1
-                        # else:
-                        # 	probs[nuc][chrom] += 1
 
         print("chrom ", chrom, "done")
     print(probs, chromosome_lengths)
@@ -242,13 +280,6 @@ def context_distribution(
                 print(str(probs[nuc][chroms]), file=out)
             except:
                 print(str(0), file=out)
-            # try:
-            # 	print(probs[nuc][chromosomes[-1]]/nuc_sum, file=out)
-            # except:
-            # 	print(str(0),file=out)
-    # chromosomes.remove("Y")
-    # chromosomes.remove("MT")
-    # chromosomes.remove("M")
 
     # Sort the file so that the nucleotides are in alphabetical order
     sort_command_1 = "sort -t ',' -k 1,1 "
@@ -354,26 +385,9 @@ def context_distribution_BED(
         for dinuc in dinuc_non_tsb:
             probs[dinuc] = {}
 
-    with open(file_to_open) as f:
-        lines = [line.strip().split() for line in f]
-    output = open(file_to_open, "w")
-    print("\t".join(lines[0]), file=output)
-    if len(lines) > 1:
-        if len(lines[1][0]) > 2:
-            for line in sorted(
-                lines[1:],
-                key=lambda x: (chromosomes_sort.index(x[0][3:]), int(x[1]), int(x[2])),
-            ):
-                print("\t".join(line), file=output)
-        else:
-            for line in sorted(
-                lines[1:],
-                key=lambda x: (chromosomes_sort.index(x[0]), int(x[1]), int(x[2])),
-            ):
-                print("\t".join(line), file=output)
-    output.close()
+    processed_file = safe_sort_and_compare(file_to_open, chromosomes_sort)
 
-    with open(file_to_open) as b_file:
+    with open(processed_file) as b_file:
         next(b_file)
         for lines in b_file:
             line = lines.strip().split()
@@ -382,8 +396,15 @@ def context_distribution_BED(
                 chrom = chrom[3:]
             if gender == "female" and chrom == "Y":
                 continue
-            start = int(line[1])
-            end = int(line[2])
+
+            try:
+                start = int(line[1])
+                end = int(line[2])
+            except Exception as e:
+                print(
+                    f"There was an issue processing the start and end position from the line: {line}"
+                )
+                continue
 
             if first_line:
                 chrom_initial = chrom
@@ -393,7 +414,9 @@ def context_distribution_BED(
 
             if chrom == chrom_initial:
                 chrom_length += end - start
-                for i in range(start, min(end + 1 - context, len(chromosome))):
+                for i in range(
+                    start, min(end + 1 - context, len(chromosome) + 1 - context)
+                ):
                     nuc = ""
                     for l in range(i, min(i + context, len(chromosome))):
                         nuc += tsb_ref[chromosome[l]][1]
@@ -401,8 +424,10 @@ def context_distribution_BED(
                     # Skip incomplete windows
                     if len(nuc) != context:
                         overlap = context - len(nuc)
-                        print(f"Skipping window at index {i}: expected context length {context}, but got {len(nuc)}. "
-                            f"Missing {overlap} base(s) due to boundary at the end of the chromosome.")
+                        print(
+                            f"Skipping window at index {i} for chromosome {chromosome}: expected context length {context}, but got {len(nuc)}. "
+                            f"Missing {overlap} base(s) due to boundary at the end of the chromosome."
+                        )
                         continue
 
                     # Skip the base if unknown
@@ -414,7 +439,11 @@ def context_distribution_BED(
                             base = nuc[int(context / 2)]
                         else:
                             continue  # Skip if `nuc` is too short
-                        if context_input != "DINUC" and context_input != "DBS186":
+                        if (
+                            context_input != "DINUC"
+                            and context_input != "DBS186"
+                            and context_input != "DBS"
+                        ):
                             # Only save the pyrimidine context (canonical)
                             if base == "A" or base == "G":
                                 nuc = revcompl(nuc)
@@ -469,10 +498,22 @@ def context_distribution_BED(
                 except:
                     continue
 
-                for i in range(start, end + 1 - context, 1):
+                for i in range(
+                    start, min(end + 1 - context, len(chromosome) + 1 - context)
+                ):
                     nuc = ""
                     for l in range(i, i + context, 1):
                         nuc += tsb_ref[chromosome[l]][1]
+
+                    # Skip incomplete windows
+                    if len(nuc) != context:
+                        overlap = context - len(nuc)
+                        print(
+                            f"Skipping window at index {i} for chromosome {chromosome}: expected context length {context}, but got {len(nuc)}. "
+                            f"Missing {overlap} base(s) due to boundary at the end of the chromosome."
+                        )
+                        continue
+
                     base = nuc[int(context / 2)]
 
                     # Skip the base if unknown
@@ -480,7 +521,11 @@ def context_distribution_BED(
                         pass
 
                     else:
-                        if context_input != "DINUC" and context_input != "DBS186":
+                        if (
+                            context_input != "DINUC"
+                            and context_input != "DBS186"
+                            and context_input != "DBS"
+                        ):
                             # Only save the pyrimidine context (canonical)
                             if base == "A" or base == "G":
                                 nuc = revcompl(nuc)
@@ -562,17 +607,10 @@ def context_distribution_BED(
                     out.flush()
                 except:
                     print(str(0) + ",", end="", file=out)
-            # try:
-            # 	print(probs[nuc][chromosomes[-1]]/nuc_sum, file=out)
-            # except:
-            # 	print(str(0),file=out)
             try:
                 print(str(probs[nuc][chroms]), file=out)
             except:
                 print(str(0), file=out)
-    # chromosomes.remove("Y")
-    # chromosomes.remove("MT")
-    # chromosomes.remove("M")
 
     # Sort the file so that the nucleotides are in alphabetical order
     sort_command_1 = "sort -t ',' -k 1,1 "
@@ -677,54 +715,53 @@ def main():
     if args.gender:
         gender = "female"
         chromosomes.remove("Y")
+        y_removed = True
+    else:
+        y_removed = False
 
-    if genome.upper() == "MM10" or genome.upper() == "MM9" or genome.upper() == "MM39":
-        chromosomes = chromosomes[:21]
-    if genome.upper() == "RN6":
-        chromosomes = chromosomes[:22]
+    # Calculate offset for slicing
+    offset = 1 if y_removed else 0
+
+    # Handle genome-specific chromosome slicing
+    if genome.upper() in ["MM10", "MM9", "MM39"]:
+        chromosomes = chromosomes[: 21 - offset]
+    elif genome.upper() in ["RN6", "RN7"]:
+        chromosomes = chromosomes[: 22 - offset]
 
     script_dir = os.getcwd()
     reference_dir = ref_install.reference_dir()
     ref_dir = reference_dir.path
     chromosome_path = str(reference_dir.get_tsb_dir() / genome) + "/"
 
-    output_path = ref_dir + "/references/chromosomes/context_distributions/"
+    output_path = os.path.join(ref_dir, "references/chromosomes/context_distributions/")
     if not os.path.exists(output_path):
         os.makedirs(output_path)
 
     if bed:
-        output_file = (
-            ref_dir
-            + "/references/chromosomes/context_distributions/context_distribution_"
-            + genome
-            + "_"
-            + context
-            + "_"
-            + gender
-            + "_BED.csv"
+        output_file = os.path.join(
+            ref_dir,
+            "references",
+            "chromosomes",
+            "context_distributions",
+            f"context_distribution_{genome}_{context}_{gender}_BED.csv",
         )
+
     else:
         if exome:
-            output_file = (
-                ref_dir
-                + "/references/chromosomes/context_distributions/context_distribution_"
-                + genome
-                + "_"
-                + context
-                + "_"
-                + gender
-                + "_exome.csv"
+            output_file = os.path.join(
+                ref_dir,
+                "references",
+                "chromosomes",
+                "context_distributions",
+                f"context_distribution_{genome}_{context}_{gender}_exome.csv",
             )
         else:
-            output_file = (
-                ref_dir
-                + "/references/chromosomes/context_distributions/context_distribution_"
-                + genome
-                + "_"
-                + context
-                + "_"
-                + gender
-                + ".csv"
+            output_file = os.path.join(
+                ref_dir,
+                "references",
+                "chromosomes",
+                "context_distributions",
+                f"context_distribution_{genome}_{context}_{gender}.csv",
             )
 
     if bed or exome:

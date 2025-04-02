@@ -1,0 +1,6 @@
+chrom1	start1	end1	chrom2	start2	end2	strand1	strand2	sample	project	donor	specimen
+14	21456418	21456419	14	21461960	21461961	-	+	SA517376	PBCA-DE	DO48966	Primary tumour - solid tissue
+14	21461740	21461741	14	21463413	21463414	-	+	SA517376	PBCA-DE	DO48966	Primary tumour - solid tissue
+14	21603096	21603097	14	21613237	21613238	+	-	SA517376	PBCA-DE	DO48966	Primary tumour - solid tissue
+17	25834195	25834196	17	25836055	25836056	+	+	SA517376	PBCA-DE	DO48966	Primary tumour - solid tissue
+5	121680210	121680211	5	121886580	121886581	-	+	SA517376	PBCA-DE	DO48966	Primary tumour - solid tissue

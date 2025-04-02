@@ -1,0 +1,7 @@
+chrom1	start1	end1	chrom2	start2	end2	strand1	strand2	sample	project	donor	specimen
+3	47567959	47567960	3	52486059	52486060	+	+	SA507250	RECA-EU	DO47068	Primary tumour - solid tissue
+3	49413336	49413337	3	53358527	53358528	-	-	SA507250	RECA-EU	DO47068	Primary tumour - solid tissue
+3	52483607	52483608	5	83888064	83888065	+	+	SA507250	RECA-EU	DO47068	Primary tumour - solid tissue
+3	52484439	52484440	5	82855936	82855937	-	-	SA507250	RECA-EU	DO47068	Primary tumour - solid tissue
+3	53364099	53364100	3	53367949	53367950	+	-	SA507250	RECA-EU	DO47068	Primary tumour - solid tissue
+5	87346269	87346270	5	87788061	87788062	+	-	SA507250	RECA-EU	DO47068	Primary tumour - solid tissue

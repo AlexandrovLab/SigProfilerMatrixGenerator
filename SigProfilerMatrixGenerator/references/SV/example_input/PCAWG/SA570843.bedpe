@@ -1,0 +1,3 @@
+chrom1	start1	end1	chrom2	start2	end2	strand1	strand2	sample	project	donor	specimen
+6	85351066	85351067	6	85404996	85404997	+	-	SA570843	PAEN-IT	DO52127	Primary tumour - solid tissue
+7	19949865	19949866	7	20075641	20075642	+	-	SA570843	PAEN-IT	DO52127	Primary tumour - solid tissue

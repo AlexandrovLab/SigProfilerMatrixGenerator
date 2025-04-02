@@ -3,7 +3,7 @@ import shutil
 
 from setuptools import setup
 
-VERSION = "1.3.1"
+VERSION = "1.3.2"
 
 # remove the dist folder first if exists
 if os.path.exists("dist"):
@@ -23,7 +23,7 @@ def write_version_py(filename="SigProfilerMatrixGenerator/version.py"):
 # THIS FILE IS GENERATED FROM SIGPROFILEMATRIXGENERATOR SETUP.PY
 short_version = '%(version)s'
 version = '%(version)s'
-Update = 'v1.3.1: Update SV matrix calls to pandas and numpy to use >= 2.0.0 syntax'
+Update = 'v1.3.2: Add mm39 and rn7 context distribution files and update the respective script.'
 
 	"""
     fh = open(filename, "w")
