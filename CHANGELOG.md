@@ -6,6 +6,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+## [1.3.2] - 2025-03-13
+
+### Fixed
+- The save_context_distribution script had an error on the edges of chromosomes where the window would extend beyond the chromosome length. This was fixed by limiting the window to the chromosome length.
+- The save_context_distribution script had an error when running multiple jobs in paralell because the exome file was being sorted differently for male and female genomes and concurrent jobs would overwrite each other. This was fixed by creating unique temporary files for each run.
+
+### Added
+- Context distribution files for mm39 and rn7 genomes.
+- Exome file for rn7 genome.
+
+
 ## [1.3.1] - 2025-03-13
 
 ### Fixed
