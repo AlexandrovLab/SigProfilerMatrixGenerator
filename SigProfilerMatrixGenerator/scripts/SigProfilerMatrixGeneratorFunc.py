@@ -1343,8 +1343,9 @@ def SigProfilerMatrixGeneratorFunc(
                 project, vcf_path, reference_genome, output_path, ncbi_chrom, log_file
             )
         elif file_extension == "tsv":
-            snv, indel, skipped, samples = convertIn.convertICGC(
-                project, vcf_path, reference_genome, output_path, ncbi_chrom, log_file
+            print("ICGC format (.tsv) is no longer supported. Please convert your file to .vcf, .maf, or .txt.")
+            raise ValueError(
+                "ICGC format (.tsv) is no longer supported. Please convert your file to .vcf, .maf, or .txt."
             )
         else:
             print("File format not supported")
