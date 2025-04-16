@@ -3798,7 +3798,7 @@ def matrix_generator_INDEL(
                 output_file_matrix_tsb,
                 output_path,
                 file_name,
-                "96ID",
+                "IDSB",
                 False,
                 volume=volume,
             )
