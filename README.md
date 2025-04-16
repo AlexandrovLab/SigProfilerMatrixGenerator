@@ -89,7 +89,7 @@ View the table below for the full list of parameters.
 
 **INPUT FILE FORMAT**
 
-This tool currently supports maf, vcf, simple text file, and ICGC formats. The user must provide variant data adhering to one of these four formats. If the user’s files are in vcf format, each sample must be saved as a separate files.
+This tool currently supports maf, vcf, and simple text file. The user must provide variant data adhering to one of these three formats. If the user’s files are in vcf format, each sample must be saved as a separate files.
 
 
 **OUTPUT FILE STRUCTURE**

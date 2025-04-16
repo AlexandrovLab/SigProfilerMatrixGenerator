@@ -3,7 +3,7 @@ import shutil
 
 from setuptools import setup
 
-VERSION = "1.3.2"
+VERSION = "1.3.3"
 
 # remove the dist folder first if exists
 if os.path.exists("dist"):
@@ -23,7 +23,7 @@ def write_version_py(filename="SigProfilerMatrixGenerator/version.py"):
 # THIS FILE IS GENERATED FROM SIGPROFILEMATRIXGENERATOR SETUP.PY
 short_version = '%(version)s'
 version = '%(version)s'
-Update = 'v1.3.2: Add mm39 and rn7 context distribution files and update the respective script.'
+Update = 'v1.3.3: Deprecate ICGC and fix plot_type for ID plots'
 
 	"""
     fh = open(filename, "w")
