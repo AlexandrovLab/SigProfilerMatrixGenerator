@@ -6,6 +6,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+## [1.3.4] - 2025-06-06
+
+### Fixed
+- Update file counts for rn7 and mm39 genomes after issue resolving issue with save_context_distribution script where final chromosome was not being processed correctly and counts were being carried over from the previous chromosome.
+
+### Added
+- Added pyproject.toml file to the repository to support Python packaging and distribution.
+
 ## [1.3.3] - 2025-04-16
 
 ### Fixed
