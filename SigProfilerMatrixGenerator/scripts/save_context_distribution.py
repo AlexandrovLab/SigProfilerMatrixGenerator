@@ -277,7 +277,7 @@ def context_distribution(
                 except:
                     print(str(0) + ",", end="", file=out)
             try:
-                print(str(probs[nuc][chroms]), file=out)
+                print(str(probs[nuc][chromosomes[-1]]), file=out)
             except:
                 print(str(0), file=out)
 
@@ -608,7 +608,7 @@ def context_distribution_BED(
                 except:
                     print(str(0) + ",", end="", file=out)
             try:
-                print(str(probs[nuc][chroms]), file=out)
+                print(str(probs[nuc][chromosomes[-1]]), file=out)
             except:
                 print(str(0), file=out)
 
