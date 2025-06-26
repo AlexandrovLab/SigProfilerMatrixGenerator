@@ -1189,29 +1189,25 @@ def SigProfilerMatrixGeneratorFunc(
             + " has not been installed\nPlease refer to the SigProfilerMatrixGenerator README for installation instructions:\n\thttps://github.com/AlexandrovLab/SigProfilerMatrixGenerator"
         )
 
-    # Organizes all of the input and output directories:
-    if path_to_input_files[-1] != "/":
-        path_to_input_files += "/"
-    vcf_path = path_to_input_files + "input/"
+    # Set base directory (for input/ and output/) based on user-provided output_directory if given
+    base_path = output_directory if output_directory else path_to_input_files
+    if not base_path.endswith("/"):
+        base_path += "/"
 
+    # Ensure input path and create if needed
+    vcf_path = os.path.join(base_path, "input/")
     vcf_path_original = vcf_path
+
+    # Copy all regular files from input source into vcf_path if vcf_path is missing or empty
     if not os.path.exists(vcf_path) or len(os.listdir(vcf_path)) < 1:
         os.makedirs(vcf_path, exist_ok=True)
-        input_files = os.listdir(path_to_input_files)
-        if os.path.exists(path_to_input_files + "input/"):
-            input_files.remove("input")
-        if os.path.exists(path_to_input_files + "logs/"):
-            input_files.remove("logs")
-        if ".DS_Store" in input_files:
-            input_files.remove(".DS_Store")
-        if "__init__.py" in input_files:
-            input_files.remove("__init__.py")
-        if "__pycache__" in input_files:
-            input_files.remove("__pycache__")
-        if os.path.exists(path_to_input_files + "output/"):
-            input_files.remove("output")
-        for files in input_files:
-            shutil.copy(path_to_input_files + files, vcf_path + files)
+        if not path_to_input_files.endswith("/"):
+            path_to_input_files += "/"
+        for filename in os.listdir(path_to_input_files):
+            src = os.path.join(path_to_input_files, filename)
+            dst = os.path.join(vcf_path, filename)
+            if os.path.isfile(src):
+                shutil.copy(src, dst)
 
     # Define the output matrix path, allowing override via `output_directory`
     if output_directory:
@@ -1219,7 +1215,7 @@ def SigProfilerMatrixGeneratorFunc(
             output_directory += "/"
         output_matrix = output_directory
     else:
-        output_matrix = path_to_input_files + "output/"
+        output_matrix = base_path + "output/"
 
     os.makedirs(output_matrix, exist_ok=True)
 
