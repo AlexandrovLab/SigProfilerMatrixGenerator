@@ -103,18 +103,18 @@ a DBS, SBS, ID, and TSB folder (there will also be a plots folder if this parame
 
 ***First six columns are required, and either the column "svclass" (deletion, translocation, tandem-duplication, or inversion) or the columns "strand1" & "strand2" (BRASS convention, see https://github.com/cancerit/BRASS/wiki/BEDPE) must also be present***
 
-
 ### Example with SV class present (tsv or csv file):
 
-| chrom1 | start1 | end1 | chrom2 | start2 | end2 | svclass |
-| :-----: | :-: | :-: | :-: | :-: | :-: | :-: |
-| 19 | 21268384 | 21268385 | 19 | 21327858 | 21327859 | deletion
+| sample  | chrom1 | start1   | end1     | chrom2 | start2   | end2     | svclass  |
+|:-------:|:------:|:--------:|:--------:|:------:|:--------:|:--------:|:--------:|
+| Sample1 | 19     | 21268384 | 21268385 | 19     | 21327858 | 21327859 | deletion |
 
 ### Example without SV class present (tsv or csv file):
 
-| chrom1 | start1 | end1 | chrom2 | start2 | end2 | strand1 | strand2
-| :-----: | :-: | :-: | :-: | :-: | :-: | :-: | :-: |
-| 19 | 21268384 | 21268385 | 19 | 21327858 | 21327859 | + | +
+| sample  | chrom1 | start1   | end1     | chrom2 | start2   | end2     | strand1 | strand2 |
+|:-------:|:------:|:--------:|:--------:|:------:|:--------:|:--------:|:-------:|:-------:|
+| Sample1 | 19     | 21268384 | 21268385 | 19     | 21327858 | 21327859 | +       | +       |
+
 
 ### Quick Start Example: ###
 
