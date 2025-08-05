@@ -143,6 +143,12 @@ def parse_arguments_matrix_generator(args: List[str]) -> argparse.Namespace:
         default=None,
     )
 
+    parser.add_argument(
+        "--output_directory",
+        help="Specify a custom output directory (default: None).",
+        default=None,
+    )
+
     result = parser.parse_args(args)
     return result
 
@@ -230,6 +236,7 @@ class CliController:
             seqInfo=parsed_args.seqInfo,
             cushion=parsed_args.cushion,
             volume=parsed_args.volume,
+            output_directory=parsed_args.output_directory,
         )
 
     def dispatch_sv_matrix_generator(self, user_args: List[str]) -> None:
