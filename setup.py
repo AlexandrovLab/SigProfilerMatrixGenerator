@@ -3,7 +3,7 @@ import shutil
 
 from setuptools import setup
 
-VERSION = "1.3.4"
+VERSION = "1.3.5"
 
 # remove the dist folder first if exists
 if os.path.exists("dist"):
@@ -23,7 +23,7 @@ def write_version_py(filename="SigProfilerMatrixGenerator/version.py"):
 # THIS FILE IS GENERATED FROM SIGPROFILEMATRIXGENERATOR SETUP.PY
 short_version = '%(version)s'
 version = '%(version)s'
-Update = 'v1.3.4: Fix mm39 and rn7 context counts and update in save_context_distribution script.'
+Update = 'v1.3.5: Update README and add custom output directory option'
 
 	"""
     fh = open(filename, "w")
