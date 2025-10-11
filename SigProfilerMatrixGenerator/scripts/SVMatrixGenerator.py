@@ -1017,6 +1017,10 @@ def generateSVMatrix(input_dir, project, output_dir, skip=False):
 
                 all_samples.append(result["sv_bedpe"])
 
+    if len(all_samples) < 1 and skip == True:
+        print("Warning: all samples have 0 classified SVs")
+        return None
+
     matrix = tsv2matrix(all_samples, project, output_dir)
     out_file = os.path.join(output_dir, project + ".SV32.matrix.tsv")
     matrix.to_csv(out_file, sep="\t")
