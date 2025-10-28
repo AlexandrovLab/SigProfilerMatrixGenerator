@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+## [1.3.6] - 2025-10-28
+
+### Added
+- Implemented a CI/CD pipeline with Travis CI to automate the building and publishing of Docker images to GHCR.
+
 ## [1.3.5] - 2025-08-05
 
 ### Changed
