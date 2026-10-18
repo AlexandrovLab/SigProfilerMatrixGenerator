@@ -99,6 +99,7 @@ def SigProfilerMatrixGeneratorFunc(
     gs=False,
     volume=None,
     output_directory=None,
+    indel_contexts=None,
 ):
     """
     Allows for the import of the sigProfilerMatrixGenerator.py function. Returns a dictionary
@@ -115,6 +116,8 @@ def SigProfilerMatrixGeneratorFunc(
                              tsb_stat  -> performs a transcriptional strand bias test for the 24, 384, and 6144 contexts. The output is
                                                       saved into the output/TSB directory
                                        gs  -> flag that performs a gene strand bias test
+                  indel_contexts  -> optional sequence containing "89" and/or "476".
+                                     Adds Koh count matrices without changing ID83.
 
     Returns:
                              matrices  -> dictionary (nested) of the matrices for each context
@@ -129,6 +132,10 @@ def SigProfilerMatrixGeneratorFunc(
                                                       'PD1202a':{'T:A[A>C]A':23,
                                                                              'T:A[A>G]A':10,...},...},...}
     """
+
+    from SigProfilerMatrixGenerator.scripts import koh_indels
+
+    indel_contexts = koh_indels.validate_contexts(indel_contexts)
 
     # verify chromosome file installation for supported genomes
     # 1. get list of all files that were downloaded
@@ -1211,6 +1218,17 @@ def SigProfilerMatrixGeneratorFunc(
 
     chrom_path = str(reference_dir.get_tsb_dir() / reference_genome) + "/"
     reference_genome = reference_genome_manager.get_reference_assembly(reference_name)
+    koh_selection = None
+    if indel_contexts and (exome or bed_file is not None):
+        region_file = (
+            reference_dir.get_exome_interval_list(reference_genome)
+            if exome else bed_file
+        )
+        koh_selection = koh_indels.IntervalSelection(
+            region_file,
+            cushion,
+            lambda name: convertIn._normalize_chromosome(name, reference_name, ncbi_chrom),
+        )
     transcript_path = (
         ref_dir + "/references/chromosomes/transcripts/" + reference_genome + "/"
     )
@@ -1400,6 +1418,19 @@ def SigProfilerMatrixGeneratorFunc(
 
     samples = sorted(samples)
     skipped_muts += skipped
+
+    koh_catalog = None
+    if indel_contexts:
+        koh_catalog = koh_indels.KohIndelCatalog(
+            indel_contexts,
+            samples,
+            output_matrix,
+            project,
+            chrom_path,
+            suffix="exome" if exome else "region" if bed_file is not None else "all",
+            selection=koh_selection,
+            chrom_based=chrom_based,
+        )
 
     # Instantiates variables for final output statistics
     analyzed_muts = [0, 0, 0]
@@ -2145,6 +2176,8 @@ def SigProfilerMatrixGeneratorFunc(
                 with open(vcf_path + file) as f:
                     lines = [line.strip().split() for line in f]
                 lines = sorted(lines, key=lambda x: (x[0], int(x[2])))
+                if koh_catalog is not None:
+                    koh_catalog.count_chromosome(chrom, lines)
                 (
                     mutation_ID,
                     skipped_mut,
@@ -2921,6 +2954,9 @@ def SigProfilerMatrixGeneratorFunc(
             shutil.rmtree(output_matrix + "temp/")
         end = time.time() - start
         print("Completed! Elapsed time: " + str(round(end, 2)) + " seconds.")
+
+    if koh_catalog is not None:
+        matrices.update(koh_catalog.save(log_file))
 
     sys.stderr.close()
     sys.stderr = tempErr

@@ -150,6 +150,11 @@ def parse_arguments_matrix_generator(args: List[str]) -> argparse.Namespace:
         default=None,
     )
 
+    parser.add_argument(
+        "--indel_contexts", nargs="+", choices=("89", "476"), default=None,
+        help="Also generate Koh ID89 and/or ID476 count matrices. ID83 remains unchanged. New-context plots are not yet available.",
+    )
+
     result = parser.parse_args(args)
     return result
 
@@ -238,6 +243,7 @@ class CliController:
             cushion=parsed_args.cushion,
             volume=parsed_args.volume,
             output_directory=parsed_args.output_directory,
+            indel_contexts=parsed_args.indel_contexts,
         )
 
     def dispatch_sv_matrix_generator(self, user_args: List[str]) -> None:

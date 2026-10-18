@@ -7,6 +7,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 ## [Unreleased]
 
 ### Added
+- Add optional Koh ID89 and ID476 count matrices through `indel_contexts` and
+  `--indel_contexts`, retaining the existing ID83 classifier and outputs.
+  Include canonical channel order, per-event audit reports, WGS/WES/BED and
+  chromosome output, and an independent R-oracle fixture covering all channels.
 - Make regression-mode discovery safe for missing fixtures, while preserving
   explicit errors when running a genome without complete regression inputs.
 - Share CHM13 interval coordinate conversion between both opportunity builders.

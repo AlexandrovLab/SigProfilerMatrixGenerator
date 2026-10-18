@@ -72,6 +72,7 @@ nav:
     - Reference Correctness: TSB-Reference-Correctness.md
   - Usage:
     - SBS, ID, DBS Input: Using-the-Tool-SBS-ID-DBS-Input.md
+    - ID89 and ID476: ID89-ID476.md
     - CNV Input: Using-the-Tool-CNV-Input.md
     - SV Input: Using-the-Tool-SV-Input.md
     - Output Overview: Using-the-Tool-Output.md

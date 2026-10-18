@@ -135,8 +135,38 @@ View the table below for the full list of parameters.
 |  | tsb_stat | Boolean | Outputs the results of a transcriptional strand bias test for the respective matrices. Default value False. |
 |  | seqInfo | Boolean | Ouputs original mutations into a text file that contains the SigProfilerMatrixGenerator classificaiton for each mutation. Default value True. |
 |  | cushion | Integer | Adds an Xbp cushion to the exome/bed_file ranges for downsampling the mutations. Default value 100. |
+|  | indel_contexts | Sequence of strings | Optionally add Koh ID89 and/or ID476 counts, e.g. `("89", "476")`. Existing ID83 outputs remain unchanged. Default value None. |
 |  | volume | String | Path to SigProfilerMatrixGenerator's volume where reference genomes will be saved and loaded from (for Docker/Singularity conatiners). The environmental variable 'SIGPROFILERMATRIXGENERATOR_VOLUME' takes precedence. Default value is None. |
 
+
+### Optional ID89 and ID476 Counts
+
+The development branch adds the [Koh et al. (2025)](https://doi.org/10.1038/s41588-025-02152-y)
+indel classifications alongside the existing ID83 matrix. Install this branch
+in a separate environment to test the feature; these instructions do not refer
+to a new PyPI release:
+
+```bash
+python -m pip install --upgrade "git+https://github.com/SigProfilerSuite/SigProfilerMatrixGenerator.git@feature/id89-id476"
+```
+
+Request both additional count matrices with the CLI:
+
+```bash
+SigProfilerMatrixGenerator matrix_generator my_project CHM13-T2T /path/to/vcfs \
+  --volume /path/to/reference-folder --indel_contexts 89 476
+```
+
+The optional matrices use the original variants and the installed reference DNA,
+not a conversion of an existing ID83 matrix. No new reference archive is needed.
+Whole-genome, exome and BED workflows are supported, including chromosome outputs.
+The existing ID83 outputs are unchanged. Use literal, anchored VCF alleles and
+the reference matching the coordinates of your variants. These are raw counts;
+native plotting and downstream signature catalogues require separate support.
+Complex replacements use an explicit absolute net length-change rule that is
+not yet confirmed by the original authors. See the
+[ID89/ID476 guide](docs/ID89-ID476.md) for Python examples, output files,
+filtering rules, validation details and current input limitations.
 
 **INPUT FILE FORMAT**
 
